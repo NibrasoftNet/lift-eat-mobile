@@ -5,7 +5,6 @@ import { useToast, Toast, ToastTitle, ToastDescription } from "@/components/ui/t
 import { VStack } from "@/components/ui/vstack";
 import { Icon, CloseIcon, HelpCircleIcon } from "@/components/ui/icon";
 import React from "react";
-import {SafeAreaView} from "react-native";
 
 export default function ToastTest() {
     const toast = useToast();
@@ -61,7 +60,7 @@ export default function ToastTest() {
     return (
         <VStack className="size-full flex items-center justify-center">
             <Button onPress={handleToast}>
-                <ButtonText>Press Me</ButtonText>
+                <ButtonText>Press</ButtonText>
             </Button>
         </VStack>
 );
