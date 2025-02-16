@@ -5,19 +5,22 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import 'react-native-reanimated';
 import { useOnlineManager } from "@/hooks/useOnlineManager";
 import { useAppState } from "@/hooks/useAppState";
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import sessionStore from "@/store/sessionStore";
+import Intro from "@/app/intro";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [showIntro, setShowIntro] = useState<boolean>(false);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -30,6 +33,14 @@ export default function RootLayout() {
   useOnlineManager();
   useAppState();
 
+  useEffect(() => {
+    // Check if the session is loaded and if the intro should be shown
+    const session = sessionStore.getState();
+    if (!session.token) {
+      setShowIntro(true);
+    }
+  }, []);
+
 
   useEffect(() => {
     if (loaded) {
@@ -39,6 +50,10 @@ export default function RootLayout() {
 
   if (!loaded) {
     return null;
+  }
+
+  if (showIntro) {
+    return <Intro onFinish={() => setShowIntro(false)} />;
   }
 
   return (

@@ -1,5 +1,5 @@
 {
-  "name": "fitness",
+  "name": "lift-eat",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -15,14 +15,18 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/html-elements": "^0.4.2",
     "@expo/vector-icons": "^14.0.2",
+    "@gluestack-ui/avatar": "^0.1.18",
     "@gluestack-ui/button": "^1.0.8",
     "@gluestack-ui/icon": "^0.1.25",
+    "@gluestack-ui/image": "^0.1.11",
     "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gluestack-ui/overlay": "^0.1.16",
     "@gluestack-ui/pressable": "^0.1.17",
     "@gluestack-ui/toast": "^1.0.8",
     "@legendapp/motion": "^2.4.0",
+    "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@tanstack/react-query": "^5.66.0",
@@ -53,8 +57,7 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.3",
-    "@react-native-community/netinfo": "11.4.1"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
