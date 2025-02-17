@@ -1,159 +1,151 @@
 import React from "react";
-import {
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Alert,
-} from "react-native";
+import { Text, Image } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import { VStack } from "@/components/ui/vstack";
+import { Button, ButtonText } from "@/components/ui/button";
 import logo from "../../assets/images/react-logo.png";
-import { useForm } from "react-hook-form";
 import {
   FormControl,
   FormControlError,
+  FormControlErrorText,
+  FormControlErrorIcon,
   FormControlLabel,
-} from "../../components/ui/form-control";
-import { VStack } from "@/components/ui/vstack";
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import { Input, InputField } from "@/components/ui/input";
+import { AlertCircleIcon } from "@/components/ui/icon";
 
 export default function Register() {
-
-
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm({
-    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
 
-  const onSubmit = (data: { email: string; password: string }) => {
-    Alert.alert("Form submitted", `Email: ${data.email}, Password: ${data.password}`);
+  const onSubmit = (data: { name: string; email: string; password: string }) => {
+    console.log("Form Data:", data);
   };
 
   return (
-    <VStack>
-      {/* <Image source={logo} style={styles.logo} />
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.description}>
-        Let’s sign in to your account and start your calorie management
-      </Text> */}
+    <VStack className="w-full p-4">
+      <Image
+        source={logo}
+        className="h-50 w-50 object-contain mb-5"
+        style={{ alignSelf: "center" }}
+      />
+      <Text className="text-4xl mb-10 text-black self-start">Register</Text>
+      <Text className="text-2xl mb-10 text-gray-600 self-start">
+        Create your account and start managing your calories
+      </Text>
 
-      {/* <FormControl isInvalid={!!errors.email}>
-        <FormControlLabel>Email</FormControlLabel>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          {...control.register("email", {
-            required: "Email is required",
-            pattern: {
-              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-              message: "Please enter a valid email",
-            },
-          })}
+      {/* Name Field */}
+      <FormControl isInvalid={!!errors.name}>
+        <FormControlLabel>
+          <FormControlLabelText>Name</FormControlLabelText>
+        </FormControlLabel>
+        <Controller
+          control={control}
+          name="name"
+          rules={{ required: "Name is required", minLength: 3 }}
+          render={({ field: { onChange, value } }) => (
+            <Input className="my-1">
+              <InputField
+                type="text"
+                placeholder="Name"
+                value={value}
+                onChangeText={onChange}
+              />
+            </Input>
+          )}
         />
-        {errors.email && <FormControlError></FormControlError>}
+        {errors.name && (
+          <FormControlError>
+            <FormControlErrorIcon as={AlertCircleIcon} />
+            <FormControlErrorText>
+              {errors.name.message || "At least 3 characters are required."}
+            </FormControlErrorText>
+          </FormControlError>
+        )}
       </FormControl>
 
-      <FormControl isInvalid={!!errors.password}>
-        <FormControlLabel>Password</FormControlLabel>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          {...control.register("password", {
-            required: "Password is required",
-            minLength: {
-              value: 6,
-              message: "Password must be at least 6 characters",
-            },
-          })}
+      {/* Email Field */}
+      <FormControl isInvalid={!!errors.email}>
+        <FormControlLabel>
+          <FormControlLabelText>Email</FormControlLabelText>
+        </FormControlLabel>
+        <Controller
+          control={control}
+          name="email"
+          rules={{ required: "Email is required", minLength: 6 }}
+          render={({ field: { onChange, value } }) => (
+            <Input className="my-1">
+              <InputField
+                type="text"
+                placeholder="Email"
+                value={value}
+                onChangeText={onChange}
+              />
+            </Input>
+          )}
         />
-        {errors.password && <FormControlError></FormControlError>}
-      </FormControl> */}
+        {errors.email && (
+          <FormControlError>
+            <FormControlErrorIcon as={AlertCircleIcon} />
+            <FormControlErrorText>
+              {errors.email.message || "At least 6 characters are required."}
+            </FormControlErrorText>
+          </FormControlError>
+        )}
+      </FormControl>
 
-      {/* <TouchableOpacity>
-        <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      </TouchableOpacity>
+      {/* Password Field */}
+      <FormControl isInvalid={!!errors.password}>
+        <FormControlLabel>
+          <FormControlLabelText>Password</FormControlLabelText>
+        </FormControlLabel>
+        <Controller
+          control={control}
+          name="password"
+          rules={{ required: "Password is required", minLength: 6 }}
+          render={({ field: { onChange, value } }) => (
+            <Input className="my-1">
+              <InputField
+                type="password"
+                placeholder="Password"
+                value={value}
+                onChangeText={onChange}
+              />
+            </Input>
+          )}
+        />
+        {errors.password && (
+          <FormControlError>
+            <FormControlErrorIcon as={AlertCircleIcon} />
+            <FormControlErrorText>
+              {errors.password.message || "At least 6 characters are required."}
+            </FormControlErrorText>
+          </FormControlError>
+        )}
+      </FormControl>
 
-      <TouchableOpacity
-        style={[styles.button, !isValid && styles.buttonDisabled]}
-        disabled={!isValid}
+      {/* Submit Button */}
+      <Button
+        className="w-full h-12 bg-teal-400 rounded-3xl justify-center items-center mb-5 mt-4"
+        size="sm"
+        onPress={handleSubmit(onSubmit)}
       >
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+        <ButtonText>Register</ButtonText>
+      </Button>
 
-      <TouchableOpacity>
-        <Text style={styles.signUp}>
-          Don't have an account?{" "}
-          <Text style={styles.signUpLink}>Sign Up</Text>
-        </Text>
-      </TouchableOpacity> */}
+      <Text className="text-black">
+        Already have an account? <Text className="text-teal-400">Login</Text>
+      </Text>
     </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-  },
-  logo: {
-    height: 200,
-    width: 200,
-    resizeMode: "contain",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    marginBottom: 40,
-    color: "black",
-    alignSelf: "flex-start",
-  },
-  description: {
-    fontSize: 20,
-    marginBottom: 40,
-    alignSelf: "flex-start",
-    color: "gray",
-  },
-  input: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#f1f1f1",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: 20,
-    color: "#000",
-  },
-  button: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#38D1D3",
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  buttonDisabled: {
-    backgroundColor: "#a3d9db",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-  },
-  signUp: {
-    color: "#000",
-  },
-  signUpLink: {
-    color: "#38D1D3",
-  },
-});
-

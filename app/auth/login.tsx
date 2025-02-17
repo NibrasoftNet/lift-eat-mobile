@@ -1,4 +1,6 @@
-import { Text, Image, View } from "react-native";
+import React from "react";
+import { Text, Image } from "react-native";
+import { useForm, Controller } from "react-hook-form";
 import { VStack } from "@/components/ui/vstack";
 import { Button, ButtonText } from "@/components/ui/button";
 import logo from "../../assets/images/react-logo.png";
@@ -12,24 +14,21 @@ import {
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import { AlertCircleIcon } from "@/components/ui/icon";
-import React from "react";
 
 export default function Login() {
-  const [isInvalidPassword, setIsInvalidPassword] = React.useState(false);
-  const [isInvalidEmail, setIsInvalidEmail] = React.useState(false);
-  const [passwordValue, setPasswordValue] = React.useState("");
-  const [emailValue, setEmailValue] = React.useState("");
-  const handleSubmit = () => {
-    if (passwordValue.length < 6) {
-      setIsInvalidPassword(true);
-    } else {
-      setIsInvalidPassword(false);
-    }
-    if (emailValue.length < 6) {
-      setIsInvalidEmail(true);
-    } else {
-      setIsInvalidEmail(false);
-    }
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: { email: string; password: string }) => {
+    console.log("Form Data:", data);
   };
 
   return (
@@ -43,56 +42,72 @@ export default function Login() {
       <Text className="text-2xl mb-10 text-gray-600 self-start">
         Let’s sign up to your account and start your calorie management
       </Text>
-      <FormControl isInvalid={isInvalidEmail}>
+
+      {/* Email Field */}
+      <FormControl isInvalid={!!errors.email}>
         <FormControlLabel>
           <FormControlLabelText>Email</FormControlLabelText>
         </FormControlLabel>
-        <Input className="my-1">
-          <InputField
-            type="text"
-            placeholder="email"
-            value={emailValue}
-            onChangeText={(text) => setEmailValue(text)}
-          />
-        </Input>
-
-        {isInvalidEmail && (
+        <Controller
+          control={control}
+          name="email"
+          rules={{ required: "Email is required", minLength: 6 }}
+          render={({ field: { onChange, value } }) => (
+            <Input className="my-1">
+              <InputField
+                type="text"
+                placeholder="email"
+                value={value}
+                onChangeText={onChange}
+              />
+            </Input>
+          )}
+        />
+        {errors.email && (
           <FormControlError>
             <FormControlErrorIcon as={AlertCircleIcon} />
             <FormControlErrorText>
-              At least 6 characters are required.
+              {errors.email.message || "At least 6 characters are required."}
             </FormControlErrorText>
           </FormControlError>
         )}
       </FormControl>
 
-      <FormControl isInvalid={isInvalidPassword}>
+      {/* Password Field */}
+      <FormControl isInvalid={!!errors.password}>
         <FormControlLabel>
           <FormControlLabelText>Password</FormControlLabelText>
         </FormControlLabel>
-        <Input className="my-1 w-full">
-          <InputField
-            type="password"
-            placeholder="password"
-            value={passwordValue}
-            onChangeText={(text) => setPasswordValue(text)}
-          />
-        </Input>
-
-        {isInvalidPassword && (
+        <Controller
+          control={control}
+          name="password"
+          rules={{ required: "Password is required", minLength: 6 }}
+          render={({ field: { onChange, value } }) => (
+            <Input className="my-1">
+              <InputField
+                type="password"
+                placeholder="password"
+                value={value}
+                onChangeText={onChange}
+              />
+            </Input>
+          )}
+        />
+        {errors.password && (
           <FormControlError>
             <FormControlErrorIcon as={AlertCircleIcon} />
             <FormControlErrorText>
-              At least 6 characters are required.
+              {errors.password.message || "At least 6 characters are required."}
             </FormControlErrorText>
           </FormControlError>
         )}
       </FormControl>
 
+      {/* Submit Button */}
       <Button
         className="w-full h-12 bg-teal-400 rounded-3xl justify-center items-center mb-5 mt-4"
         size="sm"
-        onPress={handleSubmit}
+        onPress={handleSubmit(onSubmit)}
       >
         <ButtonText>Submit</ButtonText>
       </Button>
