@@ -37,7 +37,7 @@ export default function RootLayout() {
     // Check if the session is loaded and if the intro should be shown
     const session = sessionStore.getState();
     if (!session.token) {
-      setShowIntro(true);
+      setShowIntro(false);
     }
   }, []);
 
