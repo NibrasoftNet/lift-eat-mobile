@@ -12,8 +12,10 @@ import logo from "../../assets/images/react-logo.png";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import * as yup from "yup";
+import {useRouter} from "expo-router";
 
 export default function Login() {
+  const router = useRouter()
   const loginValidationSchema = yup.object().shape({
     email: yup
       .string()
@@ -116,7 +118,7 @@ export default function Login() {
       <Image source={logo} style={styles.logo} />
       <Text style={styles.title}>Login</Text>
       <Text style={styles.description}>
-        Let’s sign up to your account and start your calorie management
+        Let’s sign in to your account and start your calorie management
       </Text>
       <Formik
         validationSchema={loginValidationSchema}
@@ -170,7 +172,9 @@ export default function Login() {
               <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('./register')}
+            >
               <Text style={styles.signUp}>
                 Don't have an account?{" "}
                 <Text style={styles.signUpLink}>Sign Up</Text>

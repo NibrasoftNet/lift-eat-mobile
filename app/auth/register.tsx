@@ -11,8 +11,10 @@ import {
 import logo from "../../assets/images/react-logo.png";
 import { Formik } from "formik";
 import * as yup from "yup";
+import { useRouter } from "expo-router";
 
 export default function Register() {
+  const router = useRouter()
   const loginValidationSchema = yup.object().shape({
     email: yup
       .string()
@@ -119,7 +121,7 @@ export default function Register() {
       <Image source={logo} style={styles.logo} />
       <Text style={styles.title}>Register</Text>
       <Text style={styles.description}>
-        Let’s sign up to your account and start your calorie management
+        Create new account
       </Text>
       <Formik
         validationSchema={loginValidationSchema}
@@ -180,9 +182,11 @@ export default function Register() {
               <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => router.push('./login')}
+            >
               <Text style={styles.signUp}>
-                Don't have an account?{" "}
+                Have an account?{" "}
                 <Text style={styles.signInLink}>Sign In</Text>
               </Text>
             </TouchableOpacity>
