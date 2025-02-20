@@ -19,13 +19,13 @@ SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
     const router = useRouter();
-    const [showIntro, setShowIntro] = useState<boolean>(true);
+    const [showIntro, setShowIntro] = useState<boolean>(false);
 
     useEffect(() => {
         if (showIntro) {
             router.replace('/intro');
         } else {
-            router.replace('/auth/register');
+            router.replace('/register');
         }
     }, []);
 
@@ -40,8 +40,8 @@ const InitialLayout = () => {
             }}
         >
             <Stack.Screen name="(root)" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/register" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} /> */}
             <Stack.Screen name="intro" options={{ headerShown: false }} />
         </Stack>
     );

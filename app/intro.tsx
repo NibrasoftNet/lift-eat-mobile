@@ -34,7 +34,7 @@ export default function Intro({ onFinish }: any) {
                         if (step === IntroStepEnum.ONE) {
                             setStep(IntroStepEnum.TWO);
                         } else {
-                            router.replace("/auth/register");
+                            router.replace("/register");
                         }
                     }}
                 >
