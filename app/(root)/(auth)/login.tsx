@@ -44,7 +44,6 @@ export default function Login() {
         Let’s sign up to your account and start your calorie management
       </Text>
 
-      {/* Email Field */}
       <FormControl isInvalid={!!errors.email}>
         <FormControlLabel>
           <FormControlLabelText>Email</FormControlLabelText>
@@ -74,7 +73,6 @@ export default function Login() {
         )}
       </FormControl>
 
-      {/* Password Field */}
       <FormControl isInvalid={!!errors.password}>
         <FormControlLabel>
           <FormControlLabelText>Password</FormControlLabelText>
@@ -104,7 +102,6 @@ export default function Login() {
         )}
       </FormControl>
 
-      {/* Submit Button */}
       <Button
         className="w-full h-12 bg-teal-400 rounded-3xl justify-center items-center mb-5 mt-4"
         size="sm"

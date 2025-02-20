@@ -13,7 +13,7 @@ export enum IntroStepEnum {
     'TWO' = "TWO",
 }
 
-export default function Intro({ onFinish }: any) {
+export default function Intro({ }: any) {
     const [step, setStep] = useState<IntroStepEnum>(IntroStepEnum.ONE);
     const router = useRouter();
 
