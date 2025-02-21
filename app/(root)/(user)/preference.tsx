@@ -7,6 +7,13 @@ import { Card } from "@/components/ui/card";
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Image } from "react-native";
+import { bed, worker, hiking, bodyBuilder } from "@/constants/icons";
+import { Box } from '@/components/ui/box';
+import { Heading } from "@/components/ui/heading";
+import {Avatar, AvatarFallbackText, AvatarImage} from "@/components/ui/avatar";
+import { Divider } from "@/components/ui/divider";
+import { Text } from "@/components/ui/text";
 
 // Enums
 enum GenderEnum {
@@ -15,9 +22,9 @@ enum GenderEnum {
 }
 
 enum PhysicalActivityEnum {
+    LOW = 'LOW',
     SEDENTARY = 'SEDENTARY',
     MODERATE = 'MODERATE',
-    LOW = 'LOW',
     HIGH = 'HIGH',
 }
 
@@ -71,7 +78,7 @@ export default function Preference() {
             const col = index % 2;              // Get column (0 or 1)
 
             slideActivityX.value = withTiming(col * (buttonWidth + 7), { duration: 300 });
-            slideActivityY.value = withTiming(row * (buttonHeight + 7), { duration: 300 });
+            slideActivityY.value = withTiming(row * (buttonHeight + 35), { duration: 300 });
         }
     }, [buttonWidth, buttonHeight, activityUnit]);
 
@@ -97,7 +104,24 @@ export default function Preference() {
         borderRadius : 5
     }));
 
-    const activityOptions = Object.values(PhysicalActivityEnum);
+    const activityOptions = [
+        {
+            level: PhysicalActivityEnum.LOW,
+            icon: bed
+        },
+        {
+            level: PhysicalActivityEnum.SEDENTARY,
+            icon: worker
+        },
+        {
+            level: PhysicalActivityEnum.MODERATE,
+            icon: hiking
+        },
+        {
+            level: PhysicalActivityEnum.HIGH,
+            icon: bodyBuilder
+        }
+    ];
 
     const onSubmit = (data: FormData) => {
         console.log('Validated Data:', data);
@@ -105,6 +129,46 @@ export default function Preference() {
 
     return (
         <VStack space="md" className="w-full max-w-sm mx-auto mt-10">
+            <Card className="p-6 rounded-lg max-w-[360px] m-3">
+                <Box className="flex-row">
+                    <Avatar className="mr-4">
+                        <AvatarFallbackText>JD</AvatarFallbackText>
+                        <AvatarImage
+                            source={{
+                                uri: "https://gluestack.github.io/public-blog-video-assets/camera.png",
+                            }}
+                        />
+                    </Avatar>
+                    <VStack>
+                        <Heading size="md" className="mb-1">
+                            Jane Doe
+                        </Heading>
+                        <Text size="sm">janedoe@sample.com</Text>
+                    </VStack>
+                </Box>
+                <Box className="my-5 flex flex-row w-full items-center justify-around">
+                    <VStack className="items-center sm:flex-1 sm:pb-0 sm:border-r sm:border-outline-300">
+                        <Heading size="xs">81</Heading>
+                        <Text size="xs">plans</Text>
+                    </VStack>
+                    <Divider
+                        orientation="vertical"
+                        className="w-0.5 self-center bg-background-300 flex"
+                    />
+                    <VStack className="items-center sm:flex-1 sm:py-0 sm:border-r sm:border-outline-300">
+                        <Heading size="xs">5,281</Heading>
+                        <Text size="xs">day</Text>
+                    </VStack>
+                    <Divider
+                        orientation="vertical"
+                        className="w-0.5 self-center bg-background-300 flex"
+                    />
+                    <VStack className="items-center sm:flex-1 sm:pt-0">
+                        <Heading size="xs">+10%</Heading>
+                        <Text size="xs">progress</Text>
+                    </VStack>
+                </Box>
+            </Card>
             {/* Gender Selection */}
             <Card className="rounded-lg flex flex-col gap-2">
                 <Grid className="w-full h-16 gap-2" _extra={{ className: 'grid-cols-2' }} style={{ position: 'relative' }}>
@@ -124,14 +188,19 @@ export default function Preference() {
             </Card>
             {/* Activity Selection (2x2 Grid) */}
             <Card className="rounded-lg flex flex-col gap-2">
-                <Grid className="w-full h-36 gap-2" _extra={{ className: 'grid-cols-2' }} style={{ position: 'relative' }}>
+                <Grid className="w-full h-52 gap-2" _extra={{ className: 'grid-cols-2' }} style={{ position: 'relative' }}>
                     {activityOptions.map((activity, index) => (
-                        <GridItem key={activity} _extra={{ className: 'col-span-1' }}
-                                  className="bg-gray-200 border border-gray-300 rounded-md"
-                                  onLayout={index === 0 ? handleButtonLayout : undefined}
+                        <GridItem key={activity.level} _extra={{ className: 'col-span-1' }}
+                          className="bg-gray-200 border border-gray-300 rounded-md"
+                          onLayout={index === 0 ? handleButtonLayout : undefined}
                         >
-                            <Button onPress={() => handleActivityUnitChange(activity)} className="w-full h-16 bg-transparent">
-                                <ButtonText className='text-gray-500'>{activity}</ButtonText>
+                            <Button onPress={() => handleActivityUnitChange(activity.level)} className="flex flex-col items-center justify-center w-full h-24 bg-transparent p-2">
+                                <Image
+                                    source={activity.icon}
+                                    className="w-full h-4/6"
+                                    resizeMode="contain"
+                                />
+                                <ButtonText className='text-gray-500 capitalize'>{activity.level}</ButtonText>
                             </Button>
                         </GridItem>
                     ))}
