@@ -19,6 +19,7 @@
     "@expo/vector-icons": "^14.0.4",
     "@gluestack-ui/avatar": "^0.1.18",
     "@gluestack-ui/button": "^1.0.8",
+    "@gluestack-ui/divider": "^0.1.10",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.25",
     "@gluestack-ui/image": "^0.1.11",
