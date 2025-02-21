@@ -1,4 +1,4 @@
-import {Slot, Stack, useRouter} from 'expo-router';
+import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 
 
@@ -15,6 +15,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)" options={{ headerShown: false }} />
       </Stack>
   );
 }
