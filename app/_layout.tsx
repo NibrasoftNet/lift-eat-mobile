@@ -17,7 +17,7 @@ SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
     const router = useRouter();
-    const [showIntro] = useState<boolean>(false);
+    const [showIntro] = useState<boolean>(true);
 
     useEffect(() => {
         if (showIntro) {
