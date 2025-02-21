@@ -26,7 +26,9 @@
     "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gluestack-ui/overlay": "^0.1.16",
     "@gluestack-ui/pressable": "^0.1.17",
+    "@gluestack-ui/slider": "^0.1.30",
     "@gluestack-ui/toast": "^1.0.8",
+    "@hookform/resolvers": "^4.1.0",
     "@legendapp/motion": "^2.4.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
@@ -64,6 +66,7 @@
     "react-native-webview": "13.12.5",
     "tailwindcss": "^3.4.17",
     "yup": "^1.6.1",
+    "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
