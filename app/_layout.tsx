@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
+import {Stack, useRouter} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import {useEffect, useState} from 'react';
@@ -13,18 +13,17 @@ import { useAppState } from "@/hooks/useAppState";
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
     const router = useRouter();
-    const [showIntro, setShowIntro] = useState<boolean>(true);
+    const [showIntro] = useState<boolean>(true);
 
     useEffect(() => {
         if (showIntro) {
-            router.replace('/details');
+            router.replace('/intro');
         } else {
-            router.replace('/auth/register');
+            router.replace('/register');
         }
     }, []);
 
@@ -32,7 +31,7 @@ const InitialLayout = () => {
         <Stack
             screenOptions={{
                 headerShown: false,
-                animation: 'slide_from_bottom',
+                animation: 'none',
                 orientation: 'portrait',
                 navigationBarHidden: true,
                 statusBarHidden: true,

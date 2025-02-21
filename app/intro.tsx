@@ -6,33 +6,35 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { intro01, intro02 } from "@/constants/images";
 import { HStack } from "@/components/ui/hstack";
 import { IntroCard } from "@/components/intro/IntroCard";
+import { useRouter } from "expo-router";
 
 export enum IntroStepEnum {
     'ONE' = "ONE",
     'TWO' = "TWO",
 }
 
-export default function Intro({ onFinish }: any) {
+export default function Intro({ }: any) {
     const [step, setStep] = useState<IntroStepEnum>(IntroStepEnum.ONE);
+    const router = useRouter();
 
     return (
         <VStack className="mb-6">
-            <HStack className="w-full justify-between">
+            <HStack className="w-full justify-between mt-10 mx-4">
                 {
                     step === IntroStepEnum.TWO && <Button
-                    className="mt-5 bg-primary-500 w-40"
+                    className="bg-blue-500 w-40"
                     onPress={() => setStep(IntroStepEnum.ONE)}
                 >
                     <MaterialCommunityIcons name="chevron-double-left" size={24}/>
                     <ButtonText size="md">Previous</ButtonText>
                 </Button>}
                 <Button
-                    className="mt-5 bg-primary-500 w-40"
+                    className={`w-40 ${step === IntroStepEnum.ONE ? "bg-blue-500" : "bg-amber-500"}`}
                     onPress={() => {
                         if (step === IntroStepEnum.ONE) {
                             setStep(IntroStepEnum.TWO);
                         } else {
-                            onFinish();
+                            router.replace("/register");
                         }
                     }}
                 >
