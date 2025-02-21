@@ -38,7 +38,10 @@ const InitialLayout = () => {
             }}
         >
             <Stack.Screen name="(root)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/register" options={{ headerShown: false, animation: 'slide_from_right' }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
             <Stack.Screen name="intro" options={{ headerShown: false }} />
+            <Stack.Screen name="details" options={{ headerShown: false }} />
         </Stack>
     );
 };
@@ -54,6 +57,7 @@ export default function ProjectLayout() {
         defaultOptions: { queries: { retry: 2 } },
     });
 
+    // Use the custom hooks
     useOnlineManager();
     useAppState();
 
