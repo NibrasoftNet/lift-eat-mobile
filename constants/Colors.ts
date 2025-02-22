@@ -11,7 +11,6 @@ const tintColorLight = primaryColor; // Use primary color for light mode
 const tintColorDark = secondaryColor; // Use secondary color for dark mode
 
 export const Colors = {
-  primary: '#1465de',
   grey: '#A6A3AF',
   light: {
     text: '#11181C',

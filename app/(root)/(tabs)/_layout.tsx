@@ -1,19 +1,20 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import {  View } from "react-native";
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import {Colors} from "@/constants/Colors";
 
 export default function TabLayout() {
-  const COLOR_PLUS = "#38D1D3";
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: COLOR_PLUS,
+        tabBarActiveTintColor: Colors.primary.background,
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          height: 70,
+          height: 50,
           backgroundColor: "white",
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
@@ -28,9 +29,71 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="analytics" size={32} color={color} />          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="plans"
+        options={{
+            tabBarIcon: ({ color }) => (
+            <FontAwesome name="calendar" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="meals"
+        options={{
+          title: "",
+          tabBarIcon: () => (
+              <View
+                  style={{
+                      width: 65,
+                      height: 65,
+                      backgroundColor: Colors.light.background,
+                      borderRadius: 35,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                      top: -40,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 4,
+                      elevation: 5,
+                  }}
+              >
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    backgroundColor: Colors.primary.background,
+                    borderRadius: 35,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "relative",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 5,
+                  }}
+                >
+                  <Ionicons name="hardware-chip-outline" size={32} color="#fff" />
+                </View>
+              </View>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="scanner"
+        options={{
           title: "",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="home-outline" size={24} color={color} />
+            <FontAwesome name="qrcode" size={32} color={color} />
           ),
         }}
       />
@@ -40,54 +103,7 @@ export default function TabLayout() {
         options={{
           title: "",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="favorite-outline" size={24} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="plans"
-        options={{
-          title: "",
-          tabBarIcon: () => (
-            <View
-              style={{
-                width: 60,
-                height: 60,
-                backgroundColor: COLOR_PLUS,
-                borderRadius: 35,
-                justifyContent: "center",
-                alignItems: "center",
-                position: "absolute",
-                top: -40,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 5,
-              }}
-            >
-              <MaterialIcons name="add" size={32} color="#fff" />
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="files"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => (
-            <AntDesign name="filetext1" size={24} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => <AntDesign name="user" size={24} color={color} />,
+            <Ionicons name="stopwatch-outline" size={32} color={color} />),
         }}
       />
     </Tabs>

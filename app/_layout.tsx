@@ -21,7 +21,7 @@ const InitialLayout = () => {
 
     useEffect(() => {
         if (showIntro) {
-            router.replace('/preference');
+            router.replace('/plans');
         } else {
             router.replace('/register');
         }
