@@ -4,6 +4,6 @@ export default function CommunityPlans() {
     return (
         <VStack>
             <Heading className="text-typography-900">Community plans</Heading>
-    </VStack>
+        </VStack>
     );
 }
