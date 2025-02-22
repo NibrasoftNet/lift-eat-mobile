@@ -4,25 +4,34 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Card } from "@/components/ui/card";
-import { useForm } from 'react-hook-form';
+import {Controller, useForm} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Image } from "react-native";
 import { bed, worker, hiking, bodyBuilder } from "@/constants/icons";
 import { Box } from '@/components/ui/box';
 import { Heading } from "@/components/ui/heading";
-import {Avatar, AvatarFallbackText, AvatarImage} from "@/components/ui/avatar";
-import { Divider } from "@/components/ui/divider";
+import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import {GenderEnum, PhysicalActivityEnum} from "@/utils/enum/user-gender-activity.enum";
+import { GenderEnum, PhysicalActivityEnum } from "@/utils/enum/user-gender-activity.enum";
 import {
     UserGenderActivityDefaultValueProps,
     UserGenderActivityFormData,
     userGenderActivitySchema
 } from "@/utils/validation/user-gender-activity.validation";
+import {
+    FormControl,
+    FormControlError,
+    FormControlErrorText,
+    FormControlLabel,
+    FormControlLabelText
+} from "@/components/ui/form-control";
+import {Input, InputField} from "@/components/ui/input";
+import {GoalEnum} from "@/utils/enum/user-details.enum";
 
 export default function UserGenderActivityForm({ defaultValues }: { defaultValues: UserGenderActivityDefaultValueProps }) {
-    const [genderUnit, setGenderUnit] = useState<GenderEnum>(GenderEnum.MALE);
-    const [activityUnit, setActivityUnit] = useState<PhysicalActivityEnum>(PhysicalActivityEnum.LOW);
+    const [genderUnit, setGenderUnit] = useState<GenderEnum>(defaultValues.gender);
+    const [activityUnit, setActivityUnit] = useState<PhysicalActivityEnum>(defaultValues.physicalActivity);
+    const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit)
 
     // Shared values for animations
     const slideGenderPosition = useSharedValue(0);
@@ -32,7 +41,7 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
     const [buttonWidth, setButtonWidth] = useState<number>(0);
     const [buttonHeight, setButtonHeight] = useState<number>(0);
 
-    const { setValue, handleSubmit } = useForm<UserGenderActivityFormData>({
+    const { setValue, handleSubmit, control, formState: { errors } } = useForm<UserGenderActivityFormData>({
         resolver: zodResolver(userGenderActivitySchema),
         defaultValues,
     });
@@ -73,6 +82,11 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
         setValue('physicalActivity', unit);
     };
 
+    const handleGoalUnitChange = (unit: GoalEnum) => {
+        setGoalUnit(unit);
+        setValue('goalUnit', unit);
+    };
+
     const animatedGenderStyles = useAnimatedStyle(() => ({
         transform: [{ translateX: slideGenderPosition.value }],
         width: buttonWidth,
@@ -109,8 +123,8 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
     };
 
     return (
-        <VStack space="md" className="w-full max-w-sm mx-auto mt-10">
-            <Card className="p-6 rounded-lg max-w-[360px] m-3">
+        <VStack space="md" className="w-full max-w-sm mx-auto mt-2">
+            <Card className="p-6 rounded-lg max-w-[360px]">
                 <Box className="flex-row">
                     <Avatar className="mr-4">
                         <AvatarFallbackText>JD</AvatarFallbackText>
@@ -122,33 +136,108 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
                     </Avatar>
                     <VStack>
                         <Heading size="md" className="mb-1">
-                            Jane Doe
+                            Khalil sel3a 3al 7it
                         </Heading>
-                        <Text size="sm">janedoe@sample.com</Text>
+                        <Text size="sm">khalil@3a9lia.com</Text>
                     </VStack>
                 </Box>
-                <Box className="my-5 flex flex-row w-full items-center justify-around">
-                    <VStack className="items-center sm:flex-1 sm:pb-0 sm:border-r sm:border-outline-300">
-                        <Heading size="xs">81</Heading>
-                        <Text size="xs">plans</Text>
-                    </VStack>
-                    <Divider
-                        orientation="vertical"
-                        className="w-0.5 self-center bg-background-300 flex"
+            </Card>
+            <Card>
+                {/* Age Input */}
+                <FormControl isInvalid={!!errors.age}>
+                    <FormControlLabel>
+                        <FormControlLabelText>Age</FormControlLabelText>
+                    </FormControlLabel>
+                    <Controller
+                        control={control}
+                        name="age"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Input className="my-1" size="md">
+                                <InputField
+                                    keyboardType="numeric"
+                                    placeholder="Age"
+                                    onBlur={onBlur}
+                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
+                                    value={value.toString()}
+                                />
+                            </Input>
+                        )}
                     />
-                    <VStack className="items-center sm:flex-1 sm:py-0 sm:border-r sm:border-outline-300">
-                        <Heading size="xs">5,281</Heading>
-                        <Text size="xs">day</Text>
-                    </VStack>
-                    <Divider
-                        orientation="vertical"
-                        className="w-0.5 self-center bg-background-300 flex"
+                    {errors.age &&
+                        <FormControlError>
+                            <FormControlErrorText>{errors.age.message}</FormControlErrorText>
+                        </FormControlError>
+                    }
+                </FormControl>
+            </Card>
+            <Card className="rounded-lg flex flex-col gap-2">
+                {/* Goal Input */}
+                <FormControl isInvalid={!!errors.goal}>
+                    <FormControlLabel>
+                        <FormControlLabelText>Goal</FormControlLabelText>
+                    </FormControlLabel>
+                    <Controller
+                        control={control}
+                        name="goal"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Input className="my-1" size="md" isDisabled={goalUnit === GoalEnum.MAINTAIN}>
+                                <InputField
+                                    keyboardType="numeric"
+                                    placeholder={`Enter you Goal ${goalUnit}`}
+                                    onBlur={onBlur}
+                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
+                                    value={value.toString()}
+                                />
+                            </Input>
+                        )}
                     />
-                    <VStack className="items-center sm:flex-1 sm:pt-0">
-                        <Heading size="xs">+10%</Heading>
-                        <Text size="xs">progress</Text>
-                    </VStack>
-                </Box>
+                    {errors.goal &&
+                        <FormControlError>
+                            <FormControlErrorText>{errors.goal.message}</FormControlErrorText>
+                        </FormControlError>}
+                </FormControl>
+                <Grid className="w-full h-16 gap-2" _extra={{ className: 'grid-cols-3' }} style={{ position: 'relative' }}>
+                    {/* Buttons */}
+                    <GridItem
+                        _extra={{ className: 'col-span-1' }}
+                        className="bg-gray-200 border border-gray-300 rounded-md"
+                    >
+                        <Button
+                            onPress={() => handleGoalUnitChange(GoalEnum.MAINTAIN)}
+                            className={`w-full h-full ${goalUnit === GoalEnum.MAINTAIN ? 'bg-blue-500' : 'bg-transparent'}`}
+                        >
+                            <ButtonText className={`text-center ${goalUnit === GoalEnum.MAINTAIN ? 'text-white' : 'text-black'}`}>
+                                Maintain
+                            </ButtonText>
+                        </Button>
+                    </GridItem>
+                    <GridItem
+                        _extra={{ className: 'col-span-1' }}
+                        className="bg-gray-200 border border-gray-300 rounded-md"
+                    >
+                        <Button
+                            onPress={() => handleGoalUnitChange(GoalEnum.WEIGHT_LOSS)}
+                            className={`w-full h-full ${goalUnit === GoalEnum.WEIGHT_LOSS ? 'bg-blue-500' : 'bg-transparent'}`}
+                        >
+                            <ButtonText className={`text-center ${goalUnit === GoalEnum.WEIGHT_LOSS ? 'text-white' : 'text-black'}`}>
+                                Lose weight
+                            </ButtonText>
+                        </Button>
+                    </GridItem>
+                    <GridItem
+                        _extra={{ className: 'col-span-1' }}
+                        className="bg-gray-200 border border-gray-300 rounded-md"
+                    >
+                        <Button
+                            onPress={() => handleGoalUnitChange(GoalEnum.GAIN_MUSCLE)}
+                            className={`w-full h-full ${goalUnit === GoalEnum.GAIN_MUSCLE ? 'bg-blue-500' : 'bg-transparent'}`}
+                        >
+                            <ButtonText className={`text-center ${goalUnit === GoalEnum.GAIN_MUSCLE ? 'text-white' : 'text-black'}`}>
+                                Gain Muscle
+                            </ButtonText>
+                        </Button>
+                    </GridItem>
+                </Grid>
             </Card>
             {/* Gender Selection */}
             <Card className="rounded-lg flex flex-col gap-2">

@@ -5,29 +5,27 @@ import {
     FormControlLabel,
     FormControlLabelText
 } from '@/components/ui/form-control';
-import { Input, InputField } from "@/components/ui/input"
 import { VStack } from '@/components/ui/vstack';
 import React, { useState } from 'react';
-import {Button, ButtonText} from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, {useAnimatedStyle, useSharedValue, withTiming} from "react-native-reanimated";
-import {Card} from "@/components/ui/card";
-import {Controller, useForm} from 'react-hook-form';
+import { Card } from "@/components/ui/card";
+import { useForm} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {GoalEnum, HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
+import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 import {
     UserDetailsDefaultValuesProps,
     UserDetailsFormData,
     userDetailsSchema
 } from "@/utils/validation/user-details.validation";
+import RulerPicker from "@/components/ui/ruler-picker/RulerPicker";
 
 export default function UserDetailsForm({defaultValues}: {defaultValues: UserDetailsDefaultValuesProps}) {
-    const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(WeightUnitEnum.KG); // Default to KG
-    const [heightUnit, setHeightUnit] = useState<HeightUnitEnum>(HeightUnitEnum.CM); // Default to CM
-    const [goalUnit, setGoalUnit] = useState<GoalEnum>(GoalEnum.MAINTAIN);
+    const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(defaultValues.weightUnit); // Default to KG
+    const [heightUnit, setHeightUnit] = useState<HeightUnitEnum>(defaultValues.heightUnit); // Default to CM;
     const slidePosition = useSharedValue(0); // Reanimated shared value for position
     const slideHeightPosition = useSharedValue(0); // Reanimated shared value for position
-    const slideGoalPosition = useSharedValue(0); // Reanimated shared value for position
     const [buttonWidth, setButtonWidth] = useState(0); // Store dynamic button width
 
 
@@ -45,14 +43,7 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
         };
     });
 
-    const animatedGoalStyles = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateX: slideGoalPosition.value }],
-            width: buttonWidth, // Dynamic width based on measured button
-        };
-    });
-
-    const {control, setValue, handleSubmit, formState: { errors } } = useForm<UserDetailsFormData>({
+    const { setValue, handleSubmit, formState: { errors } } = useForm<UserDetailsFormData>({
         resolver: zodResolver(userDetailsSchema),
         defaultValues,
     });
@@ -80,68 +71,27 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
         slideHeightPosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
     };
 
-    const handleGoalUnitChange = (unit: GoalEnum, index: number) => {
-        setGoalUnit(unit);
-        setValue('goalUnit', unit);
-        const position = index * (buttonWidth + 7);
-        // Animate the blue square to the selected button's position
-        slideGoalPosition.value = withTiming(position, { duration: 300 });
-    };
-
     const onSubmit = (data: UserDetailsFormData) => {
         console.log('Validated Data:', data);
     };
 
     return (
-        <VStack space="md" className="w-full max-w-sm mx-auto mt-10">
-            <Card>
-                {/* Age Input */}
-                <FormControl isInvalid={!!errors.age}>
-                    <FormControlLabel>
-                        <FormControlLabelText>Age</FormControlLabelText>
-                    </FormControlLabel>
-                    <Controller
-                        control={control}
-                        name="age"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Input className="my-1" size="md">
-                                <InputField
-                                    keyboardType="numeric"
-                                    placeholder="Age"
-                                    onBlur={onBlur}
-                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-                                    value={value.toString()}
-                                />
-                            </Input>
-                        )}
-                    />
-                    {errors.age &&
-                        <FormControlError>
-                            <FormControlErrorText>{errors.age.message}</FormControlErrorText>
-                        </FormControlError>
-                    }
-                </FormControl>
-            </Card>
-            <Card className="rounded-lg flex flex-col gap-2">
+        <VStack space="sm" className="w-full mx-auto mt-2">
+            <Card className="rounded-lg flex flex-col">
                 {/* Height Input */}
                 <FormControl isInvalid={!!errors.weight}>
                     <FormControlLabel>
                         <FormControlLabelText>Weight</FormControlLabelText>
                     </FormControlLabel>
-                    <Controller
-                        control={control}
-                        name="weight"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Input className="my-1" size="md">
-                                <InputField
-                                    keyboardType="numeric"
-                                    placeholder={`Enter you Weight in ${weightUnit}`}
-                                    onBlur={onBlur}
-                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-                                    value={value.toString()}
-                                />
-                            </Input>
-                        )}
+                    <RulerPicker
+                        initialValue={defaultValues.weight}
+                        minValue={30}
+                        maxValue={200}
+                        step={1}
+                        unit={weightUnit}
+                        weightTextStyle={{ fontSize: 40, }}
+                        centerLineStyle={{ backgroundColor: 'red', height: 80 }}
+                        onValueChange={(value) => setValue('weight', value)}
                     />
                     {errors.weight &&
                         <FormControlError>
@@ -175,7 +125,7 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
                             className="w-full h-full bg-transparent"
                         >
                             <ButtonText className='text-gray-500'>
-                                {HeightUnitEnum.CM}
+                                {WeightUnitEnum.LBS}
                             </ButtonText>
                         </Button>
                     </GridItem>
@@ -195,31 +145,26 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
 
                     {/* Sliding Blue Square */}
                     <Animated.View
-                        className="absolute bottom-0 h-1 bg-blue-500 opacity-50"
+                        className="absolute bottom-0 h-1 bg-blue-500"
                         style={[animatedStyles]}
                     />
                 </Grid>
             </Card>
-            <Card className="rounded-lg flex flex-col gap-2">
+            <Card className="rounded-lg flex flex-col">
                 {/* Height Input */}
                 <FormControl isInvalid={!!errors.height}>
                     <FormControlLabel>
                         <FormControlLabelText>Height</FormControlLabelText>
                     </FormControlLabel>
-                    <Controller
-                        control={control}
-                        name="height"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Input className="my-1" size="md">
-                                <InputField
-                                    keyboardType="numeric"
-                                    placeholder={`Enter you goal ${heightUnit}`}
-                                    onBlur={onBlur}
-                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-                                    value={value.toString()}
-                                />
-                            </Input>
-                        )}
+                    <RulerPicker
+                        initialValue={defaultValues.height}
+                        minValue={60}
+                        maxValue={250}
+                        step={5}
+                        unit={heightUnit}
+                        weightTextStyle={{ fontSize: 40, }}
+                        centerLineStyle={{ backgroundColor: 'red', height: 80 }}
+                        onValueChange={(value) => setValue('height', value)}
                     />
                     {errors.height &&
                         <FormControlError>
@@ -271,89 +216,13 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
 
                     {/* Sliding Blue Square */}
                     <Animated.View
-                        className="absolute bottom-0 h-1 bg-blue-500 opacity-50"
+                        className="absolute bottom-0 h-1 bg-blue-500"
                         style={[animatedHeightStyles]}
                     />
                 </Grid>
             </Card>
-            <Card className="rounded-lg flex flex-col gap-2">
-                {/* Goal Input */}
-                <FormControl isInvalid={!!errors.goal}>
-                    <FormControlLabel>
-                        <FormControlLabelText>Goal</FormControlLabelText>
-                    </FormControlLabel>
-                    <Controller
-                        control={control}
-                        name="goal"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Input className="my-1" size="md" isDisabled={goalUnit === GoalEnum.MAINTAIN}>
-                                <InputField
-                                    keyboardType="numeric"
-                                    placeholder={`Enter you Goal ${goalUnit}`}
-                                    onBlur={onBlur}
-                                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-                                    value={value.toString()}
-                                />
-                            </Input>
-                        )}
-                    />
-                    {errors.goal &&
-                        <FormControlError>
-                            <FormControlErrorText>{errors.goal.message}</FormControlErrorText>
-                        </FormControlError>}
-                </FormControl>
-                <Grid className="w-full h-16 gap-2" _extra={{ className: 'grid-cols-3' }} style={{ position: 'relative' }}>
-                    {/* Buttons */}
-                    <GridItem
-                        _extra={{ className: 'col-span-1' }}
-                        className="bg-gray-200 border border-gray-300 rounded-md"
-                        onLayout={handleButtonLayout}
-                    >
-                        <Button
-                            onPress={() => handleGoalUnitChange(GoalEnum.MAINTAIN, 0)}
-                            className="w-full h-full bg-transparent"
-                        >
-                            <ButtonText className='text-gray-500 text-center'>
-                                Maintain
-                            </ButtonText>
-                        </Button>
-                    </GridItem>
-                    <GridItem
-                        _extra={{ className: 'col-span-1' }}
-                        className="bg-gray-200 border border-gray-300 rounded-md"
-                    >
-                        <Button
-                            onPress={() => handleGoalUnitChange(GoalEnum.WEIGHT_LOSS, 1)}
-                            className="w-full h-full bg-transparent"
-                        >
-                            <ButtonText className='text-gray-500 text-center'>
-                                Lose weight
-                            </ButtonText>
-                        </Button>
-                    </GridItem>
-                    <GridItem
-                        _extra={{ className: 'col-span-1' }}
-                        className="bg-gray-200 border border-gray-300 rounded-md"
-                    >
-                        <Button
-                            onPress={() => handleGoalUnitChange(GoalEnum.GAIN_MUSCLE, 2)}
-                            className="w-full h-full bg-transparent"
-                        >
-                            <ButtonText className='text-gray-500 text-center'>
-                                Gain Muscle
-                            </ButtonText>
-                        </Button>
-                    </GridItem>
-
-                    {/* Sliding Blue Square */}
-                    <Animated.View
-                        className="absolute bottom-0 h-1 bg-blue-500 opacity-50"
-                        style={[animatedGoalStyles]}
-                    />
-                </Grid>
-            </Card>
             {/* Submit Button */}
-            <Button onPress={handleSubmit(onSubmit)} className="bg-blue-500 rounded-md">
+            <Button onPress={handleSubmit(onSubmit)} className="bg-blue-500 rounded-md mx-4 mt-8">
                 <ButtonText>Submit</ButtonText>
             </Button>
         </VStack>

@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import {  View } from "react-native";
-import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import {Ionicons, MaterialIcons, FontAwesome, Octicons} from "@expo/vector-icons";
 import {Colors} from "@/constants/Colors";
 
 export default function TabLayout() {
@@ -19,7 +19,7 @@ export default function TabLayout() {
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: -3 },
+          shadowOffset: { width: 0, height: 3 },
           shadowOpacity: 0.1,
           shadowRadius: 5,
           elevation: 5,
@@ -91,7 +91,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: "",
           tabBarIcon: ({ color }) => (
             <FontAwesome name="qrcode" size={32} color={color} />
           ),
@@ -101,9 +100,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="favoris"
         options={{
-          title: "",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="stopwatch-outline" size={32} color={color} />),
+            <Octicons name="stopwatch" size={32} color={color} />),
         }}
       />
     </Tabs>

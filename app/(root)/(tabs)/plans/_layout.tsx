@@ -14,7 +14,17 @@ export default function PlansLayout() {
                     elevation: 0, // Remove shadow on Android
                     borderBottomWidth: 1, // Add bottom border
                     borderBottomColor: "#ddd",
-                    height: 80,
+                    height: 60,
+                    paddingVertical: 0
+                },
+                tabBarItemStyle: {
+                    height: '100%',
+                    padding: 0,
+                    margin: 0,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    fontWeight: "700",
                 },
             }}
         >
