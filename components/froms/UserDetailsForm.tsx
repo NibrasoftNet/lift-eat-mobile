@@ -20,6 +20,7 @@ import {
     userDetailsSchema
 } from "@/utils/validation/user-details.validation";
 import RulerPicker from "@/components/ui/ruler-picker/RulerPicker";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function UserDetailsForm({defaultValues}: {defaultValues: UserDetailsDefaultValuesProps}) {
     const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(defaultValues.weightUnit); // Default to KG
@@ -28,6 +29,8 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
     const slideHeightPosition = useSharedValue(0); // Reanimated shared value for position
     const [buttonWidth, setButtonWidth] = useState(0); // Store dynamic button width
 
+    // Init Tanstack Query client
+    const queryClient = useQueryClient();
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -71,8 +74,25 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
         slideHeightPosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
     };
 
-    const onSubmit = (data: UserDetailsFormData) => {
-        console.log('Validated Data:', data);
+    const { mutateAsync } = useMutation({
+        mutationFn: async (data: UserDetailsFormData) => {
+            return Promise.resolve({
+                status: 200,
+                result: data
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+        },
+    });
+
+    const onSubmit = async (data: UserDetailsFormData) => {
+        try {
+            const res = await mutateAsync(data);
+            console.log("Tanstack result", res);
+        } catch (error) {
+            console.error("Mutation failed", error);
+        }
     };
 
     return (
