@@ -12,25 +12,15 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors.primary.background,
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {
-          position: "absolute",
-          height: 50,
-          backgroundColor: "white",
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: 0.1,
-          shadowRadius: 5,
-          elevation: 5,
-        },
+        tabBarLabelStyle: { display: 'none' },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="analytics" size={32} color={color} />          ),
+            <MaterialIcons name="analytics" size={32} color={color} />
+          ),
         }}
       />
 
@@ -46,7 +36,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="meals"
         options={{
-          title: "",
           tabBarIcon: () => (
               <View
                   style={{

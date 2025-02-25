@@ -30,7 +30,7 @@ export default function PlansLayout() {
         >
             {/* Mine Tab */}
             <Tabs.Screen
-                name="index"
+                name="my-plans"
                 options={{
                     title: "My Plans",
                     tabBarIcon: ({ color }) => <Ionicons name="wallet-outline" size={24} color={color} />,

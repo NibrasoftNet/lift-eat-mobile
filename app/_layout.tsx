@@ -38,7 +38,7 @@ const InitialLayout = () => {
     console.log("user", user);
     useEffect(() => {
         if (showIntro) {
-            router.replace('/details');
+            router.replace('/plans/my-plans');
         } else {
             router.replace('/register');
         }
