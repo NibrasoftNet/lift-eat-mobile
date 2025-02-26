@@ -18,7 +18,7 @@ export default function MyPlansLayout() {
         <Stack.Screen
           name="details/[id]"
           options={{
-              presentation: 'containedModal',
+              presentation: 'modal',
               headerShown: false,
               headerShadowVisible: false,
           }}

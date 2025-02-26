@@ -87,7 +87,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="favoris"
+        name="progress"
         options={{
           tabBarIcon: ({ color }) => (
             <Octicons name="stopwatch" size={32} color={color} />),

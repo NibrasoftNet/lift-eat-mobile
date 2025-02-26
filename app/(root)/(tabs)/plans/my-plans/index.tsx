@@ -13,8 +13,8 @@ import { Divider } from "@/components/ui/divider";
 import { nutritionPlanExamples } from "@/exmaples/nutrition-plan.example";
 import { FontAwesome } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { Image } from "react-native";
-import { GetGoalColor, GetGoalIcons } from "@/utils/utils";
+import { ImageBackground, View } from "react-native";
+import { GetGoalIcons, GetGoalImages } from "@/utils/utils";
 import { AddIcon } from "@/components/ui/icon";
 
 export default function PlansScreen() {
@@ -23,56 +23,96 @@ export default function PlansScreen() {
 
     const handlePlanCardPress = (plan: NutritionPlan) => {
         setSelectedPlan(plan)
-        router.push(`/plans/my-plans/details/1`)
+        router.push(`/plans/my-plans/details/${plan.id}`)
     }
     const renderPlan = ({ item, index }: { item: NutritionPlan, index: number }) => (
         <Animated.View
             entering={FadeInUp.delay(index * 100)}
-            style={{ backgroundColor: GetGoalColor[item.goal] }}
             className={`rounded-xl shadow-lg mb-4 overflow-hidden`}>
-            <Pressable onPress={() => handlePlanCardPress(item)}>
-                <VStack space="md" className="p-4">
-                    <HStack className="w-full flex justify-between">
-                        <Text className="text-primary-700 font-medium capitalize">
-                            Goal: {item.name}
-                        </Text>
-                        <Image
-                            source={GetGoalIcons[item.goal]}
-                            className="w-12 h-12 object-cover"
-                        />
-                    </HStack>
-                    <HStack className="w-full flex justify-between bg-primary-50 rounded-lg p-3">
-                        <Box>
-                            <Text className="text-white font-medium capitalize">
-                                Goal: {item.goal.replace('_', ' ')}
+            <ImageBackground
+                source={GetGoalImages[item.goal]}
+                className="size-full object-cover"
+                blurRadius={10}
+            >
+                <Pressable onPress={() => handlePlanCardPress(item)}>
+                    <VStack space="md" className="p-4 shadow-lg">
+                        <HStack className="w-full flex justify-between">
+                            <Text className="text-primary-700 font-medium capitalize">
+                                Goal: {item.name}
                             </Text>
-                            <Text className="text-white mt-1">
-                                {item.initialWeight} {item.unit} → {item.targetWeight} {item.unit}
-                            </Text>
-                            <Text className="text-white">{item.durationWeeks} weeks</Text>
-                        </Box>
-                        <Box>
-                            <Text className="text-white text-xl font-medium">Cal {item.calories}</Text>
-                            {
-                                selectedPlan.id === item.id && <FontAwesome name="check-square-o" size={24} color="white" />
-                            }
-                        </Box>
-                    </HStack>
-                    <HStack className="justify-between pt-3 border-t border-gray-100">
-                        <Text className="text-gray-600">C: {item.carbs}g</Text>
-                        <Divider
-                            orientation="vertical"
-                            className="w-0.5 self-center bg-background-300 flex sm:hidden mx-2"
-                        />
-                        <Text className="text-gray-600">F: {item.fats}g</Text>
-                        <Divider
-                            orientation="vertical"
-                            className="w-0.5 self-center bg-background-300 flex sm:hidden mx-2"
-                        />
-                        <Text className="text-gray-600">P: {item.protein}g</Text>
-                    </HStack>
-                </VStack>
-            </Pressable>
+                            <Animated.Image
+                                entering={FadeInUp.delay(index * 100)}
+                                source={GetGoalIcons[item.goal]}
+                                sharedTransitionTag={item.id}
+                                className="w-12 h-12 object-cover"
+                            />
+                        </HStack>
+                        <HStack className=" text-balck w-full flex justify-between border-primary-2 rounded-lg p-3">
+                            <Box>
+                                <Text className="font-medium capitalize">
+                                    Goal: {item.goal.replace('_', ' ')}
+                                </Text>
+                                <Text className="mt-1">
+                                    {item.initialWeight} {item.unit} → {item.targetWeight} {item.unit}
+                                </Text>
+                                <Text className="text-black">{item.durationWeeks} weeks</Text>
+                            </Box>
+                            <Box className='flex flex-col w-24 h-full gap-2'>
+                                <VStack className={`flex rounded-md w-full items-center drop-shadow-xl`}>
+                                    <View className={`w-full rounded-t-xl bg-red-500`}>
+                                        <Text className={`font-semibold text-center text-white`}>Calories</Text>
+                                    </View>
+                                    <View className={`w-full rounded-b-xl bg-red-300`}>
+                                        <Text className={`text-gray-600 font-semibold text-center`}>{item.calories} Kcal</Text>
+                                    </View>
+                                </VStack>
+                                <View className="flex w-full justify-end items-end">
+                                    {
+                                        selectedPlan.id === item.id && <FontAwesome name="check-square-o" size={24} color="white" />
+                                    }
+                                </View>
+                            </Box>
+                        </HStack>
+                        <HStack className="justify-around pt-3 border-t border-gray-100">
+                            {/* Carbs */}
+                            <VStack className={`flex h-9 rounded-md w-1/4 items-center drop-shadow-xl`}>
+                                <View className={`w-full rounded-t-xl bg-amber-500`}>
+                                    <Text className={`font-semibold text-center text-white`}>Carbs</Text>
+                                </View>
+                                <View className={`w-full rounded-b-xl bg-amber-300`}>
+                                    <Text className={`text-gray-600 font-semibold text-center`}>{item.carbs} Gr</Text>
+                                </View>
+                            </VStack>
+
+                            {/* Divider between items */}
+                            <Divider orientation="vertical" className={`w-0.5 h-14 bg-gray-300 mx-3`} />
+
+                            {/* Fats */}
+                            <VStack className={`flex rounded-md w-1/4 items-center drop-shadow-xl`}>
+                                <View className={`w-full rounded-t-xl bg-green-500`}>
+                                    <Text className={`font-semibold text-center text-white`}>Fats</Text>
+                                </View>
+                                <View className={`w-full rounded-b-xl bg-green-300`}>
+                                    <Text className={`text-gray-600 font-semibold text-center`}>{item.fats} Gr</Text>
+                                </View>
+                            </VStack>
+
+                            {/* Divider between items */}
+                            <Divider orientation="vertical" className={`w-0.5 h-14 bg-gray-300 mx-3`} />
+
+                            {/* Protein */}
+                            <VStack className={`flex rounded-md w-1/4 items-center drop-shadow-xl`}>
+                                <View className={`w-full rounded-t-xl bg-blue-500`}>
+                                    <Text className={`font-semibold text-center text-white`}>Protein</Text>
+                                </View>
+                                <View className={`w-full rounded-b-xl bg-blue-300`}>
+                                    <Text className={`text-gray-600 font-semibold text-center`}>{item.protein} Gr</Text>
+                                </View>
+                            </VStack>
+                        </HStack>
+                    </VStack>
+                </Pressable>
+            </ImageBackground>
         </Animated.View>
     );
 
