@@ -43,7 +43,7 @@ export default function PlanDetailsScreen() {
                             <HStack className="flex w-full justify-between items-center">
                                 <Text className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</Text>
                                 <Animated.Image
-                                    entering={FadeIn.delay(300).duration(1000).springify()}
+                                    entering={FadeIn.delay(500).duration(1000).springify()}
                                     source={GetGoalIcons[plan.goal]}
                                     sharedTransitionTag={plan.id}
                                     className="w-12 h-12 object-cover"
