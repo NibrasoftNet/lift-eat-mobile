@@ -1,4 +1,5 @@
 import { GoalEnum } from "@/utils/enum/user-details.enum";
+import {DayEnum} from "@/utils/enum/general.enum";
 
 export interface Ingredient {
     id: string;
@@ -25,7 +26,9 @@ export interface Meal {
 }
 
 export interface DailyPlan {
-    date: string;
+    id: number,
+    day: DayEnum;
+    week: number,
     calories: number;
     carbs: number;
     fats: number;

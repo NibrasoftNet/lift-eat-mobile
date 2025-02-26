@@ -1,21 +1,47 @@
-import React from 'react';
-import {Link, useLocalSearchParams} from 'expo-router';
-import {ImageBackground, ScrollView} from 'react-native';
-import Animated, {FadeIn, FadeInDown, FadeInUp} from 'react-native-reanimated';
+import React, {useEffect, useState} from 'react';
+import { Link, useLocalSearchParams } from 'expo-router';
+import {ImageBackground, ScrollView, View} from 'react-native';
+import Animated, {
+    FadeInDown,
+    FadeInUp,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring
+} from 'react-native-reanimated';
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { nutritionPlanExamples } from "@/exmaples/nutrition-plan.example";
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Ionicons, Octicons } from '@expo/vector-icons';
+import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Pressable } from "@/components/ui/pressable";
-import Feather from "@expo/vector-icons/Feather";
-import { GetGoalIcons, GetGoalImages } from "@/utils/utils";
-
+import { GetGoalImages } from "@/utils/utils";
+import { DayEnum } from "@/utils/enum/general.enum";
+import { Button } from "@/components/ui/button";
+import { Meal } from "@/types/plan.type";
 
 export default function PlanDetailsScreen() {
     const { id } = useLocalSearchParams();
+    const daysOfWeek = Object.values(DayEnum);
     const plan = nutritionPlanExamples.find((plan) => plan.id === id);
+    const [selectedWeek, setSelectedWeek] = useState<number>(1);
+    const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
+    const [filteredDailyMeals, setFilteredDailyMeals] = useState<Meal[] | undefined>([]);
+
+    // Filter daily plans based on selectedDay and selectedWeek
+    useEffect(() => {
+        if (plan) {
+            const filteredPlans = plan.dailyPlans.find(
+                (dailyPlan) =>
+                    dailyPlan.day === selectedDay && dailyPlan.week === selectedWeek
+            );
+            setFilteredDailyMeals(filteredPlans?.meals);
+        }
+    }, [selectedDay, selectedWeek, plan]);
+
+
+    // Reanimated shared value for animation
+    const weekAnimation = useSharedValue(1);
 
     if (!plan) {
         return (
@@ -25,110 +51,131 @@ export default function PlanDetailsScreen() {
         );
     }
 
+    const handleWeekChange = (direction: 'left' | 'right' ) => {
+        if (direction === 'left' && selectedWeek > 1) {
+            setSelectedWeek((prev) => prev - 1);
+            weekAnimation.value = withSpring(selectedWeek - 1); // Animate to the previous week
+        } else if (direction === 'right' && selectedWeek < plan.durationWeeks) {
+            setSelectedWeek((prev) => prev + 1);
+            weekAnimation.value = withSpring(selectedWeek + 1); // Animate to the next week
+        }
+    };
+
+    // Animated style for the week number
+    const animatedWeekStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: withSpring(weekAnimation.value === selectedWeek ? 1.2 : 1) }],
+            opacity: withSpring(weekAnimation.value === selectedWeek ? 1 : 0.8),
+        };
+    });
+
+    const handleDayClick = (day: DayEnum) => {
+        setSelectedDay(day)
+        const dailyPlan = plan.dailyPlans.find((dp) => dp.day === day && dp.week === selectedWeek);
+        if (dailyPlan) {
+            // Navigate to the daily plan details or display them in a modal
+            console.log("Selected Daily Plan:", dailyPlan);
+        }
+    };
+
     return (
         <ScrollView className="flex-1 bg-gray-50">
             <Box className="p-4">
-                <Link href="/plans/my-plans" asChild>
-                    <Feather name="chevrons-left" size={24} color="black" />
-                </Link>
                 <Animated.View
                     entering={FadeInDown.delay(300)}
-                    className={`rounded-xl h-72 shadow-lg mb-4 overflow-hidden`}>
+                    className={`rounded-xl h-24 shadow-lg mb-4 overflow-hidden`}>
                     <ImageBackground
                         source={GetGoalImages[plan.goal]}
                         className="size-full object-cover"
                         blurRadius={10}
                     >
-                        <VStack space="lg" className="p-4">
-                            <HStack className="flex w-full justify-between items-center">
-                                <Text className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</Text>
-                                <Animated.Image
-                                    entering={FadeIn.delay(300).duration(1000).springify()}
-                                    source={GetGoalIcons[plan.goal]}
-                                    sharedTransitionTag={plan.id}
-                                    className="w-12 h-12 object-cover"
-                                />
-                            </HStack>
-                            <Text className="text-gray-600 capitalize mb-4">
-                                Goal: {plan.goal.replace('_', ' ')}
-                            </Text>
-                            <HStack className="items-center">
-                                <Ionicons name="scale-outline" size={24} color="black" />
-                                <Text className="ml-2 text-gray-600">
-                                    {plan.initialWeight} {plan.unit} → {plan.targetWeight} {plan.unit}
-                                </Text>
-                            </HStack>
-
-                            <HStack className="items-center">
-                                <Ionicons name="calendar-clear-outline" size={24} color="black" />
-                                <Text className="ml-2 text-gray-600">
-                                    {plan.durationWeeks} weeks duration
-                                </Text>
-                            </HStack>
-
-                            <HStack className="items-center">
-                                <Octicons name="clock" size={24} color="black" />
-                                <Text className="ml-2 text-gray-600">
-                                    Created {new Date().toLocaleDateString()}
-                                </Text>
-                            </HStack>
-                        </VStack>
+                        <HStack className="flex flex-row w-full items-center justify-between p-4">
+                            <Link href="/plans/my-plans" asChild>
+                                <FontAwesome6 name="circle-chevron-left" size={32} color="black" />
+                            </Link>
+                            <VStack className={`flex rounded-xl items-center shadow-lg`}>
+                                <View className={`w-full rounded-t-xl bg-red-500 py-0.5 px-2`}>
+                                    <Text className={`font-semibold text-center text-white`}>Calories</Text>
+                                </View>
+                                <View className={`w-full rounded-b-xl bg-red-300 py-0.5 px-2`}>
+                                    <Text className={`text-gray-600 font-semibold text-center`}>{plan.calories} Kcal</Text>
+                                </View>
+                            </VStack>
+                        </HStack>
                     </ImageBackground>
                 </Animated.View>
+                <HStack className="items-center justify-between border border-gray-500 p-1 rounded-lg">
+                    {/* Left Chevron */}
+                    <Button
+                        onPress={() => handleWeekChange('left')}
+                        disabled={selectedWeek === 1}
+                        className={`p-1 w-10 h-10 ${selectedWeek === 1 ? 'opacity-50' : 'opacity-100'}`}
+                    >
+                        <FontAwesome6 name="chevron-left" size={20} color="white" />
+                    </Button>
 
-                <Animated.View
-                    entering={FadeInUp.delay(200)}
-                    className="bg-white rounded-xl p-6 shadow-sm mb-4">
-                    <Text className="text-lg font-semibold mb-4">Daily Nutrition Goals</Text>
-                    <VStack space="md">
-                        <HStack className="justify-between">
-                            <Text className="text-gray-600">Calories</Text>
-                            <Text className="font-medium">{plan.calories} kcal</Text>
-                        </HStack>
+                    {/* Animated Week Number */}
+                    <Box className='flex flex-row items-center justify-center'>
+                        <Text className="text-2xl font-bold text-blue-500">
+                            Week-
+                        </Text>
+                        <Animated.Text className="text-xl font-bold text-blue-500"  style={[animatedWeekStyle]}>
+                           {selectedWeek}
+                        </Animated.Text>
+                    </Box>
 
-                        <HStack className="justify-between">
-                            <Text className="text-gray-600">Carbohydrates</Text>
-                            <Text className="font-medium">{plan.carbs}g</Text>
-                        </HStack>
-
-                        <HStack className="justify-between">
-                            <Text className="text-gray-600">Protein</Text>
-                            <Text className="font-medium">{plan.protein}g</Text>
-                        </HStack>
-
-                        <HStack className="justify-between">
-                            <Text className="text-gray-600">Fats</Text>
-                            <Text className="font-medium">{plan.fats}g</Text>
-                        </HStack>
-                    </VStack>
-                </Animated.View>
-
+                    {/* Right Chevron */}
+                    <Button
+                        onPress={() => handleWeekChange('right')}
+                        disabled={selectedWeek === plan.durationWeeks}
+                        className={`p-1 w-10 h-10 ${selectedWeek === plan.durationWeeks ? 'opacity-50' : 'opacity-100'}`}
+                    >
+                        <FontAwesome6 name="chevron-right" size={20} color="white" />
+                    </Button>
+                </HStack>
+                {/* Days of the Week Row */}
+                <HStack className="justify-between my-4">
+                    {daysOfWeek.map((day, index: number) => (
+                        <Button
+                            key={index}
+                            onPress={() => handleDayClick(day)}
+                            className={`p-2 rounded-lg ${day === selectedDay ? "bg-blue-500" : "bg-primary-100"}`}
+                        >
+                            <Text className="text-center text-white">{day.substring(0, 3)}</Text>
+                        </Button>
+                    ))}
+                </HStack>
                 <Animated.View
                     entering={FadeInUp.delay(300)}
-                    className="bg-white rounded-xl shadow-sm">
-                    <Text className="text-lg font-semibold p-6 pb-2">Daily Meal Plans</Text>
-                    {plan.dailyPlans.map((dailyPlan, index) => (
+                    className="flex-1 gap-2">
+                    <Box className="flex w-full rounded-lg bg-gray-300 shodow-xl p-4">
+                        <Text className="text-lg text-black font-semibold">Daily Meal Plans</Text>
+                    </Box>
+
+                    { filteredDailyMeals && filteredDailyMeals.length > 0 ? filteredDailyMeals.map((meal, index) => (
                         <Pressable
-                            key={dailyPlan.date}
-                            className="border-t border-gray-100 p-6">
+                            key={meal.id}
+                            className="flex w-full rounded-lg bg-gray-300 shodow-xl p-4">
                             <HStack className="justify-between items-center">
                                 <VStack>
                                     <Text className="font-medium">
-                                        Day {index + 1}
+                                        {meal.name}
                                     </Text>
                                     <Text className="text-gray-600">
-                                        {new Date(dailyPlan.date).toLocaleDateString()}
+                                        Quantity: {meal.quantity} {meal.unit}
                                     </Text>
                                 </VStack>
                                 <HStack className="items-center">
                                     <Text className="text-gray-600 mr-2">
-                                        {dailyPlan.meals.length} meals
+                                        {meal.calories} Kcal
                                     </Text>
                                     <Ionicons name="chevron-forward-circle-outline" size={20} color="#6b7280" />
                                 </HStack>
                             </HStack>
                         </Pressable>
-                    ))}
+                    )) : (
+                        <Text className="text-gray-600 p-2">No meals planned for this day.</Text>
+                    )}
                 </Animated.View>
             </Box>
         </ScrollView>
