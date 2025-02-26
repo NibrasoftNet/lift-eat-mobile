@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import {Suspense, useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useOnlineManager } from "@/hooks/useOnlineManager";
 import { useAppState } from "@/hooks/useAppState";
@@ -13,12 +13,18 @@ import { useAppState } from "@/hooks/useAppState";
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import { View } from "react-native";
+import {ActivityIndicator, View} from "react-native";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import ErrorBoundary from "react-native-error-boundary";
+import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from '@/drizzle/migrations';
+import { addDummyData } from "@/db/addDummyData";
 
 SplashScreen.preventAutoHideAsync();
+export const DATABASE_NAME = 'tasks';
 
 const InitialLayout = () => {
     const router = useRouter();
@@ -35,7 +41,6 @@ const InitialLayout = () => {
             }
         },
     });
-    console.log("user", user);
     useEffect(() => {
         if (showIntro) {
             router.replace('/plans/my-plans');
@@ -63,7 +68,9 @@ const InitialLayout = () => {
 
 export default function ProjectLayout() {
     const colorScheme = useColorScheme();
-
+    const expoDb = openDatabaseSync(DATABASE_NAME);
+    const db = drizzle(expoDb);
+    const { success, error } = useMigrations(db, migrations);
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     });
@@ -77,6 +84,12 @@ export default function ProjectLayout() {
     // Use the custom hooks
     useOnlineManager();
     useAppState();
+
+    useEffect(() => {
+        if (success) {
+            addDummyData(db);
+        }
+    }, [success]);
 
 
     useEffect(() => {
@@ -101,10 +114,17 @@ export default function ProjectLayout() {
         <GluestackUIProvider mode="light">
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <QueryClientProvider client={queryClient}>
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        <InitialLayout />
-                        <StatusBar style="auto" hidden={true} />
+                    <Suspense fallback={<ActivityIndicator size="large" />}>
+                        <SQLiteProvider
+                            databaseName={DATABASE_NAME}
+                            options={{ enableChangeListener: true }}
+                            useSuspense>
+                            <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                <InitialLayout />
+                                <StatusBar style="auto" hidden={true} />
                     </ErrorBoundary>
+                        </SQLiteProvider>
+                    </Suspense>
                 </QueryClientProvider>
             </ThemeProvider>
         </GluestackUIProvider>

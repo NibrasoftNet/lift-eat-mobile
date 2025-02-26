@@ -15,8 +15,9 @@ module.exports = function(api) {
               "@": "./",
               "tailwind.config": "./tailwind.config.js"
             }
-          }
-        ]
+          },
+        ],
+        ['inline-import', { extensions: ['sql'] }]
       ]
     };
   };
