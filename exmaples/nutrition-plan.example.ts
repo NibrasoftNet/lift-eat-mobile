@@ -1,5 +1,6 @@
 import {NutritionPlan} from "@/types/plan.type";
 import {GoalEnum} from "@/utils/enum/user-details.enum";
+import {DayEnum} from "@/utils/enum/general.enum";
 
 const weightLossPlan: NutritionPlan = {
     id: "plan-001",
@@ -16,7 +17,9 @@ const weightLossPlan: NutritionPlan = {
     protein: 140,
     dailyPlans: [
         {
-            date: "2025-02-25",
+            id: 1,
+            day: DayEnum.MONDAY,
+            week: 1,
             calories: 1800,
             carbs: 150,
             fats: 50,
@@ -32,6 +35,34 @@ const weightLossPlan: NutritionPlan = {
                     cuisineType: "Healthy",
                     unit: "plate",
                     quantity: 1,
+                    ingredients: [
+                        { id: "ing-001", name: "Chicken Breast", calories: 220, carbs: 0, fats: 5, protein: 45, unit: "g", quantity: 150 },
+                        { id: "ing-002", name: "Lettuce", calories: 10, carbs: 2, fats: 0, protein: 1, unit: "g", quantity: 50 },
+                        { id: "ing-003", name: "Olive Oil", calories: 100, carbs: 0, fats: 11, protein: 0, unit: "tbsp", quantity: 1 },
+                        { id: "ing-004", name: "Tomato", calories: 20, carbs: 4, fats: 0, protein: 1, unit: "g", quantity: 50 }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 2,
+            day: DayEnum.TUESDAY,
+            week: 1,
+            calories: 1800,
+            carbs: 150,
+            fats: 50,
+            protein: 140,
+            meals: [
+                {
+                    id: "meal-002",
+                    name: "Barbeque",
+                    calories: 400,
+                    carbs: 20,
+                    fats: 15,
+                    protein: 50,
+                    cuisineType: "American",
+                    unit: "Gram",
+                    quantity: 100,
                     ingredients: [
                         { id: "ing-001", name: "Chicken Breast", calories: 220, carbs: 0, fats: 5, protein: 45, unit: "g", quantity: 150 },
                         { id: "ing-002", name: "Lettuce", calories: 10, carbs: 2, fats: 0, protein: 1, unit: "g", quantity: 50 },
@@ -59,7 +90,9 @@ const weightGainPlan: NutritionPlan = {
     protein: 220,
     dailyPlans: [
         {
-            date: "2025-02-25",
+            id: 3,
+            day: DayEnum.WEDNESDAY,
+            week: 1,
             calories: 3200,
             carbs: 350,
             fats: 90,
@@ -102,7 +135,9 @@ const maintenancePlan: NutritionPlan = {
     protein: 150,
     dailyPlans: [
         {
-            date: "2025-02-25",
+            id: 4,
+            day: DayEnum.FRIDAY,
+            week: 1,
             calories: 2500,
             carbs: 250,
             fats: 80,
