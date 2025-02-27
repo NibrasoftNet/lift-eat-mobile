@@ -1,6 +1,6 @@
 import { Heading } from "@/components/ui/heading";
 import { VStack } from "@/components/ui/vstack";
-import { Task } from "@/db/schema";
+import { User } from "@/db/schema";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import * as schema from '@/db/schema'
@@ -12,11 +12,11 @@ export default function Progress() {
     const drizzleDb = drizzle(db, { schema })
     useDrizzleStudio(db);
 
-    const tasks = useQuery({
-        queryKey: ['tasks'],
+    const users = useQuery({
+        queryKey: ['users'],
         queryFn: async () => {
-            const result: Task[] = await drizzleDb.query.tasks.findMany()
-            console.log("List of tasks", result)
+            const result: User[] = await drizzleDb.query.users.findMany()
+            console.log("List of users", result)
             return {
                 status: 200,
                 result: result,

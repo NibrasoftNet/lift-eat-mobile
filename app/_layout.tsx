@@ -24,26 +24,15 @@ import migrations from '@/drizzle/migrations';
 import { addDummyData } from "@/db/addDummyData";
 
 SplashScreen.preventAutoHideAsync();
-export const DATABASE_NAME = 'tasks';
+export const DATABASE_NAME = 'lift_eat_db';
 
 const InitialLayout = () => {
     const router = useRouter();
     const [showIntro] = useState<boolean>(true);
 
-    const user = useQuery({
-        queryKey: ['user'],
-        queryFn: () => {
-            return {
-                status: 200,
-                data: {
-                    result: "tanstack init succeded"
-                }
-            }
-        },
-    });
     useEffect(() => {
         if (showIntro) {
-            router.replace('/login');
+            router.replace('/plans/my-plans');
         } else {
             router.replace('/register');
         }
@@ -86,6 +75,9 @@ export default function ProjectLayout() {
     useAppState();
 
     useEffect(() => {
+        if (error) {
+            console.log("error occurred", error);
+        }
         if (success) {
             addDummyData(db);
         }
