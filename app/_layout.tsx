@@ -43,7 +43,7 @@ const InitialLayout = () => {
     });
     useEffect(() => {
         if (showIntro) {
-            router.replace('/plans/my-plans');
+            router.replace('/login');
         } else {
             router.replace('/register');
         }

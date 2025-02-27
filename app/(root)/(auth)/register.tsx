@@ -1,9 +1,8 @@
 import React from "react";
-import { Text, Image } from "react-native";
+import { Image, ImageBackground } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { VStack } from "@/components/ui/vstack";
 import { Button, ButtonText } from "@/components/ui/button";
-import logo from "../../../assets/images/react-logo.png";
 import {
   FormControl,
   FormControlError,
@@ -15,6 +14,10 @@ import {
 import { Input, InputField } from "@/components/ui/input";
 import { AlertCircleIcon } from "@/components/ui/icon";
 import { useRouter } from "expo-router";
+import { app_logo, login_background } from "@/constants/images";
+import { Card } from "@/components/ui/card";
+import { Text } from "@/components/ui/text";
+
 export default function Register() {
   const router = useRouter();
   const {
@@ -38,122 +41,127 @@ export default function Register() {
   };
 
   return (
-    <VStack className="w-full p-4">
-      <Image
-        source={logo}
-        className="h-50 w-50 object-contain mb-5"
-        style={{ alignSelf: "center" }}
-      />
-      <Text className="text-4xl mb-10 text-black self-start">Register</Text>
-      <Text className="text-2xl mb-10 text-gray-600 self-start">
-        Create your account and start managing your calories
-      </Text>
-
-      {/* Name Field */}
-      <FormControl isInvalid={!!errors.name}>
-        <FormControlLabel>
-          <FormControlLabelText>Name</FormControlLabelText>
-        </FormControlLabel>
-        <Controller
-          control={control}
-          name="name"
-          rules={{ required: "Name is required", minLength: 3 }}
-          render={({ field: { onChange, value } }) => (
-            <Input className="my-1">
-              <InputField
-                type="text"
-                placeholder="Name"
-                value={value}
-                onChangeText={onChange}
-              />
-            </Input>
-          )}
-        />
-        {errors.name && (
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>
-              {errors.name.message || "At least 3 characters are required."}
-            </FormControlErrorText>
-          </FormControlError>
-        )}
-      </FormControl>
-
-      {/* Email Field */}
-      <FormControl isInvalid={!!errors.email}>
-        <FormControlLabel>
-          <FormControlLabelText>Email</FormControlLabelText>
-        </FormControlLabel>
-        <Controller
-          control={control}
-          name="email"
-          rules={{ required: "Email is required", minLength: 6 }}
-          render={({ field: { onChange, value } }) => (
-            <Input className="my-1">
-              <InputField
-                type="text"
-                placeholder="Email"
-                value={value}
-                onChangeText={onChange}
-              />
-            </Input>
-          )}
-        />
-        {errors.email && (
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>
-              {errors.email.message || "At least 6 characters are required."}
-            </FormControlErrorText>
-          </FormControlError>
-        )}
-      </FormControl>
-
-      {/* Password Field */}
-      <FormControl isInvalid={!!errors.password}>
-        <FormControlLabel>
-          <FormControlLabelText>Password</FormControlLabelText>
-        </FormControlLabel>
-        <Controller
-          control={control}
-          name="password"
-          rules={{ required: "Password is required", minLength: 6 }}
-          render={({ field: { onChange, value } }) => (
-            <Input className="my-1">
-              <InputField
-                type="password"
-                placeholder="Password"
-                value={value}
-                onChangeText={onChange}
-              />
-            </Input>
-          )}
-        />
-        {errors.password && (
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>
-              {errors.password.message || "At least 6 characters are required."}
-            </FormControlErrorText>
-          </FormControlError>
-        )}
-      </FormControl>
-
-      {/* Submit Button */}
-      <Button
-        className="w-full h-12 bg-teal-400 rounded-3xl justify-center items-center mb-5 mt-4"
-        size="sm"
-        onPress={handleSubmit(onSubmit)}
+    <ImageBackground
+      source={login_background}
+      className="size-full object-cover"
+      blurRadius={5}
       >
-        <ButtonText>Register</ButtonText>
-      </Button>
+        <VStack className="size-full p-4 items-center justify-center gap-4">
+            <Image
+                source={app_logo}
+                className="h-48 w-48 object-contain mb-2 rounded-xl"
+                style={{ alignSelf: "center" }}
+            />
+            <Card className="flex w-full bg-transparent items-center justify-center">
+                <Text className="text-center text-4xl font-bold text-black">Register</Text>
+                <Text className="text-center text-2xl font-semibold text-gray-600">Create new account</Text>
+            </Card>
+            <Card className="w-full bg-transparent rounded-2xl border pb-6 gap-4">
+                {/* Name Field */}
+                <FormControl isInvalid={!!errors.name}>
+                <FormControlLabel>
+                  <FormControlLabelText>Name</FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="name"
+                  rules={{ required: "Name is required", minLength: 3 }}
+                  render={({ field: { onChange, value } }) => (
+                    <Input className="my-1">
+                      <InputField
+                        type="text"
+                        placeholder="Name"
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                    </Input>
+                  )}
+                />
+                {errors.name && (
+                  <FormControlError>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.name.message || "At least 3 characters are required."}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+                </FormControl>
 
-      <Text className="text-black">
-        Already have an account?{" "}
-        <Text className="text-teal-400" onPress={() => router.push("./login")}>
-          Login
-        </Text>
-      </Text>
-    </VStack>
+                {/* Email Field */}
+                <FormControl isInvalid={!!errors.email}>
+                <FormControlLabel>
+                  <FormControlLabelText>Email</FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="email"
+                  rules={{ required: "Email is required", minLength: 6 }}
+                  render={({ field: { onChange, value } }) => (
+                    <Input className="my-1">
+                      <InputField
+                        type="text"
+                        placeholder="Email"
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                    </Input>
+                  )}
+                />
+                {errors.email && (
+                  <FormControlError>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.email.message || "At least 6 characters are required."}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+                </FormControl>
+                {/* Password Field */}
+                <FormControl isInvalid={!!errors.password}>
+                <FormControlLabel>
+                  <FormControlLabelText>Password</FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="password"
+                  rules={{ required: "Password is required", minLength: 6 }}
+                  render={({ field: { onChange, value } }) => (
+                    <Input className="my-1">
+                      <InputField
+                        type="password"
+                        placeholder="Password"
+                        value={value}
+                        onChangeText={onChange}
+                      />
+                    </Input>
+                  )}
+                />
+                {errors.password && (
+                  <FormControlError>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.password.message || "At least 6 characters are required."}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+                </FormControl>
+            </Card>
+          {/* Submit Button */}
+          <Button
+            className="w-full h-12 justify-center items-center mt-4"
+            size="sm"
+            onPress={handleSubmit(onSubmit)}
+          >
+            <ButtonText>Register</ButtonText>
+          </Button>
+
+          <Text className="text-black">
+            Already have an account?{" "}
+            <Text className="text-amber-500 text-xl font-semibold underline" onPress={() => router.push("./login")}>
+              Login
+            </Text>
+          </Text>
+        </VStack>
+    </ImageBackground>
   );
 }
