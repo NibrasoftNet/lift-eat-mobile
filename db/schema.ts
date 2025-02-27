@@ -1,17 +1,11 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { GenderEnum } from "@/utils/enum/user-gender-activity.enum";
 
-export const tasks = sqliteTable('tasks', {
+export const users = sqliteTable('users', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name').notNull(),
-    list_id: integer('list_id')
-        .notNull()
-        .references(() => lists.id),
-});
+    email: text('email').notNull().unique(),
+    gender: text('gender', { enum: ['MALE', 'FEMALE'] }).notNull().default(GenderEnum.MALE),});
 
-export const lists = sqliteTable('lists', {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    name: text('name').notNull(),
-});
-
-// Export Task to use as an interface in your app
-export type Task = typeof tasks.$inferSelect;
+// Export User type for use in your app
+export type User = typeof users.$inferSelect;
