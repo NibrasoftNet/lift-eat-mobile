@@ -120,7 +120,7 @@ export default function PlansScreen() {
         <Box className="flex-1 bg-gray-50">
             <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">
                 <Text className="text-2xl font-bold text-gray-900">Nutrition Plans</Text>
-                <Link href="/plans/my-plans/details/create">
+                <Link href="/plans/my-plans/create">
                     <FontAwesome name="plus" size={32} color={Colors.light.text} />
                 </Link>
             </Box>
@@ -136,7 +136,7 @@ export default function PlansScreen() {
                 isHovered={false}
                 isDisabled={false}
                 isPressed={false}
-                onPress={() => router.push("/plans/my-plans/details/create")}
+                onPress={() => router.push("/plans/my-plans/create")}
             >
                 <FabIcon as={AddIcon} />
                 <FabLabel>New Plan</FabLabel>

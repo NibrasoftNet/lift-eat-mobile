@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1740772777144,
+      "tag": "0000_sloppy_texas_twister",
+      "breakpoints": true
+    }
+  ]
+}
