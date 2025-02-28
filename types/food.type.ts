@@ -7,7 +7,6 @@ export interface Food extends Omit<Ingredient, 'quantity'> {
     category: FoodCategory;
     portion: number;
     image?: any;
-    cuisineType?: CuisineType;
     allergens?: AllergenType[];
     cookingMethod?: CookingMethod;
     measurementUnit: MeasurementUnit;
