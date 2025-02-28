@@ -4,13 +4,11 @@ import { User } from "@/db/schema";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import * as schema from '@/db/schema'
-import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Progress() {
     const db = useSQLiteContext()
     const drizzleDb = drizzle(db, { schema })
-    useDrizzleStudio(db);
 
     const users = useQuery({
         queryKey: ['users'],

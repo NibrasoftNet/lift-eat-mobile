@@ -1,42 +1,92 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
 import "@/global.css";
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import {Suspense, useEffect, useState } from 'react';
-import 'react-native-reanimated';
-import { useOnlineManager } from "@/hooks/useOnlineManager";
-import { useAppState } from "@/hooks/useAppState";
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import {ActivityIndicator, View} from "react-native";
-import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
+import {GluestackUIProvider} from "@/components/ui/gluestack-ui-provider";
+import {useFonts} from 'expo-font';
 import ErrorBoundary from "react-native-error-boundary";
-import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import {Stack, useRouter} from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import {StatusBar} from 'expo-status-bar';
+import {Suspense, useEffect} from 'react';
+import 'react-native-reanimated';
+import {useOnlineManager} from "@/hooks/useOnlineManager";
+import {useAppState} from "@/hooks/useAppState";
+
+import {useColorScheme} from '@/hooks/useColorScheme';
+import {QueryClient, QueryClientProvider, useQuery, UseQueryResult} from '@tanstack/react-query';
+import {useReactQueryDevTools} from '@dev-plugins/react-query';
+import {ActivityIndicator, View} from "react-native";
+import {Button} from "@/components/ui/button";
+import {Text} from "@/components/ui/text";
+import {openDatabaseSync, SQLiteProvider, useSQLiteContext} from "expo-sqlite";
+import {drizzle} from 'drizzle-orm/expo-sqlite';
+import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
-import { addDummyData } from "@/db/addDummyData";
+import {addDummyData} from "@/db/addDummyData";
+import * as schema from "@/db/schema";
+import {User} from "@/db/schema";
+import {useDrizzleStudio} from "expo-drizzle-studio-plugin";
+import {Toast, useToast} from '@/components/ui/toast';
+import {Heading} from "@/components/ui/heading";
+import {VStack} from "@/components/ui/vstack";
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
 
+type ResultProps<T> = {
+    status: number,
+    result: T,
+}
+
 const InitialLayout = () => {
     const router = useRouter();
-    const [showIntro] = useState<boolean>(true);
+    const toast = useToast()
+    const db = useSQLiteContext()
+    const drizzleDb = drizzle(db, { schema })
+    useDrizzleStudio(db);
 
+    const user: UseQueryResult<ResultProps<User>> | null = useQuery({
+        queryKey: ['user'],
+        queryFn: async () => {
+            try {
+                return await drizzleDb.query.users.findFirst()
+            } catch (error: any) {
+                toast.show({
+                    placement: "top",
+                    render: ({ id }) => {
+                        const toastId = "toast-" + id
+                        return (
+                            <Toast
+                                nativeID={toastId}
+                                className="rouded-xl p-4 gap-3 w-full bg-red-500 shadow-hard-2 flex-row"
+                            >
+                                <VStack className="web:flex-1 gap-4 p-4">
+                                    <Heading
+                                        size="sm"
+                                        className="text-white font-semibold"
+                                    >
+                                        <Text>Error</Text>
+                                    </Heading>
+                                    <Text size="sm" className="text-white">
+                                        {error.toString()}
+                                    </Text>
+                                </VStack>
+                        </Toast>
+                        )
+                    },
+                })
+                return null;
+            }
+        },
+    });
     useEffect(() => {
-        if (showIntro) {
-            router.replace('/plans/my-plans');
+        console.log("user", user)
+        if (!user) {
+            router.replace("/intro");
         } else {
-            router.replace('/register');
+            router.replace("/analytics");
         }
     }, []);
+
 
     return (
         <Stack
