@@ -21,14 +21,16 @@ export enum CookingMethod {
 }
 
 export enum CuisineType {
-    ARABIC = 'TUNISIAN',
+    FRENCH = 'FRENCH',
     ITALIAN = 'ITALIAN',
-    CHINESE = 'CHINESE',
     JAPANESE = 'JAPANESE',
+    CHINESE = 'CHINESE',
     INDIAN = 'INDIAN',
-    MEDITERRANEAN = 'MEDITERRANEAN',
     MEXICAN = 'MEXICAN',
-    AMERICAN = 'AMERICAN'
+    AMERICAN = 'AMERICAN',
+    ARABIC = 'ARABIC',
+    MEDITERRANEAN = 'MEDITERRANEAN',
+    OTHER = 'OTHER'
 }
 
 export enum MealType {
@@ -46,8 +48,31 @@ export enum MeasurementUnit {
     TEASPOON = 'tsp',
     TABLESPOON = 'tbsp',
     CUP = 'cup',
-    PIECE = 'piece',
-    SERVING = 'serving'
+    PIECE = 'pc',
+    SERVING = 'serving',
+    OUNCE = 'oz',
+    POUND = 'lb'
+}
+
+export enum DifficultyLevel {
+    BEGINNER = 'BEGINNER',
+    EASY = 'EASY',
+    INTERMEDIATE = 'INTERMEDIATE',
+    ADVANCED = 'ADVANCED',
+    EXPERT = 'EXPERT'
+}
+
+export enum FoodCategory {
+    VEGETABLES = 'VEGETABLES',
+    FRUITS = 'FRUITS',
+    GRAINS = 'GRAINS',
+    PROTEIN = 'PROTEIN',
+    DAIRY = 'DAIRY',
+    FATS = 'FATS',
+    BEVERAGES = 'BEVERAGES',
+    SNACKS = 'SNACKS',
+    CONDIMENTS = 'CONDIMENTS',
+    OTHER = 'OTHER'
 }
 
 export enum RecipeDifficulty {

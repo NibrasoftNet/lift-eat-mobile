@@ -11,7 +11,7 @@ import { Fab, FabLabel, FabIcon } from "@/components/ui/fab";
 import { AddIcon } from "@/components/ui/icon";
 import { ImageBackground, View } from "react-native";
 import { Food } from '@/types/food.type';
-import { foodExamples } from '@/exmaples/foods.example';
+import { exampleFoods } from '@/examples/foods.example';
 import Badge from '@/components/ui/badge';
 
 export default function FoodsScreen() {
@@ -91,7 +91,7 @@ export default function FoodsScreen() {
     return (
         <Box className="flex-1 bg-background p-4">
             <FlashList
-                data={foodExamples}
+                data={exampleFoods}
                 renderItem={renderFood}
                 estimatedItemSize={200}
                 contentContainerStyle={{ paddingBottom: 80 }}

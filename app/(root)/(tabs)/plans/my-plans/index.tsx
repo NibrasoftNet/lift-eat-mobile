@@ -10,7 +10,7 @@ import { Pressable } from "@/components/ui/pressable"
 import { HStack } from "@/components/ui/hstack";
 import { Fab, FabLabel, FabIcon } from "@/components/ui/fab"
 import { Divider } from "@/components/ui/divider";
-import { nutritionPlanExamples } from "@/exmaples/nutrition-plan.example";
+import { nutritionPlanExamples } from "@/examples/nutrition-plan.example";
 import { FontAwesome } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { ImageBackground, View } from "react-native";

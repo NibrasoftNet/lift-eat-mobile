@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Link, useLocalSearchParams } from 'expo-router';
-import {ImageBackground, ScrollView, View} from 'react-native';
+import {ImageBackground, ScrollView, View, TouchableOpacity} from 'react-native';
 import Animated, {
     FadeInDown,
     FadeInUp,
@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
-import { nutritionPlanExamples } from "@/exmaples/nutrition-plan.example";
+import { nutritionPlanExamples } from "@/examples/nutrition-plan.example";
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { FontAwesome6, Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,39 @@ import { Pressable } from "@/components/ui/pressable";
 import { GetGoalImages } from "@/utils/utils";
 import { DayEnum } from "@/utils/enum/general.enum";
 import { Button } from "@/components/ui/button";
-import { Meal } from "@/types/plan.type";
+import { PlanMeal } from "@/types/plan.type";
+
+interface DayMealsProps {
+    meals: PlanMeal[];
+    onMealPress: (meal: PlanMeal) => void;
+}
+
+const DayMeals: React.FC<DayMealsProps> = ({ meals, onMealPress }) => {
+    return (
+        <VStack space="md">
+            {meals.map((meal) => (
+                <TouchableOpacity key={meal.id} onPress={() => onMealPress(meal)}>
+                    <HStack className="bg-white rounded-xl p-4 shadow-sm">
+                        <VStack className="flex-1">
+                            <Text className="font-medium">
+                                {meal.name}
+                            </Text>
+                            <Text className="text-gray-600">
+                                Quantité: {meal.quantity} {meal.unit}
+                            </Text>
+                        </VStack>
+                        <HStack className="items-center">
+                            <Text className="text-gray-600 mr-2">
+                                {meal.calories} kcal
+                            </Text>
+                            <Ionicons name="chevron-forward" size={20} color="#666" />
+                        </HStack>
+                    </HStack>
+                </TouchableOpacity>
+            ))}
+        </VStack>
+    );
+};
 
 export default function PlanDetailsScreen() {
     const { id } = useLocalSearchParams();
@@ -26,7 +58,7 @@ export default function PlanDetailsScreen() {
     const plan = nutritionPlanExamples.find((plan) => plan.id === id);
     const [selectedWeek, setSelectedWeek] = useState<number>(1);
     const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
-    const [filteredDailyMeals, setFilteredDailyMeals] = useState<Meal[] | undefined>([]);
+    const [filteredDailyMeals, setFilteredDailyMeals] = useState<PlanMeal[] | undefined>([]);
 
     // Filter daily plans based on selectedDay and selectedWeek
     useEffect(() => {
@@ -76,6 +108,10 @@ export default function PlanDetailsScreen() {
             // Navigate to the daily plan details or display them in a modal
             console.log("Selected Daily Plan:", dailyPlan);
         }
+    };
+
+    const handleMealPress = (meal: PlanMeal) => {
+        console.log("Selected Meal:", meal);
     };
 
     return (
@@ -152,28 +188,9 @@ export default function PlanDetailsScreen() {
                         <Text className="text-lg text-black font-semibold">Daily Meal Plans</Text>
                     </Box>
 
-                    { filteredDailyMeals && filteredDailyMeals.length > 0 ? filteredDailyMeals.map((meal, index) => (
-                        <Pressable
-                            key={meal.id}
-                            className="flex w-full rounded-lg bg-gray-300 shodow-xl p-4">
-                            <HStack className="justify-between items-center">
-                                <VStack>
-                                    <Text className="font-medium">
-                                        {meal.name}
-                                    </Text>
-                                    <Text className="text-gray-600">
-                                        Quantity: {meal.quantity} {meal.unit}
-                                    </Text>
-                                </VStack>
-                                <HStack className="items-center">
-                                    <Text className="text-gray-600 mr-2">
-                                        {meal.calories} Kcal
-                                    </Text>
-                                    <Ionicons name="chevron-forward-circle-outline" size={20} color="#6b7280" />
-                                </HStack>
-                            </HStack>
-                        </Pressable>
-                    )) : (
+                    { filteredDailyMeals && filteredDailyMeals.length > 0 ? (
+                        <DayMeals meals={filteredDailyMeals} onMealPress={handleMealPress} />
+                    ) : (
                         <Text className="text-gray-600 p-2">No meals planned for this day.</Text>
                     )}
                 </Animated.View>
