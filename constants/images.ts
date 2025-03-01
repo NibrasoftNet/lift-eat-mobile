@@ -16,5 +16,5 @@ export {
     looseFatDiet,
     login_background,
     app_logo,
-    app_logo_no_bg
+    app_logo_no_bg,
 };

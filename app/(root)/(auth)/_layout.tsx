@@ -13,8 +13,9 @@ export default function TabLayout() {
         statusBarHidden: true,
       }}
     >
-      <Stack.Screen name="register" options={{ headerShown: false, animation : "slide_from_bottom", animationDuration: 1000 }} />
-      <Stack.Screen name="login" options={{ headerShown: false , animation : "slide_from_left" }} />
+        <Stack.Screen name="register" options={{ headerShown: false, animation : "slide_from_bottom", animationDuration: 1000 }} />
+        <Stack.Screen name="login" options={{ headerShown: false , animation : "slide_from_left" }} />
+        <Stack.Screen name="reset-password" options={{ headerShown: false, animation : "slide_from_bottom", animationDuration: 1000 }} />
     </Stack>
   );
 }
