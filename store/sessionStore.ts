@@ -1,6 +1,7 @@
-import { SessionProps, UserProps } from '@/types';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { SessionProps, UserProps } from "@/types";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the state shape and actions
 interface SessionState extends SessionProps {
@@ -10,8 +11,8 @@ interface SessionState extends SessionProps {
     clearSession: () => void;
 }
 
-// Create the session store
-const sessionStore = create<SessionState>()(
+// Create the session store using AsyncStorage for persistence
+const useSessionStore = create<SessionState>()(
     persist(
         (set) => ({
             token: null,
@@ -23,9 +24,10 @@ const sessionStore = create<SessionState>()(
             clearSession: () => set({ token: null, tokenExpire: null, user: null }),
         }),
         {
-            name: "session-storage", // name of the item in storage
+            name: "session-storage",
+            storage: createJSONStorage(() => AsyncStorage), // Using AsyncStorage
         }
     )
 );
 
-export default sessionStore;
+export default useSessionStore;
