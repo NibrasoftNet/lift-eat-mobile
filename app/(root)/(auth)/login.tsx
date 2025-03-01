@@ -1,44 +1,96 @@
 import React from "react";
-import { Image, ImageBackground } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Button, ButtonText } from "@/components/ui/button";
+import {Image, ImageBackground} from "react-native";
+import {Controller, useForm} from "react-hook-form";
+import {VStack} from "@/components/ui/vstack";
+import {Text} from "@/components/ui/text";
+import {Button, ButtonText} from "@/components/ui/button";
 import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-  FormControlErrorIcon,
-  FormControlLabel,
-  FormControlLabelText,
+    FormControl,
+    FormControlError,
+    FormControlErrorIcon,
+    FormControlErrorText,
+    FormControlLabel,
+    FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Input, InputField } from "@/components/ui/input";
-import { AlertCircleIcon } from "@/components/ui/icon";
-import { useRouter } from "expo-router";
-import { app_logo, login_background } from "@/constants/images";
-import { Card } from "@/components/ui/card";
-import { LoginFormData, loginSchema } from "@/utils/validation/auth/login-schema.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {Input, InputField} from "@/components/ui/input";
+import {AlertCircleIcon} from "@/components/ui/icon";
+import {useRouter} from "expo-router";
+import {app_logo, login_background} from "@/constants/images";
+import {Card} from "@/components/ui/card";
+import {LoginFormData, loginSchema} from "@/utils/validation/auth/login-schema.validation";
+import {zodResolver} from "@hookform/resolvers/zod";
 import {HStack} from "@/components/ui/hstack";
 import ForgetPasswordModal from "@/components/auth/ForgetPasswordModal";
+import {useMutation} from "@tanstack/react-query";
+import {useToast} from "@/components/ui/toast";
+import {useDrizzleDb} from "@/providers/DrizzleProvider";
+import MultiPurposeToast from "@/components/MultiPurposeToast";
+import {ToastTypeEnum} from "@/utils/enum/general.enum";
+import {GenderEnum} from "@/utils/enum/user-gender-activity.enum";
+import {User, users} from "@/db/schema";
+import {eq} from "drizzle-orm";
+import sessionStore from "@/store/sessionStore";
 
 export default function Login() {
-  const router = useRouter();
+    const router = useRouter();
+    const { setUser } = sessionStore()
+    const toast = useToast()
+    const drizzleDb = useDrizzleDb();
     const [showModal, setShowModal] = React.useState<boolean>(false);
-    const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
+    const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
           email: "",
           password: "",
         },
-  });
+    });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log("Form Data:", data);
+    const { mutateAsync, isSuccess } = useMutation({
+        mutationFn: async (data: LoginFormData) => {
+            const userData = {
+                email: data.email,
+                name: "Khalil Zantour",
+                gender: GenderEnum.MALE
+            };
+
+            // Check if user already exists
+            const existingUser = drizzleDb.select().from(users).where(eq(users.email, data.email)).get();
+
+            if (existingUser) {
+                return existingUser;
+            }
+
+            // Insert new user
+            await drizzleDb.insert(users).values(userData);
+
+            // Return the newly inserted user
+            return drizzleDb.select().from(users).where(eq(users.email, data.email)).get();
+        },
+    });
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+        const res = await mutateAsync(data) as User;
+        console.log("Tanstack result", res, isSuccess);
+        setUser({
+            id: res.id,
+            email: res.email
+        })
+    } catch (error: any) {
+        toast.show({
+            placement: "top",
+            render: ({id}) => {
+                const toastId = "toast-" + id
+                return (
+                    <MultiPurposeToast
+                        id={toastId}
+                        color={ToastTypeEnum.ERROR}
+                        title="Error"
+                        description={error.toString()}/>
+                )
+            },
+        })
+    }
   };
 
   return (

@@ -7,3 +7,9 @@ export enum DayEnum {
     "SATURDAY" = "SATURDAY",
     "SUNDAY" = "SUNDAY",
 }
+
+export enum ToastTypeEnum {
+    "INFOS" = "INFOS",
+    "SUCCESS" = "SUCCESS",
+    "ERROR" = "ERROR",
+}

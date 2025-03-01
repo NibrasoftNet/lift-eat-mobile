@@ -15,18 +15,18 @@ import {useColorScheme} from '@/hooks/useColorScheme';
 import {QueryClient, QueryClientProvider, useQuery, UseQueryResult} from '@tanstack/react-query';
 import {useReactQueryDevTools} from '@dev-plugins/react-query';
 import {ActivityIndicator, View} from "react-native";
-import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
-import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import {Button} from "@/components/ui/button";
+import {Text} from "@/components/ui/text";
+import {openDatabaseSync, SQLiteProvider} from "expo-sqlite";
+import {drizzle} from 'drizzle-orm/expo-sqlite';
+import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
-import { addDummyData } from "@/db/addDummyData";
-import { User } from "@/db/schema";
-import { Toast, useToast } from '@/components/ui/toast';
-import { Heading } from "@/components/ui/heading";
-import { VStack } from "@/components/ui/vstack";
-import { DrizzleProvider, useDrizzleDb } from "@/providers/DrizzleProvider";
+import {addDummyData} from "@/db/addDummyData";
+import {User} from "@/db/schema";
+import {useToast} from '@/components/ui/toast';
+import {DrizzleProvider, useDrizzleDb} from "@/providers/DrizzleProvider";
+import MultiPurposeToast from "@/components/MultiPurposeToast";
+import {ToastTypeEnum} from "@/utils/enum/general.enum";
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
@@ -52,22 +52,11 @@ const InitialLayout = () => {
                     render: ({ id }) => {
                         const toastId = "toast-" + id
                         return (
-                            <Toast
-                                nativeID={toastId}
-                                className="rouded-xl p-4 gap-3 w-full bg-red-500 shadow-hard-2 flex-row"
-                            >
-                                <VStack className="web:flex-1 gap-4 p-4">
-                                    <Heading
-                                        size="sm"
-                                        className="text-white font-semibold"
-                                    >
-                                        <Text>Error</Text>
-                                    </Heading>
-                                    <Text size="sm" className="text-white">
-                                        {error.toString()}
-                                    </Text>
-                                </VStack>
-                        </Toast>
+                            <MultiPurposeToast
+                                id={toastId}
+                                color={ToastTypeEnum.ERROR}
+                                title="Error"
+                                description={error.toString()}/>
                         )
                     },
                 })

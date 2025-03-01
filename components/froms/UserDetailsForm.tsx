@@ -21,7 +21,7 @@ import {
 } from "@/utils/validation/user-details.validation";
 import RulerPicker from "@/components/ui/ruler-picker/RulerPicker";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {AlertCircleIcon} from "@/components/ui/icon";
+import { AlertCircleIcon } from "@/components/ui/icon";
 
 export default function UserDetailsForm({defaultValues}: {defaultValues: UserDetailsDefaultValuesProps}) {
     const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(defaultValues.weightUnit); // Default to KG
