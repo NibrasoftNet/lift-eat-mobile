@@ -12,9 +12,9 @@ export const GetGoalIcons: Record<GoalEnum, ImageSourcePropType> = {
 };
 
 export const GetGoalImages: Record<GoalEnum, ImageSourcePropType> = {
-    [GoalEnum.WEIGHT_LOSS]: balanceDiet,
-    [GoalEnum.MAINTAIN]: muscleGainDiet,
-    [GoalEnum.GAIN_MUSCLE]: looseFatDiet,
+    [GoalEnum.WEIGHT_LOSS]: looseFatDiet,
+    [GoalEnum.MAINTAIN]: balanceDiet,
+    [GoalEnum.GAIN_MUSCLE]: muscleGainDiet,
 };
 
 export const GetGoalColor: Record<GoalEnum, string> = {

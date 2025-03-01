@@ -12,7 +12,7 @@ import {useOnlineManager} from "@/hooks/useOnlineManager";
 import {useAppState} from "@/hooks/useAppState";
 
 import {useColorScheme} from '@/hooks/useColorScheme';
-import {QueryClient, QueryClientProvider, useQuery, UseQueryResult} from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {useReactQueryDevTools} from '@dev-plugins/react-query';
 import {ActivityIndicator, View} from "react-native";
 import {Button} from "@/components/ui/button";
@@ -22,54 +22,22 @@ import {drizzle} from 'drizzle-orm/expo-sqlite';
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import {addDummyData} from "@/db/addDummyData";
-import {User} from "@/db/schema";
-import {useToast} from '@/components/ui/toast';
-import {DrizzleProvider, useDrizzleDb} from "@/providers/DrizzleProvider";
-import MultiPurposeToast from "@/components/MultiPurposeToast";
-import {ToastTypeEnum} from "@/utils/enum/general.enum";
+import {DrizzleProvider} from "@/utils/providers/DrizzleProvider";
+import useSessionStore from "@/store/sessionStore";
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
 
-type ResultProps<T> = {
-    status: number,
-    result: T,
-}
-
 const InitialLayout = () => {
     const router = useRouter();
-    const toast = useToast()
-    const drizzleDb = useDrizzleDb();
+    const { user } = useSessionStore()
 
-    const user: UseQueryResult<ResultProps<User>> | null = useQuery({
-        queryKey: ['user'],
-        queryFn: async () => {
-            try {
-                return await drizzleDb.query.users.findFirst()
-            } catch (error: any) {
-                toast.show({
-                    placement: "top",
-                    render: ({ id }) => {
-                        const toastId = "toast-" + id
-                        return (
-                            <MultiPurposeToast
-                                id={toastId}
-                                color={ToastTypeEnum.ERROR}
-                                title="Error"
-                                description={error.toString()}/>
-                        )
-                    },
-                })
-                return null;
-            }
-        },
-    });
     useEffect(() => {
         console.log("user", user)
         if (!user) {
             router.replace("/intro");
         } else {
-            router.replace("/register");
+            router.replace("/login");
         }
     }, []);
 

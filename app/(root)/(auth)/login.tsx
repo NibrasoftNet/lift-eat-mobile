@@ -23,17 +23,16 @@ import {HStack} from "@/components/ui/hstack";
 import ForgetPasswordModal from "@/components/auth/ForgetPasswordModal";
 import {useMutation} from "@tanstack/react-query";
 import {useToast} from "@/components/ui/toast";
-import {useDrizzleDb} from "@/providers/DrizzleProvider";
+import {useDrizzleDb} from "@/utils/providers/DrizzleProvider";
 import MultiPurposeToast from "@/components/MultiPurposeToast";
 import {ToastTypeEnum} from "@/utils/enum/general.enum";
-import {GenderEnum} from "@/utils/enum/user-gender-activity.enum";
-import {User, users} from "@/db/schema";
-import {eq} from "drizzle-orm";
-import sessionStore from "@/store/sessionStore";
+import {User} from "@/db/schema";
+import useSessionStore from "@/store/sessionStore";
+import {findOrCreateUser} from "@/utils/services/users.service";
 
 export default function Login() {
     const router = useRouter();
-    const { setUser } = sessionStore()
+    const { setUser } = useSessionStore()
     const toast = useToast()
     const drizzleDb = useDrizzleDb();
     const [showModal, setShowModal] = React.useState<boolean>(false);
@@ -47,24 +46,7 @@ export default function Login() {
 
     const { mutateAsync, isSuccess } = useMutation({
         mutationFn: async (data: LoginFormData) => {
-            const userData = {
-                email: data.email,
-                name: "Khalil Zantour",
-                gender: GenderEnum.MALE
-            };
-
-            // Check if user already exists
-            const existingUser = drizzleDb.select().from(users).where(eq(users.email, data.email)).get();
-
-            if (existingUser) {
-                return existingUser;
-            }
-
-            // Insert new user
-            await drizzleDb.insert(users).values(userData);
-
-            // Return the newly inserted user
-            return drizzleDb.select().from(users).where(eq(users.email, data.email)).get();
+            return await findOrCreateUser(drizzleDb, data.email)
         },
     });
 
@@ -76,6 +58,7 @@ export default function Login() {
             id: res.id,
             email: res.email
         })
+        router.push('/analytics');
     } catch (error: any) {
         toast.show({
             placement: "top",
