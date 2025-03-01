@@ -1,21 +1,31 @@
 import React, { createContext, ReactNode, useContext, useMemo } from "react";
-import { drizzle } from "drizzle-orm/expo-sqlite";
+import { drizzle, ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import * as schema from "@/db/schema";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
-const DrizzleContext = createContext<any>(null);
+// ✅ Use the correct type for Drizzle database
+type DrizzleDbType = ExpoSQLiteDatabase<typeof schema> | null;
+
+const DrizzleContext = createContext<DrizzleDbType>(null);
 
 export const DrizzleProvider = ({ children }: { children: ReactNode }) => {
     const db = useSQLiteContext();
-    const drizzleDb = useMemo(() => drizzle(db, { schema }), [db]);
+
+    // ✅ Ensure drizzleDb has the correct inferred type
+    const drizzleDb = useMemo(() => drizzle<typeof schema>(db, { schema }), [db]);
+
     useDrizzleStudio(db);
+
     return (
-        <DrizzleContext.Provider value={drizzleDb}>{children}</DrizzleContext.Provider>
+        <DrizzleContext.Provider value={drizzleDb}>
+            {children}
+        </DrizzleContext.Provider>
     );
 };
 
-export const useDrizzleDb = () => {
+// ✅ Use the correct type in the hook
+export const useDrizzleDb = (): ExpoSQLiteDatabase<typeof schema> => {
     const context = useContext(DrizzleContext);
     if (!context) {
         throw new Error("useDrizzleDb must be used within a DrizzleProvider");
