@@ -20,13 +20,14 @@ import {
 } from "@/utils/validation/user-gender-activity.validation";
 import {
     FormControl,
-    FormControlError,
+    FormControlError, FormControlErrorIcon,
     FormControlErrorText,
     FormControlLabel,
     FormControlLabelText
 } from "@/components/ui/form-control";
 import {Input, InputField} from "@/components/ui/input";
 import {GoalEnum} from "@/utils/enum/user-details.enum";
+import {AlertCircleIcon} from "@/components/ui/icon";
 
 export default function UserGenderActivityForm({ defaultValues }: { defaultValues: UserGenderActivityDefaultValueProps }) {
     const [genderUnit, setGenderUnit] = useState<GenderEnum>(defaultValues.gender);
@@ -165,7 +166,10 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
                     />
                     {errors.age &&
                         <FormControlError>
-                            <FormControlErrorText>{errors.age.message}</FormControlErrorText>
+                            <FormControlErrorIcon as={AlertCircleIcon} />
+                            <FormControlErrorText>
+                                {errors.age.message}
+                            </FormControlErrorText>
                         </FormControlError>
                     }
                 </FormControl>
@@ -191,10 +195,15 @@ export default function UserGenderActivityForm({ defaultValues }: { defaultValue
                             </Input>
                         )}
                     />
-                    {errors.goal &&
+                    {
+                        errors.goal &&
                         <FormControlError>
-                            <FormControlErrorText>{errors.goal.message}</FormControlErrorText>
-                        </FormControlError>}
+                            <FormControlErrorIcon as={AlertCircleIcon} />
+                            <FormControlErrorText>
+                                {errors.goal.message}
+                            </FormControlErrorText>
+                        </FormControlError>
+                    }
                 </FormControl>
                 <Grid className="w-full h-16 gap-2" _extra={{ className: 'grid-cols-3' }} style={{ position: 'relative' }}>
                     {/* Buttons */}

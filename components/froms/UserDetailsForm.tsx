@@ -1,6 +1,6 @@
 import {
     FormControl,
-    FormControlError,
+    FormControlError, FormControlErrorIcon,
     FormControlErrorText,
     FormControlLabel,
     FormControlLabelText
@@ -21,6 +21,7 @@ import {
 } from "@/utils/validation/user-details.validation";
 import RulerPicker from "@/components/ui/ruler-picker/RulerPicker";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {AlertCircleIcon} from "@/components/ui/icon";
 
 export default function UserDetailsForm({defaultValues}: {defaultValues: UserDetailsDefaultValuesProps}) {
     const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(defaultValues.weightUnit); // Default to KG
@@ -113,10 +114,15 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
                         centerLineStyle={{ backgroundColor: 'red', height: 80 }}
                         onValueChange={(value) => setValue('weight', value)}
                     />
-                    {errors.weight &&
+                    {
+                        errors.weight &&
                         <FormControlError>
-                            <FormControlErrorText>{errors.weight.message}</FormControlErrorText>
-                        </FormControlError>}
+                            <FormControlErrorIcon as={AlertCircleIcon} />
+                            <FormControlErrorText>
+                                {errors.weight.message}
+                            </FormControlErrorText>
+                        </FormControlError>
+                    }
                 </FormControl>
 
                 {/* Weight Unit Buttons with Sliding Indicator */}
@@ -188,8 +194,12 @@ export default function UserDetailsForm({defaultValues}: {defaultValues: UserDet
                     />
                     {errors.height &&
                         <FormControlError>
-                            <FormControlErrorText>{errors.height.message}</FormControlErrorText>
-                        </FormControlError>}
+                            <FormControlErrorIcon as={AlertCircleIcon} />
+                            <FormControlErrorText>
+                                {errors.height.message}
+                            </FormControlErrorText>
+                        </FormControlError>
+                    }
                 </FormControl>
                 <Grid className="w-full h-16 gap-2" _extra={{ className: 'grid-cols-3' }} style={{ position: 'relative' }}>
                     {/* Buttons */}

@@ -15,19 +15,18 @@ import {useColorScheme} from '@/hooks/useColorScheme';
 import {QueryClient, QueryClientProvider, useQuery, UseQueryResult} from '@tanstack/react-query';
 import {useReactQueryDevTools} from '@dev-plugins/react-query';
 import {ActivityIndicator, View} from "react-native";
-import {Button} from "@/components/ui/button";
-import {Text} from "@/components/ui/text";
-import {openDatabaseSync, SQLiteProvider, useSQLiteContext} from "expo-sqlite";
-import {drizzle} from 'drizzle-orm/expo-sqlite';
-import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator';
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
-import {addDummyData} from "@/db/addDummyData";
-import * as schema from "@/db/schema";
-import {User} from "@/db/schema";
-import {useDrizzleStudio} from "expo-drizzle-studio-plugin";
-import {Toast, useToast} from '@/components/ui/toast';
-import {Heading} from "@/components/ui/heading";
-import {VStack} from "@/components/ui/vstack";
+import { addDummyData } from "@/db/addDummyData";
+import { User } from "@/db/schema";
+import { Toast, useToast } from '@/components/ui/toast';
+import { Heading } from "@/components/ui/heading";
+import { VStack } from "@/components/ui/vstack";
+import { DrizzleProvider, useDrizzleDb } from "@/providers/DrizzleProvider";
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
@@ -40,9 +39,7 @@ type ResultProps<T> = {
 const InitialLayout = () => {
     const router = useRouter();
     const toast = useToast()
-    const db = useSQLiteContext()
-    const drizzleDb = drizzle(db, { schema })
-    useDrizzleStudio(db);
+    const drizzleDb = useDrizzleDb();
 
     const user: UseQueryResult<ResultProps<User>> | null = useQuery({
         queryKey: ['user'],
@@ -83,7 +80,7 @@ const InitialLayout = () => {
         if (!user) {
             router.replace("/intro");
         } else {
-            router.replace("/analytics");
+            router.replace("/register");
         }
     }, []);
 
@@ -161,10 +158,12 @@ export default function ProjectLayout() {
                             databaseName={DATABASE_NAME}
                             options={{ enableChangeListener: true }}
                             useSuspense>
-                            <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                <InitialLayout />
-                                <StatusBar style="auto" hidden={true} />
-                    </ErrorBoundary>
+                            <DrizzleProvider>
+                                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                    <InitialLayout />
+                                    <StatusBar style="auto" hidden={true} />
+                                </ErrorBoundary>
+                            </DrizzleProvider>
                         </SQLiteProvider>
                     </Suspense>
                 </QueryClientProvider>

@@ -4,7 +4,7 @@
     "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo_no_bg.png",
+    "icon": "./assets/images/logo.jpg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
