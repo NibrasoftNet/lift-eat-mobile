@@ -33,17 +33,17 @@ SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
 
 const InitialLayout = () => {
-    const router = useRouter();
-    const { user } = useSessionStore()
+  const router = useRouter();
+  const { user } = useSessionStore();
 
-    useEffect(() => {
-        console.log("user", user)
-        if (!user) {
-            router.replace("/analytics");
-        } else {
-            router.replace("/login");
-        }
-    }, []);
+  useEffect(() => {
+    console.log('user', user);
+    if (!user) {
+      router.replace('/intro');
+    } else {
+      router.replace('/login');
+    }
+  }, []);
 
   useEffect(() => {
     console.log('user', user);
