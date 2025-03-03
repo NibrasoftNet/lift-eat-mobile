@@ -7,8 +7,9 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
+import { LangProps } from '@/i18n';
 
-const flags = [
+const flags: LangProps[] = [
   { lang: 'fr-FR', name: 'France' },
   { lang: 'en-US', name: 'Usa' },
 ];
