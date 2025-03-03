@@ -27,7 +27,8 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
-import useSessionStore from '@/store/sessionStore';
+import useSessionStore from '@/utils/store/sessionStore';
+import '@/i18n';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';

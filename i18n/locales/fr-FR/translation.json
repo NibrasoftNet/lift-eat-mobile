@@ -1,0 +1,14 @@
+{
+  "language": "Language",
+  "home": {
+    "title": "Acceuil",
+    "welcome": "Bienvenue",
+    "subtitle": "Exemple i18n App!",
+    "description": "Il s'agit d'un exemple d'application React Native montrant comment implémenter l'internationalisation (i18n) à l'aide de React-i18next. L'application permet aux utilisateurs de basculer entre différentes langues pour une expérience plus localisée.",
+    "exploringLanguages": "Decouvrir les langue",
+    "exploringLanguagesDescription": "Cliquez sur les drapeaux des pays pour explorer le contenu de l'application dans différentes langues.",
+    "learnMore": "Vous voulez en savoir plus ?",
+    "repositoryLinkText": "Dépôt de projet sur GitHub",
+    "articlesLinkText": "Plus d'articles"
+  }
+}
