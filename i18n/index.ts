@@ -5,6 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translation.json';
 import translationFr from './locales/fr-FR/translation.json';
 
+export type LangProps = {
+  lang: string;
+  name: string;
+};
+
 // Translation configuration
 const resources = {
   'en-US': { translation: translationEn },
@@ -15,10 +20,10 @@ const initI18n = async () => {
   let savedLanguage = await AsyncStorage.getItem('language');
 
   if (!savedLanguage) {
-    savedLanguage = Localization.locale;
+    savedLanguage = Localization.getLocales()[0].languageTag;
   }
 
-  i18n.use(initReactI18next).init({
+  await i18n.use(initReactI18next).init({
     compatibilityJSON: 'v4',
     resources,
     lng: savedLanguage,

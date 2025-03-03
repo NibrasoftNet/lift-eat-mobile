@@ -4,9 +4,9 @@ import { View } from 'react-native';
 import { Colors } from '@/utils/constants/Colors';
 import { Icon } from '@/components/ui/icon';
 import {
-  AlarmClockPlus,
   Atom,
   ChartNoAxesCombined,
+  Layers,
   Notebook,
   ScanQrCode,
 } from 'lucide-react-native';
@@ -25,7 +25,7 @@ export default function TabLayout() {
         name="analytics"
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon as={ChartNoAxesCombined} className="w-8 h-8" color={color} />
+            <Icon as={Layers} className="w-8 h-8" color={color} />
           ),
         }}
       />
@@ -96,7 +96,7 @@ export default function TabLayout() {
         name="progress"
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon as={AlarmClockPlus} className="w-8 h-8" color={color} />
+            <Icon as={ChartNoAxesCombined} className="w-8 h-8" color={color} />
           ),
         }}
       />
