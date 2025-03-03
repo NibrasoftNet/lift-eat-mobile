@@ -49,7 +49,7 @@ const InitialLayout = () => {
   useEffect(() => {
     console.log('user', user);
     if (!user) {
-      router.replace('/register');
+      router.replace('/progress');
     } else {
       router.replace('/login');
     }
