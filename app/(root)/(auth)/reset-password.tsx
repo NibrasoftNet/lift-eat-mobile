@@ -14,7 +14,7 @@ import {
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
-import { app_logo, login_background } from '@/constants/images';
+import { app_logo, login_background } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { zodResolver } from '@hookform/resolvers/zod';

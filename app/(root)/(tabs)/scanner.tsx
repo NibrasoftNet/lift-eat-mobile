@@ -1,5 +1,5 @@
-import { Heading } from "@/components/ui/heading";
-import { VStack } from "@/components/ui/vstack";
+import { Heading } from '@/components/ui/heading';
+import { VStack } from '@/components/ui/vstack';
 export default function Scanner() {
   return (
     <VStack>
