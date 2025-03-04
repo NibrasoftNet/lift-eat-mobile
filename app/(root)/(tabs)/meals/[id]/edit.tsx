@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
 import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import { Meal, Ingredient } from '@/types/plan.type';
+import { Meal, Food } from '@/types/plan.type';
 import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
 import { meals } from '@/utils/examples/meals.example';
 import * as ImagePicker from 'expo-image-picker';
@@ -35,7 +35,8 @@ export default function EditMealScreen() {
       cuisineType: CuisineTypeEnum.AMERICAN,
       unit: MealUnitEnum.SERVING,
       quantity: 1,
-      ingredients: []
+      ingredients: [],
+      foods: []  // Ajout de la propriété foods requise
     };
   });
 
@@ -109,34 +110,34 @@ export default function EditMealScreen() {
   };
 
   const handleAddIngredient = () => {
-    router.push('/meals/ingredients/add');
+    router.push('/(root)/(tabs)/meals/food/create');
   };
 
-  const handleRemoveIngredient = (ingredientId: string) => {
+  const handleRemoveIngredient = (foodId: string) => {
     setMeal(prev => ({
       ...prev,
-      ingredients: prev.ingredients.filter(ing => ing.id !== ingredientId)
+      foods: prev.foods.filter(food => food.id !== foodId)
     }));
   };
 
-  const updateIngredientQuantity = (ingredientId: string, quantity: number) => {
+  const updateIngredientQuantity = (foodId: string, quantity: number) => {
     setMeal(prev => ({
       ...prev,
-      ingredients: prev.ingredients.map(ing => 
-        ing.id === ingredientId ? { ...ing, quantity } : ing
+      foods: prev.foods.map(food => 
+        food.id === foodId ? { ...food, quantity } : food
       )
     }));
   };
 
   // Calculer les valeurs nutritionnelles totales
   const calculateTotalNutrition = () => {
-    return meal.ingredients.reduce((total, ingredient) => {
-      const ratio = ingredient.quantity / 100; // Les valeurs nutritionnelles sont pour 100g
+    return meal.foods.reduce((total, food) => {
+      const ratio = food.quantity / 100; // Les valeurs nutritionnelles sont pour 100g
       return {
-        calories: total.calories + ingredient.calories * ratio,
-        protein: total.protein + ingredient.protein * ratio,
-        carbs: total.carbs + ingredient.carbs * ratio,
-        fats: total.fats + ingredient.fats * ratio
+        calories: total.calories + food.calories * ratio,
+        protein: total.protein + food.protein * ratio,
+        carbs: total.carbs + food.carbs * ratio,
+        fats: total.fats + food.fats * ratio
       };
     }, { calories: 0, protein: 0, carbs: 0, fats: 0 });
   };
@@ -258,28 +259,28 @@ export default function EditMealScreen() {
 
                   <VStack space="sm">
                     <Text className="font-medium text-gray-700">Ingrédients</Text>
-                    {meal.ingredients.map((ingredient) => (
-                      <Box key={ingredient.id} className="flex-row items-center justify-between p-3 bg-white/90 rounded-lg">
+                    {meal.foods.map((food) => (
+                      <Box key={food.id} className="flex-row items-center justify-between p-3 bg-white/90 rounded-lg">
                         <VStack>
-                          <Text className="text-gray-900">{ingredient.name}</Text>
+                          <Text className="text-gray-900">{food.name}</Text>
                           <Text className="text-sm text-gray-500">
-                            {ingredient.calories} kcal / {ingredient.quantity}g
+                            {food.calories} kcal / {food.quantity}g
                           </Text>
                         </VStack>
                         <VStack space="sm" className="items-end">
                           <Input className="w-24 bg-white/90">
                             <InputField
-                              value={ingredient.quantity.toString()}
+                              value={food.quantity.toString()}
                               onChangeText={(text: string) => {
                                 const num = parseInt(text) || 0;
-                                updateIngredientQuantity(ingredient.id, num);
+                                updateIngredientQuantity(food.id, num);
                               }}
                               keyboardType="numeric"
                               placeholder="Quantité"
                             />
                           </Input>
                           <Pressable 
-                            onPress={() => handleRemoveIngredient(ingredient.id)}
+                            onPress={() => handleRemoveIngredient(food.id)}
                             className="px-3 py-1.5 bg-red-100 rounded-full"
                           >
                             <Text className="text-red-600 text-sm">Supprimer</Text>
