@@ -38,20 +38,10 @@ const InitialLayout = () => {
   const { user } = useSessionStore();
 
   useEffect(() => {
-    console.log('user', user);
-    if (!user) {
-      router.replace('/intro');
-    } else {
-      router.replace('/login');
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log('user', user);
     if (!user) {
       router.replace('/progress');
     } else {
-      router.replace('/login');
+      router.replace('/analytics');
     }
   }, []);
 
@@ -92,6 +82,7 @@ export default function ProjectLayout() {
   useAppState();
 
   useEffect(() => {
+    console.log(success, 'errr', error);
     if (error) {
       console.log('error occurred', error);
     }
