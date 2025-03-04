@@ -8,11 +8,19 @@ import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { ArrowLeftIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
-import { FormControl, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control';
+import {
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
+} from '@/components/ui/form-control';
 import { Select } from '@/components/ui/select';
 import { Image } from '@/components/ui/image';
 import { Food, Meal } from '@/types/plan.type';
-import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
+import {
+  CuisineTypeEnum,
+  MealTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
 import * as ImagePicker from 'expo-image-picker';
 import { cuisineOptions } from '@/utils/constants/cuisine';
 import { unitOptions } from '@/utils/constants/units';
@@ -44,7 +52,7 @@ export default function CreateMealScreen() {
       cuisineType: CuisineTypeEnum.AMERICAN,
       foods: [],
       unit: MealUnitEnum.SERVING,
-      quantity: 1
+      quantity: 1,
     };
   });
 
@@ -57,9 +65,9 @@ export default function CreateMealScreen() {
     });
 
     if (!result.canceled) {
-      setMeal(prev => ({
+      setMeal((prev) => ({
         ...prev,
-        image: { uri: result.assets[0].uri } as ImageSourcePropType
+        image: { uri: result.assets[0].uri } as ImageSourcePropType,
       }));
     }
   };
@@ -72,10 +80,12 @@ export default function CreateMealScreen() {
     });
 
     if (!result.canceled) {
-      setMeal(prev => ({
-        ...prev,
-        image: { uri: result.assets[0].uri } as ImageSourcePropType
-      }));
+      setMeal((prev) => {
+        return {
+          ...prev,
+          image: { uri: result.assets[0].uri } as ImageSourcePropType,
+        };
+      });
     }
   };
 
@@ -84,34 +94,39 @@ export default function CreateMealScreen() {
     router.back();
   };
 
-  const mealTypeOptions = Object.values(MealTypeEnum).map(type => ({
+  const mealTypeOptions = Object.values(MealTypeEnum).map((type) => ({
     label: type.replace(/_/g, ' ').toLowerCase(),
-    value: type
+    value: type,
   }));
 
   const updateFoodQuantity = (foodId: string, quantity: number) => {
     setMeal({
       ...meal,
-      foods: meal.foods.map(food => food.id === foodId ? { ...food, quantity } : food)
+      foods: meal.foods.map((food) =>
+        food.id === foodId ? { ...food, quantity } : food,
+      ),
     });
   };
 
   const handleRemoveFood = (foodId: string) => {
     setMeal({
       ...meal,
-      foods: meal.foods.filter(food => food.id !== foodId)
+      foods: meal.foods.filter((food) => food.id !== foodId),
     });
   };
 
   const calculateTotalNutrition = () => {
-    return meal.foods.reduce((acc, food) => {
-      return {
-        calories: acc.calories + food.calories * food.quantity,
-        protein: acc.protein + food.protein * food.quantity,
-        carbs: acc.carbs + food.carbs * food.quantity,
-        fats: acc.fats + food.fats * food.quantity
-      };
-    }, { calories: 0, protein: 0, carbs: 0, fats: 0 });
+    return meal.foods.reduce(
+      (acc, food) => {
+        return {
+          calories: acc.calories + food.calories * food.quantity,
+          protein: acc.protein + food.protein * food.quantity,
+          carbs: acc.carbs + food.carbs * food.quantity,
+          fats: acc.fats + food.fats * food.quantity,
+        };
+      },
+      { calories: 0, protein: 0, carbs: 0, fats: 0 },
+    );
   };
 
   return (
@@ -133,7 +148,7 @@ export default function CreateMealScreen() {
                 <ButtonIcon as={ArrowLeftIcon} className="text-primary-900" />
               </Button>
               <Text className="text-xl font-bold">
-                {editId ? "Edit meal" : "Create a new meal"}
+                {editId ? 'Edit meal' : 'Create a new meal'}
               </Text>
             </HStack>
           </Box>
@@ -142,14 +157,18 @@ export default function CreateMealScreen() {
             <VStack space="lg" className="p-4">
               <Box className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm">
                 <VStack space="md">
-                  <Text className="text-lg font-semibold text-gray-900">Meal information</Text>
-                  
+                  <Text className="text-lg font-semibold text-gray-900">
+                    Meal information
+                  </Text>
+
                   <VStack space="sm">
                     <Text className="font-medium text-gray-700">Name</Text>
                     <Input className="bg-white/90">
                       <InputField
                         value={meal.name}
-                        onChangeText={(text: string) => setMeal({ ...meal, name: text })}
+                        onChangeText={(text: string) =>
+                          setMeal({ ...meal, name: text })
+                        }
                         placeholder="Enter meal name"
                       />
                     </Input>
@@ -162,7 +181,7 @@ export default function CreateMealScreen() {
                         <Image
                           source={meal.image}
                           className="w-32 h-32 rounded-xl"
-                          alt={meal.name || "Meal image"}
+                          alt={meal.name || 'Meal image'}
                         />
                       ) : (
                         <Box className="w-32 h-32 rounded-xl bg-gray-200 items-center justify-center">
@@ -189,11 +208,15 @@ export default function CreateMealScreen() {
                   </VStack>
 
                   <VStack space="sm">
-                    <Text className="font-medium text-gray-700">Cuisine type</Text>
+                    <Text className="font-medium text-gray-700">
+                      Cuisine type
+                    </Text>
                     <Box className="bg-white/90 rounded-lg">
                       <Select
                         value={meal.cuisineType}
-                        onValueChange={(value: CuisineTypeEnum) => setMeal({ ...meal, cuisineType: value })}
+                        onValueChange={(value: CuisineTypeEnum) =>
+                          setMeal({ ...meal, cuisineType: value })
+                        }
                         options={cuisineOptions}
                         placeholder="Select a cuisine type"
                         className="border border-gray-200"
@@ -206,7 +229,9 @@ export default function CreateMealScreen() {
                     <Box className="bg-white/90 rounded-lg">
                       <Select
                         value={meal.unit}
-                        onValueChange={(value: MealUnitEnum) => setMeal({ ...meal, unit: value })}
+                        onValueChange={(value: MealUnitEnum) =>
+                          setMeal({ ...meal, unit: value })
+                        }
                         options={unitOptions}
                         placeholder="Select a unit"
                         className="border border-gray-200"
@@ -219,7 +244,9 @@ export default function CreateMealScreen() {
                       <Text className="font-medium text-gray-700">Foods</Text>
                       <Button
                         variant="outline"
-                        onPress={() => router.push('/(root)/(tabs)/meals/food/create')}
+                        onPress={() =>
+                          router.push('/(root)/(tabs)/meals/food/create')
+                        }
                         className="px-4 bg-white/90"
                       >
                         <ButtonText>Add food</ButtonText>
@@ -248,7 +275,7 @@ export default function CreateMealScreen() {
                               placeholder="Quantity"
                             />
                           </Input>
-                          <Button 
+                          <Button
                             onPress={() => handleRemoveFood(food.id)}
                             className="px-3 py-1.5 bg-red-100 rounded-full"
                           >
@@ -260,17 +287,26 @@ export default function CreateMealScreen() {
                   </VStack>
 
                   <VStack space="sm">
-                    <Text className="font-medium text-gray-700">Nutrition information</Text>
+                    <Text className="font-medium text-gray-700">
+                      Nutrition information
+                    </Text>
                     <HStack space="md" className="justify-between">
                       <Box key="calories" className="flex-1">
                         <FormControl>
                           <FormControlLabel>
-                            <FormControlLabelText>Calories</FormControlLabelText>
+                            <FormControlLabelText>
+                              Calories
+                            </FormControlLabelText>
                           </FormControlLabel>
                           <Input className="bg-white/90">
                             <InputField
                               value={meal.calories.toString()}
-                              onChangeText={(text: string) => setMeal({ ...meal, calories: parseInt(text) || 0 })}
+                              onChangeText={(text: string) =>
+                                setMeal({
+                                  ...meal,
+                                  calories: parseInt(text) || 0,
+                                })
+                              }
                               keyboardType="numeric"
                               placeholder="0"
                             />
@@ -280,12 +316,19 @@ export default function CreateMealScreen() {
                       <Box key="protein" className="flex-1">
                         <FormControl>
                           <FormControlLabel>
-                            <FormControlLabelText>Protein (g)</FormControlLabelText>
+                            <FormControlLabelText>
+                              Protein (g)
+                            </FormControlLabelText>
                           </FormControlLabel>
                           <Input className="bg-white/90">
                             <InputField
                               value={meal.protein.toString()}
-                              onChangeText={(text: string) => setMeal({ ...meal, protein: parseInt(text) || 0 })}
+                              onChangeText={(text: string) =>
+                                setMeal({
+                                  ...meal,
+                                  protein: parseInt(text) || 0,
+                                })
+                              }
                               keyboardType="numeric"
                               placeholder="0"
                             />
@@ -297,12 +340,16 @@ export default function CreateMealScreen() {
                       <Box key="carbs" className="flex-1">
                         <FormControl>
                           <FormControlLabel>
-                            <FormControlLabelText>Carbs (g)</FormControlLabelText>
+                            <FormControlLabelText>
+                              Carbs (g)
+                            </FormControlLabelText>
                           </FormControlLabel>
                           <Input className="bg-white/90">
                             <InputField
                               value={meal.carbs.toString()}
-                              onChangeText={(text: string) => setMeal({ ...meal, carbs: parseInt(text) || 0 })}
+                              onChangeText={(text: string) =>
+                                setMeal({ ...meal, carbs: parseInt(text) || 0 })
+                              }
                               keyboardType="numeric"
                               placeholder="0"
                             />
@@ -312,12 +359,16 @@ export default function CreateMealScreen() {
                       <Box key="fats" className="flex-1">
                         <FormControl>
                           <FormControlLabel>
-                            <FormControlLabelText>Fats (g)</FormControlLabelText>
+                            <FormControlLabelText>
+                              Fats (g)
+                            </FormControlLabelText>
                           </FormControlLabel>
                           <Input className="bg-white/90">
                             <InputField
                               value={meal.fats.toString()}
-                              onChangeText={(text: string) => setMeal({ ...meal, fats: parseInt(text) || 0 })}
+                              onChangeText={(text: string) =>
+                                setMeal({ ...meal, fats: parseInt(text) || 0 })
+                              }
                               keyboardType="numeric"
                               placeholder="0"
                             />
@@ -334,7 +385,9 @@ export default function CreateMealScreen() {
                 className="bg-primary-600 mt-4"
                 onPress={handleSave}
               >
-                <ButtonText>{editId ? "Save changes" : "Create meal"}</ButtonText>
+                <ButtonText>
+                  {editId ? 'Save changes' : 'Create meal'}
+                </ButtonText>
               </Button>
             </VStack>
           </ScrollView>
