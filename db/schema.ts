@@ -69,11 +69,15 @@ export const meals = sqliteTable('meals', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   type: text('type', {
     enum: ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'],
-  }).default(MealTypeEnum.BREAKFAST),
+  })
+    .notNull()
+    .default(MealTypeEnum.BREAKFAST),
   name: text('name').notNull(),
   unit: text('unit', {
     enum: ['GRAMMES', 'KILOGRAMMES', 'MILLILITRES'],
-  }).default(MealUnitEnum.GRAMMES),
+  })
+    .notNull()
+    .default(MealUnitEnum.GRAMMES),
   quantity: real('quantity').notNull(),
   calories: real('calories').notNull(),
   carbs: real('carbs').notNull(),
