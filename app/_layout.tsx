@@ -110,7 +110,7 @@ export default function ProjectLayout() {
   );
 
   return (
-    <GluestackUIProvider mode="light">
+    <GluestackUIProvider mode="system">
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
           <Suspense fallback={<ActivityIndicator size="large" />}>

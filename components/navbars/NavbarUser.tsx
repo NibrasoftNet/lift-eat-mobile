@@ -52,7 +52,8 @@ export default function NavbarUser({ user }: { user: UserPros }) {
           </ButtonText>
         </Button>
         <Button
-          className="w-16 h-16 bg-transparent drop-shadow-2xl shadow-blue-500"
+          action="secondary"
+          className="w-16 h-16 bg-transparent focus:bg-transparent hover:bg-transparent active:bg-transparent"
           onPress={() => {
             setShowGeneralSettingsDrawer(true);
           }}
