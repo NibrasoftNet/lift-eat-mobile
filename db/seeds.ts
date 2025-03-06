@@ -1,9 +1,9 @@
 import { GenderEnum } from '@/utils/enum/user-gender-activity.enum';
 import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
-import { IngredientStandard, Meal, User } from '@/db/schema';
+import { IngredientStandardProps, MealProps, UserPros } from '@/db/schema';
 import { MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
 
-export const usersSeed: Omit<User, 'id'>[] = [
+export const usersSeed: Omit<UserPros, 'id'>[] = [
   {
     name: 'User 1',
     email: 'test1@test.com',
@@ -26,7 +26,7 @@ export const usersSeed: Omit<User, 'id'>[] = [
   },
 ];
 
-export const ingredientsStandardSeed: Omit<IngredientStandard, 'id'>[] = [
+export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
   {
     name: 'Oats',
     unit: MealUnitEnum.GRAMMES,
@@ -74,7 +74,7 @@ export const ingredientsStandardSeed: Omit<IngredientStandard, 'id'>[] = [
   },
 ];
 
-export const mealsSeed: Omit<Meal, 'id'>[] = [
+export const mealsSeed: Omit<MealProps, 'id'>[] = [
   {
     type: MealTypeEnum.BREAKFAST,
     name: 'Oatmeal with Fruits',
