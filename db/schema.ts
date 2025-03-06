@@ -87,7 +87,7 @@ export const meals = sqliteTable('meals', {
 });
 
 // Export types for use in your app
-export type User = typeof users.$inferSelect;
-export type IngredientStandard = typeof ingredientsStandard.$inferSelect;
-export type Ingredient = typeof ingredients.$inferSelect;
-export type Meal = typeof meals.$inferSelect;
+export type UserPros = typeof users.$inferSelect;
+export type IngredientStandardProps = typeof ingredientsStandard.$inferSelect;
+export type IngredientProps = typeof ingredients.$inferSelect;
+export type MealProps = typeof meals.$inferSelect;
