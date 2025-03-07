@@ -3,7 +3,7 @@ import {
   WeightUnitEnum,
   HeightUnitEnum,
 } from '../../../../utils/enum/user-details.enum';
-import { UserDetailsDefaultValuesProps } from '../../../../utils/validation/user-details.validation';
+import { UserDetailsDefaultValuesProps } from '../../../../utils/validation/user/user-details.validation';
 import UserDetailsForm from '../../../../components/froms/UserDetailsForm';
 
 export default function UserDetails() {

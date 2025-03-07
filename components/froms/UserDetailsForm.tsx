@@ -23,7 +23,7 @@ import {
   UserDetailsDefaultValuesProps,
   UserDetailsFormData,
   userDetailsSchema,
-} from '@/utils/validation/user-details.validation';
+} from '@/utils/validation/user/user-details.validation';
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircleIcon } from '@/components/ui/icon';

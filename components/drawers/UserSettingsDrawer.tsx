@@ -30,11 +30,11 @@ const menuItems = [
   {
     title: 'Edit profile',
     icon: PencilRuler,
-    link: '/details',
+    tag: 'profile',
   },
-  { title: 'BMI data', icon: Weight, link: '/details/edit' },
-  { title: 'Preference', icon: Drum, link: '/preference' },
-  { title: 'Analytics', icon: Compass, link: '/preference' },
+  { title: 'BMI data', icon: Weight, tag: 'details' },
+  { title: 'Preference', icon: Drum, tag: 'preference' },
+  { title: 'Analytics', icon: Compass, tag: 'analytics' },
 ];
 
 const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
@@ -44,9 +44,13 @@ const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
   return (
     <Pressable
       onPress={() =>
-        item.title === 'Edit profile'
-          ? router.push(`/details/edit/${user.id}`)
-          : router.push(`/preference/edit/${user.id}`)
+        item.tag === 'profile'
+          ? router.push(`/profile/${user.id}`)
+          : item.tag === 'details'
+            ? router.push(`/details/edit/${user.id}`)
+            : item.tag === 'preference'
+              ? router.push(`/preference/edit/${user.id}`)
+              : router.push(`/analytics`)
       }
       className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
     >

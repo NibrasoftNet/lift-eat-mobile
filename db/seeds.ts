@@ -1,6 +1,9 @@
-import { GenderEnum } from '@/utils/enum/user-gender-activity.enum';
+import {
+  GenderEnum,
+  PhysicalActivityEnum,
+} from '@/utils/enum/user-gender-activity.enum';
 import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
-import { IngredientStandardProps, MealProps, UserPros } from '@/db/schema';
+import { IngredientStandardProps, MealProps, UserPros } from './schema';
 import { MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
 
 export const usersSeed: Omit<UserPros, 'id'>[] = [
@@ -13,6 +16,7 @@ export const usersSeed: Omit<UserPros, 'id'>[] = [
     weight: 60,
     weightUnit: WeightUnitEnum.KG,
     profileImage: null,
+    physicalActivity: PhysicalActivityEnum.LOW,
   },
   {
     name: 'User 2',
@@ -23,6 +27,7 @@ export const usersSeed: Omit<UserPros, 'id'>[] = [
     weight: 55,
     weightUnit: WeightUnitEnum.KG,
     profileImage: null,
+    physicalActivity: PhysicalActivityEnum.LOW,
   },
 ];
 

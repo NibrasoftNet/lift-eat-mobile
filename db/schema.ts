@@ -5,7 +5,10 @@ import {
   real,
   blob,
 } from 'drizzle-orm/sqlite-core';
-import { GenderEnum } from '@/utils/enum/user-gender-activity.enum';
+import {
+  GenderEnum,
+  PhysicalActivityEnum,
+} from '@/utils/enum/user-gender-activity.enum';
 import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 import { MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
 
@@ -17,14 +20,28 @@ export const users = sqliteTable('users', {
     .notNull()
     .default(GenderEnum.MALE),
   weight: real('weight').notNull().default(30),
-  weightUnit: text('weight_unit', { enum: ['KG', 'LBS', 'ST'] })
+  weightUnit: text('weight_unit', {
+    enum: [WeightUnitEnum.KG, WeightUnitEnum.LBS, WeightUnitEnum.ST],
+  })
     .notNull()
     .default(WeightUnitEnum.KG),
   height: real('height').notNull().default(150),
-  heightUnit: text('height_unit', { enum: ['CM', 'IN', 'FT'] })
+  heightUnit: text('height_unit', {
+    enum: [HeightUnitEnum.CM, HeightUnitEnum.IN, HeightUnitEnum.FT],
+  })
     .notNull()
     .default(HeightUnitEnum.CM),
   profileImage: blob('profile_image', { mode: 'buffer' }), // BLOB column for user profile image
+  physicalActivity: text('physical_activity', {
+    enum: [
+      PhysicalActivityEnum.LOW,
+      PhysicalActivityEnum.SEDENTARY,
+      PhysicalActivityEnum.MODERATE,
+      PhysicalActivityEnum.HIGH,
+    ],
+  })
+    .notNull()
+    .default(PhysicalActivityEnum.MODERATE),
 });
 
 // Ingredient Standard Table

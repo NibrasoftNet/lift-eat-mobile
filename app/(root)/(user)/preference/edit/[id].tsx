@@ -1,6 +1,6 @@
 import React from 'react';
 import UserGenderActivityForm from '../../../../../components/froms/UserGenderActivityForm';
-import { UserGenderActivityDefaultValueProps } from '../../../../../utils/validation/user-gender-activity.validation';
+import { UserGenderActivityDefaultValueProps } from '../../../../../utils/validation/user/user-gender-activity.validation';
 import {
   GenderEnum,
   PhysicalActivityEnum,
