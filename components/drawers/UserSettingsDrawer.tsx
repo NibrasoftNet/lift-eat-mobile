@@ -46,7 +46,7 @@ const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
       onPress={() =>
         item.title === 'Edit profile'
           ? router.push(`/details/edit/${user.id}`)
-          : router.push(`/preference`)
+          : router.push(`/preference/edit/${user.id}`)
       }
       className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
     >

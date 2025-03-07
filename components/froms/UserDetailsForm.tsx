@@ -277,10 +277,7 @@ export default function UserDetailsForm({
         </Grid>
       </Card>
       {/* Submit Button */}
-      <Button
-        onPress={handleSubmit(onSubmit)}
-        className="bg-blue-500 rounded-md mx-4 mt-8"
-      >
+      <Button onPress={handleSubmit(onSubmit)} className="rounded-md mx-4 mt-8">
         <ButtonText>{operation === 'create' ? 'Submit' : 'Update'}</ButtonText>
       </Button>
     </VStack>

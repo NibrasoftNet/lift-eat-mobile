@@ -43,8 +43,10 @@ import { AlertCircleIcon } from '@/components/ui/icon';
 
 export default function UserGenderActivityForm({
   defaultValues,
+  operation,
 }: {
   defaultValues: UserGenderActivityDefaultValueProps;
+  operation: 'create' | 'update';
 }) {
   const [genderUnit, setGenderUnit] = useState<GenderEnum>(
     defaultValues.gender,
@@ -370,11 +372,8 @@ export default function UserGenderActivityForm({
         </Grid>
       </Card>
       {/* Submit Button Now Correctly Positioned */}
-      <Button
-        onPress={handleSubmit(onSubmit)}
-        className="bg-blue-500 rounded-md"
-      >
-        <ButtonText>Submit</ButtonText>
+      <Button onPress={handleSubmit(onSubmit)} className="rounded-md">
+        <ButtonText>{operation === 'create' ? 'Submit' : 'Update'}</ButtonText>
       </Button>
     </VStack>
   );
