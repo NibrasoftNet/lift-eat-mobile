@@ -36,10 +36,9 @@ export const DATABASE_NAME = 'lift_eat_db';
 const InitialLayout = () => {
   const router = useRouter();
   const { user } = useSessionStore();
-
   useEffect(() => {
     if (!user) {
-      router.replace('/progress');
+      router.replace('/login');
     } else {
       router.replace('/analytics');
     }

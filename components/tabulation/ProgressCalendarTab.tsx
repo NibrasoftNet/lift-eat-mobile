@@ -4,32 +4,41 @@ import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '../../utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
+import { UserPros, users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import useSessionStore from '@/utils/store/sessionStore';
 
 const ProgressCalendarTab = () => {
   const drizzleDb = useDrizzleDb();
-
+  const { user } = useSessionStore();
   const {
-    data: user,
+    data: actualUser,
     isFetchedAfterMount,
     isFetching,
     isLoading,
   } = useQuery({
     queryKey: ['me'],
-    queryFn: async () => drizzleDb.query.users.findFirst(),
+    queryFn: async () => {
+      const userResult = await drizzleDb.query.users.findFirst({
+        where: eq(users.email, user.email),
+      });
+      console.log('qazxsw', userResult);
+      return userResult ?? null;
+    },
   });
 
   const vacation = { key: 'vacation', color: 'red', selectedDotColor: 'blue' };
   const massage = { key: 'massage', color: 'blue', selectedDotColor: 'blue' };
   const workout = { key: 'workout', color: 'green' };
   return (
-    <QueryStateHandler
-      data={user}
+    <QueryStateHandler<UserPros>
+      data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
       isFetchedAfterMount={isFetchedAfterMount}
     >
       <VStack>
-        {user && <NavbarUser user={user} />}
+        <NavbarUser user={actualUser!} />
         <Calendar
           markingType={'multi-dot'}
           markedDates={{

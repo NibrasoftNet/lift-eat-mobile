@@ -5,7 +5,7 @@ import { Text } from '../../components/ui/text';
 import { Heading } from 'lucide-react-native';
 import { Link } from 'expo-router';
 
-export const QueryStateHandler = ({
+export const QueryStateHandler = <T,>({
   isLoading,
   isFetching,
   isFetchedAfterMount,
@@ -15,7 +15,7 @@ export const QueryStateHandler = ({
   isLoading: boolean;
   isFetching: boolean;
   isFetchedAfterMount: boolean;
-  data: any;
+  data: T | undefined | null;
   children: React.ReactNode;
 }) => {
   if (!data) {

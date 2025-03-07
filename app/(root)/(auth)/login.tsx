@@ -29,7 +29,7 @@ import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { User } from '@/db/schema';
+import { UserPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 import { findOrCreateUser } from '@/utils/services/users.service';
 
@@ -51,7 +51,7 @@ export default function Login() {
     },
   });
 
-  const { mutateAsync, isSuccess } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: async (data: LoginFormData) => {
       return await findOrCreateUser(drizzleDb, data.email);
     },
@@ -59,8 +59,7 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const res = (await mutateAsync(data)) as User;
-      console.log('Tanstack result', res, isSuccess);
+      const res = (await mutateAsync(data)) as UserPros;
       setUser({
         id: res.id,
         email: res.email,
