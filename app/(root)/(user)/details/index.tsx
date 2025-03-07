@@ -14,5 +14,10 @@ export default function UserDetails() {
     heightUnit: HeightUnitEnum.CM,
   };
 
-  return <UserDetailsForm defaultValues={defaultUserDetailsValues} />;
+  return (
+    <UserDetailsForm
+      defaultValues={defaultUserDetailsValues}
+      operation="create"
+    />
+  );
 }

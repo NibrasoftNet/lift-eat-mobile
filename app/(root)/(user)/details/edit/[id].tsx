@@ -17,5 +17,10 @@ export default function EditUserDetails() {
     heightUnit: HeightUnitEnum.CM,
   };
 
-  return <UserDetailsForm defaultValues={defaultUserDetailsValues} />;
+  return (
+    <UserDetailsForm
+      defaultValues={defaultUserDetailsValues}
+      operation="update"
+    />
+  );
 }

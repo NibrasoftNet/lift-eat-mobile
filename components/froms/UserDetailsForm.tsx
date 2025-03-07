@@ -30,8 +30,10 @@ import { AlertCircleIcon } from '@/components/ui/icon';
 
 export default function UserDetailsForm({
   defaultValues,
+  operation,
 }: {
   defaultValues: UserDetailsDefaultValuesProps;
+  operation: 'create' | 'update';
 }) {
   const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(
     defaultValues.weightUnit,
@@ -279,7 +281,7 @@ export default function UserDetailsForm({
         onPress={handleSubmit(onSubmit)}
         className="bg-blue-500 rounded-md mx-4 mt-8"
       >
-        <ButtonText>Submit</ButtonText>
+        <ButtonText>{operation === 'create' ? 'Submit' : 'Update'}</ButtonText>
       </Button>
     </VStack>
   );
