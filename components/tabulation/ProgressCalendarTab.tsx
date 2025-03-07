@@ -4,8 +4,7 @@ import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '../../utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { UserPros, users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { UserPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 
 const ProgressCalendarTab = () => {
@@ -19,10 +18,7 @@ const ProgressCalendarTab = () => {
   } = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      const userResult = await drizzleDb.query.users.findFirst({
-        where: eq(users.email, user.email),
-      });
-      console.log('qazxsw', userResult);
+      const userResult = await drizzleDb.query.users.findFirst();
       return userResult ?? null;
     },
   });

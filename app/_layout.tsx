@@ -40,7 +40,7 @@ const InitialLayout = () => {
     if (!user) {
       router.replace('/login');
     } else {
-      router.replace('/analytics');
+      router.replace('/register');
     }
   }, []);
 

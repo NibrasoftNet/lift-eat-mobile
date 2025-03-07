@@ -28,7 +28,7 @@ import {
   UserGenderActivityDefaultValueProps,
   UserGenderActivityFormData,
   userGenderActivitySchema,
-} from '@/utils/validation/user-gender-activity.validation';
+} from '@/utils/validation/user/user-gender-activity.validation';
 import {
   FormControl,
   FormControlError,

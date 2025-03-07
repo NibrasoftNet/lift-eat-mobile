@@ -17,6 +17,10 @@ export default function UserPreferenceLayout() {
         name="details"
         options={{ headerShown: false, animation: 'slide_from_left' }}
       />
+      <Stack.Screen
+        name="profile/[id]"
+        options={{ headerShown: false, animation: 'slide_from_left' }}
+      />
     </Stack>
   );
 }
