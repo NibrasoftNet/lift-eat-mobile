@@ -23,27 +23,38 @@ import { Pressable } from '../ui/pressable';
 import { Button, ButtonText } from '../ui/button';
 import { UserPros } from '../../db/schema';
 import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import useSessionStore from '@/utils/store/sessionStore';
 
 const menuItems = [
   {
     title: 'Edit profile',
     icon: PencilRuler,
-    action: () => console.log('General'),
+    link: '/details',
   },
-  { title: 'BMI data', icon: Weight, action: () => console.log('details') },
-  { title: 'Preference', icon: Drum, action: () => console.log('preference') },
-  { title: 'Analytics', icon: Compass, action: () => console.log('analytics') },
+  { title: 'BMI data', icon: Weight, link: '/details/edit' },
+  { title: 'Preference', icon: Drum, link: '/preference' },
+  { title: 'Analytics', icon: Compass, link: '/preference' },
 ];
 
-const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => (
-  <Pressable
-    onPress={item.action}
-    className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
-  >
-    <Text className="text-xl">{item.title}</Text>
-    <Icon as={item.icon} size="xl" />
-  </Pressable>
-);
+const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
+  const { user } = useSessionStore();
+  const router = useRouter();
+
+  return (
+    <Pressable
+      onPress={() =>
+        item.title === 'Edit profile'
+          ? router.push(`/details/edit/${user.id}`)
+          : router.push(`/preference`)
+      }
+      className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
+    >
+      <Text className="text-xl">{item.title}</Text>
+      <Icon as={item.icon} size="xl" />
+    </Pressable>
+  );
+};
 
 const UserSettingsDrawer = ({
   showUserSettingsDrawer,

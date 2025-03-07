@@ -10,6 +10,7 @@ import { AsyncStorage } from 'expo-sqlite/kv-store';
 import { ingredientsStandardSeed, mealsSeed, usersSeed } from '@/db/seeds';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
+import { sql } from 'drizzle-orm';
 
 // Static image paths using require()
 const images = {
@@ -31,13 +32,11 @@ async function getImageBuffer(assetModule: number): Promise<any | null> {
 
     // Read file as binary data
     const fileUri = asset.localUri;
-    const binaryString = await FileSystem.readAsStringAsync(fileUri, {
-      encoding: FileSystem.EncodingType.Base64, // Read as Base64 (temporary)
-    });
-
     // Convert Base64 string to Uint8Array (Binary Blob)
     //return Uint8Array.from(atob(binaryString), (c) => c.charCodeAt(0));
-    return binaryString;
+    return await FileSystem.readAsStringAsync(fileUri, {
+      encoding: FileSystem.EncodingType.Base64, // Read as Base64 (temporary)
+    });
   } catch (error) {
     console.error(`Error reading asset:`, error);
     return null;
@@ -83,13 +82,12 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
 
   if (value) {
     console.log(' CLEAR existing tables ...');
-    return;
-    /*db.run(sql`DELETE FROM ${users}`);
+    //return;
+    db.run(sql`DELETE FROM ${users}`);
     db.run(sql`DELETE FROM ${meals}`);
     db.run(sql`DELETE FROM ${ingredientsStandard}`);
     db.run(sql`DELETE FROM ${ingredients}`);
     db.run(sql`DELETE FROM ${ingredientsIngredientsStandard}`);
-     */
   }
 
   console.log('Inserting new list...');

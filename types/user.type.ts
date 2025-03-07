@@ -1,4 +1,4 @@
-export type UserProps = {
-    id: number;
-    email: string;
+export type UserStoreProps = {
+  id: number;
+  email: string;
 };

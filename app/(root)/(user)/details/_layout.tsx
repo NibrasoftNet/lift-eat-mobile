@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
-import 'react-native-reanimated';
+import React from 'react';
 
-export default function MyPlansLayout() {
+export default function UserDetailsLayout() {
   return (
     <Stack
       screenOptions={{
@@ -12,13 +12,16 @@ export default function MyPlansLayout() {
         statusBarHidden: true,
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
-        name="create"
-        options={{ animation: 'fade_from_bottom', animationDuration: 600 }}
+        name="index"
+        options={{
+          headerShown: false,
+          animation: 'slide_from_bottom',
+          animationDuration: 1000,
+        }}
       />
       <Stack.Screen
-        name="details/[id]"
+        name="edit/[id]"
         options={{
           presentation: 'modal',
           headerShown: false,
