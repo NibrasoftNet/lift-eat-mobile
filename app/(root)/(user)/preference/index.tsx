@@ -1,19 +1,22 @@
 import React from 'react';
 import UserGenderActivityForm from '../../../../components/froms/UserGenderActivityForm';
-import { UserGenderActivityDefaultValueProps } from '../../../../utils/validation/user/user-gender-activity.validation';
+import { UserGenderActivityDefaultValueProps } from '@/utils/validation/user/user-gender-activity.validation';
 import {
   GenderEnum,
   PhysicalActivityEnum,
-} from '../../../../utils/enum/user-gender-activity.enum';
-import { GoalEnum } from '../../../../utils/enum/user-details.enum';
+} from '@/utils/enum/user-gender-activity.enum';
+import { useGlobalSearchParams } from 'expo-router';
 
 export default function CreatePreference() {
+  const userId = useGlobalSearchParams<{ userId: string }>();
+
   const defaultGenderActivityValues: UserGenderActivityDefaultValueProps = {
+    id: Number(userId),
     age: 20,
     gender: GenderEnum.MALE,
     physicalActivity: PhysicalActivityEnum.LOW,
-    goal: 0,
-    goalUnit: GoalEnum.MAINTAIN,
+    //goal: 0,
+    //goalUnit: GoalEnum.MAINTAIN,
   };
   return (
     <UserGenderActivityForm

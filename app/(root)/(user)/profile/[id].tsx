@@ -27,6 +27,7 @@ export default function EditUserProfile() {
   });
 
   const defaultUserDetailsValues: UserProfileDefaultValuesProps = {
+    id: Number(actualUser?.id!),
     name: actualUser?.name!,
     email: actualUser?.email!,
     profileImage: actualUser?.profileImage!,

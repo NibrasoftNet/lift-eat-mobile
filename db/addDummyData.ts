@@ -53,7 +53,11 @@ async function prepareUserWithImages() {
         const imageBuffer = await getImageBuffer(
           require('../assets/images/backgrounds/chinese-bg.jpg'),
         );
-        return { ...user, profileImage: imageBuffer };
+        return {
+          ...user,
+          profileImage:
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+        };
       }
       return user;
     }),
@@ -68,7 +72,11 @@ async function prepareMealsWithImages() {
       if (!meal.image && images[meal.type]) {
         // @ts-ignore
         const imageBuffer = await getImageBuffer(images[meal.type]);
-        return { ...meal, image: imageBuffer };
+        return {
+          ...meal,
+          image:
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+        };
       }
       return meal;
     }),

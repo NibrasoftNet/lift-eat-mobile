@@ -3,16 +3,15 @@ import {
   GenderEnum,
   PhysicalActivityEnum,
 } from '@/utils/enum/user-gender-activity.enum';
-import { GoalEnum } from '@/utils/enum/user-details.enum';
 
 export const userGenderActivitySchema = z.object({
   age: z.number().min(30).max(200),
-  goal: z.number().default(0),
+  /*goal: z.number().default(0),
   goalUnit: z.enum([
     GoalEnum.GAIN_MUSCLE,
     GoalEnum.MAINTAIN,
     GoalEnum.WEIGHT_LOSS,
-  ]),
+  ]),*/
   gender: z.enum([GenderEnum.MALE, GenderEnum.FEMALE]),
   physicalActivity: z.enum([
     PhysicalActivityEnum.LOW,
@@ -27,9 +26,10 @@ export type UserGenderActivityFormData = z.infer<
 >;
 
 export type UserGenderActivityDefaultValueProps = {
+  id: number;
   age: number;
   gender: GenderEnum;
   physicalActivity: PhysicalActivityEnum;
-  goal: number;
-  goalUnit: GoalEnum;
+  /*goal: number;
+  goalUnit: GoalEnum;*/
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserDetailsDefaultValuesProps } from '../../../../../utils/validation/user/user-details.validation';
+import { UserDetailsDefaultValuesProps } from '@/utils/validation/user/user-details.validation';
 import UserDetailsForm from '../../../../../components/froms/UserDetailsForm';
 import { useLocalSearchParams } from 'expo-router';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -27,6 +27,7 @@ export default function EditUserDetails() {
   });
 
   const defaultUserDetailsValues: UserDetailsDefaultValuesProps = {
+    id: Number(actualUser?.id!),
     weight: actualUser?.weight!,
     weightUnit: actualUser?.weightUnit!,
     height: actualUser?.height!,

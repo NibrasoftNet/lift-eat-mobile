@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, ImageBackground } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
   FormControlError,
@@ -18,33 +18,36 @@ import { app_logo, login_background } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  resetForgotPasswordSchema,
-  ResetPasswordFormData,
-} from '@/utils/validation/auth/reset-password-schema.validation';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/toast';
+import {
+  NewPasswordFormData,
+  newPasswordSchema,
+} from '@/utils/validation/auth/new-password-schema.validation';
+import { HStack } from '@/components/ui/hstack';
+import { Colors } from '@/utils/constants/Colors';
 
-export default function ResetPassword() {
+export default function NewPassword() {
   const router = useRouter();
   const toast = useToast();
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetForgotPasswordSchema),
+  } = useForm<NewPasswordFormData>({
+    resolver: zodResolver(newPasswordSchema),
     mode: 'onChange',
     defaultValues: {
+      oldPassword: '',
       newPassword: '',
       confirmNewPassword: '',
     },
   });
 
-  const { mutateAsync, isSuccess } = useMutation({
-    mutationFn: async (data: ResetPasswordFormData) => {
+  const { mutateAsync, isSuccess, isPending } = useMutation({
+    mutationFn: async (data: NewPasswordFormData) => {
       return Promise.resolve({
         status: 200,
         result: data,
@@ -52,7 +55,7 @@ export default function ResetPassword() {
     },
   });
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const onSubmit = async (data: NewPasswordFormData) => {
     try {
       await mutateAsync(data);
       if (isSuccess) {
@@ -102,14 +105,45 @@ export default function ResetPassword() {
           style={{ alignSelf: 'center' }}
         />
         <Card className="flex w-full bg-transparent items-center justify-center">
-          <Text className="text-center text-2xl font-bold text-white">
-            Reset Password
+          <Text className="text-center text-2xl font-bold  text-white">
+            Change Password
           </Text>
-          <Text className="text-center text-xl font-semibold text-white">
+          <Text className="text-center text-xl font-semibold  text-white">
             Create new password
           </Text>
         </Card>
-        <Card className="w-full bg-transparent rounded-2xl border pb-6 gap-4">
+        <Card className="w-full bg-transparent rounded-2xl border border-white pb-6 gap-4">
+          {/* Old Password Field */}
+          <FormControl isInvalid={!!errors.newPassword}>
+            <FormControlLabel>
+              <FormControlLabelText className="text-white">
+                Old Password
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Controller
+              control={control}
+              name="oldPassword"
+              render={({ field: { onChange, value } }) => (
+                <Input className="my-1">
+                  <InputField
+                    type="password"
+                    placeholder="Old Password"
+                    value={value}
+                    onChangeText={onChange}
+                    className="placeholder:text-white"
+                  />
+                </Input>
+              )}
+            />
+            {errors.oldPassword && (
+              <FormControlError>
+                <FormControlErrorIcon as={AlertCircleIcon} />
+                <FormControlErrorText>
+                  {errors.oldPassword.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
           {/* New Password Field */}
           <FormControl isInvalid={!!errors.newPassword}>
             <FormControlLabel>
@@ -173,24 +207,21 @@ export default function ResetPassword() {
             )}
           </FormControl>
         </Card>
-        {/* Submit Button */}
-        <Button
-          className="w-full h-12 justify-center items-center mt-4"
-          size="sm"
-          onPress={handleSubmit(onSubmit)}
-        >
-          <ButtonText>Update</ButtonText>
-        </Button>
-
-        <Text className="text-black">
-          Back to{' '}
-          <Text
-            className="text-amber-500 text-xl font-semibold underline"
-            onPress={() => router.push('./login')}
+        <HStack className="w-full justify-between items-center mt-4 gap-2">
+          {/* Submit Button */}
+          <Button
+            className="w-2/5 bg-tertiary-500"
+            size="sm"
+            onPress={() => router.back()}
           >
-            Login
-          </Text>
-        </Text>
+            <ButtonText>Cancel</ButtonText>
+          </Button>
+          {/* Submit Button */}
+          <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
+            {isPending && <ButtonSpinner color={Colors.light.icon} />}
+            <ButtonText>Update</ButtonText>
+          </Button>
+        </HStack>
       </VStack>
     </ImageBackground>
   );

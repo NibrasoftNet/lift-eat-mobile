@@ -9,6 +9,7 @@ export const userProfileSchema = z.object({
 export type UserProfileFormData = z.infer<typeof userProfileSchema>;
 
 export type UserProfileDefaultValuesProps = {
+  id: number;
   name: string;
   email: string;
   profileImage?: Buffer<ArrayBufferLike>;

@@ -22,13 +22,13 @@ export default function MultiPurposeToast({
     <Toast
       nativeID={id}
       style={{ backgroundColor: GetToastColor[color] }}
-      className={`rounded-xl p-4 gap-3 w-full shadow-hard-2 flex-row`}
+      className={`flex rounded-b-xl p-4 gap-3 w-full shadow-hard-2`}
     >
-      <VStack className="web:flex-1 gap-4 p-4">
-        <Heading size="sm" className="text-black font-semibold">
+      <VStack className="gap-4 p-4 w-full">
+        <Heading size="sm" className="text-white text-xl font-semibold">
           <Text>{title}</Text>
         </Heading>
-        <Text size="sm" className="text-black">
+        <Text size="sm" className="text-white text-lg font-semibold">
           {description}
         </Text>
       </VStack>

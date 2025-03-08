@@ -21,9 +21,8 @@ import {
   UserProfileDefaultValuesProps,
   UserProfileFormData,
   userProfileSchema,
-} from '../../utils/validation/user/user-profile.validation';
+} from '@/utils/validation/user/user-profile.validation';
 import { User } from 'lucide-react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Pressable } from '@/components/ui/pressable';
 import {
   Actionsheet,
@@ -34,15 +33,25 @@ import {
   ActionsheetItem,
   ActionsheetItemText,
 } from '@/components/ui/actionsheet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateUser } from '@/utils/services/users.service';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { useToast } from '@/components/ui/toast';
+import { getImageFromPicker } from '@/utils/utils';
 
 export default function UserProfileForm({
   defaultValues,
 }: {
   defaultValues: UserProfileDefaultValuesProps;
 }) {
+  const drizzleDb = useDrizzleDb();
+  const toast = useToast();
+  const queryClient = useQueryClient();
   const [isActionSheetOpen, setActionSheetOpen] = useState(false);
   const [photo, setPhoto] = useState<Buffer<ArrayBufferLike> | string>(
-    `data:image/jpeg;base64,${defaultValues.profileImage}`,
+    `${defaultValues.profileImage}`,
   );
   const {
     setValue,
@@ -62,31 +71,7 @@ export default function UserProfileForm({
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setActionSheetOpen(false); // Close the action sheet
 
-    // Request permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
-    }
-
-    // Open the image picker based on the selected source
-    let result;
-    if (source === 'camera') {
-      result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-        base64: true,
-      });
-    } else if (source === 'gallery') {
-      result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-        base64: true,
-      });
-    }
+    const result = await getImageFromPicker(source);
 
     if (!result?.canceled) {
       const base64Image = `data:image/jpeg;base64,${result?.assets[0].base64}`;
@@ -95,8 +80,50 @@ export default function UserProfileForm({
     }
   };
 
-  const onSubmit = (data: UserProfileFormData) => {
-    console.log('Validated Data:', data);
+  const { mutateAsync, isSuccess } = useMutation({
+    mutationFn: async (data: UserProfileFormData) => {
+      return await updateUser(drizzleDb, defaultValues.id, data);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+
+  const onSubmit = async (data: UserProfileFormData) => {
+    try {
+      await mutateAsync(data);
+      if (isSuccess) {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Success"
+                description="Success update profile"
+              />
+            );
+          },
+        });
+      }
+    } catch (error: any) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Error"
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    }
   };
 
   return (
@@ -104,7 +131,7 @@ export default function UserProfileForm({
       <Card className="w-full bg-transparent pb-6 gap-4">
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>
-            <Avatar className="w-32 h-32 rounded-md">
+            <Avatar className="w-32 h-32 rounded-xl">
               <AvatarFallbackText>JD</AvatarFallbackText>
               {photo ? (
                 <AvatarImage

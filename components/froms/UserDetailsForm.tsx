@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import React, { useState } from 'react';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, {
   useAnimatedStyle,
@@ -27,6 +27,14 @@ import {
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircleIcon } from '@/components/ui/icon';
+import { updateUser } from '@/utils/services/users.service';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { useToast } from '@/components/ui/toast';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { useRouter } from 'expo-router';
+import { Colors } from '@/utils/constants/Colors';
+import { HStack } from '@/components/ui/hstack';
 
 export default function UserDetailsForm({
   defaultValues,
@@ -35,12 +43,15 @@ export default function UserDetailsForm({
   defaultValues: UserDetailsDefaultValuesProps;
   operation: 'create' | 'update';
 }) {
+  const drizzleDb = useDrizzleDb();
+  const toast = useToast();
+  const router = useRouter();
   const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(
     defaultValues.weightUnit,
-  ); // Default to KG
+  );
   const [heightUnit, setHeightUnit] = useState<HeightUnitEnum>(
     defaultValues.heightUnit,
-  ); // Default to CM;
+  );
   const slidePosition = useSharedValue(0); // Reanimated shared value for position
   const slideHeightPosition = useSharedValue(0); // Reanimated shared value for position
   const [buttonWidth, setButtonWidth] = useState(0); // Store dynamic button width
@@ -94,23 +105,62 @@ export default function UserDetailsForm({
     slideHeightPosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
   };
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserDetailsFormData) => {
-      return Promise.resolve({
-        status: 200,
-        result: data,
-      });
+      return await updateUser(drizzleDb, defaultValues.id, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['me'] });
     },
   });
 
   const onSubmit = async (data: UserDetailsFormData) => {
     try {
-      await mutateAsync(data);
-    } catch (error) {
-      console.error('Mutation failed', error);
+      const updatedUser = await mutateAsync(data);
+      if (updatedUser.id) {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Success"
+                description="Success update profile"
+              />
+            );
+          },
+        });
+        if (operation === 'update') {
+          router.back();
+        } else {
+          router.push('/preference');
+        }
+      }
+    } catch (error: any) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Error"
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    if (operation === 'update') {
+      router.back();
+    } else {
+      router.push('/preference');
     }
   };
 
@@ -276,10 +326,21 @@ export default function UserDetailsForm({
           />
         </Grid>
       </Card>
-      {/* Submit Button */}
-      <Button onPress={handleSubmit(onSubmit)} className="rounded-md mx-4 mt-8">
-        <ButtonText>{operation === 'create' ? 'Submit' : 'Update'}</ButtonText>
-      </Button>
+      <HStack className="w-full justify-between items-center mt-4 gap-2">
+        {/* Submit Button */}
+        <Button
+          className="w-2/5 bg-tertiary-500"
+          size="sm"
+          onPress={handleCancel}
+        >
+          <ButtonText>{operation === 'create' ? 'Skip' : 'Cancel'}</ButtonText>
+        </Button>
+        {/* Submit Button */}
+        <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
+          {isPending && <ButtonSpinner color={Colors.light.icon} />}
+          <ButtonText>Update</ButtonText>
+        </Button>
+      </HStack>
     </VStack>
   );
 }

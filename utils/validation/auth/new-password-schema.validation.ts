@@ -1,8 +1,9 @@
 import * as z from 'zod';
-import { passwordSchema } from '@/utils/validation/auth/password-schema.validation';
+import { passwordSchema } from './password-schema.validation';
 
-export const resetForgotPasswordSchema = z
+export const newPasswordSchema = z
   .object({
+    oldPassword: passwordSchema,
     newPassword: passwordSchema,
     confirmNewPassword: z.string(),
   })
@@ -16,9 +17,10 @@ export const resetForgotPasswordSchema = z
     },
   );
 
-export type ResetPasswordFormData = z.infer<typeof resetForgotPasswordSchema>;
+export type NewPasswordFormData = z.infer<typeof newPasswordSchema>;
 
-export type ResetPasswordDefaultValueProps = {
+export type NewPasswordDefaultValueProps = {
+  oldPassword: string;
   newPassword: string;
   confirmNewPassword: string;
 };

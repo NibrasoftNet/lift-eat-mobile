@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, ImageBackground } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
   FormControlError,
@@ -27,6 +27,7 @@ import { useMutation } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '@/components/ui/toast';
+import { Colors } from '@/utils/constants/Colors';
 
 export default function Register() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function Register() {
     },
   });
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isSuccess, isPending } = useMutation({
     mutationFn: async (data: RegisterFormData) => {
       return Promise.resolve({
         status: 200,
@@ -56,9 +57,24 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const res = await mutateAsync(data);
-      console.log('Register result', res);
-      setShowDrawer(true);
+      await mutateAsync(data);
+      if (isSuccess) {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Success"
+                description="Success update profile"
+              />
+            );
+          },
+        });
+        setShowDrawer(true);
+      }
     } catch (error: any) {
       toast.show({
         placement: 'top',
@@ -91,18 +107,20 @@ export default function Register() {
             style={{ alignSelf: 'center' }}
           />
           <Card className="flex w-full bg-transparent items-center justify-center">
-            <Text className="text-center text-2xl font-bold text-black">
+            <Text className="text-center text-2xl font-bold text-white">
               Register
             </Text>
-            <Text className="text-center text-xl font-semibold text-gray-600">
+            <Text className="text-center text-xl font-semibold text-white">
               Create new account
             </Text>
           </Card>
-          <Card className="w-full bg-transparent rounded-2xl border pb-6 gap-4">
+          <Card className="w-full bg-transparent rounded-2xl border border-white pb-6 gap-4">
             {/* Name Field */}
             <FormControl isInvalid={!!errors.name}>
               <FormControlLabel>
-                <FormControlLabelText>Name</FormControlLabelText>
+                <FormControlLabelText className="text-white">
+                  Name
+                </FormControlLabelText>
               </FormControlLabel>
               <Controller
                 control={control}
@@ -114,6 +132,7 @@ export default function Register() {
                       placeholder="Name"
                       value={value}
                       onChangeText={onChange}
+                      className="placeholder:text-white"
                     />
                   </Input>
                 )}
@@ -131,7 +150,9 @@ export default function Register() {
             {/* Email Field */}
             <FormControl isInvalid={!!errors.email}>
               <FormControlLabel>
-                <FormControlLabelText>Email</FormControlLabelText>
+                <FormControlLabelText className="text-white">
+                  Email
+                </FormControlLabelText>
               </FormControlLabel>
               <Controller
                 control={control}
@@ -143,6 +164,7 @@ export default function Register() {
                       placeholder="Email"
                       value={value}
                       onChangeText={onChange}
+                      className="placeholder:text-white"
                     />
                   </Input>
                 )}
@@ -159,7 +181,9 @@ export default function Register() {
             {/* Password Field */}
             <FormControl isInvalid={!!errors.password}>
               <FormControlLabel>
-                <FormControlLabelText>Password</FormControlLabelText>
+                <FormControlLabelText className="text-white">
+                  Password
+                </FormControlLabelText>
               </FormControlLabel>
               <Controller
                 control={control}
@@ -171,6 +195,7 @@ export default function Register() {
                       placeholder="Password"
                       value={value}
                       onChangeText={onChange}
+                      className="placeholder:text-white"
                     />
                   </Input>
                 )}
@@ -191,10 +216,11 @@ export default function Register() {
             size="sm"
             onPress={handleSubmit(onSubmit)}
           >
+            {isPending && <ButtonSpinner color={Colors.light.icon} />}
             <ButtonText>Register</ButtonText>
           </Button>
 
-          <Text className="text-black">
+          <Text className="text-white">
             Already have an account?{' '}
             <Text
               className="text-amber-500 text-xl font-semibold underline"
