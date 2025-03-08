@@ -15,6 +15,7 @@ export const userDetailsSchema = z.object({
 export type UserDetailsFormData = z.infer<typeof userDetailsSchema>;
 
 export type UserDetailsDefaultValuesProps = {
+  id: number;
   weight: number;
   weightUnit: WeightUnitEnum;
   height: number;

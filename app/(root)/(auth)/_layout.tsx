@@ -32,6 +32,14 @@ export default function TabLayout() {
           animationDuration: 1000,
         }}
       />
+      <Stack.Screen
+        name="new-password"
+        options={{
+          headerShown: false,
+          animation: 'slide_from_bottom',
+          animationDuration: 1000,
+        }}
+      />
     </Stack>
   );
 }

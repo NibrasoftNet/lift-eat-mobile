@@ -3,7 +3,7 @@ import { Image, ImageBackground } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
   FormControlError,
@@ -32,6 +32,7 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { UserPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 import { findOrCreateUser } from '@/utils/services/users.service';
+import { Colors } from '@/utils/constants/Colors';
 
 export default function Login() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function Login() {
     },
   });
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
       return await findOrCreateUser(drizzleDb, data.email);
     },
@@ -60,11 +61,27 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const res = (await mutateAsync(data)) as UserPros;
-      setUser({
-        id: res.id,
-        email: res.email,
-      });
-      router.push('/analytics');
+      if (res.id) {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Success"
+                description="Success Login"
+              />
+            );
+          },
+        });
+        setUser({
+          id: res.id,
+          email: res.email,
+        });
+        router.push('/analytics');
+      }
     } catch (error: any) {
       toast.show({
         placement: 'top',
@@ -97,17 +114,19 @@ export default function Login() {
             style={{ alignSelf: 'center' }}
           />
           <Card className="flex w-full bg-transparent items-center justify-center gap-4">
-            <Text className="text-center text-4xl font-bold text-black">
+            <Text className="text-center text-4xl font-bold  text-white">
               Login
             </Text>
-            <Text className="text-center text-2xl font-semibold text-gray-600">
+            <Text className="text-center text-2xl font-semibold text-white">
               Login to your account
             </Text>
           </Card>
-          <Card className="w-full bg-transparent rounded-2xl border pb-6 gap-4">
+          <Card className="w-full bg-transparent rounded-2xl border border-white pb-6 gap-4">
             <FormControl isInvalid={!!errors.email}>
               <FormControlLabel>
-                <FormControlLabelText>Email</FormControlLabelText>
+                <FormControlLabelText className="text-white">
+                  Email
+                </FormControlLabelText>
               </FormControlLabel>
               <Controller
                 control={control}
@@ -119,6 +138,7 @@ export default function Login() {
                       placeholder="email"
                       value={value}
                       onChangeText={onChange}
+                      className="placeholder:text-white"
                     />
                   </Input>
                 )}
@@ -135,7 +155,9 @@ export default function Login() {
 
             <FormControl isInvalid={!!errors.password}>
               <FormControlLabel>
-                <FormControlLabelText>Password</FormControlLabelText>
+                <FormControlLabelText className="text-white">
+                  Password
+                </FormControlLabelText>
               </FormControlLabel>
               <Controller
                 control={control}
@@ -147,6 +169,7 @@ export default function Login() {
                       placeholder="password"
                       value={value}
                       onChangeText={onChange}
+                      className="placeholder:text-white"
                     />
                   </Input>
                 )}
@@ -181,10 +204,11 @@ export default function Login() {
             size="sm"
             onPress={handleSubmit(onSubmit)}
           >
+            {isPending && <ButtonSpinner color={Colors.light.icon} />}
             <ButtonText>Submit</ButtonText>
           </Button>
 
-          <Text className="text-black">
+          <Text className="text-white text-lg font-semibold">
             Don't have an account?{' '}
             <Text
               className="text-amber-500 text-lg font-semibold underline"

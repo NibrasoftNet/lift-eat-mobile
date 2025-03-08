@@ -4,7 +4,7 @@ import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import { Icon } from '../ui/icon';
 import { Gem, Settings, User } from 'lucide-react-native';
 import { Button, ButtonIcon, ButtonText } from '../ui/button';
-import { UserPros } from '../../db/schema';
+import { UserPros } from '@/db/schema';
 import UserSettingsDrawer from '@/components/drawers/UserSettingsDrawer';
 import GeneralSettingsDrawer from '@/components/drawers/GeneralSettingsDrawer';
 
@@ -30,7 +30,7 @@ export default function NavbarUser({ user }: { user: UserPros }) {
             {user.profileImage ? (
               <AvatarImage
                 source={{
-                  uri: `data:image/jpeg;base64,${user.profileImage}`,
+                  uri: `${user.profileImage}`,
                 }}
               />
             ) : (

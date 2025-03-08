@@ -6,6 +6,7 @@ package-lock.json
 
 # Expo
 .expo/
+.idea/
 dist/
 web-build/
 expo-env.d.ts

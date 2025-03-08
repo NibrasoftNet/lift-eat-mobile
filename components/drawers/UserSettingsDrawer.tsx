@@ -15,18 +15,26 @@ import {
   AvatarImage,
 } from '../ui/avatar';
 import { Icon } from '../ui/icon';
-import { Compass, Drum, PencilRuler, User, Weight } from 'lucide-react-native';
+import {
+  Compass,
+  Drum,
+  PencilRuler,
+  SquareAsterisk,
+  User,
+  Weight,
+} from 'lucide-react-native';
 import { VStack } from '../ui/vstack';
 import { Heading } from '../ui/heading';
 import { Text } from '../ui/text';
 import { Pressable } from '../ui/pressable';
 import { Button, ButtonText } from '../ui/button';
-import { UserPros } from '../../db/schema';
+import { UserPros } from '@/db/schema';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import useSessionStore from '@/utils/store/sessionStore';
 
 const menuItems = [
+  { title: 'Analytics', icon: Compass, tag: 'analytics' },
   {
     title: 'Edit profile',
     icon: PencilRuler,
@@ -34,7 +42,7 @@ const menuItems = [
   },
   { title: 'BMI data', icon: Weight, tag: 'details' },
   { title: 'Preference', icon: Drum, tag: 'preference' },
-  { title: 'Analytics', icon: Compass, tag: 'analytics' },
+  { title: 'Change Password', icon: SquareAsterisk, tag: 'newPassword' },
 ];
 
 const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
@@ -44,13 +52,15 @@ const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
   return (
     <Pressable
       onPress={() =>
-        item.tag === 'profile'
-          ? router.push(`/profile/${user.id}`)
-          : item.tag === 'details'
-            ? router.push(`/details/edit/${user.id}`)
-            : item.tag === 'preference'
-              ? router.push(`/preference/edit/${user.id}`)
-              : router.push(`/analytics`)
+        item.tag === 'newPassword'
+          ? router.push(`/new-password`)
+          : item.tag === 'profile'
+            ? router.push(`/profile/${user.id}`)
+            : item.tag === 'details'
+              ? router.push(`/details/edit/${user.id}`)
+              : item.tag === 'preference'
+                ? router.push(`/preference/edit/${user.id}`)
+                : router.push(`/analytics`)
       }
       className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
     >
@@ -89,7 +99,7 @@ const UserSettingsDrawer = ({
               {user.profileImage ? (
                 <AvatarImage
                   source={{
-                    uri: `data:image/jpeg;base64,${user.profileImage}`,
+                    uri: `${user.profileImage}`,
                   }}
                 />
               ) : (

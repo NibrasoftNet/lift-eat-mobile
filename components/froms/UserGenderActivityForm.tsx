@@ -1,8 +1,9 @@
 import { VStack } from '@/components/ui/vstack';
 import React, { useEffect, useState } from 'react';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, {
+  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -10,15 +11,8 @@ import Animated, {
 import { Card } from '@/components/ui/card';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Image } from 'react-native';
+import { ImageBackground, View } from 'react-native';
 import { bed, worker, hiking, bodyBuilder } from '@/utils/constants/icons';
-import { Box } from '@/components/ui/box';
-import { Heading } from '@/components/ui/heading';
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
 import {
   GenderEnum,
@@ -38,8 +32,17 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
-import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { AlertCircleIcon } from '@/components/ui/icon';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateUser } from '@/utils/services/users.service';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { useToast } from '@/components/ui/toast';
+import { useRouter } from 'expo-router';
+import { HStack } from '@/components/ui/hstack';
+import { Colors } from '@/utils/constants/Colors';
+import { GetGoalImages, GetPhysicalActivityImages } from '@/utils/utils';
 
 export default function UserGenderActivityForm({
   defaultValues,
@@ -48,13 +51,17 @@ export default function UserGenderActivityForm({
   defaultValues: UserGenderActivityDefaultValueProps;
   operation: 'create' | 'update';
 }) {
+  const drizzleDb = useDrizzleDb();
+  const toast = useToast();
+  const router = useRouter();
+
   const [genderUnit, setGenderUnit] = useState<GenderEnum>(
     defaultValues.gender,
   );
   const [activityUnit, setActivityUnit] = useState<PhysicalActivityEnum>(
     defaultValues.physicalActivity,
   );
-  const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
+  // const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
 
   // Shared values for animations
   const slideGenderPosition = useSharedValue(0);
@@ -63,6 +70,9 @@ export default function UserGenderActivityForm({
 
   const [buttonWidth, setButtonWidth] = useState<number>(0);
   const [buttonHeight, setButtonHeight] = useState<number>(0);
+
+  // Init Tanstack Query client
+  const queryClient = useQueryClient();
 
   const {
     setValue,
@@ -101,7 +111,7 @@ export default function UserGenderActivityForm({
       slideActivityX.value = withTiming(col * (buttonWidth + 7), {
         duration: 300,
       });
-      slideActivityY.value = withTiming(row * (buttonHeight + 35), {
+      slideActivityY.value = withTiming(row * (buttonHeight + 7), {
         duration: 300,
       });
     }
@@ -117,10 +127,10 @@ export default function UserGenderActivityForm({
     setValue('physicalActivity', unit);
   };
 
-  const handleGoalUnitChange = (unit: GoalEnum) => {
+  /*const handleGoalUnitChange = (unit: GoalEnum) => {
     setGoalUnit(unit);
     setValue('goalUnit', unit);
-  };
+  };*/
 
   const animatedGenderStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: slideGenderPosition.value }],
@@ -156,30 +166,90 @@ export default function UserGenderActivityForm({
     },
   ];
 
-  const onSubmit = (data: UserGenderActivityFormData) => {
-    console.log('Validated Data:', data);
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: async (data: UserGenderActivityFormData) => {
+      return await updateUser(drizzleDb, defaultValues.id, data);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+
+  const onSubmit = async (data: UserGenderActivityFormData) => {
+    try {
+      const updatedUser = await mutateAsync(data);
+      if (updatedUser.id) {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Success"
+                description="Success update profile"
+              />
+            );
+          },
+        });
+        if (operation === 'update') {
+          router.back();
+        } else {
+          router.push('/preference');
+        }
+      }
+    } catch (error: any) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Error"
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    if (operation === 'update') {
+      router.back();
+    } else {
+      router.push('/analytics');
+    }
   };
 
   return (
     <VStack space="md" className="w-full max-w-sm mx-auto mt-2">
-      <Card className="p-6 rounded-lg max-w-[360px]">
-        <Box className="flex-row">
-          <Avatar className="mr-4">
-            <AvatarFallbackText>JD</AvatarFallbackText>
-            <AvatarImage
-              source={{
-                uri: 'https://gluestack.github.io/public-blog-video-assets/camera.png',
-              }}
-            />
-          </Avatar>
-          <VStack>
-            <Heading size="md" className="mb-1">
-              Khalil sel3a 3al 7it
-            </Heading>
-            <Text size="sm">khalil@3a9lia.com</Text>
+      <Animated.View
+        entering={FadeInDown.delay(300)}
+        className={`rounded-xl h-24 shadow-lg mb-4 overflow-hidden flex items-center justify-center`}
+      >
+        <ImageBackground
+          source={GetGoalImages['GAIN_MUSCLE']}
+          className="size-full object-cover"
+          blurRadius={10}
+        >
+          <VStack className={`flex rounded-xl items-center m-4`}>
+            <View className={`w-48 rounded-t-xl bg-black py-0.5 px-2`}>
+              <Text className={`font-semibold text-center text-white`}>
+                Nutrition data
+              </Text>
+            </View>
+            <View className={`w-48 rounded-b-xl bg-gray-200 py-0.5 px-2`}>
+              <Text className={`text-gray-600 font-semibold text-center`}>
+                Update your data
+              </Text>
+            </View>
           </VStack>
-        </Box>
-      </Card>
+        </ImageBackground>
+      </Animated.View>
       <Card>
         {/* Age Input */}
         <FormControl isInvalid={!!errors.age}>
@@ -209,8 +279,8 @@ export default function UserGenderActivityForm({
           )}
         </FormControl>
       </Card>
-      <Card className="rounded-lg flex flex-col gap-2">
-        {/* Goal Input */}
+      {/*<Card className="rounded-lg flex flex-col gap-2">
+         Goal Input 
         <FormControl isInvalid={!!errors.goal}>
           <FormControlLabel>
             <FormControlLabelText>Goal</FormControlLabelText>
@@ -246,7 +316,7 @@ export default function UserGenderActivityForm({
           _extra={{ className: 'grid-cols-3' }}
           style={{ position: 'relative' }}
         >
-          {/* Buttons */}
+           Buttons 
           <GridItem
             _extra={{ className: 'col-span-1' }}
             className="bg-gray-200 border border-gray-300 rounded-md"
@@ -293,7 +363,7 @@ export default function UserGenderActivityForm({
             </Button>
           </GridItem>
         </Grid>
-      </Card>
+      </Card>*/}
       {/* Gender Selection */}
       <Card className="rounded-lg flex flex-col gap-2">
         <Grid
@@ -349,19 +419,20 @@ export default function UserGenderActivityForm({
               className="bg-gray-200 border border-gray-300 rounded-md"
               onLayout={index === 0 ? handleButtonLayout : undefined}
             >
-              <Button
-                onPress={() => handleActivityUnitChange(activity.level)}
-                className="flex flex-col items-center justify-center w-full h-24 bg-transparent p-2"
+              <ImageBackground
+                source={GetPhysicalActivityImages[activity.level]}
+                className="w-full object-cover h-4/6"
+                blurRadius={3}
               >
-                <Image
-                  source={activity.icon}
-                  className="w-full h-4/6"
-                  resizeMode="contain"
-                />
-                <ButtonText className="text-gray-500 capitalize">
-                  {activity.level}
-                </ButtonText>
-              </Button>
+                <Button
+                  onPress={() => handleActivityUnitChange(activity.level)}
+                  className="flex flex-col items-center justify-center w-full h-24 bg-transparent p-2"
+                >
+                  <ButtonText className="text-white capitalize">
+                    {activity.level}
+                  </ButtonText>
+                </Button>
+              </ImageBackground>
             </GridItem>
           ))}
           {/* Animated Indicator for Activity Selection */}
@@ -371,10 +442,21 @@ export default function UserGenderActivityForm({
           />
         </Grid>
       </Card>
-      {/* Submit Button Now Correctly Positioned */}
-      <Button onPress={handleSubmit(onSubmit)} className="rounded-md">
-        <ButtonText>{operation === 'create' ? 'Submit' : 'Update'}</ButtonText>
-      </Button>
+      <HStack className="w-full justify-between items-center mt-4 gap-2">
+        {/* Submit Button */}
+        <Button
+          className="w-2/5 bg-tertiary-500"
+          size="sm"
+          onPress={handleCancel}
+        >
+          <ButtonText>{operation === 'create' ? 'Skip' : 'Cancel'}</ButtonText>
+        </Button>
+        {/* Submit Button */}
+        <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
+          {isPending && <ButtonSpinner color={Colors.light.icon} />}
+          <ButtonText>Update</ButtonText>
+        </Button>
+      </HStack>
     </VStack>
   );
 }
