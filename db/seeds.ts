@@ -2,9 +2,28 @@ import {
   GenderEnum,
   PhysicalActivityEnum,
 } from '@/utils/enum/user-gender-activity.enum';
-import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
-import { IngredientStandardProps, MealProps, UserPros } from './schema';
-import { MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
+import {
+  GoalEnum,
+  HeightUnitEnum,
+  WeightUnitEnum,
+} from '@/utils/enum/user-details.enum';
+import {
+  DailyPlanProps,
+  IngredientStandardProps,
+  MealProps,
+  PlanProps,
+  UserPros,
+} from './schema';
+import {
+  CuisineTypeEnum,
+  MealTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
+import {
+  DailyPlanGeneratedWithEnum,
+  DayEnum,
+  PlanGeneratedWithEnum,
+} from '@/utils/enum/general.enum';
 
 export const usersSeed: Omit<UserPros, 'id'>[] = [
   {
@@ -17,10 +36,11 @@ export const usersSeed: Omit<UserPros, 'id'>[] = [
     weightUnit: WeightUnitEnum.KG,
     profileImage: null,
     physicalActivity: PhysicalActivityEnum.LOW,
+    score: 0,
   },
   {
-    name: 'User 2',
-    email: 'test2@test.com',
+    name: 'Khalil',
+    email: 'Khalil@test.com',
     gender: GenderEnum.FEMALE,
     height: 165,
     heightUnit: HeightUnitEnum.CM,
@@ -28,6 +48,19 @@ export const usersSeed: Omit<UserPros, 'id'>[] = [
     weightUnit: WeightUnitEnum.KG,
     profileImage: null,
     physicalActivity: PhysicalActivityEnum.LOW,
+    score: 0,
+  },
+  {
+    name: 'Alice',
+    email: 'alice@example.com',
+    gender: GenderEnum.FEMALE,
+    weight: 55,
+    weightUnit: WeightUnitEnum.KG,
+    height: 160,
+    heightUnit: HeightUnitEnum.CM,
+    profileImage: null,
+    physicalActivity: PhysicalActivityEnum.MODERATE,
+    score: 0,
   },
 ];
 
@@ -35,9 +68,10 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
   {
     name: 'Oats',
     unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    carbs: 50,
-    fat: 5,
+    quantity: 10,
+    calories: 1700,
+    carbs: 10,
+    fat: 10,
     protein: 10,
     image: null,
   },
@@ -45,6 +79,7 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
     name: 'Banana',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
+    calories: 170,
     carbs: 25,
     fat: 0.3,
     protein: 1.2,
@@ -54,7 +89,8 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
     name: 'Grilled Chicken',
     unit: MealUnitEnum.GRAMMES,
     quantity: 150,
-    carbs: 0,
+    calories: 190,
+    carbs: 5,
     fat: 3,
     protein: 40,
     image: null,
@@ -63,6 +99,7 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
     name: 'Rice',
     unit: MealUnitEnum.GRAMMES,
     quantity: 200,
+    calories: 120,
     carbs: 45,
     fat: 1,
     protein: 5,
@@ -72,6 +109,7 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
     name: 'Salmon',
     unit: MealUnitEnum.GRAMMES,
     quantity: 150,
+    calories: 170,
     carbs: 0,
     fat: 10,
     protein: 25,
@@ -79,10 +117,12 @@ export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
   },
 ];
 
-export const mealsSeed: Omit<MealProps, 'id'>[] = [
+export const mealsSeed: Omit<MealProps, 'id' | 'creatorId'>[] = [
   {
     type: MealTypeEnum.BREAKFAST,
     name: 'Oatmeal with Fruits',
+    description: 'no description',
+    cuisine: CuisineTypeEnum.AFRICAN,
     unit: MealUnitEnum.GRAMMES,
     quantity: 200,
     calories: 300,
@@ -94,6 +134,8 @@ export const mealsSeed: Omit<MealProps, 'id'>[] = [
   {
     type: MealTypeEnum.LUNCH,
     name: 'Grilled Chicken Salad',
+    description: 'no description',
+    cuisine: CuisineTypeEnum.AFRICAN,
     unit: MealUnitEnum.GRAMMES,
     quantity: 400,
     calories: 500,
@@ -105,6 +147,8 @@ export const mealsSeed: Omit<MealProps, 'id'>[] = [
   {
     type: MealTypeEnum.DINNER,
     name: 'Salmon with Rice',
+    description: 'no description',
+    cuisine: CuisineTypeEnum.ASIAN,
     unit: MealUnitEnum.GRAMMES,
     quantity: 350,
     calories: 600,
@@ -112,5 +156,86 @@ export const mealsSeed: Omit<MealProps, 'id'>[] = [
     fat: 12,
     protein: 40,
     image: null,
+  },
+];
+
+export const dailyPlanSeed: Omit<DailyPlanProps, 'id' | 'planId'>[] = [
+  {
+    week: 1,
+    calories: 2000,
+    carbs: 250,
+    fat: 70,
+    protein: 150,
+    type: DailyPlanGeneratedWithEnum.MANUAL,
+    day: DayEnum.MONDAY,
+  },
+  {
+    week: 2,
+    calories: 1800,
+    carbs: 200,
+    fat: 60,
+    protein: 140,
+    type: DailyPlanGeneratedWithEnum.AI,
+    day: DayEnum.WEDNESDAY,
+  },
+  {
+    week: 3,
+    calories: 2200,
+    carbs: 270,
+    fat: 75,
+    protein: 160,
+    type: DailyPlanGeneratedWithEnum.COMPANY,
+    day: DayEnum.FRIDAY,
+  },
+];
+
+export const planSeed: Omit<PlanProps, 'id' | 'userId'>[] = [
+  {
+    name: 'Fat Loss Plan',
+    goal: GoalEnum.WEIGHT_LOSS,
+    unit: WeightUnitEnum.KG,
+    initialWeight: 80,
+    targetWeight: 70,
+    public: true,
+    current: true,
+    completed: false,
+    durationWeeks: 12,
+    calories: 1800,
+    carbs: 200,
+    fat: 50,
+    protein: 120,
+    type: PlanGeneratedWithEnum.MANUAL,
+  },
+  {
+    name: 'Muscle Gain Plan',
+    goal: GoalEnum.GAIN_MUSCLE,
+    unit: WeightUnitEnum.LBS,
+    initialWeight: 160,
+    targetWeight: 180,
+    public: false,
+    current: false,
+    completed: false,
+    durationWeeks: 16,
+    calories: 2800,
+    carbs: 300,
+    fat: 80,
+    protein: 180,
+    type: PlanGeneratedWithEnum.AI,
+  },
+  {
+    name: 'Maintenance Plan',
+    goal: GoalEnum.MAINTAIN,
+    unit: WeightUnitEnum.KG,
+    initialWeight: 70,
+    targetWeight: 70,
+    public: true,
+    current: true,
+    completed: true,
+    durationWeeks: 8,
+    calories: 2200,
+    carbs: 250,
+    fat: 70,
+    protein: 140,
+    type: PlanGeneratedWithEnum.MANUAL,
   },
 ];

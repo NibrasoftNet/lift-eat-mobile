@@ -1,9 +1,14 @@
 import { NutritionPlan } from '@/types/plan.type';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { DayEnum } from '@/utils/enum/general.enum';
+import {
+  CuisineTypeEnum,
+  MealTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
 
 const weightLossPlan: NutritionPlan = {
-  id: 'plan-001',
+  id: 1,
   name: 'Fat Burn & Lean Muscle',
   goal: GoalEnum.WEIGHT_LOSS,
   unit: 'kg',
@@ -26,18 +31,20 @@ const weightLossPlan: NutritionPlan = {
       protein: 140,
       meals: [
         {
-          id: 'meal-001',
+          id: 1,
           name: 'Grilled Chicken Salad',
           calories: 400,
           carbs: 20,
           fats: 15,
           protein: 50,
-          cuisineType: 'Healthy',
-          unit: 'plate',
+          type: MealTypeEnum.DINNER,
+          image: null,
+          cuisineType: CuisineTypeEnum.THAI,
+          unit: MealUnitEnum.GRAMMES,
           quantity: 1,
           ingredients: [
             {
-              id: 'ing-001',
+              id: 1,
               name: 'Chicken Breast',
               calories: 220,
               carbs: 0,
@@ -47,7 +54,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 150,
             },
             {
-              id: 'ing-002',
+              id: 2,
               name: 'Lettuce',
               calories: 10,
               carbs: 2,
@@ -57,7 +64,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 50,
             },
             {
-              id: 'ing-003',
+              id: 3,
               name: 'Olive Oil',
               calories: 100,
               carbs: 0,
@@ -67,7 +74,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 1,
             },
             {
-              id: 'ing-004',
+              id: 4,
               name: 'Tomato',
               calories: 20,
               carbs: 4,
@@ -90,18 +97,20 @@ const weightLossPlan: NutritionPlan = {
       protein: 140,
       meals: [
         {
-          id: 'meal-002',
+          id: 2,
           name: 'Barbeque',
           calories: 400,
           carbs: 20,
           fats: 15,
           protein: 50,
-          cuisineType: 'American',
-          unit: 'Gram',
+          type: MealTypeEnum.LUNCH,
+          image: null,
+          cuisineType: CuisineTypeEnum.AMERICAN,
+          unit: MealUnitEnum.GRAMMES,
           quantity: 100,
           ingredients: [
             {
-              id: 'ing-001',
+              id: 5,
               name: 'Chicken Breast',
               calories: 220,
               carbs: 0,
@@ -111,7 +120,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 150,
             },
             {
-              id: 'ing-002',
+              id: 6,
               name: 'Lettuce',
               calories: 10,
               carbs: 2,
@@ -121,7 +130,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 50,
             },
             {
-              id: 'ing-003',
+              id: 7,
               name: 'Olive Oil',
               calories: 100,
               carbs: 0,
@@ -131,7 +140,7 @@ const weightLossPlan: NutritionPlan = {
               quantity: 1,
             },
             {
-              id: 'ing-004',
+              id: 8,
               name: 'Tomato',
               calories: 20,
               carbs: 4,
@@ -148,7 +157,7 @@ const weightLossPlan: NutritionPlan = {
 };
 
 const weightGainPlan: NutritionPlan = {
-  id: 'plan-002',
+  id: 2,
   name: 'Mass Gainer Program',
   goal: GoalEnum.GAIN_MUSCLE,
   unit: 'lbs',
@@ -171,18 +180,20 @@ const weightGainPlan: NutritionPlan = {
       protein: 220,
       meals: [
         {
-          id: 'meal-002',
+          id: 3,
           name: 'Oatmeal with Peanut Butter & Banana',
           calories: 700,
           carbs: 90,
           fats: 20,
           protein: 30,
-          cuisineType: 'Breakfast',
-          unit: 'bowl',
+          type: MealTypeEnum.BREAKFAST,
+          image: null,
+          cuisineType: CuisineTypeEnum.EUROPEAN,
+          unit: MealUnitEnum.BOWL,
           quantity: 1,
           ingredients: [
             {
-              id: 'ing-005',
+              id: 8,
               name: 'Oats',
               calories: 300,
               carbs: 50,
@@ -192,7 +203,7 @@ const weightGainPlan: NutritionPlan = {
               quantity: 80,
             },
             {
-              id: 'ing-006',
+              id: 9,
               name: 'Peanut Butter',
               calories: 180,
               carbs: 6,
@@ -202,7 +213,7 @@ const weightGainPlan: NutritionPlan = {
               quantity: 2,
             },
             {
-              id: 'ing-007',
+              id: 10,
               name: 'Banana',
               calories: 120,
               carbs: 30,
@@ -212,7 +223,7 @@ const weightGainPlan: NutritionPlan = {
               quantity: 1,
             },
             {
-              id: 'ing-008',
+              id: 11,
               name: 'Milk',
               calories: 100,
               carbs: 10,
@@ -229,7 +240,7 @@ const weightGainPlan: NutritionPlan = {
 };
 
 const maintenancePlan: NutritionPlan = {
-  id: 'plan-003',
+  id: 3,
   name: 'Balanced Lifestyle Diet',
   goal: GoalEnum.MAINTAIN,
   unit: 'kg',
@@ -252,18 +263,20 @@ const maintenancePlan: NutritionPlan = {
       protein: 150,
       meals: [
         {
-          id: 'meal-003',
+          id: 4,
           name: 'Grilled Salmon with Quinoa & Vegetables',
+          type: MealTypeEnum.DINNER,
+          image: null,
           calories: 600,
           carbs: 50,
           fats: 25,
           protein: 50,
-          cuisineType: 'Mediterranean',
-          unit: 'plate',
+          cuisineType: CuisineTypeEnum.AMERICAN,
+          unit: MealUnitEnum.GRAMMES,
           quantity: 1,
           ingredients: [
             {
-              id: 'ing-009',
+              id: 15,
               name: 'Salmon',
               calories: 300,
               carbs: 0,
@@ -273,7 +286,7 @@ const maintenancePlan: NutritionPlan = {
               quantity: 150,
             },
             {
-              id: 'ing-010',
+              id: 16,
               name: 'Quinoa',
               calories: 180,
               carbs: 35,
@@ -283,7 +296,7 @@ const maintenancePlan: NutritionPlan = {
               quantity: 100,
             },
             {
-              id: 'ing-011',
+              id: 17,
               name: 'Olive Oil',
               calories: 100,
               carbs: 0,
@@ -293,7 +306,7 @@ const maintenancePlan: NutritionPlan = {
               quantity: 1,
             },
             {
-              id: 'ing-012',
+              id: 18,
               name: 'Broccoli',
               calories: 20,
               carbs: 5,

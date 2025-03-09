@@ -8,6 +8,18 @@ export enum DayEnum {
   'SUNDAY' = 'SUNDAY',
 }
 
+export enum DailyPlanGeneratedWithEnum {
+  'MANUAL' = 'MANUAL',
+  'AI' = 'AI',
+  'COMPANY' = 'COMPANY',
+}
+
+export enum PlanGeneratedWithEnum {
+  'MANUAL' = 'MANUAL',
+  'AI' = 'AI',
+  'COMPANY' = 'COMPANY',
+}
+
 export enum ToastTypeEnum {
   'INFOS' = 'INFOS',
   'SUCCESS' = 'SUCCESS',

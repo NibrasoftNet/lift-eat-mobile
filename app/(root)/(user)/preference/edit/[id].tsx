@@ -1,24 +1,50 @@
 import React from 'react';
 import UserGenderActivityForm from '../../../../../components/froms/UserGenderActivityForm';
-import { UserGenderActivityDefaultValueProps } from '../../../../../utils/validation/user/user-gender-activity.validation';
-import {
-  GenderEnum,
-  PhysicalActivityEnum,
-} from '../../../../../utils/enum/user-gender-activity.enum';
-import { GoalEnum } from '../../../../../utils/enum/user-details.enum';
+import { UserGenderActivityDefaultValueProps } from '@/utils/validation/user/user-gender-activity.validation';
+import { useLocalSearchParams } from 'expo-router';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { useQuery } from '@tanstack/react-query';
+import { eq } from 'drizzle-orm';
+import { UserPros, users } from '@/db/schema';
+import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
 export default function EditUserPreference() {
+  const { id } = useLocalSearchParams();
+  const drizzleDb = useDrizzleDb();
+
+  const {
+    data: actualUser,
+    isFetchedAfterMount,
+    isFetching,
+    isLoading,
+  } = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => {
+      return drizzleDb.query.users.findFirst({
+        where: eq(users.id, Number(id)),
+      });
+    },
+  });
+
   const defaultGenderActivityValues: UserGenderActivityDefaultValueProps = {
-    age: 20,
-    gender: GenderEnum.MALE,
-    physicalActivity: PhysicalActivityEnum.LOW,
-    goal: 0,
-    goalUnit: GoalEnum.MAINTAIN,
+    id: Number(actualUser?.id!),
+    age: actualUser?.weight!,
+    gender: actualUser?.gender!,
+    physicalActivity: actualUser?.physicalActivity!,
+    //goal: 0,
+    //goalUnit: GoalEnum.MAINTAIN,
   };
   return (
-    <UserGenderActivityForm
-      defaultValues={defaultGenderActivityValues}
-      operation="update"
-    />
+    <QueryStateHandler<UserPros>
+      data={actualUser}
+      isLoading={isLoading}
+      isFetching={isFetching}
+      isFetchedAfterMount={isFetchedAfterMount}
+    >
+      <UserGenderActivityForm
+        defaultValues={defaultGenderActivityValues}
+        operation="update"
+      />
+    </QueryStateHandler>
   );
 }

@@ -210,7 +210,7 @@ export default function PlansScreen() {
         <Text className="text-2xl font-bold text-gray-900">
           Nutrition Plans
         </Text>
-        <Link href="/plans/my-plans/details/create">
+        <Link href="/plans/my-plans/create">
           <Icon as={SoupIcon} className="w-8 h-8" />
         </Link>
       </Box>
@@ -226,7 +226,7 @@ export default function PlansScreen() {
         isHovered={false}
         isDisabled={false}
         isPressed={false}
-        onPress={() => router.push('/plans/my-plans/details/create')}
+        onPress={() => router.push('/plans/my-plans/create')}
       >
         <FabIcon as={AddIcon} />
         <FabLabel>New Plan</FabLabel>

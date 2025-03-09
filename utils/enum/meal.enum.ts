@@ -6,6 +6,7 @@ export enum MealTypeEnum {
 }
 
 export enum CuisineTypeEnum {
+  GENERAL = 'GENERAL',
   AFRICAN = 'AFRICAN',
   AMERICAN = 'AMERICAN',
   ASIAN = 'ASIAN',

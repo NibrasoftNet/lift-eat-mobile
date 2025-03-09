@@ -1,6 +1,6 @@
 import { VStack } from '../ui/vstack';
 import React, { useState } from 'react';
-import { Button, ButtonText } from '../ui/button';
+import { Button, ButtonSpinner, ButtonText } from '../ui/button';
 import { Card } from '../ui/card';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,6 +40,7 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { getImageFromPicker } from '@/utils/utils';
+import { Colors } from '@/utils/constants/Colors';
 
 export default function UserProfileForm({
   defaultValues,
@@ -80,35 +81,29 @@ export default function UserProfileForm({
     }
   };
 
-  const { mutateAsync, isSuccess } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserProfileFormData) => {
       return await updateUser(drizzleDb, defaultValues.id, data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title="Success"
+              description="Success update profile"
+            />
+          );
+        },
+      });
     },
-  });
-
-  const onSubmit = async (data: UserProfileFormData) => {
-    try {
-      await mutateAsync(data);
-      if (isSuccess) {
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.SUCCESS}
-                title="Success"
-                description="Success update profile"
-              />
-            );
-          },
-        });
-      }
-    } catch (error: any) {
+    onError: (error: any) => {
+      // Show error toast
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -123,7 +118,11 @@ export default function UserProfileForm({
           );
         },
       });
-    }
+    },
+  });
+
+  const onSubmit = async (data: UserProfileFormData) => {
+    await mutateAsync(data);
   };
 
   return (
@@ -210,6 +209,7 @@ export default function UserProfileForm({
       </Card>
       {/* Submit Button */}
       <Button onPress={handleSubmit(onSubmit)} className="rounded-md">
+        {isPending && <ButtonSpinner color={Colors.light.icon} />}
         <ButtonText>Update</ButtonText>
       </Button>
 

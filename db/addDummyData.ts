@@ -1,13 +1,23 @@
 import {
-  ingredients,
-  ingredientsIngredientsStandard,
+  dailyPlan,
+  dailyPlanMeals,
+  DailyPlanMealsProps,
   ingredientsStandard,
+  mealIngredients,
+  MealIngredientsProps,
   meals,
+  plan,
   users,
 } from '@/db/schema';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import { AsyncStorage } from 'expo-sqlite/kv-store';
-import { ingredientsStandardSeed, mealsSeed, usersSeed } from '@/db/seeds';
+import {
+  dailyPlanSeed,
+  ingredientsStandardSeed,
+  mealsSeed,
+  planSeed,
+  usersSeed,
+} from '@/db/seeds';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { sql } from 'drizzle-orm';
@@ -51,7 +61,7 @@ async function prepareUserWithImages() {
       if (!user.profileImage) {
         // @ts-ignore
         const imageBuffer = await getImageBuffer(
-          require('../assets/images/backgrounds/chinese-bg.jpg'),
+          require('../assets/images/logo_no_bg.png'),
         );
         return {
           ...user,
@@ -60,6 +70,26 @@ async function prepareUserWithImages() {
         };
       }
       return user;
+    }),
+  );
+}
+
+async function prepareIngredientStandardWithImages() {
+  return await Promise.all(
+    ingredientsStandardSeed.map(async (ingStandard) => {
+      // @ts-ignore
+      if (!ingStandard.image) {
+        // @ts-ignore
+        const imageBuffer = await getImageBuffer(
+          require('../assets/images/foods/salmon.jpg'),
+        );
+        return {
+          ...ingStandard,
+          image:
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+        };
+      }
+      return ingStandard;
     }),
   );
 }
@@ -92,70 +122,113 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
     console.log(' CLEAR existing tables ...');
     //return;
     db.run(sql`DELETE FROM ${users}`);
-    db.run(sql`DELETE FROM ${meals}`);
     db.run(sql`DELETE FROM ${ingredientsStandard}`);
-    db.run(sql`DELETE FROM ${ingredients}`);
-    db.run(sql`DELETE FROM ${ingredientsIngredientsStandard}`);
+    db.run(sql`DELETE FROM ${mealIngredients}`);
+    db.run(sql`DELETE FROM ${meals}`);
+    db.run(sql`DELETE FROM ${dailyPlan}`);
+    db.run(sql`DELETE FROM ${dailyPlanMeals}`);
+    db.run(sql`DELETE FROM ${plan}`);
   }
 
   console.log('Inserting new list...');
 
   // Process users with images
-  const mealsWithUsers = await prepareUserWithImages();
+  const usersWithImage = await prepareUserWithImages();
+  console.log('Preparation Users completed: success...');
 
   // Insert Users
-  await db.insert(users).values(mealsWithUsers);
+  const usersIds = await db
+    .insert(users)
+    .values(usersWithImage)
+    .returning({ id: users.id });
+  console.log('Inserting Users completed: success...');
+
+  // Process ingredient standard with images
+  const ingredientStandardWithImages =
+    await prepareIngredientStandardWithImages();
+
+  console.log('Preparation ingredient Standard completed: success...');
 
   // Insert Ingredient Standards
   const ingredientStandardIds = await db
     .insert(ingredientsStandard)
-    .values(ingredientsStandardSeed)
+    .values(ingredientStandardWithImages)
     .returning({ id: ingredientsStandard.id });
+  console.log('Inserting Ingredient standards completed: success...');
 
   // Process meals with images
   const mealsWithImages = await prepareMealsWithImages();
+  const mealsWithCreator = mealsWithImages.map((meal) => ({
+    ...meal,
+    creatorId: usersIds[0].id, // Adding creatorId to each object
+  }));
 
   // Insert Meals
   const mealIds = await db
     .insert(meals)
-    .values(mealsWithImages)
+    .values(mealsWithCreator)
     .returning({ id: meals.id });
+  console.log('Inserting meals completed: success...');
+
+  const ingredientWithMealAndStandard: Omit<MealIngredientsProps, 'id'>[] =
+    ingredientsStandardSeed.map((ingredient) => {
+      const selectedIngredientStandardId =
+        ingredientStandardIds[
+          Math.floor(Math.random() * ingredientStandardIds.length)
+        ].id;
+
+      const selectedMealId =
+        mealIds[Math.floor(Math.random() * mealIds.length)].id;
+
+      return {
+        ...ingredient,
+        ingredientStandardId: selectedIngredientStandardId,
+        mealId: selectedMealId,
+      };
+    });
 
   // Insert Ingredients (Linking to Meals)
-  const ingredientIds = await db
-    .insert(ingredients)
-    .values([
-      { mealId: mealIds[0].id, quantity: 100 },
-      { mealId: mealIds[0].id, quantity: 100 },
-      { mealId: mealIds[1].id, quantity: 150 },
-      { mealId: mealIds[2].id, quantity: 200 },
-      { mealId: mealIds[2].id, quantity: 150 },
-    ])
-    .returning({ id: ingredients.id });
+  await db.insert(mealIngredients).values(ingredientWithMealAndStandard);
+  console.log('Inserting mealIngredients completed: success...');
 
-  // Link Ingredients to Ingredient Standards
-  await db.insert(ingredientsIngredientsStandard).values([
-    {
-      ingredientId: ingredientIds[0].id,
-      ingredientStandardId: ingredientStandardIds[0].id,
-    },
-    {
-      ingredientId: ingredientIds[1].id,
-      ingredientStandardId: ingredientStandardIds[1].id,
-    },
-    {
-      ingredientId: ingredientIds[2].id,
-      ingredientStandardId: ingredientStandardIds[2].id,
-    },
-    {
-      ingredientId: ingredientIds[3].id,
-      ingredientStandardId: ingredientStandardIds[3].id,
-    },
-    {
-      ingredientId: ingredientIds[4].id,
-      ingredientStandardId: ingredientStandardIds[4].id,
-    },
-  ]);
+  // Insert Plans
+  const plansWithUser = planSeed.map((plan) => ({
+    ...plan,
+    userId: usersIds[0].id, // Adding userId to each plan
+  }));
+
+  const planIds = await db
+    .insert(plan)
+    .values(plansWithUser)
+    .returning({ id: plan.id });
+  console.log('Inserting Plans completed: success...');
+
+  // Insert Daily Plans
+  const dailyPlansWithPlan = dailyPlanSeed.map((dailyPlan) => ({
+    ...dailyPlan,
+    planId: planIds[Math.floor(Math.random() * planIds.length)].id, // Adding planId to each dailyPlan
+  }));
+
+  const dailyPlanIds = await db
+    .insert(dailyPlan)
+    .values(dailyPlansWithPlan)
+    .returning({ id: dailyPlan.id });
+  console.log('Inserting Daily Plans completed: success...');
+
+  // Insert Daily Plan Meals
+  const dailyPlanMealsData: Omit<DailyPlanMealsProps, 'id'>[] =
+    dailyPlanIds.map((dailyPlan) => {
+      const selectedMealId =
+        mealIds[Math.floor(Math.random() * mealIds.length)].id;
+
+      return {
+        dailyPlanId: dailyPlan.id,
+        mealId: selectedMealId,
+      };
+    });
+
+  await db.insert(dailyPlanMeals).values(dailyPlanMealsData);
+  console.log('Inserting Daily Plan Meals completed: success...');
 
   AsyncStorage.setItemSync('dbInitialized', 'true');
   console.log('Seed data inserted successfully!');
