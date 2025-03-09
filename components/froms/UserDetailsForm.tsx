@@ -111,34 +111,23 @@ export default function UserDetailsForm({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title="Success"
+              description="Success update details"
+            />
+          );
+        },
+      });
     },
-  });
-
-  const onSubmit = async (data: UserDetailsFormData) => {
-    try {
-      const updatedUser = await mutateAsync(data);
-      if (updatedUser.id) {
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.SUCCESS}
-                title="Success"
-                description="Success update profile"
-              />
-            );
-          },
-        });
-        if (operation === 'update') {
-          router.back();
-        } else {
-          router.push('/preference');
-        }
-      }
-    } catch (error: any) {
+    onError: (error: any) => {
+      // Show error toast
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -153,7 +142,11 @@ export default function UserDetailsForm({
           );
         },
       });
-    }
+    },
+  });
+
+  const onSubmit = async (data: UserDetailsFormData) => {
+    await mutateAsync(data);
   };
 
   const handleCancel = () => {
@@ -326,7 +319,7 @@ export default function UserDetailsForm({
           />
         </Grid>
       </Card>
-      <HStack className="w-full justify-between items-center mt-4 gap-2">
+      <HStack className="w-full justify-between items-center mt-4 gap-2 px-4">
         {/* Submit Button */}
         <Button
           className="w-2/5 bg-tertiary-500"

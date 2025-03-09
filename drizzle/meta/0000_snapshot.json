@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "68665adc-a8b7-4b06-8767-5d4c993d5a9f",
+  "id": "5c0935f4-7efc-4799-ba66-13968abb273d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "ingredients": {
-      "name": "ingredients",
+    "daily_plan": {
+      "name": "daily_plan",
       "columns": {
         "id": {
           "name": "id",
@@ -14,16 +14,65 @@
           "notNull": true,
           "autoincrement": true
         },
-        "meal_id": {
-          "name": "meal_id",
+        "week": {
+          "name": "week",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
-        "quantity": {
-          "name": "quantity",
+        "calories": {
+          "name": "calories",
           "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 17
+        },
+        "carbs": {
+          "name": "carbs",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "fat": {
+          "name": "fat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "protein": {
+          "name": "protein",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'MANUAL'"
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'MONDAY'"
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -31,17 +80,17 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "ingredients_meal_id_meals_id_fk": {
-          "name": "ingredients_meal_id_meals_id_fk",
-          "tableFrom": "ingredients",
-          "tableTo": "meals",
+        "daily_plan_plan_id_plan_id_fk": {
+          "name": "daily_plan_plan_id_plan_id_fk",
+          "tableFrom": "daily_plan",
+          "tableTo": "plan",
           "columnsFrom": [
-            "meal_id"
+            "plan_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -49,8 +98,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "ingredients_ingredients_standard": {
-      "name": "ingredients_ingredients_standard",
+    "daily_plan_meals": {
+      "name": "daily_plan_meals",
       "columns": {
         "id": {
           "name": "id",
@@ -59,15 +108,15 @@
           "notNull": true,
           "autoincrement": true
         },
-        "ingredient_id": {
-          "name": "ingredient_id",
+        "daily_plan_id": {
+          "name": "daily_plan_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "ingredient_standard_id": {
-          "name": "ingredient_standard_id",
+        "meal_id": {
+          "name": "meal_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -76,30 +125,30 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "ingredients_ingredients_standard_ingredient_id_ingredients_id_fk": {
-          "name": "ingredients_ingredients_standard_ingredient_id_ingredients_id_fk",
-          "tableFrom": "ingredients_ingredients_standard",
-          "tableTo": "ingredients",
+        "daily_plan_meals_daily_plan_id_daily_plan_id_fk": {
+          "name": "daily_plan_meals_daily_plan_id_daily_plan_id_fk",
+          "tableFrom": "daily_plan_meals",
+          "tableTo": "daily_plan",
           "columnsFrom": [
-            "ingredient_id"
+            "daily_plan_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "ingredients_ingredients_standard_ingredient_standard_id_ingredients_standard_id_fk": {
-          "name": "ingredients_ingredients_standard_ingredient_standard_id_ingredients_standard_id_fk",
-          "tableFrom": "ingredients_ingredients_standard",
-          "tableTo": "ingredients_standard",
+        "daily_plan_meals_meal_id_meals_id_fk": {
+          "name": "daily_plan_meals_meal_id_meals_id_fk",
+          "tableFrom": "daily_plan_meals",
+          "tableTo": "meals",
           "columnsFrom": [
-            "ingredient_standard_id"
+            "meal_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -122,7 +171,8 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'felfel'"
         },
         "unit": {
           "name": "unit",
@@ -137,28 +187,40 @@
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
+        },
+        "calories": {
+          "name": "calories",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 17
         },
         "carbs": {
           "name": "carbs",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "fat": {
           "name": "fat",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "protein": {
           "name": "protein",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "image": {
           "name": "image",
@@ -170,6 +232,104 @@
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "meal_ingredients": {
+      "name": "meal_ingredients",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "calories": {
+          "name": "calories",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 17
+        },
+        "carbs": {
+          "name": "carbs",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "fat": {
+          "name": "fat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "protein": {
+          "name": "protein",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "ingredient_standard_id": {
+          "name": "ingredient_standard_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meal_id": {
+          "name": "meal_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meal_ingredients_ingredient_standard_id_ingredients_standard_id_fk": {
+          "name": "meal_ingredients_ingredient_standard_id_ingredients_standard_id_fk",
+          "tableFrom": "meal_ingredients",
+          "tableTo": "ingredients_standard",
+          "columnsFrom": [
+            "ingredient_standard_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "meal_ingredients_meal_id_meals_id_fk": {
+          "name": "meal_ingredients_meal_id_meals_id_fk",
+          "tableFrom": "meal_ingredients",
+          "tableTo": "meals",
+          "columnsFrom": [
+            "meal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -188,7 +348,7 @@
           "name": "type",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'BREAKFAST'"
         },
@@ -197,13 +357,30 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'kosksi'"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'no description'"
+        },
+        "cuisine": {
+          "name": "cuisine",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'GENERAL'"
         },
         "unit": {
           "name": "unit",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'GRAMMES'"
         },
@@ -212,35 +389,40 @@
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "calories": {
           "name": "calories",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 17
         },
         "carbs": {
           "name": "carbs",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "fat": {
           "name": "fat",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "protein": {
           "name": "protein",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 1
         },
         "image": {
           "name": "image",
@@ -248,10 +430,181 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "creator_id": {
+          "name": "creator_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "meals_creator_id_users_id_fk": {
+          "name": "meals_creator_id_users_id_fk",
+          "tableFrom": "meals",
+          "tableTo": "users",
+          "columnsFrom": [
+            "creator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "plan": {
+      "name": "plan",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'PlanB'"
+        },
+        "goal": {
+          "name": "goal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'MAINTAIN'"
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'KG'"
+        },
+        "initial_weight": {
+          "name": "initial_weight",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 60
+        },
+        "target_weight": {
+          "name": "target_weight",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 60
+        },
+        "public": {
+          "name": "public",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "current": {
+          "name": "current",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "completed": {
+          "name": "completed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "duration_weeks": {
+          "name": "duration_weeks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "calories": {
+          "name": "calories",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 17
+        },
+        "carbs": {
+          "name": "carbs",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "fat": {
+          "name": "fat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "protein": {
+          "name": "protein",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'MANUAL'"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "plan_user_id_users_id_fk": {
+          "name": "plan_user_id_users_id_fk",
+          "tableFrom": "plan",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -271,7 +624,8 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'John'"
         },
         "email": {
           "name": "email",
@@ -290,11 +644,11 @@
         },
         "weight": {
           "name": "weight",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 30
+          "default": 0
         },
         "weight_unit": {
           "name": "weight_unit",
@@ -326,6 +680,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "physical_activity": {
+          "name": "physical_activity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'MODERATE'"
         }
       },
       "indexes": {

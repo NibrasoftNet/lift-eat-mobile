@@ -18,11 +18,6 @@ import {
   PhysicalActivityEnum,
 } from '@/utils/enum/user-gender-activity.enum';
 import {
-  UserGenderActivityDefaultValueProps,
-  UserGenderActivityFormData,
-  userGenderActivitySchema,
-} from '@/utils/validation/user/user-gender-activity.validation';
-import {
   FormControl,
   FormControlError,
   FormControlErrorIcon,
@@ -33,7 +28,6 @@ import {
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateUser } from '@/utils/services/users.service';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -42,14 +36,18 @@ import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
 import { Colors } from '@/utils/constants/Colors';
 import { GetGoalImages, GetPhysicalActivityImages } from '@/utils/utils';
+import {
+  CalculateCaloriesIntakeDefaultValueProps,
+  CalculateCaloriesIntakeFormData,
+  calculateCaloriesIntakeSchema,
+} from '@/utils/validation/plan/calculate-calories-intake.validation';
+import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { activityOptions } from '@/utils/constants/constant';
 
-export default function UserGenderActivityForm({
+export default function CalculateCaloriesIntakeForm({
   defaultValues,
-  operation,
 }: {
-  defaultValues: UserGenderActivityDefaultValueProps;
-  operation: 'create' | 'update';
+  defaultValues: CalculateCaloriesIntakeDefaultValueProps;
 }) {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
@@ -61,7 +59,7 @@ export default function UserGenderActivityForm({
   const [activityUnit, setActivityUnit] = useState<PhysicalActivityEnum>(
     defaultValues.physicalActivity,
   );
-  // const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
+  const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
 
   // Shared values for animations
   const slideGenderPosition = useSharedValue(0);
@@ -79,8 +77,8 @@ export default function UserGenderActivityForm({
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<UserGenderActivityFormData>({
-    resolver: zodResolver(userGenderActivitySchema),
+  } = useForm<CalculateCaloriesIntakeFormData>({
+    resolver: zodResolver(calculateCaloriesIntakeSchema),
     defaultValues,
   });
 
@@ -127,6 +125,11 @@ export default function UserGenderActivityForm({
     setValue('physicalActivity', unit);
   };
 
+  const handleGoalUnitChange = (unit: GoalEnum) => {
+    setGoalUnit(unit);
+    setValue('goalUnit', unit);
+  };
+
   const animatedGenderStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: slideGenderPosition.value }],
     width: buttonWidth,
@@ -142,12 +145,18 @@ export default function UserGenderActivityForm({
     borderRadius: 5,
   }));
 
-  const { mutateAsync, isPending } = useMutation({
+  /* const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserGenderActivityFormData) => {
       return await updateUser(drizzleDb, defaultValues.id, data);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });*/
+
+  const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
+    try {
+      // const updatedUser = await mutateAsync(data);
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -157,14 +166,12 @@ export default function UserGenderActivityForm({
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
               title="Success"
-              description="Success update preference"
+              description="Success update profile"
             />
           );
         },
       });
-    },
-    onError: (error: any) => {
-      // Show error toast
+    } catch (error: any) {
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -179,18 +186,6 @@ export default function UserGenderActivityForm({
           );
         },
       });
-    },
-  });
-
-  const onSubmit = async (data: UserGenderActivityFormData) => {
-    await mutateAsync(data);
-  };
-
-  const handleCancel = () => {
-    if (operation === 'update') {
-      router.back();
-    } else {
-      router.push('/analytics');
     }
   };
 
@@ -248,8 +243,8 @@ export default function UserGenderActivityForm({
           )}
         </FormControl>
       </Card>
-      {/*<Card className="rounded-lg flex flex-col gap-2">
-         Goal Input 
+      <Card className="rounded-lg flex flex-col gap-2">
+        {/* Goal Input */}
         <FormControl isInvalid={!!errors.goal}>
           <FormControlLabel>
             <FormControlLabelText>Goal</FormControlLabelText>
@@ -285,7 +280,6 @@ export default function UserGenderActivityForm({
           _extra={{ className: 'grid-cols-3' }}
           style={{ position: 'relative' }}
         >
-           Buttons 
           <GridItem
             _extra={{ className: 'col-span-1' }}
             className="bg-gray-200 border border-gray-300 rounded-md"
@@ -332,7 +326,7 @@ export default function UserGenderActivityForm({
             </Button>
           </GridItem>
         </Grid>
-      </Card>*/}
+      </Card>
       {/* Gender Selection */}
       <Card className="rounded-lg flex flex-col gap-2">
         <Grid
@@ -416,14 +410,14 @@ export default function UserGenderActivityForm({
         <Button
           className="w-2/5 bg-tertiary-500"
           size="sm"
-          onPress={handleCancel}
+          onPress={() => router.back()}
         >
-          <ButtonText>{operation === 'create' ? 'Skip' : 'Cancel'}</ButtonText>
+          <ButtonText>Cancel</ButtonText>
         </Button>
         {/* Submit Button */}
         <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
-          {isPending && <ButtonSpinner color={Colors.light.icon} />}
-          <ButtonText>Update</ButtonText>
+          <ButtonSpinner color={Colors.light.icon} />
+          <ButtonText>Create</ButtonText>
         </Button>
       </HStack>
     </VStack>

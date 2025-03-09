@@ -52,5 +52,6 @@ export const Colors = {
   },
   green: {
     light: '#DCFCE7',
+    background: '#29CC29',
   },
 };

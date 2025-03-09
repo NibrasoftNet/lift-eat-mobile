@@ -15,8 +15,6 @@ export default function CreatePreference() {
     age: 20,
     gender: GenderEnum.MALE,
     physicalActivity: PhysicalActivityEnum.LOW,
-    //goal: 0,
-    //goalUnit: GoalEnum.MAINTAIN,
   };
   return (
     <UserGenderActivityForm
