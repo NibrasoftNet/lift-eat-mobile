@@ -18,14 +18,17 @@ import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
 import { Button } from '@/components/ui/button';
 import { Meal } from '@/types/plan.type';
-import { dailyPlan, plan, PlanWithDailyPlansProps } from '@/db/schema';
+import { PlanWithDailyPlansAndMealsProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useQuery } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { eq } from 'drizzle-orm';
+import { getPlanDetails } from '@/utils/services/plan.service';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { useToast } from '@/components/ui/toast';
 
 export default function PlanDetailsScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const daysOfWeek = Object.values(DayEnum);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
@@ -41,19 +44,7 @@ export default function PlanDetailsScreen() {
     isLoading,
   } = useQuery({
     queryKey: [`plan-${id}`],
-    queryFn: async () => {
-      const foundPlan = await drizzleDb.query.plan.findFirst({
-        where: eq(plan.id, Number(id)),
-      });
-
-      if (!foundPlan) return null;
-
-      const dailyPlans = await drizzleDb.query.dailyPlan.findMany({
-        where: eq(dailyPlan.planId, Number(id)),
-      });
-      console.log('selem 3alaykom', { ...foundPlan, dailyPlans });
-      return { ...foundPlan, dailyPlans } as PlanWithDailyPlansProps;
-    },
+    queryFn: async () => await getPlanDetails(drizzleDb, id),
   });
 
   // Filter daily plans based on selectedDay and selectedWeek
@@ -69,14 +60,6 @@ export default function PlanDetailsScreen() {
 
   // Reanimated shared value for animation
   const weekAnimation = useSharedValue(1);
-
-  if (!plan) {
-    return (
-      <Box className="flex-1 justify-center items-center">
-        <Text className="text-lg text-gray-600">Plan not found</Text>
-      </Box>
-    );
-  }
 
   const handleWeekChange = (direction: 'left' | 'right') => {
     /*    if (direction === 'left' && selectedWeek > 1) {
@@ -110,7 +93,7 @@ export default function PlanDetailsScreen() {
   };
 
   return (
-    <QueryStateHandler<PlanWithDailyPlansProps>
+    <QueryStateHandler<PlanWithDailyPlansAndMealsProps>
       data={singlePlan}
       isLoading={isLoading}
       isFetching={isFetching}
@@ -123,7 +106,7 @@ export default function PlanDetailsScreen() {
             className={`rounded-xl h-24 shadow-lg mb-4 overflow-hidden`}
           >
             <ImageBackground
-              source={GetGoalImages['GAIN_MUSCLE']}
+              source={GetGoalImages[singlePlan?.goal!]}
               className="size-full object-cover"
               blurRadius={10}
             >
