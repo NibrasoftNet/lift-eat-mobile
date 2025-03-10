@@ -20,7 +20,6 @@ import {
 } from '@/db/seeds';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
-import { sql } from 'drizzle-orm';
 
 // Static image paths using require()
 const images = {
@@ -119,15 +118,15 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   const value = AsyncStorage.getItemSync('dbInitialized');
 
   if (value) {
-    console.log(' CLEAR existing tables ...');
-    //return;
-    db.run(sql`DELETE FROM ${users}`);
+    console.log('Seed data already exists ...');
+    return;
+    /*db.run(sql`DELETE FROM ${users}`);
     db.run(sql`DELETE FROM ${ingredientsStandard}`);
     db.run(sql`DELETE FROM ${mealIngredients}`);
     db.run(sql`DELETE FROM ${meals}`);
     db.run(sql`DELETE FROM ${dailyPlan}`);
     db.run(sql`DELETE FROM ${dailyPlanMeals}`);
-    db.run(sql`DELETE FROM ${plan}`);
+    db.run(sql`DELETE FROM ${plan}`);*/
   }
 
   console.log('Inserting new list...');

@@ -1,7 +1,7 @@
-import { Card } from '../../components/ui/card';
-import { Spinner } from '../../components/ui/spinner';
-import { VStack } from '../../components/ui/vstack';
-import { Text } from '../../components/ui/text';
+import { Card } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { VStack } from '@/components/ui/vstack';
+import { Text } from '@/components/ui/text';
 import { Heading } from 'lucide-react-native';
 import { Link } from 'expo-router';
 
@@ -15,7 +15,7 @@ export const QueryStateHandler = <T,>({
   isLoading: boolean;
   isFetching: boolean;
   isFetchedAfterMount: boolean;
-  data: T | undefined | null;
+  data: T | T[] | undefined | null;
   children: React.ReactNode;
 }) => {
   if (!data) {
