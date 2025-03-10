@@ -1,11 +1,7 @@
-import { NutritionPlan } from '@/types/plan.type';
-import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { DayEnum } from '@/utils/enum/general.enum';
-import {
-  CuisineTypeEnum,
-  MealTypeEnum,
-  MealUnitEnum,
-} from '@/utils/enum/meal.enum';
+import { GoalEnum } from '../enum/user-details.enum';
+import { DayEnum } from '../enum/general.enum';
+import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '../enum/meal.enum';
+import { NutritionPlan } from '../../types/plan.type';
 
 const weightLossPlan: NutritionPlan = {
   id: 1,

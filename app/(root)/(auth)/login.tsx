@@ -29,7 +29,6 @@ import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { UserPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 import { findOrCreateUser } from '@/utils/services/users.service';
 import { Colors } from '@/utils/constants/Colors';
@@ -56,36 +55,32 @@ export default function Login() {
     mutationFn: async (data: LoginFormData) => {
       return await findOrCreateUser(drizzleDb, data.email);
     },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      const res = (await mutateAsync(data)) as UserPros;
-      if (res.id) {
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.SUCCESS}
-                title="Success"
-                description="Success Login"
-              />
-            );
-          },
-        });
-        setUser({
-          id: res.id,
-          email: res.email,
-        });
-        router.push('/analytics');
-      }
-    } catch (error: any) {
+    onSuccess: async (data) => {
       toast.show({
         placement: 'top',
-        render: ({ id }) => {
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title="Success"
+              description="Success update details"
+            />
+          );
+        },
+      });
+      setUser({
+        id: data?.id,
+        email: data?.email,
+      });
+      router.push('/analytics');
+    },
+    onError: (error: any) => {
+      // Show error toast
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
           const toastId = 'toast-' + id;
           return (
             <MultiPurposeToast
@@ -97,7 +92,11 @@ export default function Login() {
           );
         },
       });
-    }
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    await mutateAsync(data);
   };
 
   return (

@@ -10,7 +10,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { HStack } from '@/components/ui/hstack';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
 import { Divider } from '@/components/ui/divider';
-import { nutritionPlanExamples } from '@/utils/exmaples/nutrition-plan.example';
+import { nutritionPlanExamples } from '@/utils/examples/nutrition-plan.example';
 import { ImageBackground, View } from 'react-native';
 import { GetGoalIcons, GetGoalImages } from '@/utils/utils';
 import {
@@ -24,25 +24,34 @@ import {
 import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { SoupIcon } from 'lucide-react-native';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import useSessionStore from '@/utils/store/sessionStore';
+import { useQuery } from '@tanstack/react-query';
+import { PlanProps, UserPros } from '@/db/schema';
+import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
 export default function PlansScreen() {
-  const [selectedPlan, setSelectedPlan] = useState<NutritionPlan>(
-    nutritionPlanExamples[0],
-  );
   const router = useRouter();
+  const drizzleDb = useDrizzleDb();
+  const { user } = useSessionStore();
+  const {
+    data: plansList,
+    isFetchedAfterMount,
+    isFetching,
+    isLoading,
+  } = useQuery({
+    queryKey: ['my-plans'],
+    queryFn: async () => {
+      const plans = await drizzleDb.query.plan.findMany();
+      return plans ?? null;
+    },
+  });
 
-  const handlePlanCardPress = (plan: NutritionPlan) => {
-    setSelectedPlan(plan);
+  const handlePlanCardPress = (plan: PlanProps) => {
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
-  const renderPlan = ({
-    item,
-    index,
-  }: {
-    item: NutritionPlan;
-    index: number;
-  }) => (
+  const renderPlan = ({ item, index }: { item: PlanProps; index: number }) => (
     <Animated.View
       entering={FadeInUp.delay(index * 100)}
       className={`rounded-xl shadow-lg mb-4 overflow-hidden`}
@@ -59,7 +68,7 @@ export default function PlansScreen() {
                 <Animated.Image
                   entering={FadeInUp.delay(index * 100)}
                   source={GetGoalIcons[item.goal]}
-                  sharedTransitionTag={item.id}
+                  sharedTransitionTag={String(item.id)}
                   className="w-8 h-8 object-cover"
                 />
                 <Text className="text-primary-700 font-medium capitalize">
@@ -125,7 +134,7 @@ export default function PlansScreen() {
                   </View>
                 </VStack>
                 <View className="flex w-full justify-end items-end">
-                  {selectedPlan.id === item.id && (
+                  {item.current && (
                     <View
                       className={`w-24 h-8 rounded-xl bg-black flex items-center justify-center`}
                     >
@@ -171,7 +180,7 @@ export default function PlansScreen() {
                 </View>
                 <View className={`w-full rounded-b-xl bg-green-300`}>
                   <Text className={`text-gray-600 font-semibold text-center`}>
-                    {item.fats} Gr
+                    {item.fat} Gr
                   </Text>
                 </View>
               </VStack>
@@ -205,32 +214,39 @@ export default function PlansScreen() {
   );
 
   return (
-    <Box className="flex-1 bg-gray-50">
-      <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">
-          Nutrition Plans
-        </Text>
-        <Link href="/plans/my-plans/create">
-          <Icon as={SoupIcon} className="w-8 h-8" />
-        </Link>
+    <QueryStateHandler<PlanProps>
+      data={plansList}
+      isLoading={isLoading}
+      isFetching={isFetching}
+      isFetchedAfterMount={isFetchedAfterMount}
+    >
+      <Box className="flex-1 bg-gray-50">
+        <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">
+          <Text className="text-2xl font-bold text-gray-900">
+            Nutrition Plans
+          </Text>
+          <Link href="/plans/my-plans/create">
+            <Icon as={SoupIcon} className="w-8 h-8" />
+          </Link>
+        </Box>
+        <FlashList
+          data={plansList}
+          renderItem={renderPlan}
+          estimatedItemSize={200}
+          contentContainerStyle={{ padding: 16 }}
+        />
+        <Fab
+          size="md"
+          placement="bottom right"
+          isHovered={false}
+          isDisabled={false}
+          isPressed={false}
+          onPress={() => router.push('/plans/my-plans/create')}
+        >
+          <FabIcon as={AddIcon} />
+          <FabLabel>New Plan</FabLabel>
+        </Fab>
       </Box>
-      <FlashList
-        data={nutritionPlanExamples}
-        renderItem={renderPlan}
-        estimatedItemSize={200}
-        contentContainerStyle={{ padding: 16 }}
-      />
-      <Fab
-        size="md"
-        placement="bottom right"
-        isHovered={false}
-        isDisabled={false}
-        isPressed={false}
-        onPress={() => router.push('/plans/my-plans/create')}
-      >
-        <FabIcon as={AddIcon} />
-        <FabLabel>New Plan</FabLabel>
-      </Fab>
-    </Box>
+    </QueryStateHandler>
   );
 }

@@ -236,3 +236,8 @@ export type MealProps = typeof meals.$inferSelect;
 export type DailyPlanProps = typeof dailyPlan.$inferSelect;
 export type DailyPlanMealsProps = typeof dailyPlanMeals.$inferSelect;
 export type PlanProps = typeof plan.$inferSelect;
+
+//Custom type
+export type PlanWithDailyPlansAndMealsProps = PlanProps & {
+  dailyPlans: (DailyPlanProps & { meals: MealProps[] })[];
+};
