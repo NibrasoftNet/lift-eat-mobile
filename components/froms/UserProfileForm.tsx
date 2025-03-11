@@ -22,7 +22,7 @@ import {
   UserProfileFormData,
   userProfileSchema,
 } from '@/utils/validation/user/user-profile.validation';
-import { User } from 'lucide-react-native';
+import { User, Images, Camera } from 'lucide-react-native';
 import { Pressable } from '@/components/ui/pressable';
 import {
   Actionsheet,
@@ -30,7 +30,6 @@ import {
   ActionsheetContent,
   ActionsheetDragIndicatorWrapper,
   ActionsheetDragIndicator,
-  ActionsheetItem,
   ActionsheetItemText,
 } from '@/components/ui/actionsheet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +40,7 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { getImageFromPicker } from '@/utils/utils';
 import { Colors } from '@/utils/constants/Colors';
+import { HStack } from '@/components/ui/hstack';
 
 export default function UserProfileForm({
   defaultValues,
@@ -130,7 +130,7 @@ export default function UserProfileForm({
       <Card className="w-full bg-transparent pb-6 gap-4">
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>
-            <Avatar className="w-32 h-32 rounded-xl">
+            <Avatar className="flex item center justify center w-32 h-32 rounded-full shadow-2xl border border-amber-500">
               <AvatarFallbackText>JD</AvatarFallbackText>
               {photo ? (
                 <AvatarImage
@@ -223,12 +223,23 @@ export default function UserProfileForm({
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
-          <ActionsheetItem onPress={() => handleImageSelection('camera')}>
-            <ActionsheetItemText>Take a Photo</ActionsheetItemText>
-          </ActionsheetItem>
-          <ActionsheetItem onPress={() => handleImageSelection('gallery')}>
-            <ActionsheetItemText>Choose from Gallery</ActionsheetItemText>
-          </ActionsheetItem>
+          {/* Horizontal layout with icons */}
+          <HStack className='w-full justify-around mt-4'>
+            <Pressable
+              onPress={() => handleImageSelection('camera')}
+              className='border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2'
+            >
+              <Icon as={Camera} className="w-16 h-16" />
+              <ActionsheetItemText className='text-lg font-semibold'>Camera</ActionsheetItemText>
+            </Pressable>
+            <Pressable
+              onPress={() => handleImageSelection('gallery')}
+              className='border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2'
+            >
+              <Icon as={Images} className="w-16 h-16" />
+              <ActionsheetItemText className='text-lg font-semibold'>Gallery</ActionsheetItemText>
+            </Pressable>
+          </HStack>
         </ActionsheetContent>
       </Actionsheet>
     </VStack>

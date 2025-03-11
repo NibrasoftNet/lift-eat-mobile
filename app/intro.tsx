@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { intro01, intro02 } from '@/utils/constants/images';
 import { HStack } from '@/components/ui/hstack';
-import { IntroCard } from '@/components/intro/IntroCard';
+import { IntroCard } from '@/components/cards/IntroCard';
 import { useRouter } from 'expo-router';
 
 export enum IntroStepEnum {

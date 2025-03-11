@@ -23,7 +23,7 @@ import {
 } from '@/utils/validation/auth/login-schema.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HStack } from '@/components/ui/hstack';
-import ForgetPasswordModal from '@/components/auth/ForgetPasswordModal';
+import ForgetPasswordModal from '@/components/modals/ForgetPasswordModal';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
