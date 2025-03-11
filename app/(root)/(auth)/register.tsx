@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { app_logo, login_background } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import AuthDrawer from '@/components/auth/AuthDrawer';
+import AuthDrawer from '@/components/drawers/AuthDrawer';
 import {
   RegisterFormData,
   registerSchema,

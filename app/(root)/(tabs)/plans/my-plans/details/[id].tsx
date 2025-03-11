@@ -12,29 +12,28 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Pressable } from '@/components/ui/pressable';
 import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
 import { Button } from '@/components/ui/button';
-import { Meal } from '@/types/plan.type';
-import { PlanWithDailyPlansAndMealsProps } from '@/db/schema';
+import { MealProps, PlanWithDailyPlansAndMealsProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useQuery } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { getPlanDetails } from '@/utils/services/plan.service';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { useToast } from '@/components/ui/toast';
+import { Icon } from '@/components/ui/icon';
+import { ChevronLeft, ChevronRight, CircleChevronLeft } from 'lucide-react-native';
+import { FlashList } from '@shopify/flash-list';
+import MealCard from '@/components/cards/MealCard';
 
 export default function PlanDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const daysOfWeek = Object.values(DayEnum);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<
-    Meal[] | undefined
+    MealProps[] | undefined
   >([]);
 
   const {
@@ -48,48 +47,48 @@ export default function PlanDetailsScreen() {
   });
 
   // Filter daily plans based on selectedDay and selectedWeek
-  /*  useEffect(() => {
+  useEffect(() => {
     if (singlePlan) {
-      const filteredPlans = singlePlan.dailyPlan.find(
+      const filteredPlans = singlePlan.dailyPlans.find(
         (dailyPlan) =>
           dailyPlan.day === selectedDay && dailyPlan.week === selectedWeek,
       );
       setFilteredDailyMeals(filteredPlans?.meals);
     }
-  }, [selectedDay, selectedWeek, plan]);*/
+  }, [selectedDay, selectedWeek, singlePlan]);
 
   // Reanimated shared value for animation
   const weekAnimation = useSharedValue(1);
 
   const handleWeekChange = (direction: 'left' | 'right') => {
-    /*    if (direction === 'left' && selectedWeek > 1) {
+    if (direction === 'left' && selectedWeek > 1) {
       setSelectedWeek((prev) => prev - 1);
       weekAnimation.value = withSpring(selectedWeek - 1); // Animate to the previous week
-    } else if (direction === 'right' && selectedWeek < plan.durationWeeks) {
+    } else if (direction === 'right' && selectedWeek < singlePlan?.durationWeeks!) {
       setSelectedWeek((prev) => prev + 1);
       weekAnimation.value = withSpring(selectedWeek + 1); // Animate to the next week
-    }*/
+    }
   };
 
   // Animated style for the week number
-  /*  const animatedWeekStyle = useAnimatedStyle(() => {
+  const animatedWeekStyle = useAnimatedStyle(() => {
     return {
       transform: [
         { scale: withSpring(weekAnimation.value === selectedWeek ? 1.2 : 1) },
       ],
       opacity: withSpring(weekAnimation.value === selectedWeek ? 1 : 0.8),
     };
-  });*/
+  });
 
   const handleDayClick = (day: DayEnum) => {
     setSelectedDay(day);
-    /*    const dailyPlan = plan.dailyPlans.find(
+    const dailyPlan = singlePlan?.dailyPlans.find(
       (dp) => dp.day === day && dp.week === selectedWeek,
     );
     if (dailyPlan) {
       // Navigate to the daily plan details or display them in a modal
       console.log('Selected Daily Plan:', dailyPlan);
-    }*/
+    }
   };
 
   return (
@@ -112,11 +111,9 @@ export default function PlanDetailsScreen() {
             >
               <HStack className="flex flex-row w-full items-center justify-between p-4">
                 <Link href="/plans/my-plans" asChild>
-                  <FontAwesome6
-                    name="circle-chevron-left"
-                    size={32}
-                    color="black"
-                  />
+                  <Pressable>
+                    <Icon  as={CircleChevronLeft} className="w-10 h-10 text-black" />
+                  </Pressable>
                 </Link>
                 <VStack className={`flex rounded-xl items-center shadow-lg`}>
                   <View
@@ -144,7 +141,7 @@ export default function PlanDetailsScreen() {
               disabled={selectedWeek === 1}
               className={`p-1 w-10 h-10 ${selectedWeek === 1 ? 'opacity-50' : 'opacity-100'}`}
             >
-              <FontAwesome6 name="chevron-left" size={20} color="white" />
+              <Icon as={ChevronLeft} className="w-8 h-8 text-white" />
             </Button>
 
             {/* Animated Week Number */}
@@ -152,7 +149,7 @@ export default function PlanDetailsScreen() {
               <Text className="text-2xl font-bold text-blue-500">Week-</Text>
               <Animated.Text
                 className="text-xl font-bold text-blue-500"
-                //style={[animatedWeekStyle]}
+                style={[animatedWeekStyle]}
               >
                 {selectedWeek}
               </Animated.Text>
@@ -161,11 +158,11 @@ export default function PlanDetailsScreen() {
             {/* Right Chevron */}
             <Button
               onPress={() => handleWeekChange('right')}
-              //disabled={selectedWeek === plan.durationWeeks}
+              disabled={selectedWeek === singlePlan?.durationWeeks}
               //${selectedWeek === plan.durationWeeks ? 'opacity-50' : 'opacity-100'}
               className={`p-1 w-10 h-10`}
             >
-              <FontAwesome6 name="chevron-right" size={20} color="white" />
+              <Icon as={ChevronRight} className="w-8 h-8 text-white" />
             </Button>
           </HStack>
           {/* Days of the Week Row */}
@@ -193,31 +190,12 @@ export default function PlanDetailsScreen() {
             </Box>
 
             {filteredDailyMeals && filteredDailyMeals.length > 0 ? (
-              filteredDailyMeals.map((meal, index) => (
-                <Pressable
-                  key={meal.id}
-                  className="flex w-full rounded-lg bg-gray-300 shodow-xl p-4"
-                >
-                  <HStack className="justify-between items-center">
-                    <VStack>
-                      <Text className="font-medium">{meal.name}</Text>
-                      <Text className="text-gray-600">
-                        Quantity: {meal.quantity} {meal.unit}
-                      </Text>
-                    </VStack>
-                    <HStack className="items-center">
-                      <Text className="text-gray-600 mr-2">
-                        {meal.calories} Kcal
-                      </Text>
-                      <Ionicons
-                        name="chevron-forward-circle-outline"
-                        size={20}
-                        color="#6b7280"
-                      />
-                    </HStack>
-                  </HStack>
-                </Pressable>
-              ))
+              <FlashList
+                data={filteredDailyMeals}
+                renderItem={({ item }) => <MealCard meal={item} />}
+                keyExtractor={(item) => String(item.id)}
+                estimatedItemSize={10}
+              />
             ) : (
               <Text className="text-gray-600 p-2">
                 No meals planned for this day.
