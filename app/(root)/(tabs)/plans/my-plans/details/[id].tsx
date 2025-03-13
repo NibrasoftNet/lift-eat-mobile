@@ -24,7 +24,8 @@ import { getPlanDetails } from '@/utils/services/plan.service';
 import { Icon } from '@/components/ui/icon';
 import { ChevronLeft, ChevronRight, CircleChevronLeft } from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
-import MealCard from '@/components/cards/MealCard';
+import PlanMealCard from '@/components/cards/PlanMealCard';
+import NutritionBox from '@/components/boxes/NutritionBox';
 
 export default function PlanDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -115,22 +116,14 @@ export default function PlanDetailsScreen() {
                     <Icon  as={CircleChevronLeft} className="w-10 h-10 text-black" />
                   </Pressable>
                 </Link>
-                <VStack className={`flex rounded-xl items-center shadow-lg`}>
-                  <View
-                    className={`w-full rounded-t-xl bg-red-500 py-0.5 px-2`}
-                  >
-                    <Text className={`font-semibold text-center text-white`}>
-                      Calories
-                    </Text>
-                  </View>
-                  <View
-                    className={`w-full rounded-b-xl bg-red-300 py-0.5 px-2`}
-                  >
-                    <Text className={`text-gray-600 font-semibold text-center`}>
-                      {singlePlan?.calories} Kcal
-                    </Text>
-                  </View>
-                </VStack>
+                <NutritionBox
+                  title='Colories'
+                  value={singlePlan?.calories!}
+                  unit="Kcal"
+                  className='w-24'
+                  titleClassName='bg-red-500'
+                  valueClassName='bg-red-300'
+                />
               </HStack>
             </ImageBackground>
           </Animated.View>
@@ -192,7 +185,7 @@ export default function PlanDetailsScreen() {
             {filteredDailyMeals && filteredDailyMeals.length > 0 ? (
               <FlashList
                 data={filteredDailyMeals}
-                renderItem={({ item }) => <MealCard meal={item} />}
+                renderItem={({ item }) => <PlanMealCard meal={item} />}
                 keyExtractor={(item) => String(item.id)}
                 estimatedItemSize={10}
               />

@@ -23,9 +23,9 @@ import { Asset } from 'expo-asset';
 
 // Static image paths using require()
 const images = {
-  BREAKFAST: require('../assets/images/Meals/SaladeCésar.jpg'),
-  LUNCH: require('../assets/images/Meals/téléchargement.jpg'),
-  DINNER: require('../assets/images/Meals/SushiBowlauSaumon.jpj.jpg'),
+  BREAKFAST: require('../assets/images/seed/caesar_salad.jpg'),
+  LUNCH: require('../assets/images/seed/kouskousi.jpg'),
+  DINNER: require('../assets/images/seed/suchi_bowl.jpg'),
 };
 
 // Function to load a static asset and return Base64
@@ -80,7 +80,7 @@ async function prepareIngredientStandardWithImages() {
       if (!ingStandard.image) {
         // @ts-ignore
         const imageBuffer = await getImageBuffer(
-          require('../assets/images/foods/salmon.jpg'),
+          require('../assets/images/seed/salmon.jpg'),
         );
         return {
           ...ingStandard,

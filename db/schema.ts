@@ -6,22 +6,23 @@ import {
   blob,
 } from 'drizzle-orm/sqlite-core';
 import {
-  GenderEnum,
-  PhysicalActivityEnum,
+  GenderEnum, GenderTypeArray,
+  PhysicalActivityEnum, PhysicalActivityTypeArray,
 } from '@/utils/enum/user-gender-activity.enum';
 import {
-  GoalEnum,
+  GoalEnum, GoalTypeArray,
   HeightUnitEnum,
-  WeightUnitEnum,
+  WeightUnitEnum, WeightUnitTypeArray,
 } from '@/utils/enum/user-details.enum';
 import {
-  CuisineTypeEnum,
-  MealTypeEnum,
+  CuisineTypeArray,
+  CuisineTypeEnum, MealTypeArray,
+  MealTypeEnum, MealUnitArray,
   MealUnitEnum,
 } from '@/utils/enum/meal.enum';
 import {
-  DailyPlanGeneratedWithEnum,
-  DayEnum,
+  DailyPlanGeneratedWithEnum, DailyPlanGeneratedWithUnitArray,
+  DayEnum, DayUnitArray, PlanGeneratedWithArray,
   PlanGeneratedWithEnum,
 } from '@/utils/enum/general.enum';
 
@@ -29,12 +30,12 @@ export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().default('John'),
   email: text('email').notNull().unique(),
-  gender: text('gender', { enum: [GenderEnum.MALE, GenderEnum.FEMALE] })
+  gender: text('gender', { enum: GenderTypeArray})
     .notNull()
     .default(GenderEnum.MALE),
   weight: real('weight').notNull().default(60),
   weightUnit: text('weight_unit', {
-    enum: [WeightUnitEnum.KG, WeightUnitEnum.LBS, WeightUnitEnum.ST],
+    enum: WeightUnitTypeArray,
   })
     .notNull()
     .default(WeightUnitEnum.KG),
@@ -46,12 +47,7 @@ export const users = sqliteTable('users', {
     .default(HeightUnitEnum.CM),
   profileImage: blob('profile_image', { mode: 'buffer' }), // BLOB column for user profile image
   physicalActivity: text('physical_activity', {
-    enum: [
-      PhysicalActivityEnum.LOW,
-      PhysicalActivityEnum.SEDENTARY,
-      PhysicalActivityEnum.MODERATE,
-      PhysicalActivityEnum.HIGH,
-    ],
+    enum: PhysicalActivityTypeArray,
   })
     .notNull()
     .default(PhysicalActivityEnum.MODERATE),
@@ -63,7 +59,7 @@ export const ingredientsStandard = sqliteTable('ingredients_standard', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().default('felfel'),
   unit: text('unit', {
-    enum: [MealUnitEnum.GRAMMES, MealUnitEnum.BOWL, MealUnitEnum.LITRES],
+    enum: MealUnitArray,
   }).default(MealUnitEnum.GRAMMES),
   quantity: real('quantity').notNull().default(1),
   calories: real('calories').notNull().default(17),
@@ -95,34 +91,19 @@ export const mealIngredients = sqliteTable('meal_ingredients', {
 export const meals = sqliteTable('meals', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   type: text('type', {
-    enum: [
-      MealTypeEnum.BREAKFAST,
-      MealTypeEnum.LUNCH,
-      MealTypeEnum.DINNER,
-      MealTypeEnum.SNACK,
-    ],
+    enum: MealTypeArray,
   })
     .notNull()
     .default(MealTypeEnum.BREAKFAST),
   name: text('name').notNull().default('kosksi'),
   description: text('description').notNull().default('no description'),
   cuisine: text('cuisine', {
-    enum: [
-      CuisineTypeEnum.GENERAL,
-      CuisineTypeEnum.AFRICAN,
-      CuisineTypeEnum.EUROPEAN,
-      CuisineTypeEnum.ASIAN,
-      CuisineTypeEnum.MEDITERRANEAN,
-    ],
+    enum: CuisineTypeArray,
   })
     .notNull()
     .default(CuisineTypeEnum.GENERAL),
   unit: text('unit', {
-    enum: [
-      MealUnitEnum.GRAMMES,
-      MealUnitEnum.KILOGRAMMES,
-      MealUnitEnum.MILLILITRES,
-    ],
+    enum: MealUnitArray,
   })
     .notNull()
     .default(MealUnitEnum.GRAMMES),
@@ -147,24 +128,12 @@ export const dailyPlan = sqliteTable('daily_plan', {
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
   type: text('type', {
-    enum: [
-      DailyPlanGeneratedWithEnum.MANUAL,
-      DailyPlanGeneratedWithEnum.AI,
-      DailyPlanGeneratedWithEnum.COMPANY,
-    ],
+    enum: DailyPlanGeneratedWithUnitArray,
   })
     .notNull()
     .default(DailyPlanGeneratedWithEnum.MANUAL),
   day: text('day', {
-    enum: [
-      DayEnum.MONDAY,
-      DayEnum.TUESDAY,
-      DayEnum.WEDNESDAY,
-      DayEnum.THURSDAY,
-      DayEnum.FRIDAY,
-      DayEnum.SATURDAY,
-      DayEnum.SUNDAY,
-    ],
+    enum: DayUnitArray,
   })
     .notNull()
     .default(DayEnum.MONDAY),
@@ -193,12 +162,12 @@ export const plan = sqliteTable('plan', {
   id: integer('id').primaryKey({ autoIncrement: true }), // Custom ID like 'plan-001'
   name: text('name').notNull().default('PlanB'),
   goal: text('goal', {
-    enum: [GoalEnum.WEIGHT_LOSS, GoalEnum.GAIN_MUSCLE, GoalEnum.MAINTAIN],
+    enum: GoalTypeArray,
   })
     .notNull()
     .default(GoalEnum.MAINTAIN),
   unit: text('unit', {
-    enum: [WeightUnitEnum.KG, WeightUnitEnum.LBS, WeightUnitEnum.ST],
+    enum: WeightUnitTypeArray,
   })
     .notNull()
     .default(WeightUnitEnum.KG),
@@ -213,11 +182,7 @@ export const plan = sqliteTable('plan', {
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
   type: text('type', {
-    enum: [
-      PlanGeneratedWithEnum.MANUAL,
-      PlanGeneratedWithEnum.AI,
-      DailyPlanGeneratedWithEnum.COMPANY,
-    ],
+    enum: PlanGeneratedWithArray,
   })
     .notNull()
     .default(PlanGeneratedWithEnum.MANUAL),
@@ -237,7 +202,16 @@ export type DailyPlanProps = typeof dailyPlan.$inferSelect;
 export type DailyPlanMealsProps = typeof dailyPlanMeals.$inferSelect;
 export type PlanProps = typeof plan.$inferSelect;
 
-//Custom type
+// Custom type for Plan with nested DailyPlans and Meals
 export type PlanWithDailyPlansAndMealsProps = PlanProps & {
   dailyPlans: (DailyPlanProps & { meals: MealProps[] })[];
+};
+
+export type IngredientWithStandardProps = MealIngredientsProps & {
+  ingredientStandard: IngredientStandardProps;
+}
+
+// Custom type for Meal with nested MealIngredients and IngredientStandard
+export type MealWithIngredientAndStandardProps = MealProps & {
+  mealIngredients: IngredientWithStandardProps[];
 };

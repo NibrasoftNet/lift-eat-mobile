@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text } from 'react-native';
 
 export default function PlansLayout() {
   return (
@@ -8,33 +8,34 @@ export default function PlansLayout() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarPosition: 'top', // Move tabs to the top
+        tabBarIconStyle: { display: 'none' },
+        tabBarPosition: 'top',
+        tabBarLabelStyle: {
+          fontSize: 14,
+          fontWeight: 'bold',
+          textTransform: 'capitalize',
+        },
         tabBarStyle: {
           backgroundColor: 'white',
-          elevation: 0, // Remove shadow on Android
-          borderBottomWidth: 1, // Add bottom border
-          borderBottomColor: '#ddd',
-          height: 60,
           paddingVertical: 0,
         },
         tabBarItemStyle: {
           height: '100%',
           padding: 0,
-          margin: 0,
+          margin: 10,
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '700',
-        },
+        tabBarActiveTintColor: 'blue',
+        tabBarInactiveTintColor: 'gray',
       }}
     >
       {/* Mine Tab */}
       <Tabs.Screen
         name="my-plans"
         options={{
-          title: 'My Plans',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="wallet-outline" size={24} color={color} />
+          tabBarLabel: ({ focused, color }) => (
+            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+              Mine
+            </Text>
           ),
         }}
       />
@@ -43,9 +44,10 @@ export default function PlansLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: 'Community',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="people-outline" size={24} color={color} />
+          tabBarLabel: ({ focused, color }) => (
+            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+              Community
+            </Text>
           ),
         }}
       />
@@ -54,9 +56,10 @@ export default function PlansLayout() {
       <Tabs.Screen
         name="company"
         options={{
-          title: 'Lift eat',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="warehouse" size={22} color={color} />
+          tabBarLabel: ({ focused, color }) => (
+            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+              Company
+            </Text>
           ),
         }}
       />

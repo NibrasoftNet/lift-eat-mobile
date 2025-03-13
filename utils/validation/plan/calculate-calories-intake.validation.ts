@@ -6,13 +6,7 @@ import {
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 
 export const calculateCaloriesIntakeSchema = z.object({
-  age: z.number().min(30).max(200),
-  goal: z.number().default(0),
-  goalUnit: z.enum([
-    GoalEnum.GAIN_MUSCLE,
-    GoalEnum.MAINTAIN,
-    GoalEnum.WEIGHT_LOSS,
-  ]),
+  age: z.number().min(10).max(200),
   gender: z.enum([GenderEnum.MALE, GenderEnum.FEMALE]),
   physicalActivity: z.enum([
     PhysicalActivityEnum.LOW,
@@ -30,6 +24,4 @@ export type CalculateCaloriesIntakeDefaultValueProps = {
   age: number;
   gender: GenderEnum;
   physicalActivity: PhysicalActivityEnum;
-  goal: number;
-  goalUnit: GoalEnum;
 };

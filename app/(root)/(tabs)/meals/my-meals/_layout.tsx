@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 
-export default function NewPlanLayout() {
+export default function MyMealsLayout() {
   return (
     <Stack
       screenOptions={{
@@ -12,17 +12,18 @@ export default function NewPlanLayout() {
         statusBarHidden: true,
       }}
     >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
-        name="index"
+        name="create"
         options={{ animation: 'fade_from_bottom', animationDuration: 600 }}
       />
       <Stack.Screen
-        name="target/index"
-        options={{ animation: 'fade_from_bottom', animationDuration: 600 }}
-      />
-      <Stack.Screen
-        name="target/edit/[id]"
-        options={{ animation: 'fade_from_bottom', animationDuration: 600 }}
+        name="details/[id]"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+          headerShadowVisible: false,
+        }}
       />
     </Stack>
   );

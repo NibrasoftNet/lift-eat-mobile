@@ -13,6 +13,7 @@ import { Button, ButtonIcon } from '../ui/button';
 import { Box } from '../ui/box';
 import { Divider } from '../ui/divider';
 import { useRouter } from 'expo-router';
+import NutritionBox from '@/components/boxes/NutritionBox';
 
 const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index }) => {
   const router = useRouter()
@@ -88,72 +89,38 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
                 </Text>
                 <Text className="text-black">{item.durationWeeks} weeks</Text>
               </Box>
-              <Box className="flex flex-col w-24 h-full gap-2">
-                <VStack
-                  className={`flex rounded-md w-full items-center drop-shadow-xl`}
-                >
-                  <View className={`w-full rounded-t-xl bg-red-500`}>
-                    <Text className={`font-semibold text-center text-white`}>
-                      Calories
-                    </Text>
-                  </View>
-                  <View className={`w-full rounded-b-xl bg-red-300`}>
-                    <Text className={`text-gray-600 font-semibold text-center`}>
-                      {item.calories} Kcal
-                    </Text>
-                  </View>
-                </VStack>
-                <View className="flex w-full justify-end items-end">
-                  {item.current && (
-                    <View
-                      className={`w-24 h-8 rounded-xl bg-black flex items-center justify-center`}
-                    >
-                      <Text className={`text-white font-semibold text-center`}>
-                        Current
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </Box>
+              <NutritionBox
+                title='Calories'
+                value={item.calories}
+                unit="KCal"
+                className='w-24'
+                titleClassName='bg-red-500'
+                valueClassName='bg-red-300' />
             </HStack>
             <HStack className="justify-around pt-3 border-t border-gray-100">
               {/* Carbs */}
-              <VStack
-                className={`flex h-9 rounded-md w-1/4 items-center drop-shadow-xl`}
-              >
-                <View className={`w-full rounded-t-xl bg-amber-500`}>
-                  <Text className={`font-semibold text-center text-white`}>
-                    Carbs
-                  </Text>
-                </View>
-                <View className={`w-full rounded-b-xl bg-amber-300`}>
-                  <Text className={`text-gray-600 font-semibold text-center`}>
-                    {item.carbs} Gr
-                  </Text>
-                </View>
-              </VStack>
-
+              <NutritionBox
+                title='Carbs'
+                value={item.carbs}
+                unit="Gr"
+                className='w-24'
+                titleClassName='bg-amber-500'
+                valueClassName='bg-amber-300' />
               {/* Divider between items */}
               <Divider
                 orientation="vertical"
-                className={`w-0.5 h-14 bg-gray-300 mx-3`}
+                className={`w-0.5 h-14 bg-gray-100 mx-3`}
               />
 
               {/* Fats */}
-              <VStack
-                className={`flex rounded-md w-1/4 items-center drop-shadow-xl`}
-              >
-                <View className={`w-full rounded-t-xl bg-green-500`}>
-                  <Text className={`font-semibold text-center text-white`}>
-                    Fats
-                  </Text>
-                </View>
-                <View className={`w-full rounded-b-xl bg-green-300`}>
-                  <Text className={`text-gray-600 font-semibold text-center`}>
-                    {item.fat} Gr
-                  </Text>
-                </View>
-              </VStack>
+              <NutritionBox
+                title='Fats'
+                value={item.fat}
+                unit="Gr"
+                className='w-24'
+                titleClassName='bg-green-500'
+                valueClassName='bg-green-300'
+              />
 
               {/* Divider between items */}
               <Divider
@@ -162,20 +129,14 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
               />
 
               {/* Protein */}
-              <VStack
-                className={`flex rounded-md w-1/4 items-center drop-shadow-xl`}
-              >
-                <View className={`w-full rounded-t-xl bg-blue-500`}>
-                  <Text className={`font-semibold text-center text-white`}>
-                    Protein
-                  </Text>
-                </View>
-                <View className={`w-full rounded-b-xl bg-blue-300`}>
-                  <Text className={`text-gray-600 font-semibold text-center`}>
-                    {item.protein} Gr
-                  </Text>
-                </View>
-              </VStack>
+              <NutritionBox
+                title='Protein'
+                value={item.protein}
+                unit="Gr"
+                className='w-24'
+                titleClassName='bg-blue-500'
+                valueClassName='bg-blue-300'
+              />
             </HStack>
           </VStack>
         </Pressable>
