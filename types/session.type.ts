@@ -1,7 +1,11 @@
-import { UserProps } from "./user.type";
 
 export type SessionProps = {
     token: string | null;
     tokenExpire: number | null;
-    user: UserProps | null;
+    user: UserSessionProps | null;
+}
+
+export type UserSessionProps = {
+    id: number;
+    email: string;
 }

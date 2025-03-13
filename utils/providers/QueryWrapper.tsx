@@ -9,17 +9,19 @@ export const QueryStateHandler = <T,>({
   isLoading,
   isFetching,
   isFetchedAfterMount,
+  isRefetching,
   data,
   children,
 }: {
   isLoading: boolean;
   isFetching: boolean;
   isFetchedAfterMount: boolean;
+  isRefetching?: boolean | false;
   data: T | T[] | undefined | null;
   children: React.ReactNode;
 }) => {
-  if (!data) {
-    if (isFetchedAfterMount || isFetching || isLoading) {
+  if (data === null || data === undefined) {
+    if (isFetchedAfterMount || isFetching || isLoading || isRefetching) {
       return (
         <VStack className="size-full items-center justify-center gap-2">
           <Spinner />

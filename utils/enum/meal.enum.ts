@@ -5,6 +5,9 @@ export enum MealTypeEnum {
   SNACK = 'SNACK',
 }
 
+export const MealTypeArray = Object.values(MealTypeEnum) as unknown as Readonly<[MealTypeEnum, ...MealTypeEnum[]]>;
+
+
 export enum CuisineTypeEnum {
   GENERAL = 'GENERAL',
   AFRICAN = 'AFRICAN',
@@ -25,6 +28,8 @@ export enum CuisineTypeEnum {
   VIETNAMESE = 'VIETNAMESE',
 }
 
+export const CuisineTypeArray = Object.values(CuisineTypeEnum) as unknown as Readonly<[CuisineTypeEnum, ...CuisineTypeEnum[]]>;
+
 export enum MealUnitEnum {
   GRAMMES = 'GRAMMES',
   KILOGRAMMES = 'KILOGRAMMES',
@@ -39,3 +44,5 @@ export enum MealUnitEnum {
   PLATE = 'PLATE',
   BOWL = 'BOWL',
 }
+
+export const MealUnitArray = Object.values(MealUnitEnum) as unknown as Readonly<[MealUnitEnum, ...MealUnitEnum[]]>;

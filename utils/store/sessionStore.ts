@@ -1,4 +1,4 @@
-import { SessionProps, UserProps } from '@/types';
+import { SessionProps, UserSessionProps } from '@/types';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface SessionState extends SessionProps {
   setToken: (token: string | null) => void;
   setTokenExpire: (tokenExpire: number | null) => void;
-  setUser: (user: UserProps | null) => void;
+  setUser: (user: UserSessionProps | null) => void;
   clearSession: () => void;
 }
 

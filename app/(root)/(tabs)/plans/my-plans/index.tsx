@@ -15,8 +15,9 @@ import { useQuery } from '@tanstack/react-query';
 import { PlanProps, UserPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import PlanCard from '@/components/cards/PlanCard';
+import { getPlansList } from '@/utils/services/plan.service';
 
-export default function PlansScreen() {
+export default function MyPlansScreen() {
   const router = useRouter();
   const drizzleDb = useDrizzleDb();
   const { user } = useSessionStore();
@@ -28,7 +29,7 @@ export default function PlansScreen() {
   } = useQuery({
     queryKey: ['my-plans'],
     queryFn: async () => {
-      const plans = await drizzleDb.query.plan.findMany();
+      const plans = await getPlansList(drizzleDb);
       return plans ?? null;
     },
   });

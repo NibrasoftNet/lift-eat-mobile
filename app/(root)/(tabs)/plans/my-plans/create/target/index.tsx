@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-  PhysicalActivityEnum,
-} from '@/utils/enum/user-gender-activity.enum';
-import { CalculateCaloriesIntakeDefaultValueProps } from '@/utils/validation/plan/calculate-calories-intake.validation';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
-import CalculateCaloriesIntakeForm from '@/components/froms/CalculateCaloriesIntakeForm';
+import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
+import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +9,7 @@ import { eq } from 'drizzle-orm';
 import { UserPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
-export default function CreateCaloriesCount() {
+export default function CreateNutritionTarget() {
   const { user } = useSessionStore()
   const drizzleDb = useDrizzleDb();
 
@@ -30,11 +27,12 @@ export default function CreateCaloriesCount() {
     },
   });
 
-  const defaultCalculateCaloriesIntakeValues: CalculateCaloriesIntakeDefaultValueProps =
+  const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps =
     {
-      age: 20,
-      gender: actualUser?.gender!,
-      physicalActivity: PhysicalActivityEnum.LOW,
+      initialWeight: actualUser?.weight!,
+      targetWeight: actualUser?.weight!,
+      durationWeeks: 1,
+      goalUnit: GoalEnum.MAINTAIN,
     };
   return (
     <QueryStateHandler<UserPros>
@@ -43,8 +41,9 @@ export default function CreateCaloriesCount() {
       isFetching={isFetching}
       isFetchedAfterMount={isFetchedAfterMount}
     >
-      <CalculateCaloriesIntakeForm
-        defaultValues={defaultCalculateCaloriesIntakeValues}
+      <NutritionGoalForm
+        defaultValues={nutritionGoalDefaultValueProps}
+        operation='create'
       />
     </QueryStateHandler>
   );

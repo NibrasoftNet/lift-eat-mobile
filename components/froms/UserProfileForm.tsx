@@ -126,7 +126,8 @@ export default function UserProfileForm({
   };
 
   return (
-    <VStack space="md" className="w-full justify-between max-w-sm mx-auto mt-2">
+    <VStack space="md" className="w-full justify-between mt-2">
+
       <Card className="w-full bg-transparent pb-6 gap-4">
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>

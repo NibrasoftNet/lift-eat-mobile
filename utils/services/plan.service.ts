@@ -10,6 +10,21 @@ import {
 } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
 
+export const getPlansList = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+) => {
+  // Simulate a delay (e.g., 5 seconds)
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  try {
+    // Fetch all meals
+    return await drizzleDb.query.plan.findMany();
+  } catch (error) {
+    console.error('Error get plan list:', error); // Debugging log
+    throw error;
+  }
+};
+
+
 export const getPlanDetails = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   planId: string,
