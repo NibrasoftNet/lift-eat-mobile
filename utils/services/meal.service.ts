@@ -205,6 +205,8 @@ export const deleteMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
   try {
     console.log(`Deleting meal with ID: ${mealId}...`);
 
