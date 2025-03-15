@@ -11,9 +11,10 @@ import { Heading } from '@/components/ui/heading';
 import React, { Dispatch, SetStateAction } from 'react';
 import { OtpInput } from 'react-native-otp-entry';
 import { VStack } from '@/components/ui/vstack';
-import { SimpleLineIcons } from '@expo/vector-icons';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
+import { Icon } from '@/components/ui/icon';
+import { Mail } from 'lucide-react-native';
 
 export default function AuthDrawer({
   showDrawer,
@@ -34,7 +35,7 @@ export default function AuthDrawer({
       <DrawerBackdrop />
       <DrawerContent>
         <DrawerHeader className="flex justify-center items-center w-full">
-          <SimpleLineIcons name="envelope-letter" size={32} color="black" />
+          <Icon as={Mail} className="w-16 h-16" />
         </DrawerHeader>
         <DrawerBody>
           <VStack className="gap-2 flex-1">

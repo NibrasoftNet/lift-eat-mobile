@@ -3,8 +3,8 @@ import * as schema from '../../db/schema';
 import {
   dailyPlan,
   dailyPlanMeals,
-  DailyPlanProps,
-  MealProps,
+  DailyPlanOrmProps,
+  MealOrmProps,
   meals,
   plan,
 } from '../../db/schema';
@@ -23,7 +23,6 @@ export const getPlansList = async (
     throw error;
   }
 };
-
 
 export const getPlanDetails = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
@@ -68,7 +67,7 @@ export const getPlanDetails = async (
     // Combine results efficiently using a Map
     const dailyPlanMap = new Map<
       number,
-      DailyPlanProps & { meals: MealProps[] }
+      DailyPlanOrmProps & { meals: MealOrmProps[] }
     >();
 
     dailyPlans.forEach((dp) => {

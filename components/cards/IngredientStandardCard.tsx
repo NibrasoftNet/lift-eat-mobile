@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
@@ -10,49 +10,59 @@ import {
   PlusCircle,
   UtensilsCrossedIcon,
 } from 'lucide-react-native';
+import { IngredientStandardOrmProps } from '@/db/schema';
+import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
-import { Button, ButtonIcon } from '../ui/button';
-import NutritionBox from '../boxes/NutritionBox';
-import { Divider } from '../ui/divider';
-import { useIngredientStore } from '../../utils/store/ingredientStore';
-import { IngredientWithStandardProps } from '../../types/ingredient.type';
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from '@/components/ui/avatar';
+import { Button, ButtonIcon } from '@/components/ui/button';
+import NutritionBox from '@/components/boxes/NutritionBox';
+import { Divider } from '@/components/ui/divider';
+import { useIngredientStore } from '@/utils/store/ingredientStore';
 
-const IngredientCard: React.FC<{
-  item: IngredientWithStandardProps;
+const IngredientStandardCard: React.FC<{
+  item: IngredientStandardOrmProps;
   index: number;
 }> = ({ item, index }) => {
-  const [newQuantity, setNewQuantity] = useState<number>(item.quantity);
+  const router = useRouter();
+
   // Zustand store hooks
-  const { updateIngredient } = useIngredientStore();
-  const handleQuantityChange = (operation: 'increase' | 'decrease') => {
-    if (operation === 'increase') {
-      updateIngredient(item.ingredientStandardId, newQuantity + 10);
-      setNewQuantity((prev) => prev + 10);
-    } else {
-      updateIngredient(item.ingredientStandardId, newQuantity - 10);
-      setNewQuantity((prev) => prev - 10);
-    }
-  };
+  const { selectedIngredients, toggleIngredient } = useIngredientStore();
+
+  // State to track if item is selected
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+
+  // Update isSelected when selectedIngredients changes
+  useEffect(() => {
+    const foundIndex = selectedIngredients.findIndex(
+      (ing) => ing.ingredientStandardId === item.id,
+    );
+    setIsSelected(foundIndex !== -1);
+  }, [selectedIngredients, item.id]);
 
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 100)}
       className="rounded-xl overflow-hidden mb-2"
     >
-      <Card className={`w-full items-center gap-2 p-2`}>
+      <Card
+        className={`w-full items-center gap-2 p-2 ${isSelected ? 'bg-amber-500' : 'bg-white'}`}
+      >
         <HStack className="w-full items-center justify-between">
           <HStack className="flex-1 items-center gap-2">
             <Box className="flex-col items-center justify-center w-16 h-16">
               <Avatar>
                 <AvatarFallbackText>
-                  {item.ingredientsStandard.name?.slice(0, 2).toUpperCase()}
+                  {item.name?.slice(0, 2).toUpperCase()}
                 </AvatarFallbackText>
-                {item.ingredientsStandard.image ? (
+                {item.image ? (
                   <AvatarImage
                     className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
-                    source={{ uri: `${item.ingredientsStandard.image}` }}
+                    source={{ uri: `${item.image}` }}
                   />
                 ) : (
                   <AvatarFallbackText>
@@ -62,32 +72,22 @@ const IngredientCard: React.FC<{
               </Avatar>
             </Box>
             <VStack className="flex-1">
-              <Text className="text-xl font-bold">
-                {item.ingredientsStandard.name}
-              </Text>
+              <Text className="text-xl font-bold">{item.name}</Text>
               <Text className="text-sm">
-                {item.quantity} • {item.ingredientsStandard.unit}
+                {item.quantity} • {item.unit}
               </Text>
             </VStack>
           </HStack>
-          <HStack className="items-center gap-2">
-            <Button
-              onPress={() => handleQuantityChange('decrease')}
-              disabled={newQuantity <= item.ingredientsStandard.quantity}
-              action="secondary"
-              className="w-12 h-12 bg-transparent disabled:bg-secondary-500 disabled:text-white"
-            >
-              <ButtonIcon as={MinusCircle} className="w-10 h-10" />
-            </Button>
-            <Text>{newQuantity}</Text>
-            <Button
-              onPress={() => handleQuantityChange('increase')}
-              action="secondary"
-              className="w-12 h-12 bg-transparent"
-            >
-              <ButtonIcon as={PlusCircle} className="w-10 h-10" />
-            </Button>
-          </HStack>
+          <Button
+            onPress={() => toggleIngredient(item)}
+            action="secondary"
+            className="w-12 h-12 bg-transparent"
+          >
+            <ButtonIcon
+              as={isSelected ? MinusCircle : PlusCircle}
+              className="w-10 h-10"
+            />
+          </Button>
         </HStack>
         <Divider
           orientation="horizontal"
@@ -150,4 +150,4 @@ const IngredientCard: React.FC<{
   );
 };
 
-export default IngredientCard;
+export default IngredientStandardCard;

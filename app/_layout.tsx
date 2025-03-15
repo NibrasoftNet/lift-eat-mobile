@@ -10,7 +10,7 @@ import ErrorBoundary from 'react-native-error-boundary';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import 'react-native-reanimated';
 import { useOnlineManager } from '@/hooks/useOnlineManager';
 import { useAppState } from '@/hooks/useAppState';
@@ -18,9 +18,7 @@ import { useAppState } from '@/hooks/useAppState';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import { ActivityIndicator, View } from 'react-native';
-import { Button } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
+import { ActivityIndicator, GestureResponderEvent } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
@@ -29,6 +27,11 @@ import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import '@/i18n';
+import { VStack } from '@/components/ui/vstack';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { Icon } from '@/components/ui/icon';
+import { CloudAlert } from 'lucide-react-native';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
@@ -40,7 +43,7 @@ const InitialLayout = () => {
     if (!user) {
       router.replace('/login');
     } else {
-      router.replace('/register');
+      router.replace('/analytics');
     }
   }, []);
 
@@ -100,12 +103,21 @@ export default function ProjectLayout() {
     return null;
   }
 
-  const ErrorFallback = ({ error, resetError }: any) => (
-    <View>
+  const ErrorFallback = ({
+    error,
+    resetError,
+  }: {
+    error: Error;
+    resetError: (event: GestureResponderEvent) => void;
+  }) => (
+    <VStack className="size-full items-center justify-center gap-4 p-4">
+      <Icon as={CloudAlert} className="w-10 h-10 text-red-500" />
       <Text>Oops! Something went wrong:</Text>
       <Text>{error.toString()}</Text>
-      <Button onPress={resetError}>Reset</Button>
-    </View>
+      <Button className="w-full mt-10 text-white" onPress={resetError}>
+        <ButtonText>Reset</ButtonText>
+      </Button>
+    </VStack>
   );
 
   return (

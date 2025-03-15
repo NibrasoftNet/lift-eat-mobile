@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { ImageBackground, ScrollView, View } from 'react-native';
+import { ImageBackground, ScrollView } from 'react-native';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -10,19 +10,22 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
 import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
 import { Button } from '@/components/ui/button';
-import { MealProps, PlanWithDailyPlansAndMealsProps } from '@/db/schema';
+import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useQuery } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { getPlanDetails } from '@/utils/services/plan.service';
 import { Icon } from '@/components/ui/icon';
-import { ChevronLeft, ChevronRight, CircleChevronLeft } from 'lucide-react-native';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleChevronLeft,
+} from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
 import PlanMealCard from '@/components/cards/PlanMealCard';
 import NutritionBox from '@/components/boxes/NutritionBox';
@@ -34,7 +37,7 @@ export default function PlanDetailsScreen() {
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<
-    MealProps[] | undefined
+    MealOrmProps[] | undefined
   >([]);
 
   const {
@@ -65,7 +68,10 @@ export default function PlanDetailsScreen() {
     if (direction === 'left' && selectedWeek > 1) {
       setSelectedWeek((prev) => prev - 1);
       weekAnimation.value = withSpring(selectedWeek - 1); // Animate to the previous week
-    } else if (direction === 'right' && selectedWeek < singlePlan?.durationWeeks!) {
+    } else if (
+      direction === 'right' &&
+      selectedWeek < singlePlan?.durationWeeks!
+    ) {
       setSelectedWeek((prev) => prev + 1);
       weekAnimation.value = withSpring(selectedWeek + 1); // Animate to the next week
     }
@@ -93,7 +99,7 @@ export default function PlanDetailsScreen() {
   };
 
   return (
-    <QueryStateHandler<PlanWithDailyPlansAndMealsProps>
+    <QueryStateHandler<PlanWithDailyPlansAndMealsOrmProps>
       data={singlePlan}
       isLoading={isLoading}
       isFetching={isFetching}
@@ -113,16 +119,19 @@ export default function PlanDetailsScreen() {
               <HStack className="flex flex-row w-full items-center justify-between p-4">
                 <Link href="/plans/my-plans" asChild>
                   <Pressable>
-                    <Icon  as={CircleChevronLeft} className="w-10 h-10 text-black" />
+                    <Icon
+                      as={CircleChevronLeft}
+                      className="w-10 h-10 text-black"
+                    />
                   </Pressable>
                 </Link>
                 <NutritionBox
-                  title='Colories'
+                  title="Colories"
                   value={singlePlan?.calories!}
                   unit="Kcal"
-                  className='w-24'
-                  titleClassName='bg-red-500'
-                  valueClassName='bg-red-300'
+                  className="w-24"
+                  titleClassName="bg-red-500"
+                  valueClassName="bg-red-300"
                 />
               </HStack>
             </ImageBackground>

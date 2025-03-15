@@ -4,7 +4,7 @@ import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { UserPros } from '@/db/schema';
+import { UserOrmPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 
 const ProgressCalendarTab = () => {
@@ -27,7 +27,7 @@ const ProgressCalendarTab = () => {
   const massage = { key: 'massage', color: 'blue', selectedDotColor: 'blue' };
   const workout = { key: 'workout', color: 'green' };
   return (
-    <QueryStateHandler<UserPros>
+    <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}

@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
-import { ScrollView, ImageBackground, ImageSourcePropType } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { VStack } from '../ui/vstack';
 import { HStack } from '../ui/hstack';
-import { Button, ButtonIcon, ButtonText } from '../ui/button';
-import { AlertCircleIcon, ArrowLeftIcon, EditIcon, Icon, ThreeDotsIcon, TrashIcon } from '../ui/icon';
+import { AddIcon, AlertCircleIcon, Icon } from '../ui/icon';
 import { Input, InputField } from '../ui/input';
 import {
-  FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText,
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
   FormControlLabel,
   FormControlLabelText,
 } from '../ui/form-control';
@@ -25,47 +27,85 @@ import {
   SelectPortal,
   SelectTrigger,
 } from '../ui/select';
-import { Image } from '../ui/image';
-import { Ingredients, Meal } from '@/types/plan.type';
 import {
   CuisineTypeArray,
-  CuisineTypeEnum,
   MealTypeArray,
-  MealTypeEnum, MealUnitArray,
-  MealUnitEnum,
+  MealUnitArray,
 } from '@/utils/enum/meal.enum';
-import * as ImagePicker from 'expo-image-picker';
-import useSessionStore from '@/utils/store/sessionStore';
-import { MealDefaultValuesProps, MealFormData, mealSchema } from '@/utils/validation/meal/meal.validation';
+import {
+  MealDefaultValuesProps,
+  MealFormData,
+  mealSchema,
+} from '@/utils/validation/meal/meal.validation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getImageFromPicker } from '@/utils/utils';
 import { Pressable } from '../ui/pressable';
 import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
-import { Camera, ChevronDown, CircleChevronLeft, Images, NotebookPen, User } from 'lucide-react-native';
+import {
+  Camera,
+  ChevronDown,
+  CircleChevronLeft,
+  Images,
+  NotebookPen,
+  Save,
+  User,
+} from 'lucide-react-native';
 import { Heading } from '../ui/heading';
 import {
   Actionsheet,
   ActionsheetBackdrop,
-  ActionsheetContent, ActionsheetDragIndicator,
-  ActionsheetDragIndicatorWrapper, ActionsheetItemText,
+  ActionsheetContent,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetItemText,
 } from '../ui/actionsheet';
 import { Card } from '../ui/card';
 import { Textarea, TextareaInput } from '../ui/textarea';
 import { Grid, GridItem } from '../ui/grid';
-import { GenderEnum } from '@/utils/enum/user-gender-activity.enum';
-import Animated from 'react-native-reanimated';
+import { Fab, FabIcon, FabLabel } from '@/components/ui/fab';
+import IngredientsDrawer from '@/components/drawers/IngredientsDrawer';
+import { FlashList } from '@shopify/flash-list';
+import { useIngredientStore } from '@/utils/store/ingredientStore';
+import IngredientCard from '@/components/cards/IngredientCard';
+import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
+import {
+  Button,
+  ButtonIcon,
+  ButtonSpinner,
+  ButtonText,
+} from '@/components/ui/button';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '../ui/toast';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import useSessionStore from '@/utils/store/sessionStore';
+import { createNewMeal } from '@/utils/services/meal.service';
+import { Colors } from '@/utils/constants/Colors';
 
-
-
-export default function MealForm({ defaultValues, operation }: { defaultValues: MealDefaultValuesProps, operation: 'create' | 'update' }) {
+export default function MealForm({
+  defaultValues,
+  operation,
+}: {
+  defaultValues: MealDefaultValuesProps;
+  operation: 'create' | 'update';
+}) {
+  const drizzleDb = useDrizzleDb();
   const router = useRouter();
-  const { editId } = useLocalSearchParams();
-  const [meal, setMeal] = useState<Meal | undefined>(undefined);
-  const [isImageActionSheetOpen, setIsImageActionSheetOpen] = useState(false);
-  const [image, setImage] = useState<Buffer<ArrayBufferLike> | string | undefined>(
-    `${defaultValues.image}`,
-  );
+  const toast = useToast();
+  const { user } = useSessionStore();
+  const { selectedIngredients, totalMacros } = useIngredientStore();
+  const [image, setImage] = useState<
+    Buffer<ArrayBufferLike> | string | undefined
+  >(`${defaultValues.image}`);
+  const [isImageActionSheetOpen, setIsImageActionSheetOpen] =
+    useState<boolean>(false);
+  const [showIngredientsDrawer, setShowIngredientsDrawer] =
+    useState<boolean>(false);
+  // Init Tanstack Query client
+  const queryClient = useQueryClient();
+
   const {
     setValue,
     handleSubmit,
@@ -93,45 +133,72 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
     }
   };
 
-/*  const handleSave = () => {
-    console.log('Save meal:', meal);
-    router.back();
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: async (data: MealFormData) => {
+      return await createNewMeal(
+        drizzleDb,
+        data,
+        selectedIngredients,
+        totalMacros,
+        user?.id!,
+      );
+    },
+    onSuccess: async () => {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title="Success Create Meal"
+              description="Success Create Meal"
+            />
+          );
+        },
+      });
+      router.push('/meals/my-meals');
+    },
+    onError: (error: any) => {
+      // Show error toast
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Meal creation Failed"
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    },
+  });
+
+  const onSubmit = async (data: MealFormData) => {
+    if (selectedIngredients.length <= 0) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Ingrdients not selected"
+              description="Please select ingredients"
+            />
+          );
+        },
+      });
+      return;
+    }
+    await mutateAsync(data);
   };
-
-  const mealTypeOptions = Object.values(MealTypeEnum).map((type) => ({
-    label: type.replace(/_/g, ' ').toLowerCase(),
-    value: type,
-  }));
-
-  const updateFoodQuantity = (foodId: string, quantity: number) => {
-    setMeal({
-      ...meal,
-      foods: meal.foods.map((food) =>
-        food.id === foodId ? { ...food, quantity } : food,
-      ),
-    });
-  };
-
-  const handleRemoveFood = (foodId: string) => {
-    setMeal({
-      ...meal,
-      foods: meal.foods.filter((food) => food.id !== foodId),
-    });
-  };
-
-  const calculateTotalNutrition = () => {
-    return meal.foods.reduce(
-      (acc, food) => {
-        return {
-          calories: acc.calories + food.calories * food.quantity,
-          protein: acc.protein + food.protein * food.quantity,
-          carbs: acc.carbs + food.carbs * food.quantity,
-          fats: acc.fats + food.fats * food.quantity,
-        };
-      },
-      { calories: 0, protein: 0, carbs: 0, fats: 0 },
-    );
-  };*/
 
   return (
     <>
@@ -142,7 +209,17 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
               <Icon as={CircleChevronLeft} className="w-10 h-10 text-black" />
             </Pressable>
           </Link>
-          <Icon as={NotebookPen} className="w-10 h-10 text-black" />
+          <Button
+            action="secondary"
+            className="w-12 h-12 bg-transparent"
+            onPress={handleSubmit(onSubmit)}
+          >
+            {isPending ? (
+              <ButtonSpinner color={Colors.blue.background} />
+            ) : (
+              <ButtonIcon as={Save} className="w-10 h-10 text-black" />
+            )}
+          </Button>
         </HStack>
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>
@@ -247,9 +324,7 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                     control={control}
                     name="type"
                     render={({ field: { onChange, value } }) => (
-                      <Select
-                        onValueChange={onChange}
-                      >
+                      <Select onValueChange={onChange}>
                         <SelectTrigger>
                           <SelectInput
                             value={value}
@@ -266,7 +341,11 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                               <SelectDragIndicator />
                             </SelectDragIndicatorWrapper>
                             {MealTypeArray.map((type) => (
-                              <SelectItem key={type} label={type} value={type} />
+                              <SelectItem
+                                key={type}
+                                label={type}
+                                value={type}
+                              />
                             ))}
                           </SelectContent>
                         </SelectPortal>
@@ -293,9 +372,7 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                     control={control}
                     name="cuisine"
                     render={({ field: { onChange, value } }) => (
-                      <Select
-                        onValueChange={onChange}
-                      >
+                      <Select onValueChange={onChange}>
                         <SelectTrigger>
                           <SelectInput
                             value={value}
@@ -311,7 +388,11 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                               <SelectDragIndicator />
                             </SelectDragIndicatorWrapper>
                             {CuisineTypeArray.map((type) => (
-                              <SelectItem key={type} label={type} value={type} />
+                              <SelectItem
+                                key={type}
+                                label={type}
+                                value={type}
+                              />
                             ))}
                           </SelectContent>
                         </SelectPortal>
@@ -348,9 +429,7 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                     control={control}
                     name="unit"
                     render={({ field: { onChange, value } }) => (
-                      <Select
-                        onValueChange={onChange}
-                      >
+                      <Select onValueChange={onChange}>
                         <SelectTrigger>
                           <SelectInput
                             value={value}
@@ -367,7 +446,11 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                               <SelectDragIndicator />
                             </SelectDragIndicatorWrapper>
                             {MealUnitArray.map((unit) => (
-                              <SelectItem key={unit} label={unit} value={unit} />
+                              <SelectItem
+                                key={unit}
+                                label={unit}
+                                value={unit}
+                              />
                             ))}
                           </SelectContent>
                         </SelectPortal>
@@ -399,7 +482,9 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                           keyboardType="numeric"
                           placeholder="Quantity"
                           onBlur={onBlur}
-                          onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
+                          onChangeText={(val) =>
+                            onChange(val ? parseInt(val, 10) : 0)
+                          }
                           value={value.toString()}
                         />
                       </Input>
@@ -408,14 +493,49 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
                   {errors.quantity && (
                     <FormControlError>
                       <FormControlErrorIcon as={AlertCircleIcon} />
-                      <FormControlErrorText>{errors.quantity.message}</FormControlErrorText>
+                      <FormControlErrorText>
+                        {errors.quantity.message}
+                      </FormControlErrorText>
                     </FormControlError>
                   )}
                 </FormControl>
               </GridItem>
             </Grid>
           </Card>
+          <MacrosInfoCard
+            calories={totalMacros?.totalCalories!}
+            carbs={totalMacros?.totalCarbs!}
+            fats={totalMacros?.totalFats!}
+            protein={totalMacros?.totalProtein!}
+            unit="Gr"
+          />
+          {selectedIngredients.length ? (
+            <FlashList
+              data={selectedIngredients}
+              renderItem={({ item, index }) => (
+                <IngredientCard item={item} index={index} />
+              )}
+              keyExtractor={(item) => String(item.ingredientsStandard.id)}
+              estimatedItemSize={20}
+              contentContainerStyle={{ padding: 8 }}
+            />
+          ) : (
+            <Card className="rounded-lg flex flex-col gap-2">
+              <Text>No ingredients selected...</Text>
+            </Card>
+          )}
         </ScrollView>
+        <Fab
+          size="md"
+          placement="bottom right"
+          isHovered={false}
+          isDisabled={false}
+          isPressed={false}
+          onPress={() => setShowIngredientsDrawer(true)}
+        >
+          <FabIcon as={AddIcon} />
+          <FabLabel>Ingredients</FabLabel>
+        </Fab>
       </VStack>
       {/* Actionsheet for selecting image source */}
       <Actionsheet
@@ -450,6 +570,11 @@ export default function MealForm({ defaultValues, operation }: { defaultValues: 
           </HStack>
         </ActionsheetContent>
       </Actionsheet>
+      {/* Drawer for ingredients selection */}
+      <IngredientsDrawer
+        showIngredientsDrawer={showIngredientsDrawer}
+        setShowIngredientsDrawer={setShowIngredientsDrawer}
+      />
     </>
   );
 }

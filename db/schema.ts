@@ -6,23 +6,32 @@ import {
   blob,
 } from 'drizzle-orm/sqlite-core';
 import {
-  GenderEnum, GenderTypeArray,
-  PhysicalActivityEnum, PhysicalActivityTypeArray,
+  GenderEnum,
+  GenderTypeArray,
+  PhysicalActivityEnum,
+  PhysicalActivityTypeArray,
 } from '@/utils/enum/user-gender-activity.enum';
 import {
-  GoalEnum, GoalTypeArray,
+  GoalEnum,
+  GoalTypeArray,
   HeightUnitEnum,
-  WeightUnitEnum, WeightUnitTypeArray,
+  WeightUnitEnum,
+  WeightUnitTypeArray,
 } from '@/utils/enum/user-details.enum';
 import {
   CuisineTypeArray,
-  CuisineTypeEnum, MealTypeArray,
-  MealTypeEnum, MealUnitArray,
+  CuisineTypeEnum,
+  MealTypeArray,
+  MealTypeEnum,
+  MealUnitArray,
   MealUnitEnum,
 } from '@/utils/enum/meal.enum';
 import {
-  DailyPlanGeneratedWithEnum, DailyPlanGeneratedWithUnitArray,
-  DayEnum, DayUnitArray, PlanGeneratedWithArray,
+  DailyPlanGeneratedWithEnum,
+  DailyPlanGeneratedWithUnitArray,
+  DayEnum,
+  DayUnitArray,
+  PlanGeneratedWithArray,
   PlanGeneratedWithEnum,
 } from '@/utils/enum/general.enum';
 
@@ -30,7 +39,7 @@ export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().default('John'),
   email: text('email').notNull().unique(),
-  gender: text('gender', { enum: GenderTypeArray})
+  gender: text('gender', { enum: GenderTypeArray })
     .notNull()
     .default(GenderEnum.MALE),
   weight: real('weight').notNull().default(60),
@@ -194,24 +203,25 @@ export const plan = sqliteTable('plan', {
 });
 
 // Export types for use in your app
-export type UserPros = typeof users.$inferSelect;
-export type IngredientStandardProps = typeof ingredientsStandard.$inferSelect;
-export type MealIngredientsProps = typeof mealIngredients.$inferSelect;
-export type MealProps = typeof meals.$inferSelect;
-export type DailyPlanProps = typeof dailyPlan.$inferSelect;
-export type DailyPlanMealsProps = typeof dailyPlanMeals.$inferSelect;
-export type PlanProps = typeof plan.$inferSelect;
+export type UserOrmPros = typeof users.$inferSelect;
+export type IngredientStandardOrmProps =
+  typeof ingredientsStandard.$inferSelect;
+export type MealIngredientsOrmProps = typeof mealIngredients.$inferSelect;
+export type MealOrmProps = typeof meals.$inferSelect;
+export type DailyPlanOrmProps = typeof dailyPlan.$inferSelect;
+export type DailyPlanMealsOrmProps = typeof dailyPlanMeals.$inferSelect;
+export type PlanOrmProps = typeof plan.$inferSelect;
 
 // Custom type for Plan with nested DailyPlans and Meals
-export type PlanWithDailyPlansAndMealsProps = PlanProps & {
-  dailyPlans: (DailyPlanProps & { meals: MealProps[] })[];
+export type PlanWithDailyPlansAndMealsOrmProps = PlanOrmProps & {
+  dailyPlans: (DailyPlanOrmProps & { meals: MealOrmProps[] })[];
 };
 
-export type IngredientWithStandardProps = MealIngredientsProps & {
-  ingredientStandard: IngredientStandardProps;
-}
+export type IngredientWithStandardOrmProps = MealIngredientsOrmProps & {
+  ingredientStandard: IngredientStandardOrmProps;
+};
 
 // Custom type for Meal with nested MealIngredients and IngredientStandard
-export type MealWithIngredientAndStandardProps = MealProps & {
-  mealIngredients: IngredientWithStandardProps[];
+export type MealWithIngredientAndStandardOrmProps = MealOrmProps & {
+  mealIngredients: IngredientWithStandardOrmProps[];
 };

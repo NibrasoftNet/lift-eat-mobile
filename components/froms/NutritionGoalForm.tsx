@@ -1,22 +1,13 @@
 import { VStack } from '@/components/ui/vstack';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
-import Animated, {
-  FadeInDown, FadeInLeft,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ImageBackground, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {
-  GenderEnum,
-  PhysicalActivityEnum,
-} from '@/utils/enum/user-gender-activity.enum';
 import {
   FormControl,
   FormControlError,
@@ -35,25 +26,20 @@ import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
 import { Colors } from '@/utils/constants/Colors';
-import { GetGoalImages, GetPhysicalActivityImages } from '@/utils/utils';
-import {
-  CalculateCaloriesIntakeDefaultValueProps,
-  CalculateCaloriesIntakeFormData,
-  calculateCaloriesIntakeSchema,
-} from '@/utils/validation/plan/calculate-calories-intake.validation';
+import { GetGoalImages } from '@/utils/utils';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { activityOptions } from '@/utils/constants/constant';
 import {
-  NutritionGoalDefaultValueProps, nutritionGoalSchema,
+  NutritionGoalDefaultValueProps,
+  nutritionGoalSchema,
   NutritionGoalSchemaFormData,
 } from '@/utils/validation/plan/nutrition-goal.validation';
 
 export default function NutritionGoalForm({
   defaultValues,
-  operation
+  operation,
 }: {
   defaultValues: NutritionGoalDefaultValueProps;
-  operation: 'create' | 'update',
+  operation: 'create' | 'update';
 }) {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
@@ -176,7 +162,9 @@ export default function NutritionGoalForm({
           {errors.initialWeight && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>{errors.initialWeight.message}</FormControlErrorText>
+              <FormControlErrorText>
+                {errors.initialWeight.message}
+              </FormControlErrorText>
             </FormControlError>
           )}
         </FormControl>
@@ -207,7 +195,9 @@ export default function NutritionGoalForm({
           {errors.targetWeight && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>{errors.targetWeight.message}</FormControlErrorText>
+              <FormControlErrorText>
+                {errors.targetWeight.message}
+              </FormControlErrorText>
             </FormControlError>
           )}
         </FormControl>
@@ -273,10 +263,7 @@ export default function NutritionGoalForm({
             control={control}
             name="durationWeeks"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                className="my-1"
-                size="md"
-              >
+              <Input className="my-1" size="md">
                 <InputField
                   keyboardType="numeric"
                   placeholder={`Enter you Durantion in weeks`}
@@ -290,7 +277,9 @@ export default function NutritionGoalForm({
           {errors.durationWeeks && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>{errors.durationWeeks.message}</FormControlErrorText>
+              <FormControlErrorText>
+                {errors.durationWeeks.message}
+              </FormControlErrorText>
             </FormControlError>
           )}
         </FormControl>

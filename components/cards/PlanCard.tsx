@@ -2,11 +2,17 @@ import React from 'react';
 import { Pressable } from '../ui/pressable';
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
-import { EditIcon, GlobeIcon, Icon, ThreeDotsIcon, TrashIcon } from '../ui/icon';
+import {
+  EditIcon,
+  GlobeIcon,
+  Icon,
+  ThreeDotsIcon,
+  TrashIcon,
+} from '../ui/icon';
 import { Text } from '../ui/text';
-import { PlanProps } from '@/db/schema';
+import { PlanOrmProps } from '@/db/schema';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { ImageBackground, View } from 'react-native';
+import { ImageBackground } from 'react-native';
 import { GetGoalIcons, GetGoalImages } from '@/utils/utils';
 import { Menu, MenuItem, MenuItemLabel } from '../ui/menu';
 import { Button, ButtonIcon } from '../ui/button';
@@ -15,9 +21,12 @@ import { Divider } from '../ui/divider';
 import { useRouter } from 'expo-router';
 import NutritionBox from '@/components/boxes/NutritionBox';
 
-const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index }) => {
-  const router = useRouter()
-  const handlePlanCardPress = (plan: PlanProps) => {
+const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
+  item,
+  index,
+}) => {
+  const router = useRouter();
+  const handlePlanCardPress = (plan: PlanOrmProps) => {
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
@@ -64,7 +73,11 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
                   );
                 }}
               >
-                <MenuItem key="Select Current" textValue="Select Current" disabled={item.current}>
+                <MenuItem
+                  key="Select Current"
+                  textValue="Select Current"
+                  disabled={item.current}
+                >
                   <Icon as={GlobeIcon} size="sm" className="mr-2" />
                   <MenuItemLabel size="sm">Select Current</MenuItemLabel>
                 </MenuItem>
@@ -90,22 +103,24 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
                 <Text className="text-black">{item.durationWeeks} weeks</Text>
               </Box>
               <NutritionBox
-                title='Calories'
+                title="Calories"
                 value={item.calories}
                 unit="KCal"
-                className='w-24'
-                titleClassName='bg-red-500'
-                valueClassName='bg-red-300' />
+                className="w-24"
+                titleClassName="bg-red-500"
+                valueClassName="bg-red-300"
+              />
             </HStack>
             <HStack className="justify-around pt-3 border-t border-gray-100">
               {/* Carbs */}
               <NutritionBox
-                title='Carbs'
+                title="Carbs"
                 value={item.carbs}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-amber-500'
-                valueClassName='bg-amber-300' />
+                className="w-24"
+                titleClassName="bg-amber-500"
+                valueClassName="bg-amber-300"
+              />
               {/* Divider between items */}
               <Divider
                 orientation="vertical"
@@ -114,12 +129,12 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
 
               {/* Fats */}
               <NutritionBox
-                title='Fats'
+                title="Fats"
                 value={item.fat}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-green-500'
-                valueClassName='bg-green-300'
+                className="w-24"
+                titleClassName="bg-green-500"
+                valueClassName="bg-green-300"
               />
 
               {/* Divider between items */}
@@ -130,12 +145,12 @@ const PlanCard: React.FC<{ item: PlanProps; index: number }> = ({ item, index })
 
               {/* Protein */}
               <NutritionBox
-                title='Protein'
+                title="Protein"
                 value={item.protein}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-blue-500'
-                valueClassName='bg-blue-300'
+                className="w-24"
+                titleClassName="bg-blue-500"
+                valueClassName="bg-blue-300"
               />
             </HStack>
           </VStack>

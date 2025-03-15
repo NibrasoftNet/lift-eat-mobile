@@ -1,12 +1,15 @@
 import * as z from 'zod';
 import {
   CuisineTypeArray,
-  CuisineTypeEnum, MealTypeArray,
+  CuisineTypeEnum,
+  MealTypeArray,
   MealTypeEnum,
-  MealUnitArray, MealUnitEnum,
+  MealUnitArray,
+  MealUnitEnum,
 } from '@/utils/enum/meal.enum';
 
 export const mealSchema = z.object({
+  id: z.number().optional().nullable(),
   name: z.string().min(3).max(50),
   type: z.enum(MealTypeArray),
   description: z.string().min(3),
@@ -25,6 +28,7 @@ export const mealSchema = z.object({
 export type MealFormData = z.infer<typeof mealSchema>;
 
 export type MealDefaultValuesProps = {
+  id?: number;
   type: MealTypeEnum;
   name: string;
   description: string;
@@ -37,5 +41,5 @@ export type MealDefaultValuesProps = {
   protein: number;
   image?: Buffer<ArrayBufferLike>;
   creatorId: number;
-  ingredients: any
+  ingredients: any;
 };

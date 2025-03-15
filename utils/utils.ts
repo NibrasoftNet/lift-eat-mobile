@@ -73,7 +73,7 @@ export const GetGoalColor: Record<GoalEnum, string> = {
 };
 
 export const GetToastColor: Record<ToastTypeEnum, string> = {
-  [ToastTypeEnum.INFOS]: Colors.blue.light,
-  [ToastTypeEnum.ERROR]: Colors.red.light,
+  [ToastTypeEnum.INFOS]: Colors.blue.background,
+  [ToastTypeEnum.ERROR]: Colors.red.background,
   [ToastTypeEnum.SUCCESS]: Colors.green.background,
 };

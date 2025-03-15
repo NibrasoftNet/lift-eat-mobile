@@ -5,15 +5,16 @@ import { VStack } from '../ui/vstack';
 import { Icon } from '../ui/icon';
 import { CircleChevronRight, HandPlatter } from 'lucide-react-native';
 import { Text } from '../ui/text';
-import { MealProps } from '@/db/schema';
-import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
+import { MealOrmProps } from '@/db/schema';
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from '@/components/ui/avatar';
 
-
-const PlanMealCard: React.FC<{ meal: MealProps }> = ({ meal }) => {
+const PlanMealCard: React.FC<{ meal: MealOrmProps }> = ({ meal }) => {
   return (
-    <Pressable
-      className="flex w-full rounded-lg bg-secondary-300 shadow-xl p-3 border border-secondary-500"
-    >
+    <Pressable className="flex w-full rounded-lg bg-secondary-300 shadow-xl p-3 border border-secondary-500">
       <HStack className="justify-between items-center">
         <Avatar>
           <AvatarFallbackText>
@@ -39,10 +40,11 @@ const PlanMealCard: React.FC<{ meal: MealProps }> = ({ meal }) => {
           </Text>
         </VStack>
         <HStack className="items-center">
-          <Text className="text-gray-600 mr-2">
-            {meal.calories} Kcal
-          </Text>
-          <Icon as={CircleChevronRight} className="w-10 h-10 text-tertiary-500" />
+          <Text className="text-gray-600 mr-2">{meal.calories} Kcal</Text>
+          <Icon
+            as={CircleChevronRight}
+            className="w-10 h-10 text-tertiary-500"
+          />
         </HStack>
       </HStack>
     </Pressable>
