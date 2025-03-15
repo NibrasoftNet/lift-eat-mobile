@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { EditIcon, ThreeDotsIcon, Icon, TrashIcon } from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
 import { Divider } from '@/components/ui/divider';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { useQuery } from '@tanstack/react-query';
-import { getMealByIdWithIngredients } from '@/utils/services/meal.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  deleteMeal,
+  getMealByIdWithIngredients,
+} from '@/utils/services/meal.service';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { MealWithIngredientAndStandardOrmProps } from '@/db/schema';
 import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
@@ -33,11 +36,27 @@ import {
 import IngredientAccordion from '@/components/accordions/IngredientAccordion';
 import { Accordion } from '@/components/ui/accordion';
 import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { useToast } from '@/components/ui/toast';
+import {
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@/components/ui/modal';
+import { Heading } from '@/components/ui/heading';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function MealDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const toast = useToast();
   const drizzleDb = useDrizzleDb();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const {
     data: singleMeal,
@@ -50,6 +69,53 @@ export default function MealDetailsScreen() {
     queryFn: async () =>
       await getMealByIdWithIngredients(drizzleDb, Number(id)),
   });
+
+  const { mutateAsync, isPending: isDeletionPending } = useMutation({
+    mutationFn: async () => await deleteMeal(drizzleDb, Number(id)),
+    onSuccess: async () => {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title={`Success delete Meal`}
+              description={`Success delete Meal`}
+            />
+          );
+        },
+      });
+      await queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey.some((key) => key?.toString().startsWith('my-meals')),
+      });
+      router.back();
+      setShowModal(false);
+    },
+    onError: (error: any) => {
+      // Show error toast
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title={`Failure delete Meal`}
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    },
+  });
+
+  const handleMealDelete = async () => {
+    await mutateAsync();
+  };
 
   return (
     <QueryStateHandler<MealWithIngredientAndStandardOrmProps>
@@ -93,7 +159,11 @@ export default function MealDetailsScreen() {
               <Icon as={EditIcon} size="sm" className="mr-2" />
               <MenuItemLabel size="sm">Edit</MenuItemLabel>
             </MenuItem>
-            <MenuItem key="Delete Plan" textValue="Delete Plan">
+            <MenuItem
+              key="Delete Plan"
+              textValue="Delete Plan"
+              onPress={() => setShowModal(true)}
+            >
               <Icon as={TrashIcon} size="sm" className="mr-2" />
               <MenuItemLabel size="sm">Delete</MenuItemLabel>
             </MenuItem>
@@ -184,7 +254,7 @@ export default function MealDetailsScreen() {
             </Box>
           ) : (
             <Accordion className="w-full">
-              {singleMeal?.mealIngredients.map((mealIngredient, index) => (
+              {singleMeal?.mealIngredients.map((mealIngredient) => (
                 <IngredientAccordion
                   key={mealIngredient.id}
                   item={mealIngredient}
@@ -195,6 +265,51 @@ export default function MealDetailsScreen() {
           )}
         </ScrollView>
       </VStack>
+      <Modal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+        }}
+      >
+        <ModalBackdrop />
+        <ModalContent className="max-w-[305px] items-center">
+          <ModalHeader>
+            <Box className="w-[56px] h-[56px] rounded-full bg-background-error items-center justify-center">
+              <Icon as={TrashIcon} className="stroke-error-600" size="xl" />
+            </Box>
+          </ModalHeader>
+          <ModalBody className="mt-0 mb-4">
+            <Heading size="md" className="text-typography-950 mb-2 text-center">
+              Delete single meal
+            </Heading>
+            <Text size="sm" className="text-typography-500 text-center">
+              Are you sure you want to delete this meal? This action cannot be
+              undone.
+            </Text>
+          </ModalBody>
+          <ModalFooter className="w-full">
+            <Button
+              variant="outline"
+              action="secondary"
+              size="sm"
+              onPress={() => {
+                setShowModal(false);
+              }}
+              className="flex-grow"
+            >
+              <ButtonText>Cancel</ButtonText>
+            </Button>
+            <Button
+              onPress={() => handleMealDelete()}
+              size="sm"
+              className="flex-grow"
+            >
+              {isDeletionPending && <Spinner size="small" />}
+              <ButtonText>Delete</ButtonText>
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </QueryStateHandler>
   );
 }

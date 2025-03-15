@@ -56,6 +56,7 @@ export const QueryStateHandler = <T,>({
       </VStack>
     );
   }
-
-  return <>{children}</>;
+  if (data) {
+    return <>{children}</>;
+  }
 };

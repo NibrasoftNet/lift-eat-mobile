@@ -67,9 +67,7 @@ export default function EditMealScreen() {
       isPending={isPending}
       isFetchedAfterMount={isFetchedAfterMount}
     >
-      {mealToEdit && (
-        <MealForm defaultValues={defaultMealValues} operation="update" />
-      )}
+      <MealForm defaultValues={defaultMealValues} operation="update" />
     </QueryStateHandler>
   );
 }
