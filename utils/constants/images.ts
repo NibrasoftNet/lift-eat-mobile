@@ -10,6 +10,10 @@ import highActivity from '@/assets/images/activity/hight.jpg';
 import moderateActivity from '@/assets/images/activity/moderate.jpg';
 import sedentaryActivity from '@/assets/images/activity/sedentary.jpg';
 import lowActivity from '@/assets/images/activity/low.jpg';
+import breackfast from '@/assets/images/meals/breakfast.png';
+import lunch from '@/assets/images/meals/lunch.png';
+import snacks from '@/assets/images/meals/snacks.png';
+import dinner from '@/assets/images/meals/dinner.png';
 
 export {
   intro01,
@@ -24,4 +28,8 @@ export {
   moderateActivity,
   sedentaryActivity,
   lowActivity,
+  breackfast,
+  lunch,
+  snacks,
+  dinner,
 };

@@ -6,11 +6,7 @@ import { Text } from '@/components/ui/text';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
 import { AddIcon, Icon } from '@/components/ui/icon';
-import {
-  MealTypeEnum,
-  CuisineTypeEnum,
-  MealTypeArray,
-} from '@/utils/enum/meal.enum';
+import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import MealCard from '@/components/cards/MealCard';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
@@ -19,11 +15,12 @@ import { getMealsList } from '@/utils/services/meal.service';
 import { MealOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { SearchIcon, SoupIcon } from 'lucide-react-native';
-import { ScrollView } from 'react-native';
+import { Image, ScrollView } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
+import { cuisineOptions, mealsTypeOptions } from '@/utils/constants/constant';
 
 export default function MyMealsScreen() {
   const router = useRouter();
@@ -106,27 +103,24 @@ export default function MyMealsScreen() {
             >
               <ButtonText className="text-black">All</ButtonText>
             </Button>
-            {[
-              CuisineTypeEnum.GENERAL,
-              CuisineTypeEnum.AFRICAN,
-              CuisineTypeEnum.ASIAN,
-              CuisineTypeEnum.EUROPEAN,
-              CuisineTypeEnum.MEDITERRANEAN,
-              CuisineTypeEnum.AMERICAN,
-            ].map((cuisine) => (
-              <Button
-                key={cuisine}
-                onPress={() => handleCuisineSelect(cuisine)}
-                className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                  selectedCuisine === cuisine
-                    ? 'border-amber-500'
-                    : 'border-gray-200'
-                }`}
-              >
-                <ButtonText className="text-black">
-                  {cuisine?.slice(0, 2).toUpperCase()}
-                </ButtonText>
-              </Button>
+            {cuisineOptions.map((cuisineType) => (
+              <VStack key={cuisineType.name} className="w-16 h-20 items-center">
+                <Button
+                  onPress={() => handleCuisineSelect(cuisineType.name)}
+                  className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
+                    selectedCuisine === cuisineType.name
+                      ? 'border-amber-500'
+                      : 'border-gray-200'
+                  }`}
+                >
+                  <Image
+                    source={cuisineType.icon}
+                    className="h-16 w-16 object-contain rounded-full"
+                    style={{ alignSelf: 'center' }}
+                  />
+                </Button>
+                <Text className="text-sm capitalize">{cuisineType.name}</Text>
+              </VStack>
             ))}
           </>
         </ScrollView>
@@ -151,20 +145,24 @@ export default function MyMealsScreen() {
             >
               <ButtonText className="text-black">All</ButtonText>
             </Button>
-            {MealTypeArray.map((mealType) => (
-              <Button
-                key={mealType}
-                onPress={() => handleMealTypeSelect(mealType)}
-                className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                  selectedMealType === mealType
-                    ? 'border-amber-500'
-                    : 'border-gray-200'
-                }`}
-              >
-                <ButtonText className="text-black">
-                  {mealType?.slice(0, 2).toUpperCase()}
-                </ButtonText>
-              </Button>
+            {mealsTypeOptions.map((mealType) => (
+              <VStack key={mealType.name} className="w-16 h-20 items-center">
+                <Button
+                  onPress={() => handleMealTypeSelect(mealType.name)}
+                  className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
+                    selectedMealType === mealType.name
+                      ? 'border-amber-500'
+                      : 'border-gray-200'
+                  }`}
+                >
+                  <Image
+                    source={mealType.icon}
+                    className="h-16 w-16 object-contain rounded-full"
+                    style={{ alignSelf: 'center' }}
+                  />
+                </Button>
+                <Text className="text-sm capitalize">{mealType.name}</Text>
+              </VStack>
             ))}
           </>
         </ScrollView>
