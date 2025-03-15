@@ -1,6 +1,27 @@
 import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 import { bed, bodyBuilder, hiking, worker } from '@/utils/constants/icons';
-import { CuisineTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
+import {
+  CuisineTypeEnum,
+  MealTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
+import { breackfast, dinner, lunch, snacks } from '@/utils/constants/images';
+import {
+  african,
+  asian,
+  caribbean,
+  china,
+  european,
+  france,
+  general,
+  india,
+  italy,
+  japan,
+  mexico,
+  qatar,
+  tunisia,
+  united_states,
+} from '@/utils/constants/flags';
 
 export const activityOptions = [
   {
@@ -21,16 +42,40 @@ export const activityOptions = [
   },
 ];
 
+export const mealsTypeOptions = [
+  {
+    name: MealTypeEnum.BREAKFAST,
+    icon: breackfast,
+  },
+  {
+    name: MealTypeEnum.LUNCH,
+    icon: lunch,
+  },
+  {
+    name: MealTypeEnum.SNACK,
+    icon: snacks,
+  },
+  {
+    name: MealTypeEnum.DINNER,
+    icon: dinner,
+  },
+];
+
 export const cuisineOptions = [
-  { label: "American", value: CuisineTypeEnum.AMERICAN },
-  { label: "Italian", value: CuisineTypeEnum.ITALIAN },
-  { label: "Japanese", value: CuisineTypeEnum.JAPANESE },
-  { label: "Mexican", value: CuisineTypeEnum.MEXICAN },
-  { label: "French", value: CuisineTypeEnum.FRENCH },
-  { label: "Indian", value: CuisineTypeEnum.INDIAN },
-  { label: "Chinese", value: CuisineTypeEnum.CHINESE },
-  { label: "Thai", value: CuisineTypeEnum.THAI },
-  { label: "Mediterranean", value: CuisineTypeEnum.MEDITERRANEAN }
+  { name: CuisineTypeEnum.GENERAL, icon: general },
+  { name: CuisineTypeEnum.AFRICAN, icon: african },
+  { name: CuisineTypeEnum.EUROPEAN, icon: european },
+  { name: CuisineTypeEnum.ASIAN, icon: asian },
+  { name: CuisineTypeEnum.CARIBBEAN, icon: caribbean },
+  { name: CuisineTypeEnum.TUNISIAN, icon: tunisia },
+  { name: CuisineTypeEnum.QATARI, icon: qatar },
+  { name: CuisineTypeEnum.AMERICAN, icon: united_states },
+  { name: CuisineTypeEnum.CHINESE, icon: china },
+  { name: CuisineTypeEnum.FRENCH, icon: france },
+  { name: CuisineTypeEnum.INDIAN, icon: india },
+  { name: CuisineTypeEnum.ITALIAN, icon: italy },
+  { name: CuisineTypeEnum.JAPANESE, icon: japan },
+  { name: CuisineTypeEnum.MEXICAN, icon: mexico },
 ];
 
 export const unitOptions = [

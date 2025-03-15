@@ -192,7 +192,7 @@ class OpenFoodFactsService {
     let productImage: ImageSourcePropType | null = null;
 
     // Default image as fallback
-    const defaultImage: ImageSourcePropType = require('@/assets/images/Meals/téléchargement.jpg');
+    const defaultImage: ImageSourcePropType = require('@/assets/images/seed/kouskousi.jpg');
 
     // Check for product images in priority order
     if (product.image_url) {

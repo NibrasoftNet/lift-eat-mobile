@@ -108,7 +108,7 @@ export default function Scanner() {
     const meal = scanResult.meal;
     // Ensure we always have a valid image source
     const imageSource: ImageSourcePropType =
-      meal.image || require('@/assets/images/Meals/téléchargement.jpg');
+      meal.image || require('@/assets/images/seed/kouskousi.jpg');
 
     return (
       <View className="flex-1">
