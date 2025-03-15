@@ -9,7 +9,7 @@ import {
   meals,
   MealWithIngredientAndStandardOrmProps,
 } from '../../db/schema';
-import { eq, inArray, like } from 'drizzle-orm';
+import { and, eq, inArray, like } from 'drizzle-orm';
 import { MealFormData } from '../validation/meal/meal.validation';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { TotalMacrosProps } from '@/types/meal.type';
@@ -70,17 +70,16 @@ export const getMealsList = async (
   mealType?: MealTypeEnum,
   mealName?: string,
 ) => {
-  console.log('fadsasdf', cuisine, mealType);
   // Simulate a delay (e.g., 2 seconds)
   await new Promise((resolve) => setTimeout(resolve, 2000));
   try {
     let query = drizzleDb.select().from(meals).$dynamic();
 
-    if (cuisine) {
+    if (cuisine && mealType) {
+      query.where(and(eq(meals.cuisine, cuisine), eq(meals.type, mealType)));
+    } else if (cuisine) {
       query.where(eq(meals.cuisine, cuisine));
-    }
-
-    if (mealType) {
+    } else if (mealType) {
       query.where(eq(meals.type, mealType));
     }
 
@@ -199,5 +198,37 @@ export const updateMeal = async (
   } catch (error) {
     console.error('Error updating meal:', error); // Debugging log
     throw error;
+  }
+};
+
+export const deleteMeal = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  mealId: number,
+) => {
+  try {
+    console.log(`Deleting meal with ID: ${mealId}...`);
+
+    // Step 1: Delete associated mealIngredients
+    await drizzleDb
+      .delete(mealIngredients)
+      .where(eq(mealIngredients.mealId, mealId));
+
+    console.log(`Deleted mealIngredients for meal ID: ${mealId}`);
+
+    // Step 2: Delete the meal
+    const deletedMeal = await drizzleDb
+      .delete(meals)
+      .where(eq(meals.id, mealId))
+      .returning({ id: meals.id });
+
+    if (!deletedMeal || deletedMeal.length === 0) {
+      throw new Error('Failed to delete meal'); // Throw error if deletion fails
+    }
+
+    console.log(`Successfully deleted meal with ID: ${mealId}`);
+    return deletedMeal[0]; // Return the deleted meal ID
+  } catch (error) {
+    console.error(`Error deleting meal with ID: ${mealId}:`, error); // Log the error
+    throw error; // Rethrow the error to propagate it to the caller
   }
 };

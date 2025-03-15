@@ -15,6 +15,7 @@ const ProgressCalendarTab = () => {
     isPending,
     isFetching,
     isLoading,
+    isRefetching,
   } = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -32,6 +33,7 @@ const ProgressCalendarTab = () => {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <VStack>
         <NavbarUser user={actualUser!} />

@@ -16,6 +16,7 @@ export default function EditUserDetails() {
     data: actualUser,
     isPending,
     isFetching,
+    isRefetching,
     isLoading,
   } = useQuery({
     queryKey: ['me'],
@@ -40,6 +41,7 @@ export default function EditUserDetails() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <UserDetailsForm
         defaultValues={defaultUserDetailsValues}

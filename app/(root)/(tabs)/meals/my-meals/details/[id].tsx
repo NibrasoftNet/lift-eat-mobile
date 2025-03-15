@@ -43,6 +43,7 @@ export default function MealDetailsScreen() {
     data: singleMeal,
     isPending,
     isFetching,
+    isRefetching,
     isLoading,
   } = useQuery({
     queryKey: [`meal-${id}`],
@@ -56,6 +57,7 @@ export default function MealDetailsScreen() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <VStack className="flex-1 w-full gap-4 p-4">
         <HStack className="w-full h-8 justify-between">

@@ -18,6 +18,7 @@ export default function CreateNutritionTarget() {
     isPending,
     isFetching,
     isLoading,
+    isRefetching,
   } = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -39,6 +40,7 @@ export default function CreateNutritionTarget() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <NutritionGoalForm
         defaultValues={nutritionGoalDefaultValueProps}
