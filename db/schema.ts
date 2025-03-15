@@ -218,7 +218,7 @@ export type PlanWithDailyPlansAndMealsOrmProps = PlanOrmProps & {
 };
 
 export type IngredientWithStandardOrmProps = MealIngredientsOrmProps & {
-  ingredientStandard: IngredientStandardOrmProps;
+  ingredientsStandard: IngredientStandardOrmProps;
 };
 
 // Custom type for Meal with nested MealIngredients and IngredientStandard

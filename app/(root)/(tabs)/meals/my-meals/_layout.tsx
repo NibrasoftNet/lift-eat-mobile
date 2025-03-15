@@ -25,6 +25,14 @@ export default function MyMealsLayout() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="edit/[id]"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

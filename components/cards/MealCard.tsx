@@ -15,15 +15,12 @@ import { MealOrmProps } from '@/db/schema';
 import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from '@/components/ui/avatar';
-import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
-import { Button, ButtonIcon } from '@/components/ui/button';
-import NutritionBox from '@/components/boxes/NutritionBox';
-import { Divider } from '@/components/ui/divider';
+import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
+import { Menu, MenuItem, MenuItemLabel } from '../ui/menu';
+import { Button, ButtonIcon } from '../ui/button';
+import NutritionBox from '../boxes/NutritionBox';
+import { Divider } from '../ui/divider';
+import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 
 const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   item,
@@ -61,7 +58,11 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                 );
               }}
             >
-              <MenuItem key="Edit Plan" textValue="Edit Plan">
+              <MenuItem
+                key="Edit Plan"
+                textValue="Edit Plan"
+                onPress={() => router.push(`/meals/my-meals/edit/${item.id}`)}
+              >
                 <Icon as={EditIcon} size="sm" className="mr-2" />
                 <MenuItemLabel size="sm">Edit</MenuItemLabel>
               </MenuItem>
@@ -72,7 +73,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
             </Menu>
           </HStack>
           <Box className="h-28 w-full items-center justify-center">
-            <Avatar>
+            <Avatar className="border-2 border-tertiary-500 w-36 h-36 shadow-xl">
               <AvatarFallbackText>
                 {item.name?.slice(0, 2).toUpperCase()}
               </AvatarFallbackText>
@@ -84,9 +85,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                   }}
                 />
               ) : (
-                <AvatarFallbackText>
-                  <Icon as={HandPlatter} size="lg" className="stroke-white" />
-                </AvatarFallbackText>
+                <Icon as={HandPlatter} size="lg" className="stroke-white" />
               )}
             </Avatar>
           </Box>
@@ -126,48 +125,12 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                 <Text>{item.unit}</Text>
               </HStack>
             </HStack>
-            <HStack className="justify-around pt-3 border-t border-gray-100">
-              {/* Carbs */}
-              <NutritionBox
-                title="Carbs"
-                value={item.carbs}
-                unit="Gr"
-                className="w-24"
-                titleClassName="bg-amber-500"
-                valueClassName="bg-amber-300"
-              />
-              {/* Divider between items */}
-              <Divider
-                orientation="vertical"
-                className={`w-0.5 h-14 bg-gray-100 mx-3`}
-              />
-
-              {/* Fats */}
-              <NutritionBox
-                title="Fats"
-                value={item.fat}
-                unit="Gr"
-                className="w-24"
-                titleClassName="bg-green-500"
-                valueClassName="bg-green-300"
-              />
-
-              {/* Divider between items */}
-              <Divider
-                orientation="vertical"
-                className={`w-0.5 h-14 bg-gray-300 mx-3`}
-              />
-
-              {/* Protein */}
-              <NutritionBox
-                title="Protein"
-                value={item.protein}
-                unit="Gr"
-                className="w-24"
-                titleClassName="bg-blue-500"
-                valueClassName="bg-blue-300"
-              />
-            </HStack>
+            <MacrosDetailsBox
+              carbs={item.carbs}
+              fats={item.fat}
+              protein={item.protein}
+              unit={'Gr'}
+            />
           </VStack>
         </Card>
       </Pressable>

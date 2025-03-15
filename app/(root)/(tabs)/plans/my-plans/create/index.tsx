@@ -15,7 +15,7 @@ export default function CreateCaloriesCount() {
 
   const {
     data: actualUser,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -38,7 +38,7 @@ export default function CreateCaloriesCount() {
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <CalculateCaloriesIntakeForm
         defaultValues={defaultCalculateCaloriesIntakeValues}

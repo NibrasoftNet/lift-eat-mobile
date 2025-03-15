@@ -14,7 +14,7 @@ export default function EditUserPreference() {
 
   const {
     data: actualUser,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -39,7 +39,7 @@ export default function EditUserPreference() {
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <UserGenderActivityForm
         defaultValues={defaultGenderActivityValues}

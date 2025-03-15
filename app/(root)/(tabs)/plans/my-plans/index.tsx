@@ -20,7 +20,7 @@ export default function MyPlansScreen() {
   const { user } = useSessionStore();
   const {
     data: plansList,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -36,7 +36,7 @@ export default function MyPlansScreen() {
       data={plansList}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <Box className="flex-1 bg-gray-50">
         <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">

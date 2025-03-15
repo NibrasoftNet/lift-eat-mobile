@@ -42,7 +42,7 @@ export default function PlanDetailsScreen() {
 
   const {
     data: singlePlan,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -103,7 +103,7 @@ export default function PlanDetailsScreen() {
       data={singlePlan}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <ScrollView className="flex-1 bg-gray-50">
         <Box className="p-4">

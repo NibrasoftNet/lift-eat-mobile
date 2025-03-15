@@ -6,6 +6,8 @@ import { TotalMacrosProps } from '@/types/meal.type';
 interface IngredientStore {
   selectedIngredients: IngredientWithStandardProps[];
   totalMacros: TotalMacrosProps;
+  setSelectedIngredients: (ingredients: IngredientWithStandardProps[]) => void;
+  setTotalMacros: (macros: TotalMacrosProps) => void;
   addIngredient: (ingredient: IngredientStandardOrmProps) => void;
   removeIngredient: (id: number) => void;
   toggleIngredient: (ingredient: IngredientStandardOrmProps) => void;
@@ -49,6 +51,17 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
     totalCarbs: 0,
     totalProtein: 0,
   },
+
+  setSelectedIngredients: (ingredients) =>
+    set(() => ({
+      selectedIngredients: ingredients,
+      totalMacros: calculateTotalMacros(ingredients),
+    })),
+
+  setTotalMacros: (macros) =>
+    set(() => ({
+      totalMacros: macros,
+    })),
 
   addIngredient: (ingredient) =>
     set((state) => {
@@ -101,18 +114,22 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
           ? {
               ...ing,
               quantity: newQuantity,
-              calories:
+              calories: Math.round(
                 (newQuantity / ing.ingredientsStandard.quantity) *
-                ing.ingredientsStandard.calories,
-              carbs:
+                  ing.ingredientsStandard.calories,
+              ),
+              carbs: Math.round(
                 (newQuantity / ing.ingredientsStandard.quantity) *
-                ing.ingredientsStandard.carbs,
-              fat:
+                  ing.ingredientsStandard.carbs,
+              ),
+              fat: Math.round(
                 (newQuantity / ing.ingredientsStandard.quantity) *
-                ing.ingredientsStandard.fat,
-              protein:
+                  ing.ingredientsStandard.fat,
+              ),
+              protein: Math.round(
                 (newQuantity / ing.ingredientsStandard.quantity) *
-                ing.ingredientsStandard.protein,
+                  ing.ingredientsStandard.protein,
+              ),
             }
           : ing,
       );

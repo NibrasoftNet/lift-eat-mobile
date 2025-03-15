@@ -15,7 +15,7 @@ export const mealSchema = z.object({
   description: z.string().min(3),
   cuisine: z.enum(CuisineTypeArray),
   unit: z.enum(MealUnitArray),
-  quantity: z.number(),
+  quantity: z.number().min(1),
   calories: z.number(),
   carbs: z.number(),
   fat: z.number(),
