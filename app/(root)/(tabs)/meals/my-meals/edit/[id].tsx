@@ -21,6 +21,7 @@ export default function EditMealScreen() {
     isFetching,
     isRefetching,
     isPending,
+    isFetchedAfterMount,
   } = useQuery({
     queryKey: [`meal-${id}`],
     queryFn: async () => {
@@ -58,15 +59,17 @@ export default function EditMealScreen() {
   };
 
   return (
-    /* TODO: FIGURE OUT WHY QueryStateHandler TRIGGERS: Warning: Text strings must be rendered within a <Text> component. */
     <QueryStateHandler<MealWithIngredientAndStandardOrmProps>
       data={mealToEdit}
       isLoading={isLoading}
       isFetching={isFetching}
       isRefetching={isRefetching}
       isPending={isPending}
+      isFetchedAfterMount={isFetchedAfterMount}
     >
-      <MealForm defaultValues={defaultMealValues} operation="update" />;
+      {mealToEdit && (
+        <MealForm defaultValues={defaultMealValues} operation="update" />
+      )}
     </QueryStateHandler>
   );
 }

@@ -22,6 +22,7 @@ export default function MyPlansScreen() {
     data: plansList,
     isPending,
     isFetching,
+    isRefetching,
     isLoading,
   } = useQuery({
     queryKey: ['my-plans'],
@@ -37,6 +38,7 @@ export default function MyPlansScreen() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <Box className="flex-1 bg-gray-50">
         <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">

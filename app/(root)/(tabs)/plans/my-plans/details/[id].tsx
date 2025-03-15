@@ -45,6 +45,7 @@ export default function PlanDetailsScreen() {
     isPending,
     isFetching,
     isLoading,
+    isRefetching,
   } = useQuery({
     queryKey: [`plan-${id}`],
     queryFn: async () => await getPlanDetails(drizzleDb, id),
@@ -104,6 +105,7 @@ export default function PlanDetailsScreen() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <ScrollView className="flex-1 bg-gray-50">
         <Box className="p-4">

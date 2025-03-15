@@ -16,6 +16,7 @@ export default function EditUserPreference() {
     data: actualUser,
     isPending,
     isFetching,
+    isRefetching,
     isLoading,
   } = useQuery({
     queryKey: ['me'],
@@ -40,6 +41,7 @@ export default function EditUserPreference() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <UserGenderActivityForm
         defaultValues={defaultGenderActivityValues}

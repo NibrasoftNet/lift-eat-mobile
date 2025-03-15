@@ -17,6 +17,7 @@ export default function EditUserProfile() {
     isPending,
     isFetching,
     isLoading,
+    isRefetching,
   } = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -39,6 +40,7 @@ export default function EditUserProfile() {
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
+      isRefetching={isRefetching}
     >
       <UserProfileForm defaultValues={defaultUserDetailsValues} />
     </QueryStateHandler>
