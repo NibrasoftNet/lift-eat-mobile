@@ -28,7 +28,7 @@ import { Heading } from '../ui/heading';
 import { Text } from '../ui/text';
 import { Pressable } from '../ui/pressable';
 import { Button, ButtonText } from '../ui/button';
-import { UserPros } from '@/db/schema';
+import { UserOrmPros } from '@/db/schema';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import useSessionStore from '@/utils/store/sessionStore';
@@ -77,7 +77,7 @@ const UserSettingsDrawer = ({
 }: {
   showUserSettingsDrawer: boolean;
   setShowUserSettingsDrawer: Dispatch<SetStateAction<boolean>>;
-  user: UserPros;
+  user: UserOrmPros;
 }) => {
   return (
     <Drawer

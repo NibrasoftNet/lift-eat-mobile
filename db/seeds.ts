@@ -8,11 +8,11 @@ import {
   WeightUnitEnum,
 } from '@/utils/enum/user-details.enum';
 import {
-  DailyPlanProps,
-  IngredientStandardProps,
-  MealProps,
-  PlanProps,
-  UserPros,
+  DailyPlanOrmProps,
+  IngredientStandardOrmProps,
+  MealOrmProps,
+  PlanOrmProps,
+  UserOrmPros,
 } from './schema';
 import {
   CuisineTypeEnum,
@@ -25,7 +25,7 @@ import {
   PlanGeneratedWithEnum,
 } from '@/utils/enum/general.enum';
 
-export const usersSeed: Omit<UserPros, 'id'>[] = [
+export const usersSeed: Omit<UserOrmPros, 'id'>[] = [
   {
     name: 'User 1',
     email: 'test1@test.com',
@@ -64,60 +64,61 @@ export const usersSeed: Omit<UserPros, 'id'>[] = [
   },
 ];
 
-export const ingredientsStandardSeed: Omit<IngredientStandardProps, 'id'>[] = [
-  {
-    name: 'Oats',
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 10,
-    calories: 1700,
-    carbs: 10,
-    fat: 10,
-    protein: 10,
-    image: null,
-  },
-  {
-    name: 'Banana',
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    calories: 170,
-    carbs: 25,
-    fat: 0.3,
-    protein: 1.2,
-    image: null,
-  },
-  {
-    name: 'Grilled Chicken',
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 150,
-    calories: 190,
-    carbs: 5,
-    fat: 3,
-    protein: 40,
-    image: null,
-  },
-  {
-    name: 'Rice',
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 200,
-    calories: 120,
-    carbs: 45,
-    fat: 1,
-    protein: 5,
-    image: null,
-  },
-  {
-    name: 'Salmon',
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 150,
-    calories: 170,
-    carbs: 0,
-    fat: 10,
-    protein: 25,
-    image: null,
-  },
-];
+export const ingredientsStandardSeed: Omit<IngredientStandardOrmProps, 'id'>[] =
+  [
+    {
+      name: 'Oats',
+      unit: MealUnitEnum.GRAMMES,
+      quantity: 10,
+      calories: 1700,
+      carbs: 10,
+      fat: 10,
+      protein: 10,
+      image: null,
+    },
+    {
+      name: 'Banana',
+      unit: MealUnitEnum.GRAMMES,
+      quantity: 100,
+      calories: 170,
+      carbs: 25,
+      fat: 0.3,
+      protein: 1.2,
+      image: null,
+    },
+    {
+      name: 'Grilled Chicken',
+      unit: MealUnitEnum.GRAMMES,
+      quantity: 150,
+      calories: 190,
+      carbs: 5,
+      fat: 3,
+      protein: 40,
+      image: null,
+    },
+    {
+      name: 'Rice',
+      unit: MealUnitEnum.GRAMMES,
+      quantity: 200,
+      calories: 120,
+      carbs: 45,
+      fat: 1,
+      protein: 5,
+      image: null,
+    },
+    {
+      name: 'Salmon',
+      unit: MealUnitEnum.GRAMMES,
+      quantity: 150,
+      calories: 170,
+      carbs: 0,
+      fat: 10,
+      protein: 25,
+      image: null,
+    },
+  ];
 
-export const mealsSeed: Omit<MealProps, 'id' | 'creatorId'>[] = [
+export const mealsSeed: Omit<MealOrmProps, 'id' | 'creatorId'>[] = [
   {
     type: MealTypeEnum.BREAKFAST,
     name: 'Oatmeal with Fruits',
@@ -159,7 +160,7 @@ export const mealsSeed: Omit<MealProps, 'id' | 'creatorId'>[] = [
   },
 ];
 
-export const dailyPlanSeed: Omit<DailyPlanProps, 'id' | 'planId'>[] = [
+export const dailyPlanSeed: Omit<DailyPlanOrmProps, 'id' | 'planId'>[] = [
   {
     week: 1,
     calories: 2000,
@@ -189,7 +190,7 @@ export const dailyPlanSeed: Omit<DailyPlanProps, 'id' | 'planId'>[] = [
   },
 ];
 
-export const planSeed: Omit<PlanProps, 'id' | 'userId'>[] = [
+export const planSeed: Omit<PlanOrmProps, 'id' | 'userId'>[] = [
   {
     name: 'Fat Loss Plan',
     goal: GoalEnum.WEIGHT_LOSS,

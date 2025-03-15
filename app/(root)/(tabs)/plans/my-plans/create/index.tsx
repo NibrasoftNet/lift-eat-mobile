@@ -1,19 +1,16 @@
 import React from 'react';
-import {
-  PhysicalActivityEnum,
-} from '@/utils/enum/user-gender-activity.enum';
+import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 import { CalculateCaloriesIntakeDefaultValueProps } from '@/utils/validation/plan/calculate-calories-intake.validation';
-import { GoalEnum } from '@/utils/enum/user-details.enum';
 import CalculateCaloriesIntakeForm from '@/components/froms/CalculateCaloriesIntakeForm';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
-import { UserPros, users } from '@/db/schema';
+import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
 export default function CreateCaloriesCount() {
-  const { user } = useSessionStore()
+  const { user } = useSessionStore();
   const drizzleDb = useDrizzleDb();
 
   const {
@@ -37,7 +34,7 @@ export default function CreateCaloriesCount() {
       physicalActivity: PhysicalActivityEnum.LOW,
     };
   return (
-    <QueryStateHandler<UserPros>
+    <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}

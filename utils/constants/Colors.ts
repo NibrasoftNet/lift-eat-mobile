@@ -46,9 +46,11 @@ export const Colors = {
   },
   blue: {
     light: '#DBEAFE',
+    background: '#2337C6',
   },
   red: {
     light: '#FEE2E2',
+    background: '#D60404',
   },
   green: {
     light: '#DCFCE7',

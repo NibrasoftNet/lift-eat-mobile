@@ -4,7 +4,7 @@ import UserDetailsForm from '../../../../../components/froms/UserDetailsForm';
 import { useLocalSearchParams } from 'expo-router';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
-import { UserPros, users } from '@/db/schema';
+import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { eq } from 'drizzle-orm';
 
@@ -35,7 +35,7 @@ export default function EditUserDetails() {
   };
 
   return (
-    <QueryStateHandler<UserPros>
+    <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}

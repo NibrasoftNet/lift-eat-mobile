@@ -1,10 +1,10 @@
 import {
   dailyPlan,
   dailyPlanMeals,
-  DailyPlanMealsProps,
+  DailyPlanMealsOrmProps,
   ingredientsStandard,
   mealIngredients,
-  MealIngredientsProps,
+  MealIngredientsOrmProps,
   meals,
   plan,
   users,
@@ -169,7 +169,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
     .returning({ id: meals.id });
   console.log('Inserting meals completed: success...');
 
-  const ingredientWithMealAndStandard: Omit<MealIngredientsProps, 'id'>[] =
+  const ingredientWithMealAndStandard: Omit<MealIngredientsOrmProps, 'id'>[] =
     ingredientsStandardSeed.map((ingredient) => {
       const selectedIngredientStandardId =
         ingredientStandardIds[
@@ -215,7 +215,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   console.log('Inserting Daily Plans completed: success...');
 
   // Insert Daily Plan Meals
-  const dailyPlanMealsData: Omit<DailyPlanMealsProps, 'id'>[] =
+  const dailyPlanMealsData: Omit<DailyPlanMealsOrmProps, 'id'>[] =
     dailyPlanIds.map((dailyPlan) => {
       const selectedMealId =
         mealIds[Math.floor(Math.random() * mealIds.length)].id;

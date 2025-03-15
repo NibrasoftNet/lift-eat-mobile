@@ -65,14 +65,14 @@ export default function Login() {
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
               title="Success"
-              description="Success update details"
+              description="Success user login"
             />
           );
         },
       });
       setUser({
-        id: data?.id,
-        email: data?.email,
+        id: data?.id!,
+        email: data?.email!,
       });
       router.push('/analytics');
     },

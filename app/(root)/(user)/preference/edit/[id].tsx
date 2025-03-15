@@ -5,7 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
-import { UserPros, users } from '@/db/schema';
+import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
 export default function EditUserPreference() {
@@ -35,7 +35,7 @@ export default function EditUserPreference() {
     //goalUnit: GoalEnum.MAINTAIN,
   };
   return (
-    <QueryStateHandler<UserPros>
+    <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}

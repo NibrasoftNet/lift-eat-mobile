@@ -6,11 +6,11 @@ import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
-import { UserPros, users } from '@/db/schema';
+import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
 export default function CreateNutritionTarget() {
-  const { user } = useSessionStore()
+  const { user } = useSessionStore();
   const drizzleDb = useDrizzleDb();
 
   const {
@@ -27,15 +27,14 @@ export default function CreateNutritionTarget() {
     },
   });
 
-  const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps =
-    {
-      initialWeight: actualUser?.weight!,
-      targetWeight: actualUser?.weight!,
-      durationWeeks: 1,
-      goalUnit: GoalEnum.MAINTAIN,
-    };
+  const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps = {
+    initialWeight: actualUser?.weight!,
+    targetWeight: actualUser?.weight!,
+    durationWeeks: 1,
+    goalUnit: GoalEnum.MAINTAIN,
+  };
   return (
-    <QueryStateHandler<UserPros>
+    <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
@@ -43,7 +42,7 @@ export default function CreateNutritionTarget() {
     >
       <NutritionGoalForm
         defaultValues={nutritionGoalDefaultValueProps}
-        operation='create'
+        operation="create"
       />
     </QueryStateHandler>
   );

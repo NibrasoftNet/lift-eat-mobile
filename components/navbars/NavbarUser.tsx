@@ -4,11 +4,11 @@ import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import { Icon } from '../ui/icon';
 import { Gem, Settings, User } from 'lucide-react-native';
 import { Button, ButtonIcon, ButtonText } from '../ui/button';
-import { UserPros } from '@/db/schema';
+import { UserOrmPros } from '@/db/schema';
 import UserSettingsDrawer from '@/components/drawers/UserSettingsDrawer';
 import GeneralSettingsDrawer from '@/components/drawers/GeneralSettingsDrawer';
 
-export default function NavbarUser({ user }: { user: UserPros }) {
+export default function NavbarUser({ user }: { user: UserOrmPros }) {
   const [showUserSettingsDrawer, setShowUserSettingsDrawer] =
     useState<boolean>(false);
   const [showGeneralSettingsDrawer, setShowGeneralSettingsDrawer] =

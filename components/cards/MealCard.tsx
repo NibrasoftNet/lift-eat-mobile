@@ -5,37 +5,45 @@ import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
 import { EditIcon, Icon, ThreeDotsIcon, TrashIcon } from '../ui/icon';
-import { HandPlatter, SquareSigma, UtensilsCrossedIcon, Weight } from 'lucide-react-native';
-import { MealProps } from '@/db/schema';
+import {
+  HandPlatter,
+  SquareSigma,
+  UtensilsCrossedIcon,
+  Weight,
+} from 'lucide-react-native';
+import { MealOrmProps } from '@/db/schema';
 import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from '@/components/ui/avatar';
 import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import NutritionBox from '@/components/boxes/NutritionBox';
 import { Divider } from '@/components/ui/divider';
 
-
-
-const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index }) => {
-  const router = useRouter()
-  const handleMealCardPress = (meal: MealProps) => {
+const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
+  item,
+  index,
+}) => {
+  const router = useRouter();
+  const handleMealCardPress = (meal: MealOrmProps) => {
     console.log(meal.name);
     router.push(`/meals/my-meals/details/${meal.id}`);
   };
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 100)}
-      className='mb-4 rounded-xl overflow-hidden'
+      className="mb-4 rounded-xl overflow-hidden"
     >
-      <Pressable
-        onPress={() => handleMealCardPress(item)}
-      >
+      <Pressable onPress={() => handleMealCardPress(item)}>
         <Card className="items-center gap-2">
-          <HStack className='w-full h-4 items-center justify-end'>
+          <HStack className="w-full h-4 items-center justify-end">
             <Menu
-              placement='right top'
+              placement="right top"
               offset={5}
               disabledKeys={['Settings']}
               trigger={({ ...triggerProps }) => {
@@ -63,7 +71,7 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
               </MenuItem>
             </Menu>
           </HStack>
-          <Box className='h-28 w-full items-center justify-center'>
+          <Box className="h-28 w-full items-center justify-center">
             <Avatar>
               <AvatarFallbackText>
                 {item.name?.slice(0, 2).toUpperCase()}
@@ -82,37 +90,29 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
               )}
             </Avatar>
           </Box>
-          <VStack className='mt-4'>
+          <VStack className="mt-4">
             <HStack className="items-center justify-between mb-2">
               <HStack space="sm" className="items-center flex-1">
-                <Icon
-                  as={UtensilsCrossedIcon}
-                  className="text-gray-600"
-                />
+                <Icon as={UtensilsCrossedIcon} className="text-gray-600" />
                 <VStack className="flex-1">
-                  <Text
-                    className='font-semibold text-sm'
-                  >
-                    {item.name}
-                  </Text>
-                  <Text
-                    className='text-sm'
-                  >
+                  <Text className="font-semibold text-sm">{item.name}</Text>
+                  <Text className="text-sm">
                     {item.type} • {item.cuisine}
                   </Text>
                 </VStack>
               </HStack>
               <NutritionBox
-                title='Calories'
+                title="Calories"
                 value={item.calories}
                 unit="KCal"
-                className='w-24'
-                titleClassName='bg-red-500'
-                valueClassName='bg-red-300' />
+                className="w-24"
+                titleClassName="bg-red-500"
+                valueClassName="bg-red-300"
+              />
             </HStack>
             <HStack className="items-center justify-center w-full">
               <HStack className="gap-2 items-center">
-                <Icon as={SquareSigma} size="md"/>
+                <Icon as={SquareSigma} size="md" />
                 <Text>Serving:</Text>
                 <Text>{item.quantity}</Text>
               </HStack>
@@ -121,7 +121,7 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
                 className={`w-0.5 h-14 bg-gray-100 mx-3`}
               />
               <HStack className="gap-2 items-center">
-                <Icon as={Weight} size="md"/>
+                <Icon as={Weight} size="md" />
                 <Text>Unit:</Text>
                 <Text>{item.unit}</Text>
               </HStack>
@@ -129,12 +129,13 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
             <HStack className="justify-around pt-3 border-t border-gray-100">
               {/* Carbs */}
               <NutritionBox
-                title='Carbs'
+                title="Carbs"
                 value={item.carbs}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-amber-500'
-                valueClassName='bg-amber-300' />
+                className="w-24"
+                titleClassName="bg-amber-500"
+                valueClassName="bg-amber-300"
+              />
               {/* Divider between items */}
               <Divider
                 orientation="vertical"
@@ -143,12 +144,12 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
 
               {/* Fats */}
               <NutritionBox
-                title='Fats'
+                title="Fats"
                 value={item.fat}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-green-500'
-                valueClassName='bg-green-300'
+                className="w-24"
+                titleClassName="bg-green-500"
+                valueClassName="bg-green-300"
               />
 
               {/* Divider between items */}
@@ -159,12 +160,12 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
 
               {/* Protein */}
               <NutritionBox
-                title='Protein'
+                title="Protein"
                 value={item.protein}
                 unit="Gr"
-                className='w-24'
-                titleClassName='bg-blue-500'
-                valueClassName='bg-blue-300'
+                className="w-24"
+                titleClassName="bg-blue-500"
+                valueClassName="bg-blue-300"
               />
             </HStack>
           </VStack>
@@ -172,6 +173,6 @@ const MealCard: React.FC<{ item: MealProps; index: number }> = ({ item, index })
       </Pressable>
     </Animated.View>
   );
-}
+};
 
-export default MealCard
+export default MealCard;

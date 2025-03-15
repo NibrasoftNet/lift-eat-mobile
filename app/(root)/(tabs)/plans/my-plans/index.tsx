@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { Link, useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
-import {
-  AddIcon,
-  Icon,
-} from '@/components/ui/icon';
+import { AddIcon, Icon } from '@/components/ui/icon';
 import { SoupIcon } from 'lucide-react-native';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
-import { PlanProps, UserPros } from '@/db/schema';
+import { PlanOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import PlanCard from '@/components/cards/PlanCard';
 import { getPlansList } from '@/utils/services/plan.service';
@@ -35,7 +32,7 @@ export default function MyPlansScreen() {
   });
 
   return (
-    <QueryStateHandler<PlanProps>
+    <QueryStateHandler<PlanOrmProps>
       data={plansList}
       isLoading={isLoading}
       isFetching={isFetching}
@@ -52,7 +49,9 @@ export default function MyPlansScreen() {
         </Box>
         <FlashList
           data={plansList}
-          renderItem={({ item, index }) => <PlanCard item={item} index={index} />}
+          renderItem={({ item, index }) => (
+            <PlanCard item={item} index={index} />
+          )}
           keyExtractor={(item) => String(item.id)}
           estimatedItemSize={200}
           contentContainerStyle={{ padding: 16 }}
