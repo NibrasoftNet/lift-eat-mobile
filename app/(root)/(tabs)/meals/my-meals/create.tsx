@@ -19,7 +19,7 @@ export default function CreateNewMealScreen() {
     description: '',
     cuisine: CuisineTypeEnum.GENERAL,
     unit: MealUnitEnum.GRAMMES,
-    quantity: 0,
+    quantity: 1,
     calories: 0,
     carbs: 0,
     fat: 0,

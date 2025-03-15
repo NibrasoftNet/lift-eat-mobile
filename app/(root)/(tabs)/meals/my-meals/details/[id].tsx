@@ -41,7 +41,7 @@ export default function MealDetailsScreen() {
 
   const {
     data: singleMeal,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -55,7 +55,7 @@ export default function MealDetailsScreen() {
       data={singleMeal}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <VStack className="flex-1 w-full gap-4 p-4">
         <HStack className="w-full h-8 justify-between">
@@ -83,7 +83,11 @@ export default function MealDetailsScreen() {
               );
             }}
           >
-            <MenuItem key="Edit Plan" textValue="Edit Plan">
+            <MenuItem
+              key="Edit Plan"
+              textValue="Edit Plan"
+              onPress={() => router.push(`/meals/my-meals/edit/${id}`)}
+            >
               <Icon as={EditIcon} size="sm" className="mr-2" />
               <MenuItemLabel size="sm">Edit</MenuItemLabel>
             </MenuItem>

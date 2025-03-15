@@ -15,7 +15,7 @@ export default function CreateNutritionTarget() {
 
   const {
     data: actualUser,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -38,7 +38,7 @@ export default function CreateNutritionTarget() {
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <NutritionGoalForm
         defaultValues={nutritionGoalDefaultValueProps}

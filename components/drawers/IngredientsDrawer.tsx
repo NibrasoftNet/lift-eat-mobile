@@ -39,7 +39,7 @@ export default function IngredientsDrawer({
 
   const {
     data: ingredientsStandardList,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
     isRefetching,
@@ -97,7 +97,7 @@ export default function IngredientsDrawer({
               data={ingredientsStandardList}
               isLoading={isLoading}
               isFetching={isFetching}
-              isFetchedAfterMount={isFetchedAfterMount}
+              isPending={isPending}
               isRefetching={isRefetching}
             >
               <FlashList

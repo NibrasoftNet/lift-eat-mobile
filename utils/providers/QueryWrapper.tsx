@@ -2,35 +2,36 @@ import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Heading } from 'lucide-react-native';
+import { Heading } from '@/components/ui/heading';
 import { Link } from 'expo-router';
+import React from 'react';
 
 export const QueryStateHandler = <T,>({
   isLoading,
   isFetching,
-  isFetchedAfterMount,
   isRefetching,
+  isPending,
   data,
   children,
 }: {
   isLoading: boolean;
   isFetching: boolean;
-  isFetchedAfterMount: boolean;
+  isPending: boolean;
   isRefetching?: boolean | false;
   data: T | T[] | undefined | null;
   children: React.ReactNode;
 }) => {
   if (data === null || data === undefined) {
-    if (isFetchedAfterMount || isFetching || isLoading || isRefetching) {
+    if (isPending || isFetching || isLoading || isRefetching) {
       return (
-        <VStack className="size-full items-center justify-center gap-2">
+        <VStack className="w-full h-full items-center justify-center gap-2">
           <Spinner />
           <Text size="md">Please Wait</Text>
         </VStack>
       );
     }
     return (
-      <VStack className="size-full items-center justify-center">
+      <VStack className="w-full h-full items-center justify-center">
         <Card
           size="md"
           variant="elevated"
@@ -40,7 +41,7 @@ export const QueryStateHandler = <T,>({
             Data Not Found
           </Heading>
           <Text size="sm">Login again to get access to your profile</Text>
-          <Link href="/login" className="px-4 py-2 rounded-lg">
+          <Link href="/login">
             <Text size="sm">Back to login</Text>
           </Link>
         </Card>

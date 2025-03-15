@@ -12,7 +12,7 @@ const ProgressCalendarTab = () => {
   const { user } = useSessionStore();
   const {
     data: actualUser,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -31,7 +31,7 @@ const ProgressCalendarTab = () => {
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <VStack>
         <NavbarUser user={actualUser!} />

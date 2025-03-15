@@ -38,7 +38,7 @@ export default function MyMealsScreen() {
 
   const {
     data: myMealsList,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
     isRefetching,
@@ -115,7 +115,7 @@ export default function MyMealsScreen() {
                 >
                   <Image
                     source={cuisineType.icon}
-                    className="h-16 w-16 object-contain rounded-full"
+                    className="h-14 w-14 object-contain rounded-full"
                     style={{ alignSelf: 'center' }}
                   />
                 </Button>
@@ -157,7 +157,7 @@ export default function MyMealsScreen() {
                 >
                   <Image
                     source={mealType.icon}
-                    className="h-16 w-16 object-contain rounded-full"
+                    className="h-14 w-14 object-contain rounded-full"
                     style={{ alignSelf: 'center' }}
                   />
                 </Button>
@@ -179,7 +179,7 @@ export default function MyMealsScreen() {
         data={myMealsList}
         isLoading={isLoading}
         isFetching={isFetching}
-        isFetchedAfterMount={isFetchedAfterMount}
+        isPending={isPending}
         isRefetching={isRefetching}
       >
         {myMealsList?.length === 0 ? (

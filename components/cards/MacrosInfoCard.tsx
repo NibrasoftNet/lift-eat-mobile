@@ -22,6 +22,7 @@ const MacrosInfoCard = ({
     <Card className="gap-2">
       <HStack className="items-center justify-between">
         <Text className="font-semibold text-lg">Nutrition Data</Text>
+        {/* Calories */}
         <NutritionBox
           title="Calories"
           value={calories}
@@ -31,7 +32,6 @@ const MacrosInfoCard = ({
           valueClassName="bg-red-300"
         />
       </HStack>
-      {/* Calories */}
       <HStack className="justify-around pt-3 border-t border-gray-100">
         {/* Carbs */}
         <NutritionBox

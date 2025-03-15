@@ -65,9 +65,7 @@ const IngredientStandardCard: React.FC<{
                     source={{ uri: `${item.image}` }}
                   />
                 ) : (
-                  <AvatarFallbackText>
-                    <Icon as={HandPlatter} size="lg" className="stroke-white" />
-                  </AvatarFallbackText>
+                  <Icon as={HandPlatter} size="lg" className="stroke-white" />
                 )}
               </Avatar>
             </Box>

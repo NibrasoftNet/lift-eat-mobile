@@ -12,13 +12,13 @@ interface NutritionBoxProps {
 }
 
 const NutritionBox: React.FC<NutritionBoxProps> = ({
-     title,
-     value,
+  title,
+  value,
   unit,
-     className = '',
-     titleClassName = '',
-     valueClassName = '',
-   }: NutritionBoxProps) => {
+  className = '',
+  titleClassName = '',
+  valueClassName = '',
+}: NutritionBoxProps) => {
   return (
     <Box
       className={`flex rounded-md items-center drop-shadow-xl ${className}`} // Apply passed className for the entire box

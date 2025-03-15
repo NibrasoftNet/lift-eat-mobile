@@ -14,7 +14,7 @@ export default function EditUserProfile() {
 
   const {
     data: actualUser,
-    isFetchedAfterMount,
+    isPending,
     isFetching,
     isLoading,
   } = useQuery({
@@ -38,7 +38,7 @@ export default function EditUserProfile() {
       data={actualUser}
       isLoading={isLoading}
       isFetching={isFetching}
-      isFetchedAfterMount={isFetchedAfterMount}
+      isPending={isPending}
     >
       <UserProfileForm defaultValues={defaultUserDetailsValues} />
     </QueryStateHandler>

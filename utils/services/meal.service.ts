@@ -70,9 +70,9 @@ export const getMealsList = async (
   mealType?: MealTypeEnum,
   mealName?: string,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  console.log('cuisine, meal type', cuisine, mealType, mealName);
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
+  console.log('fadsasdf', cuisine, mealType);
+  // Simulate a delay (e.g., 2 seconds)
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   try {
     let query = drizzleDb.select().from(meals).$dynamic();
 
@@ -124,13 +124,12 @@ export const getMealByIdWithIngredients = async (
       await drizzleDb.query.ingredientsStandard.findMany({
         where: inArray(ingredientsStandard.id, ingredientStandardIds),
       });
-
     // 4. Combine results efficiently using a Map
     const mealWithIngredients: MealWithIngredientAndStandardOrmProps = {
       ...foundMeal,
       mealIngredients: mealIngredientRecords.map((mi) => ({
         ...mi,
-        ingredientStandard: ingredientStandardRecords.find(
+        ingredientsStandard: ingredientStandardRecords.find(
           (is) => is.id === mi.ingredientStandardId,
         )!,
       })),
@@ -138,6 +137,67 @@ export const getMealByIdWithIngredients = async (
     return mealWithIngredients;
   } catch (error) {
     console.error('Error fetching meal by ID:', error);
+    throw error;
+  }
+};
+
+export const updateMeal = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  data: MealFormData,
+  selectedIngredients: IngredientWithStandardProps[],
+  totalMacros: TotalMacrosProps,
+) => {
+  await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate delay
+  try {
+    console.log('Updating meal...');
+
+    // Update the meal in the meals table
+    const updatedMeal = await drizzleDb
+      .update(meals)
+      .set({
+        ...data,
+        id: data?.id!,
+        calories: totalMacros.totalCalories,
+        carbs: totalMacros.totalCarbs,
+        fat: totalMacros.totalFats,
+        protein: totalMacros.totalProtein,
+        image: data.image ?? null,
+      })
+      .where(eq(meals.id, data?.id!)) // Use the id from data to find the meal
+      .returning({ id: meals.id });
+
+    if (!updatedMeal || updatedMeal.length === 0) {
+      throw new Error('Failed to update meal');
+    }
+
+    // Delete old meal ingredients
+    await drizzleDb
+      .delete(mealIngredients)
+      .where(eq(mealIngredients.mealId, data?.id!));
+
+    console.log(`Deleted old ingredients for meal ID: ${data.id}`);
+
+    // Insert new meal ingredients
+    const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
+      selectedIngredients.map((ingredient) => ({
+        mealId: data?.id!,
+        ingredientStandardId: ingredient.ingredientStandardId,
+        quantity: ingredient.quantity,
+        calories: ingredient.calories,
+        carbs: ingredient.carbs,
+        fat: ingredient.fat,
+        protein: ingredient.protein,
+      }));
+
+    await drizzleDb.insert(mealIngredients).values(mealIngredientsData);
+
+    console.log(
+      `Inserted ${selectedIngredients.length} new ingredients for meal ID: ${data.id}`,
+    );
+
+    return updatedMeal[0];
+  } catch (error) {
+    console.error('Error updating meal:', error); // Debugging log
     throw error;
   }
 };

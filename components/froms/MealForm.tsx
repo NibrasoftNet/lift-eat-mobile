@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useRouter, useLocalSearchParams, Link } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
@@ -47,7 +47,6 @@ import {
   ChevronDown,
   CircleChevronLeft,
   Images,
-  NotebookPen,
   Save,
   User,
 } from 'lucide-react-native';
@@ -69,19 +68,14 @@ import { FlashList } from '@shopify/flash-list';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import IngredientCard from '@/components/cards/IngredientCard';
 import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
-import {
-  Button,
-  ButtonIcon,
-  ButtonSpinner,
-  ButtonText,
-} from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonSpinner } from '@/components/ui/button';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
-import { createNewMeal } from '@/utils/services/meal.service';
+import { createNewMeal, updateMeal } from '@/utils/services/meal.service';
 import { Colors } from '@/utils/constants/Colors';
 
 export default function MealForm({
@@ -135,13 +129,15 @@ export default function MealForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: MealFormData) => {
-      return await createNewMeal(
-        drizzleDb,
-        data,
-        selectedIngredients,
-        totalMacros,
-        user?.id!,
-      );
+      return operation === 'create'
+        ? await createNewMeal(
+            drizzleDb,
+            data,
+            selectedIngredients,
+            totalMacros,
+            user?.id!,
+          )
+        : updateMeal(drizzleDb, data, selectedIngredients, totalMacros);
     },
     onSuccess: async () => {
       toast.show({
@@ -152,8 +148,8 @@ export default function MealForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title="Success Create Meal"
-              description="Success Create Meal"
+              title={`Success ${operation} Meal`}
+              description={`Success ${operation} Meal`}
             />
           );
         },
@@ -170,7 +166,7 @@ export default function MealForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title="Meal creation Failed"
+              title={`Failure ${operation} Meal`}
               description={error.toString()}
             />
           );
@@ -232,9 +228,7 @@ export default function MealForm({
                   }}
                 />
               ) : (
-                <AvatarFallbackText>
-                  <Icon as={User} size="lg" className="stroke-white" />
-                </AvatarFallbackText>
+                <Icon as={User} size="lg" className="stroke-white" />
               )}
             </Avatar>
           </Pressable>
@@ -277,7 +271,7 @@ export default function MealForm({
                 </FormControlError>
               )}
             </FormControl>
-            {/* Description Field */}
+            {/*Description Field*/}
             <FormControl isInvalid={!!errors.description}>
               <FormControlLabel>
                 <FormControlLabelText>Preparation</FormControlLabelText>
@@ -315,8 +309,8 @@ export default function MealForm({
             >
               {/* Type column */}
               <GridItem _extra={{ className: 'col-span-1' }}>
-                {/* Description Field */}
-                <FormControl isInvalid={!!errors.name}>
+                {/*type Field*/}
+                <FormControl isInvalid={!!errors.type}>
                   <FormControlLabel>
                     <FormControlLabelText>Type</FormControlLabelText>
                   </FormControlLabel>
@@ -363,8 +357,8 @@ export default function MealForm({
                 </FormControl>
               </GridItem>
               <GridItem _extra={{ className: 'col-span-1' }}>
-                {/* Description Field */}
-                <FormControl isInvalid={!!errors.name}>
+                {/*Cuisine Field*/}
+                <FormControl isInvalid={!!errors.cuisine}>
                   <FormControlLabel>
                     <FormControlLabelText>Cuisine</FormControlLabelText>
                   </FormControlLabel>
@@ -412,15 +406,15 @@ export default function MealForm({
             </Grid>
           </Card>
           {/* Unit and quantity */}
-          <Card className="rounded-lg flex flex-col gap-2">
+          <Card className="rounded-lg flex flex-col gap-2 h-32">
             <Grid
               className="w-full h-16 gap-2"
               _extra={{ className: 'grid-cols-2' }}
               style={{ position: 'relative' }}
             >
-              {/* Type column */}
+              {/*Type column*/}
               <GridItem _extra={{ className: 'col-span-1' }}>
-                {/* Description Field */}
+                {/*Description Field*/}
                 <FormControl isInvalid={!!errors.unit}>
                   <FormControlLabel>
                     <FormControlLabelText>Unit</FormControlLabelText>
@@ -468,7 +462,7 @@ export default function MealForm({
                 </FormControl>
               </GridItem>
               <GridItem _extra={{ className: 'col-span-1' }}>
-                {/* Age Input */}
+                {/*Quantity Input*/}
                 <FormControl isInvalid={!!errors.quantity}>
                   <FormControlLabel>
                     <FormControlLabelText>Quantity</FormControlLabelText>
@@ -482,6 +476,7 @@ export default function MealForm({
                           keyboardType="numeric"
                           placeholder="Quantity"
                           onBlur={onBlur}
+                          aria-valuemin={1}
                           onChangeText={(val) =>
                             onChange(val ? parseInt(val, 10) : 0)
                           }
@@ -515,7 +510,7 @@ export default function MealForm({
               renderItem={({ item, index }) => (
                 <IngredientCard item={item} index={index} />
               )}
-              keyExtractor={(item) => String(item.ingredientsStandard.id)}
+              keyExtractor={(item) => String(item.ingredientStandardId)}
               estimatedItemSize={20}
               contentContainerStyle={{ padding: 8 }}
             />
@@ -578,242 +573,3 @@ export default function MealForm({
     </>
   );
 }
-
-/*
-            <VStack space="lg" className="p-4">
-              <Box className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm">
-                <VStack space="md">
-                  <Text className="text-lg font-semibold text-gray-900">
-                    Meal information
-                  </Text>
-
-                  <VStack space="sm">
-                    <Text className="font-medium text-gray-700">Name</Text>
-                    <Input className="bg-white/90">
-                      <InputField
-                        value={meal.name}
-                        onChangeText={(text: string) =>
-                          setMeal({ ...meal, name: text })
-                        }
-                        placeholder="Enter meal name"
-                      />
-                    </Input>
-                  </VStack>
-
-                  <VStack space="sm">
-                    <Text className="font-medium text-gray-700">Image</Text>
-                    <HStack space="md" className="items-center">
-                      {meal.image ? (
-                        <Image
-                          source={meal.image}
-                          className="w-32 h-32 rounded-xl"
-                          alt={meal.name || 'Meal image'}
-                        />
-                      ) : (
-                        <Box className="w-32 h-32 rounded-xl bg-gray-200 items-center justify-center">
-                          <Text className="text-gray-500">No image</Text>
-                        </Box>
-                      )}
-                      <VStack space="sm" className="flex-1">
-                        <Button
-                          variant="outline"
-                          onPress={pickImage}
-                          className="w-full bg-white/90"
-                        >
-                          <ButtonText>Choose image</ButtonText>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onPress={takePhoto}
-                          className="w-full bg-white/90"
-                        >
-                          <ButtonText>Take photo</ButtonText>
-                        </Button>
-                      </VStack>
-                    </HStack>
-                  </VStack>
-
-                  <VStack space="sm">
-                    <Text className="font-medium text-gray-700">
-                      Cuisine type
-                    </Text>
-                    <Box className="bg-white/90 rounded-lg">
-                      <Select
-                        value={meal.cuisineType}
-                        onValueChange={(value: CuisineTypeEnum) =>
-                          setMeal({ ...meal, cuisineType: value })
-                        }
-                        options={cuisineOptions}
-                        placeholder="Select a cuisine type"
-                        className="border border-gray-200"
-                      />
-                    </Box>
-                  </VStack>
-
-                  <VStack space="sm">
-                    <Text className="font-medium text-gray-700">Unit</Text>
-                    <Box className="bg-white/90 rounded-lg">
-                      <Select
-                        value={meal.unit}
-                        onValueChange={(value: MealUnitEnum) =>
-                          setMeal({ ...meal, unit: value })
-                        }
-                        options={unitOptions}
-                        placeholder="Select a unit"
-                        className="border border-gray-200"
-                      />
-                    </Box>
-                  </VStack>
-
-                  <VStack space="sm">
-                    <Box className="flex-row justify-between items-center">
-                      <Text className="font-medium text-gray-700">Foods</Text>
-                      <Button
-                        variant="outline"
-                        onPress={() =>
-                          router.push('/(root)/(tabs)/meals/food/create')
-                        }
-                        className="px-4 bg-white/90"
-                      >
-                        <ButtonText>Add food</ButtonText>
-                      </Button>
-                    </Box>
-                    {meal.foods.map((food: Food) => (
-                      <Box
-                        key={food.id}
-                        className="flex-row justify-between items-center p-3 bg-white/90 rounded-lg"
-                      >
-                        <VStack>
-                          <Text className="text-gray-900">{food.name}</Text>
-                          <Text className="text-sm text-gray-500">
-                            {food.calories} kcal / {food.quantity}g
-                          </Text>
-                        </VStack>
-                        <VStack space="sm" className="items-end">
-                          <Input className="w-24 bg-white/90">
-                            <InputField
-                              value={food.quantity.toString()}
-                              onChangeText={(text: string) => {
-                                const num = parseInt(text) || 0;
-                                updateFoodQuantity(food.id, num);
-                              }}
-                              keyboardType="numeric"
-                              placeholder="Quantity"
-                            />
-                          </Input>
-                          <Button
-                            onPress={() => handleRemoveFood(food.id)}
-                            className="px-3 py-1.5 bg-red-100 rounded-full"
-                          >
-                            <Text className="text-red-600 text-sm">Remove</Text>
-                          </Button>
-                        </VStack>
-                      </Box>
-                    ))}
-                  </VStack>
-
-                  <VStack space="sm">
-                    <Text className="font-medium text-gray-700">
-                      Nutrition information
-                    </Text>
-                    <HStack space="md" className="justify-between">
-                      <Box key="calories" className="flex-1">
-                        <FormControl>
-                          <FormControlLabel>
-                            <FormControlLabelText>
-                              Calories
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input className="bg-white/90">
-                            <InputField
-                              value={meal.calories.toString()}
-                              onChangeText={(text: string) =>
-                                setMeal({
-                                  ...meal,
-                                  calories: parseInt(text) || 0,
-                                })
-                              }
-                              keyboardType="numeric"
-                              placeholder="0"
-                            />
-                          </Input>
-                        </FormControl>
-                      </Box>
-                      <Box key="protein" className="flex-1">
-                        <FormControl>
-                          <FormControlLabel>
-                            <FormControlLabelText>
-                              Protein (g)
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input className="bg-white/90">
-                            <InputField
-                              value={meal.protein.toString()}
-                              onChangeText={(text: string) =>
-                                setMeal({
-                                  ...meal,
-                                  protein: parseInt(text) || 0,
-                                })
-                              }
-                              keyboardType="numeric"
-                              placeholder="0"
-                            />
-                          </Input>
-                        </FormControl>
-                      </Box>
-                    </HStack>
-                    <HStack space="md" className="justify-between">
-                      <Box key="carbs" className="flex-1">
-                        <FormControl>
-                          <FormControlLabel>
-                            <FormControlLabelText>
-                              Carbs (g)
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input className="bg-white/90">
-                            <InputField
-                              value={meal.carbs.toString()}
-                              onChangeText={(text: string) =>
-                                setMeal({ ...meal, carbs: parseInt(text) || 0 })
-                              }
-                              keyboardType="numeric"
-                              placeholder="0"
-                            />
-                          </Input>
-                        </FormControl>
-                      </Box>
-                      <Box key="fats" className="flex-1">
-                        <FormControl>
-                          <FormControlLabel>
-                            <FormControlLabelText>
-                              Fats (g)
-                            </FormControlLabelText>
-                          </FormControlLabel>
-                          <Input className="bg-white/90">
-                            <InputField
-                              value={meal.fats.toString()}
-                              onChangeText={(text: string) =>
-                                setMeal({ ...meal, fats: parseInt(text) || 0 })
-                              }
-                              keyboardType="numeric"
-                              placeholder="0"
-                            />
-                          </Input>
-                        </FormControl>
-                      </Box>
-                    </HStack>
-                  </VStack>
-                </VStack>
-              </Box>
-
-              <Button
-                variant="solid"
-                className="bg-primary-600 mt-4"
-                onPress={handleSave}
-              >
-                <ButtonText>
-                  {editId ? 'Save changes' : 'Create meal'}
-                </ButtonText>
-              </Button>
-            </VStack>
-* */
