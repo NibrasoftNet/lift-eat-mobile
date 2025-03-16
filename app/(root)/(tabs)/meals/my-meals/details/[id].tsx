@@ -5,7 +5,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import { EditIcon, ThreeDotsIcon, Icon, TrashIcon } from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
 import { Divider } from '@/components/ui/divider';
@@ -39,16 +39,7 @@ import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '@/components/ui/toast';
-import {
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from '@/components/ui/modal';
-import { Heading } from '@/components/ui/heading';
-import { Spinner } from '@/components/ui/spinner';
+import DeletionModal from '@/components/modals/DeletionModal';
 
 export default function MealDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -265,51 +256,14 @@ export default function MealDetailsScreen() {
           )}
         </ScrollView>
       </VStack>
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-        }}
-      >
-        <ModalBackdrop />
-        <ModalContent className="max-w-[305px] items-center">
-          <ModalHeader>
-            <Box className="w-[56px] h-[56px] rounded-full bg-background-error items-center justify-center">
-              <Icon as={TrashIcon} className="stroke-error-600" size="xl" />
-            </Box>
-          </ModalHeader>
-          <ModalBody className="mt-0 mb-4">
-            <Heading size="md" className="text-typography-950 mb-2 text-center">
-              Delete single meal
-            </Heading>
-            <Text size="sm" className="text-typography-500 text-center">
-              Are you sure you want to delete this meal? This action cannot be
-              undone.
-            </Text>
-          </ModalBody>
-          <ModalFooter className="w-full">
-            <Button
-              variant="outline"
-              action="secondary"
-              size="sm"
-              onPress={() => {
-                setShowModal(false);
-              }}
-              className="flex-grow"
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
-            <Button
-              onPress={() => handleMealDelete()}
-              size="sm"
-              className="flex-grow"
-            >
-              {isDeletionPending && <Spinner size="small" />}
-              <ButtonText>Delete</ButtonText>
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeletionModal
+        title="Delete single meal"
+        description="Are you sure you want to delete this meal? This action cannot be undone."
+        showModal={showModal}
+        setShowModal={setShowModal}
+        isPending={isDeletionPending}
+        handleDelete={() => handleMealDelete()}
+      />
     </QueryStateHandler>
   );
 }

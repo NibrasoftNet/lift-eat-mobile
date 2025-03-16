@@ -17,26 +17,17 @@ import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import { Menu, MenuItem, MenuItemLabel } from '../ui/menu';
-import { Button, ButtonIcon, ButtonText } from '../ui/button';
+import { Button, ButtonIcon } from '../ui/button';
 import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
-import {
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from '../ui/modal';
-import { Heading } from '../ui/heading';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMeal } from '@/utils/services/meal.service';
 import MultiPurposeToast from '../MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '../ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { Spinner } from '../ui/spinner';
+import DeletionModal from '@/components/modals/DeletionModal';
 
 const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   item,
@@ -207,51 +198,14 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
           </Card>
         </Pressable>
       </Animated.View>
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-        }}
-      >
-        <ModalBackdrop />
-        <ModalContent className="max-w-[305px] items-center">
-          <ModalHeader>
-            <Box className="w-[56px] h-[56px] rounded-full bg-background-error items-center justify-center">
-              <Icon as={TrashIcon} className="stroke-error-600" size="xl" />
-            </Box>
-          </ModalHeader>
-          <ModalBody className="mt-0 mb-4">
-            <Heading size="md" className="text-typography-950 mb-2 text-center">
-              Delete single meal
-            </Heading>
-            <Text size="sm" className="text-typography-500 text-center">
-              Are you sure you want to delete this meal? This action cannot be
-              undone.
-            </Text>
-          </ModalBody>
-          <ModalFooter className="w-full">
-            <Button
-              variant="outline"
-              action="secondary"
-              size="sm"
-              onPress={() => {
-                setShowModal(false);
-              }}
-              className="flex-grow"
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
-            <Button
-              onPress={() => handleMealDelete()}
-              size="sm"
-              className="flex-grow"
-            >
-              {isPending && <Spinner size="small" />}
-              <ButtonText>Delete</ButtonText>
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeletionModal
+        title="Delete single meal"
+        description="Are you sure you want to delete this meal? This action cannot be undone."
+        showModal={showModal}
+        setShowModal={setShowModal}
+        isPending={isPending}
+        handleDelete={() => handleMealDelete()}
+      />
     </>
   );
 };
