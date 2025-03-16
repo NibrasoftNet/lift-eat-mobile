@@ -55,11 +55,11 @@ const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
         item.tag === 'newPassword'
           ? router.push(`/new-password`)
           : item.tag === 'profile'
-            ? router.push(`/profile/${user.id}`)
+            ? router.push(`/profile/${user?.id!}`)
             : item.tag === 'details'
-              ? router.push(`/details/edit/${user.id}`)
+              ? router.push(`/details/edit/${user?.id!}`)
               : item.tag === 'preference'
-                ? router.push(`/preference/edit/${user.id}`)
+                ? router.push(`/preference/edit/${user?.id!}`)
                 : router.push(`/analytics`)
       }
       className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
