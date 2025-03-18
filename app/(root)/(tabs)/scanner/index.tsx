@@ -230,11 +230,18 @@ export default function Scanner() {
 
             {/* Scanner à nouveau */}
             <Card className="p-4 bg-white/80 backdrop-blur-md mt-2">
-              <Button
-                title="Scanner un autre produit"
-                onPress={resetScanner}
-                color="#3498db"
-              />
+              <VStack space="md">
+                <Button
+                  title="Scanner un autre produit"
+                  onPress={resetScanner}
+                  color="#3498db"
+                />
+                <Button
+                  title="Rechercher un produit"  
+                  onPress={() => router.push('/scanner/search')}
+                  color="#2980b9"
+                />
+              </VStack>
             </Card>
 
             {/* Information sur le produit */}
@@ -314,6 +321,18 @@ export default function Scanner() {
                   <Text className="text-white text-lg mt-4 font-bold">
                     Scannez un code-barres
                   </Text>
+                  <HStack className="mb-4">
+                    <Button
+                      title="Flipper caméra"
+                      onPress={() => setFacing(prev => (prev === 'back' ? 'front' : 'back'))}
+                      color="#34495e"
+                    />
+                  </HStack>
+                  <Button
+                    title="Rechercher un produit"
+                    onPress={() => router.push('/scanner/search')}
+                    color="#2980b9"
+                  />
                 </VStack>
               </CameraView>
               {scannedData && (

@@ -203,47 +203,6 @@ class OpenFoodFactsService {
     return ingredient;
   }
 
-  // Conserver la fonction convertProductToMeal pour la compatibilité avec le code existant
-  // mais l'implémenter pour utiliser convertProductToIngredient
-  convertProductToMeal(product: Product): Meal {
-    const ingredient = this.convertProductToIngredient(product);
-    
-    // Get product image URL
-    let productImage: ImageSourcePropType | null = null;
-
-    // Default image as fallback
-    const defaultImage: ImageSourcePropType = require('@/assets/images/seed/kouskousi.jpg');
-
-    // Check for product images in priority order
-    if (product.image_url) {
-      productImage = { uri: product.image_url };
-    } else if (product.image_front_url) {
-      productImage = { uri: product.image_front_url };
-    } else if (product.image_small_url) {
-      productImage = { uri: product.image_small_url };
-    } else {
-      productImage = defaultImage;
-    }
-
-    // Generate a meal object compatible with the app's structure
-    const meal: Meal = {
-      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
-      name: product.product_name || 'Produit sans nom',
-      image: productImage,
-      type: MealTypeEnum.SNACK,
-      calories: ingredient.calories,
-      protein: ingredient.protein,
-      carbs: ingredient.carbs,
-      fat: ingredient.fat,
-      cuisineType: CuisineTypeEnum.GENERAL,
-      unit: MealUnitEnum.SERVING,
-      quantity: 1,
-      ingredients: [ingredient],
-    };
-
-    return meal;
-  }
-
   /**
    * Search products based on various criteria
    * @param params Search parameters
@@ -253,32 +212,124 @@ class OpenFoodFactsService {
     params: SearchParams,
   ): Promise<OpenFoodFactsResponse | null> {
     try {
-      // Construct URL with query parameters
-      const url = new URL(`${this.baseUrl}/search`);
+      console.log('🔎 [OpenFoodFacts] Début recherche avec les paramètres:', JSON.stringify(params));
+      
+      // Nouvelle approche: utiliser l'API v0 d'OpenFoodFacts qui est la plus stable
+      const url = new URL(`https://world.openfoodfacts.org/cgi/search.pl`);
 
-      // Add fields parameter
+      // Paramètres pour le format JSON
+      url.searchParams.append('json', '1');
+      url.searchParams.append('action', 'process');
+      
+      // Ajouter tous les champs dont nous avons besoin
       url.searchParams.append(
         'fields',
         'code,product_name,product_name_fr,brands,categories,image_url,image_small_url,image_front_url,nutriscore_grade,nutriments',
       );
 
-      // Add all other parameters
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          url.searchParams.append(key, value.toString());
-        }
-      });
+      // Configurer la recherche pour OpenFoodFacts avec une approche plus directe
+      if (params.search_terms) {
+        const searchTerm = params.search_terms.trim();
+        
+        // Utiliser search_terms directement (meilleure compatibilité)
+        url.searchParams.append('search_terms', searchTerm);
+        
+        console.log(`🔤 [OpenFoodFacts] Recherche du terme: "${searchTerm}"`);
+      } else {
+        console.log('⚠️ [OpenFoodFacts] Aucun terme de recherche spécifié');
+      }
+
+      // Ajouter les filtres si nécessaire
+      if (params.brands) {
+        url.searchParams.append('tagtype_0', 'brands');
+        url.searchParams.append('tag_contains_0', 'contains');
+        url.searchParams.append('tag_0', params.brands);
+        console.log(`🏷️ [OpenFoodFacts] Filtrage par marque: "${params.brands}"`);
+      }
+      
+      if (params.categories) {
+        const tagIndex = params.brands ? 1 : 0;
+        url.searchParams.append(`tagtype_${tagIndex}`, 'categories');
+        url.searchParams.append(`tag_contains_${tagIndex}`, 'contains');
+        url.searchParams.append(`tag_${tagIndex}`, params.categories);
+        console.log(`🏷️ [OpenFoodFacts] Filtrage par catégorie: "${params.categories}"`);
+      }
+
+      // Pagination
+      if (params.page) {
+        url.searchParams.append('page', params.page.toString());
+        console.log(`📄 [OpenFoodFacts] Page: ${params.page}`);
+      }
+      
+      if (params.page_size) {
+        url.searchParams.append('page_size', params.page_size.toString());
+        console.log(`📏 [OpenFoodFacts] Éléments par page: ${params.page_size}`);
+      }
+      
+      // Tri
+      if (params.sort_by) {
+        url.searchParams.append('sort_by', params.sort_by);
+        console.log(`🔃 [OpenFoodFacts] Tri par: ${params.sort_by}`);
+      }
+
+      console.log('🌐 [OpenFoodFacts] URL de recherche finale:', url.toString());
 
       const response = await fetch(url.toString());
 
       if (!response.ok) {
+        console.error(`❌ [OpenFoodFacts] Erreur HTTP: ${response.status} ${response.statusText}`);
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data = (await response.json()) as OpenFoodFactsResponse;
+      console.log(`✅ [OpenFoodFacts] Réponse reçue avec ${data.products?.length || 0} produits sur ${data.count || 0} au total`);
+      
+      // Filtrer les résultats côté client pour garantir la pertinence
+      if (data.products && params.search_terms) {
+        const searchTermLower = params.search_terms.toLowerCase();
+        console.log(`🔍 [OpenFoodFacts] Vérification de la pertinence des résultats pour: "${searchTermLower}"`);
+        
+        const filteredProducts = data.products.filter(product => {
+          const productName = (product.product_name || '').toLowerCase();
+          const productNameFr = (product.product_name_fr || '').toLowerCase();
+          const brands = (product.brands || '').toLowerCase();
+          
+          const isRelevant = 
+            productName.includes(searchTermLower) || 
+            productNameFr.includes(searchTermLower) || 
+            brands.includes(searchTermLower);
+            
+          if (isRelevant) {
+            console.log(`✓ [OpenFoodFacts] Produit pertinent trouvé: ${product.product_name || 'Sans nom'}`);
+          }
+          
+          return isRelevant;
+        });
+        
+        console.log(`📊 [OpenFoodFacts] Produits avant filtrage: ${data.products.length}, après: ${filteredProducts.length}`);
+        
+        // Si nous avons des résultats pertinents, utilisons-les
+        if (filteredProducts.length > 0) {
+          data.products = filteredProducts;
+          // Mettre à jour le nombre total également
+          if (data.count) data.count = filteredProducts.length;
+        } else {
+          console.log(`⚠️ [OpenFoodFacts] Aucun produit pertinent trouvé, conservation des résultats d'origine`);
+          
+          // Afficher les détails des produits pour déboguer
+          data.products.forEach((product, index) => {
+            console.log(`📦 [OpenFoodFacts] Produit original ${index+1}:`);
+            console.log(`  Nom: ${product.product_name || 'N/A'}`);
+            console.log(`  Nom FR: ${product.product_name_fr || 'N/A'}`);
+            console.log(`  Marque: ${product.brands || 'N/A'}`);
+            console.log(`  Catégories: ${product.categories || 'N/A'}`);
+          });
+        }
+      }
+      
       return data;
     } catch (error) {
-      console.error('Error searching products:', error);
+      console.error('❌ [OpenFoodFacts] Erreur lors de la recherche:', error);
       throw error;
     }
   }
@@ -290,18 +341,58 @@ class OpenFoodFactsService {
    */
   async getAutocompleteSuggestions(term: string): Promise<string[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/suggest/${encodeURIComponent(term)}`,
-      );
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+      console.log(`🔎 [OpenFoodFacts] Recherche de suggestions pour: "${term}"`);
+      
+      // Si le terme est trop court, retourner un tableau vide au lieu de faire un appel API
+      if (!term || term.length < 2) {
+        console.log('⚠️ [OpenFoodFacts] Terme de recherche trop court pour l\'autocomplétion');
+        return [];
       }
+      
+      // Essayer avec l'ancienne API de suggestions
+      try {
+        console.log(`🌐 [OpenFoodFacts] Appel API suggestions: ${this.baseUrl}/suggest/${encodeURIComponent(term)}`);
+        const response = await fetch(
+          `${this.baseUrl}/suggest/${encodeURIComponent(term)}`,
+        );
 
-      const data = (await response.json()) as { suggestions: string[] };
-      return data.suggestions || [];
+        if (!response.ok) {
+          console.error(`❌ [OpenFoodFacts] Erreur API suggestions: ${response.status} ${response.statusText}`);
+          throw new Error(`Suggestion API request failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as { suggestions: string[] };
+        console.log(`✅ [OpenFoodFacts] ${data.suggestions?.length || 0} suggestions reçues`);
+        return data.suggestions || [];
+      } catch (error) {
+        console.log('⚠️ [OpenFoodFacts] Repli sur l\'API de recherche pour les suggestions');
+        // En cas d'échec, faire une recherche simple et extraire les noms de produits
+        const searchParams: SearchParams = {
+          search_terms: term,
+          page: 1,
+          page_size: 5
+        };
+        
+        console.log(`🔄 [OpenFoodFacts] Utilisation de searchProducts comme fallback`);
+        const searchResults = await this.searchProducts(searchParams);
+        
+        if (searchResults && searchResults.products && searchResults.products.length > 0) {
+          // Extraire les noms de produits uniques
+          const suggestions = searchResults.products
+            .map(product => product.product_name || '')
+            .filter(name => name.length > 0)
+            .slice(0, 5); // Limiter à 5 suggestions
+            
+          const uniqueSuggestions = [...new Set(suggestions)]; // Éliminer les doublons
+          console.log(`✅ [OpenFoodFacts] ${uniqueSuggestions.length} suggestions générées via recherche`);
+          return uniqueSuggestions;
+        }
+        
+        console.log('⚠️ [OpenFoodFacts] Aucune suggestion trouvée via la recherche');
+        return [];
+      }
     } catch (error) {
-      console.error('Error getting autocomplete suggestions:', error);
+      console.error('❌ [OpenFoodFacts] Erreur récupération suggestions:', error);
       return [];
     }
   }
