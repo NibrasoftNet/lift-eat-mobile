@@ -1,6 +1,7 @@
 import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '../enum/meal.enum';
 import { ImageSourcePropType } from 'react-native';
 import { Ingredients, Meal } from '../../types/plan.type';
+import SearchCacheService from '../services/SearchCacheService';
 
 /**
  * Types for Open Food Facts API responses
@@ -55,12 +56,11 @@ export interface OpenFoodFactsResponse {
  */
 export interface SearchParams {
   search_terms?: string;
-  brands?: string;
-  categories?: string;
-  countries?: string;
   page?: number;
   page_size?: number;
   sort_by?: string;
+  countries?: string | string[];
+  _timestamp?: string;
 }
 
 /**
@@ -77,365 +77,284 @@ export interface ScanResult {
  * Service to interact with Open Food Facts API
  */
 class OpenFoodFactsService {
-  private baseUrl: string = 'https://world.openfoodfacts.org/api/v2';
+  private static readonly BASE_URL = 'https://world.openfoodfacts.org';
+  private static readonly USER_AGENT = 'LiftEatMobile/1.0 (mobile-app@nibrasoftnet.fr)';
+  private static readonly SEARCH_FIELDS = 'code,product_name,product_name_fr,brands,categories,image_url,image_small_url,image_front_url,nutriscore_grade,nutriments';
 
   /**
-   * Get product by barcode
-   * @param barcode The product barcode
-   * @returns Promise with product data
+   * Recherche de produits avec gestion avancée des erreurs et retry
+   * Cette méthode utilise l'ancienne API qui est plus fiable
    */
-  async getProductByBarcode(barcode: string): Promise<Product | null> {
-    try {
-      // Validate barcode format (basic validation)
-      if (!barcode || barcode.trim() === '') {
-        throw new Error('Invalid barcode format');
-      }
-
-      const response = await fetch(`${this.baseUrl}/product/${barcode}.json`);
-
-      if (response.status === 404) {
-        console.log(`Product with barcode ${barcode} not found`);
-        return null; // Return null for 404 instead of throwing error
-      }
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = (await response.json()) as OpenFoodFactsResponse;
-
-      if (data.status === 1 && data.product) {
-        return data.product;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching product by barcode:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Scans a barcode and returns validation results with product information
-   * @param barcode The barcode to scan
-   * @returns Promise with scan validation results
-   */
-  async scanBarcode(barcode: string): Promise<ScanResult> {
-    try {
-      // Validate barcode format (basic validation)
-      if (!barcode || barcode.trim() === '') {
-        return {
-          isValid: false,
-          message: 'Code-barres invalide ou vide',
-          product: null,
-          ingredient: null,
-        };
-      }
-
-      const product = await this.getProductByBarcode(barcode);
-
-      if (!product) {
-        return {
-          isValid: false,
-          message: `Le produit avec le code-barres "${barcode}" n'a pas été trouvé dans la base de données Open Food Facts. Essayez un autre produit ou vérifiez que le code-barres est correct.`,
-          product: null,
-          ingredient: null,
-        };
-      }
-
-      // Convert product to ingredient format
-      const ingredient = this.convertProductToIngredient(product);
-
-      return {
-        isValid: true,
-        message: 'Produit trouvé avec succès',
-        product,
-        ingredient,
-      };
-    } catch (error) {
-      console.error('Error during barcode scan:', error);
-
-      // Provide more informative error message based on error type
-      let errorMessage = 'Erreur lors de la recherche du produit';
-
-      if (error instanceof Error) {
-        if (error.message.includes('404')) {
-          errorMessage = 'Produit non trouvé dans la base de données';
-        } else if (error.message.includes('network')) {
-          errorMessage =
-            'Erreur de connexion réseau. Vérifiez votre connexion internet.';
-        }
-      }
-
-      return {
-        isValid: false,
-        message: errorMessage,
-        product: null,
-        ingredient: null,
-      };
-    }
-  }
-
-  /**
-   * Converts an Open Food Facts product to an ingredient format for the app
-   * @param product The product from Open Food Facts
-   * @returns An ingredient object compatible with the app
-   */
-  convertProductToIngredient(product: Product): Ingredients {
-    // Calculate nutrition values, defaulting to 0 if not available
-    const calories = Math.round(product.nutriments?.energy_100g || 0);
-    const proteins = Math.round(product.nutriments?.proteins_100g || 0);
-    const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
-    const fats = Math.round(product.nutriments?.fat_100g || 0);
-
-    // Create ingredient from product
-    const ingredient: Ingredients = {
-      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
-      name: product.product_name || 'Produit sans nom',
-      calories: calories,
-      protein: proteins,
-      carbs: carbs,
-      fat: fats,
-      quantity: 1,
-      unit: product.serving_size ? 'portion' : 'grammes',
-    };
-
-    return ingredient;
-  }
-
-  /**
-   * Search products based on various criteria
-   * @param params Search parameters
-   * @returns Promise with search results
-   */
-  async searchProducts(
-    params: SearchParams,
-  ): Promise<OpenFoodFactsResponse | null> {
+  static async searchProducts(
+    params: SearchParams
+  ): Promise<{ products: Product[]; count: number }> {
     try {
       console.log('🔎 [OpenFoodFacts] Début recherche avec les paramètres:', JSON.stringify(params));
       
-      // Nouvelle approche: utiliser l'API v0 d'OpenFoodFacts qui est la plus stable
-      const url = new URL(`https://world.openfoodfacts.org/cgi/search.pl`);
-
-      // Paramètres pour le format JSON
-      url.searchParams.append('json', '1');
-      url.searchParams.append('action', 'process');
+      // Normaliser les paramètres de recherche
+      const searchTerms = params.search_terms ? params.search_terms.trim() : '';
+      const page = params.page || 1;
+      const pageSize = params.page_size || 20;
+      const sortBy = params.sort_by || 'popularity';
       
-      // Ajouter tous les champs dont nous avons besoin
-      url.searchParams.append(
-        'fields',
-        'code,product_name,product_name_fr,brands,categories,image_url,image_small_url,image_front_url,nutriscore_grade,nutriments',
-      );
-
-      // Configurer la recherche pour OpenFoodFacts avec une approche plus directe
-      if (params.search_terms) {
-        const searchTerm = params.search_terms.trim();
-        
-        // Utiliser search_terms directement (meilleure compatibilité)
-        url.searchParams.append('search_terms', searchTerm);
-        
-        console.log(`🔤 [OpenFoodFacts] Recherche du terme: "${searchTerm}"`);
-      } else {
-        console.log('⚠️ [OpenFoodFacts] Aucun terme de recherche spécifié');
-      }
-
-      // Ajouter les filtres si nécessaire
-      if (params.brands) {
-        url.searchParams.append('tagtype_0', 'brands');
-        url.searchParams.append('tag_contains_0', 'contains');
-        url.searchParams.append('tag_0', params.brands);
-        console.log(`🏷️ [OpenFoodFacts] Filtrage par marque: "${params.brands}"`);
+      if (searchTerms) {
+        console.log(`🔤 [OpenFoodFacts] Recherche du terme: "${searchTerms}"`);
       }
       
-      if (params.categories) {
-        const tagIndex = params.brands ? 1 : 0;
-        url.searchParams.append(`tagtype_${tagIndex}`, 'categories');
-        url.searchParams.append(`tag_contains_${tagIndex}`, 'contains');
-        url.searchParams.append(`tag_${tagIndex}`, params.categories);
-        console.log(`🏷️ [OpenFoodFacts] Filtrage par catégorie: "${params.categories}"`);
+      console.log(`📄 [OpenFoodFacts] Page: ${page}`);
+      console.log(`📏 [OpenFoodFacts] Éléments par page: ${pageSize}`);
+      
+      if (sortBy) {
+        console.log(`🔃 [OpenFoodFacts] Tri par: ${sortBy}`);
       }
 
+      // NOUVELLE APPROCHE: Utiliser directement l'API de recherche par terme avec une URL simple
+      // Cette approche est plus directe et plus fiable
+      const timestamp = Date.now();
+      let url = `${this.BASE_URL}/cgi/search.pl?search_simple=1&action=process&json=1`;
+      
+      // Ajouter les paramètres de recherche
+      if (searchTerms && searchTerms.length > 0) {
+        url += `&search_terms=${encodeURIComponent(searchTerms)}`;
+      }
+      
       // Pagination
-      if (params.page) {
-        url.searchParams.append('page', params.page.toString());
-        console.log(`📄 [OpenFoodFacts] Page: ${params.page}`);
+      url += `&page=${page}&page_size=${pageSize}`;
+      
+      // Champs à récupérer
+      url += `&fields=${this.SEARCH_FIELDS}`;
+      
+      // Rendre le filtre par pays optionnel pour obtenir plus de résultats
+      const countries = params.countries;
+      if (countries) {
+        console.log(`🌍 [OpenFoodFacts] Filtre par pays: ${countries}`);
+        if (Array.isArray(countries)) {
+          url += `&tagtype_0=countries&tag_contains_0=contains&tag_0=${encodeURIComponent(countries.join('|'))}`;
+        } else {
+          url += `&tagtype_0=countries&tag_contains_0=contains&tag_0=${encodeURIComponent(countries)}`;
+        }
+      } else {
+        console.log(`🌍 [OpenFoodFacts] Aucun filtre de pays appliqué`);
       }
       
-      if (params.page_size) {
-        url.searchParams.append('page_size', params.page_size.toString());
-        console.log(`📏 [OpenFoodFacts] Éléments par page: ${params.page_size}`);
-      }
+      // Ajouter un paramètre timestamp pour éviter tout cache
+      url += `&_=${timestamp}`;
       
-      // Tri
-      if (params.sort_by) {
-        url.searchParams.append('sort_by', params.sort_by);
-        console.log(`🔃 [OpenFoodFacts] Tri par: ${params.sort_by}`);
-      }
+      console.log(`🌐 [OpenFoodFacts] URL de recherche finale: ${url}`);
 
-      console.log('🌐 [OpenFoodFacts] URL de recherche finale:', url.toString());
-
-      const response = await fetch(url.toString());
-
-      if (!response.ok) {
-        console.error(`❌ [OpenFoodFacts] Erreur HTTP: ${response.status} ${response.statusText}`);
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = (await response.json()) as OpenFoodFactsResponse;
-      console.log(`✅ [OpenFoodFacts] Réponse reçue avec ${data.products?.length || 0} produits sur ${data.count || 0} au total`);
+      // Appliquer une stratégie de retry avec délai exponentiel
+      let retries = 0;
+      const maxRetries = 3;
+      let lastError;
       
-      // Filtrer les résultats côté client pour garantir la pertinence
-      if (data.products && params.search_terms) {
-        const searchTermLower = params.search_terms.toLowerCase();
-        console.log(`🔍 [OpenFoodFacts] Vérification de la pertinence des résultats pour: "${searchTermLower}"`);
-        
-        const filteredProducts = data.products.filter(product => {
-          const productName = (product.product_name || '').toLowerCase();
-          const productNameFr = (product.product_name_fr || '').toLowerCase();
-          const brands = (product.brands || '').toLowerCase();
+      while (retries < maxRetries) {
+        try {
+          // Ajouter des en-têtes pour désactiver le cache à tous les niveaux
+          const response = await fetch(url, { 
+            method: 'GET',
+            headers: { 
+              'User-Agent': this.USER_AGENT,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
           
-          const isRelevant = 
-            productName.includes(searchTermLower) || 
-            productNameFr.includes(searchTermLower) || 
-            brands.includes(searchTermLower);
-            
-          if (isRelevant) {
-            console.log(`✓ [OpenFoodFacts] Produit pertinent trouvé: ${product.product_name || 'Sans nom'}`);
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
           }
           
-          return isRelevant;
-        });
-        
-        console.log(`📊 [OpenFoodFacts] Produits avant filtrage: ${data.products.length}, après: ${filteredProducts.length}`);
-        
-        // Si nous avons des résultats pertinents, utilisons-les
-        if (filteredProducts.length > 0) {
-          data.products = filteredProducts;
-          // Mettre à jour le nombre total également
-          if (data.count) data.count = filteredProducts.length;
-        } else {
-          console.log(`⚠️ [OpenFoodFacts] Aucun produit pertinent trouvé, conservation des résultats d'origine`);
+          const data = await response.json();
           
-          // Afficher les détails des produits pour déboguer
-          data.products.forEach((product, index) => {
-            console.log(`📦 [OpenFoodFacts] Produit original ${index+1}:`);
-            console.log(`  Nom: ${product.product_name || 'N/A'}`);
-            console.log(`  Nom FR: ${product.product_name_fr || 'N/A'}`);
-            console.log(`  Marque: ${product.brands || 'N/A'}`);
-            console.log(`  Catégories: ${product.categories || 'N/A'}`);
+          // Vérification supplémentaire pour s'assurer que les données sont pertinentes
+          const count = data.count || 0;
+          const products = data.products || [];
+          
+          console.log(`✅ [OpenFoodFacts] Réponse reçue avec ${products.length} produits sur ${count} au total`);
+          if (products.length > 0) {
+            console.log(`📦 [OpenFoodFacts] Premier produit: ${products[0]?.product_name || 'Sans nom'}`);
+          }
+          
+          return { products, count };
+        } catch (error) {
+          lastError = error;
+          console.error(`❌ [OpenFoodFacts] Erreur lors de la tentative ${retries + 1}/${maxRetries}:`, error);
+          
+          // Attendre avant de réessayer (délai exponentiel)
+          const delay = 1000 * Math.pow(2, retries);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          retries++;
+        }
+      }
+      
+      // Si toutes les tentatives ont échoué
+      console.error(`❌ [OpenFoodFacts] Échec après ${maxRetries} tentatives`);
+      throw lastError;
+    } catch (error) {
+      console.error(`❌ [OpenFoodFacts] Erreur lors de la recherche de produits:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a product by barcode
+   * Méthode pour obtenir un produit par son code-barres
+   */
+  static async getProductByBarcode(barcode: string): Promise<Product> {
+    try {
+      console.log(`🔍 [OpenFoodFacts] Recherche du produit avec code-barres: ${barcode}`);
+      
+      const url = `${this.BASE_URL}/api/v0/product/${barcode}.json?_=${Date.now()}`;
+      console.log(`🌐 [OpenFoodFacts] URL de recherche du produit: ${url}`);
+      
+      // Appliquer une stratégie de retry avec délai exponentiel
+      let retries = 0;
+      const maxRetries = 3;
+      let lastError;
+      
+      while (retries < maxRetries) {
+        try {
+          // Ajouter des en-têtes pour désactiver le cache à tous les niveaux
+          const response = await fetch(url, { 
+            method: 'GET', 
+            headers: { 
+              'User-Agent': this.USER_AGENT,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
           });
+          
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 0) {
+            throw new Error(`Product not found: ${data.status_verbose}`);
+          }
+          
+          console.log(`✅ [OpenFoodFacts] Produit trouvé: ${data.product?.product_name || 'Sans nom'}`);
+          
+          const product = data.product || {};
+          
+          return product;
+        } catch (error) {
+          lastError = error;
+          console.error(`❌ [OpenFoodFacts] Erreur lors de la tentative ${retries + 1}/${maxRetries}:`, error);
+          
+          // Attendre avant de réessayer (délai exponentiel)
+          const delay = 1000 * Math.pow(2, retries);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          retries++;
         }
       }
       
-      return data;
+      // Si toutes les tentatives ont échoué
+      console.error(`❌ [OpenFoodFacts] Échec après ${maxRetries} tentatives pour le produit: ${barcode}`);
+      throw lastError;
     } catch (error) {
-      console.error('❌ [OpenFoodFacts] Erreur lors de la recherche:', error);
+      console.error(`❌ [OpenFoodFacts] Erreur lors de la récupération du produit ${barcode}:`, error);
       throw error;
     }
   }
 
   /**
-   * Get suggestions for autocomplete
-   * @param term Search term to get suggestions for
-   * @returns Promise with suggestions
+   * Get nutriments for filtering
+   * Méthode de compatibilité avec l'ancienne API
    */
-  async getAutocompleteSuggestions(term: string): Promise<string[]> {
+  static async getNutriments(): Promise<any> {
     try {
-      console.log(`🔎 [OpenFoodFacts] Recherche de suggestions pour: "${term}"`);
+      console.log('🔍 [OpenFoodFacts] Récupération des nutriments');
       
-      // Si le terme est trop court, retourner un tableau vide au lieu de faire un appel API
-      if (!term || term.length < 2) {
-        console.log('⚠️ [OpenFoodFacts] Terme de recherche trop court pour l\'autocomplétion');
-        return [];
-      }
-      
-      // Essayer avec l'ancienne API de suggestions
-      try {
-        console.log(`🌐 [OpenFoodFacts] Appel API suggestions: ${this.baseUrl}/suggest/${encodeURIComponent(term)}`);
-        const response = await fetch(
-          `${this.baseUrl}/suggest/${encodeURIComponent(term)}`,
-        );
-
-        if (!response.ok) {
-          console.error(`❌ [OpenFoodFacts] Erreur API suggestions: ${response.status} ${response.statusText}`);
-          throw new Error(`Suggestion API request failed with status ${response.status}`);
-        }
-
-        const data = (await response.json()) as { suggestions: string[] };
-        console.log(`✅ [OpenFoodFacts] ${data.suggestions?.length || 0} suggestions reçues`);
-        return data.suggestions || [];
-      } catch (error) {
-        console.log('⚠️ [OpenFoodFacts] Repli sur l\'API de recherche pour les suggestions');
-        // En cas d'échec, faire une recherche simple et extraire les noms de produits
-        const searchParams: SearchParams = {
-          search_terms: term,
-          page: 1,
-          page_size: 5
-        };
-        
-        console.log(`🔄 [OpenFoodFacts] Utilisation de searchProducts comme fallback`);
-        const searchResults = await this.searchProducts(searchParams);
-        
-        if (searchResults && searchResults.products && searchResults.products.length > 0) {
-          // Extraire les noms de produits uniques
-          const suggestions = searchResults.products
-            .map(product => product.product_name || '')
-            .filter(name => name.length > 0)
-            .slice(0, 5); // Limiter à 5 suggestions
-            
-          const uniqueSuggestions = [...new Set(suggestions)]; // Éliminer les doublons
-          console.log(`✅ [OpenFoodFacts] ${uniqueSuggestions.length} suggestions générées via recherche`);
-          return uniqueSuggestions;
-        }
-        
-        console.log('⚠️ [OpenFoodFacts] Aucune suggestion trouvée via la recherche');
-        return [];
-      }
+      // En attendant que l'API soit disponible, on utilise une liste prédéfinie
+      return {
+        tags: [
+          { id: 'proteins', name: 'Protéines' },
+          { id: 'fat', name: 'Matières grasses' },
+          { id: 'carbs', name: 'Glucides' },
+          { id: 'sugar', name: 'Sucre' },
+          { id: 'fiber', name: 'Fibres' },
+          { id: 'salt', name: 'Sel' },
+          { id: 'calcium', name: 'Calcium' },
+          { id: 'iron', name: 'Fer' },
+          { id: 'vitamin-a', name: 'Vitamine A' },
+          { id: 'vitamin-c', name: 'Vitamine C' },
+          { id: 'vitamin-d', name: 'Vitamine D' },
+          { id: 'vitamin-e', name: 'Vitamine E' },
+          { id: 'calories-high', name: 'Calories élevées' },
+          { id: 'calories-medium', name: 'Calories moyennes' },
+          { id: 'calories-low', name: 'Calories faibles' },
+          { id: 'protein-high', name: 'Riche en protéines' },
+          { id: 'carbs-high', name: 'Riche en glucides' },
+          { id: 'fat-high', name: 'Riche en lipides' },
+          { id: 'fiber-high', name: 'Riche en fibres' },
+          { id: 'organic', name: 'Bio' }
+        ]
+      };
     } catch (error) {
-      console.error('❌ [OpenFoodFacts] Erreur récupération suggestions:', error);
-      return [];
+      console.error('❌ [OpenFoodFacts] Erreur lors de la récupération des nutriments:', error);
+      return {
+        tags: [
+          { id: 'proteins', name: 'Protéines' },
+          { id: 'fat', name: 'Matières grasses' },
+          { id: 'carbs', name: 'Glucides' },
+          { id: 'sugar', name: 'Sucre' },
+          { id: 'fiber', name: 'Fibres' }
+        ]
+      };
     }
   }
 
   /**
-   * Get product categories
-   * @returns Promise with categories
+   * Get allergens for filtering
+   * Méthode de compatibilité avec l'ancienne API
    */
-  async getCategories(): Promise<any> {
+  static async getAllergens(): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/categories.json`);
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      console.log('🔍 [OpenFoodFacts] Récupération des allergènes');
+      
+      return {
+        tags: [
+          { id: 'gluten', name: 'Gluten' },
+          { id: 'milk', name: 'Lait' },
+          { id: 'eggs', name: 'Œufs' },
+          { id: 'nuts', name: 'Fruits à coque' },
+          { id: 'peanuts', name: 'Arachides' },
+          { id: 'soybeans', name: 'Soja' },
+          { id: 'fish', name: 'Poisson' },
+          { id: 'shellfish', name: 'Crustacés' },
+          { id: 'molluscs', name: 'Mollusques' },
+          { id: 'celery', name: 'Céleri' },
+          { id: 'mustard', name: 'Moutarde' },
+          { id: 'sesame', name: 'Sésame' },
+          { id: 'sulphites', name: 'Sulfites' },
+          { id: 'lupin', name: 'Lupin' },
+          { id: 'lactose', name: 'Lactose' },
+          { id: 'fructose', name: 'Fructose' },
+          { id: 'glucose', name: 'Glucose' },
+          { id: 'without-gluten', name: 'Sans gluten' },
+          { id: 'without-lactose', name: 'Sans lactose' },
+          { id: 'vegan', name: 'Végan' }
+        ]
+      };
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get product brands
-   * @returns Promise with brands
-   */
-  async getBrands(): Promise<any> {
-    try {
-      const response = await fetch(`${this.baseUrl}/brands.json`);
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching brands:', error);
-      throw error;
+      console.error('❌ [OpenFoodFacts] Erreur lors de la récupération des allergènes:', error);
+      return {
+        tags: [
+          { id: 'gluten', name: 'Gluten' },
+          { id: 'milk', name: 'Lait' },
+          { id: 'eggs', name: 'Œufs' },
+          { id: 'nuts', name: 'Fruits à coque' },
+          { id: 'peanuts', name: 'Arachides' }
+        ]
+      };
     }
   }
 }
 
-export default new OpenFoodFactsService();
+// Exporter la classe pour maintenir la compatibilité avec le code existant
+export default OpenFoodFactsService;

@@ -31,126 +31,64 @@ export default function Search() {
     const router = useRouter();
     const drizzleDb = useDrizzleDb();
     const [searchTerm, setSearchTerm] = useState('');
-    const [suggestions, setSuggestions] = useState<string[]>([]);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
     
     // Filtres
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedBrand, setSelectedBrand] = useState('');
-    const [categories, setCategories] = useState<string[]>([]);
-    const [brands, setBrands] = useState<string[]>([]);
-    const [loadingCategories, setLoadingCategories] = useState(false);
-    const [loadingBrands, setLoadingBrands] = useState(false);
+    const [selectedCountry, setSelectedCountry] = useState('');
 
-    // Charger les catégories et marques au montage du composant
+    // Charger les pays au montage du composant
     useEffect(() => {
         const loadFilters = async () => {
             try {
-                setLoadingCategories(true);
-                setLoadingBrands(true);
-                
-                // Charger les catégories
-                const categoriesData = await OpenFoodFactsService.getCategories();
-                if (categoriesData && categoriesData.tags) {
-                    // Extraire les 20 premières catégories les plus populaires
-                    const topCategories = categoriesData.tags
-                        .slice(0, 20)
-                        .map((tag: any) => tag.name || tag.id);
-                    setCategories(topCategories);
-                }
-                
-                // Charger les marques
-                const brandsData = await OpenFoodFactsService.getBrands();
-                if (brandsData && brandsData.tags) {
-                    // Extraire les 20 premières marques les plus populaires
-                    const topBrands = brandsData.tags
-                        .slice(0, 20)
-                        .map((tag: any) => tag.name || tag.id);
-                    setBrands(topBrands);
-                }
+                // Charger les pays
+                // const countriesData = await OpenFoodFactsService.getCountries();
+                // if (countriesData && countriesData.tags) {
+                //     // Extraire les 20 premiers pays les plus populaires
+                //     const topCountries = countriesData.tags
+                //         .slice(0, 20)
+                //         .map((tag: any) => tag.name || tag.id);
+                //     setCountries(topCountries);
+                // }
             } catch (error) {
                 console.error('Erreur lors du chargement des filtres:', error);
             } finally {
-                setLoadingCategories(false);
-                setLoadingBrands(false);
             }
         };
         
         loadFilters();
     }, []);
 
-    // Fonction de recherche debounced pour les suggestions
-    const debouncedGetSuggestions = useCallback(
-        debounce(async (term: string) => {
-            if (term.length < 2) {
-                setSuggestions([]);
-                setShowSuggestions(false);
-                return;
-            }
-            
-            try {
-                const suggestionsResult = await OpenFoodFactsService.getAutocompleteSuggestions(term);
-                setSuggestions(suggestionsResult);
-                setShowSuggestions(suggestionsResult.length > 0);
-            } catch (error) {
-                console.error('Erreur lors de la récupération des suggestions:', error);
-                setSuggestions([]);
-                setShowSuggestions(false);
-            }
-        }, 300),
-        []
-    );
-
     // Fonction pour effectuer la recherche
     const performSearch = async (term: string, page = 1, refreshing = false) => {
         if (term.length < 2) return;
         
-        if (!refreshing) {
-            setLoading(true);
-        }
-        
-        // Préparer les filtres
-        const filters: Record<string, string> = {};
-        if (selectedCategory) filters.categories = selectedCategory;
-        if (selectedBrand) filters.brands = selectedBrand;
-        
-        // Désactiver temporairement le cache pour tester
-        /* 
-        // Vérifier si les résultats sont dans le cache
-        const cacheKey = term;
-        const cachedResults = SearchCacheService.getCachedResults(cacheKey, filters);
-        
-        if (cachedResults && page === 1 && !refreshing) {
-            setSearchResults(cachedResults);
-            setTotalPages(Math.ceil(cachedResults.length / ITEMS_PER_PAGE));
-            setCurrentPage(1);
-            setLoading(false);
-            return;
-        }
-        */
-        
         try {
-            // Préparer les paramètres de recherche
+            setLoading(true);
+            
+            // Ajouter un timestamp pour garantir une requête unique à chaque recherche
+            console.log(`🔍 [Search] Démarrage d'une nouvelle recherche: "${term}" (page ${page}) à ${new Date().toISOString()}`);
+            
+            // Préparer les paramètres de recherche - Simplifié pour ne conserver que le filtre pays
             const searchParams: SearchParams = {
-                search_terms: term,
+                search_terms: term.trim(),
                 page,
                 page_size: ITEMS_PER_PAGE,
-                sort_by: 'popularity',
+                _timestamp: Date.now().toString()
             };
             
-            // Ajouter les filtres si sélectionnés
-            if (selectedCategory) searchParams.categories = selectedCategory;
-            if (selectedBrand) searchParams.brands = selectedBrand;
+            // Ne filtrer par pays que si explicitement sélectionné
+            if (selectedCountry && selectedCountry.trim() !== '') {
+                searchParams.countries = selectedCountry;
+            }
             
             console.log('Recherche avec les paramètres:', JSON.stringify(searchParams));
             
-            // Effectuer la recherche
+            // Effectuer la recherche avec la méthode statique
             const response = await OpenFoodFactsService.searchProducts(searchParams);
             
             if (response && response.products) {
@@ -191,14 +129,6 @@ export default function Search() {
     // Gestionnaire pour le changement du terme de recherche
     const handleSearchTermChange = (text: string) => {
         setSearchTerm(text);
-        debouncedGetSuggestions(text);
-    };
-
-    // Gestionnaire pour sélectionner une suggestion
-    const handleSelectSuggestion = (suggestion: string) => {
-        setSearchTerm(suggestion);
-        setShowSuggestions(false);
-        performSearch(suggestion, 1);
     };
 
     // Gestionnaire pour changer de page
@@ -228,7 +158,7 @@ export default function Search() {
             
             // Naviguer vers l'écran de création de repas avec l'ID de l'ingrédient
             router.push({
-                pathname: "/meals/my-meals/create",
+                pathname: "/(root)/(tabs)/meals/my-meals/create",
                 params: {
                     ingredientStandardId: product.code || String(Math.floor(Math.random() * 100000))
                 }
@@ -247,9 +177,22 @@ export default function Search() {
 
     // Gestionnaire pour réinitialiser les filtres
     const resetFilters = () => {
-        setSelectedCategory('');
-        setSelectedBrand('');
+        setSelectedCountry('');
         performSearch(searchTerm, 1);
+    };
+
+    // Fonction pour afficher les détails d'un produit
+    const viewProductDetails = (product: Product) => {
+        if (!product || !product.code) {
+            console.error('Produit invalide ou code manquant');
+            return;
+        }
+        
+        // Naviguer vers la page de détails de l'ingrédient avec le code du produit
+        router.push({
+            pathname: "/(root)/(tabs)/scanner/ingredient-details/[id]",
+            params: { id: product.code }
+        });
     };
 
     // Rendu d'un élément de la liste des résultats
@@ -304,7 +247,7 @@ export default function Search() {
                             </VStack>
                         </HStack>
                         <Button
-                            onPress={() => handleSelectProduct(item)}
+                            onPress={() => viewProductDetails(item)}
                             action="secondary"
                             className="w-12 h-12 bg-transparent"
                         >
@@ -547,37 +490,15 @@ export default function Search() {
                         />
                     </Input>
 
-                    {/* Suggestions */}
-                    {showSuggestions && suggestions.length > 0 && (
-                        <Card className="absolute top-14 w-full z-10 bg-white/95 rounded-xl shadow-md">
-                            <VStack className="p-2">
-                                {suggestions.map((suggestion, index) => (
-                                    <Animated.View 
-                                        key={index} 
-                                        entering={FadeInUp.delay(index * 50)}
-                                    >
-                                        <Pressable
-                                            className="p-3 border-b border-gray-100"
-                                            onPress={() => handleSelectSuggestion(suggestion)}
-                                        >
-                                            <Text>{suggestion}</Text>
-                                        </Pressable>
-                                    </Animated.View>
-                                ))}
-                            </VStack>
-                        </Card>
-                    )}
-
-                    {/* Filtres */}
                     <HStack className="gap-2">
                         <Select 
-                            onValueChange={setSelectedCategory}
+                            onValueChange={setSelectedCountry}
                             className="flex-1"
                         >
                             <SelectTrigger className="h-12 bg-white/90 rounded-xl">
                                 <SelectInput
-                                    placeholder="Catégorie"
-                                    value={selectedCategory}
+                                    placeholder="Pays"
+                                    value={selectedCountry}
                                 />
                                 <Box className="mr-2">
                                     <Icon as={FilterIcon} className="w-5 h-5 text-gray-500" />
@@ -589,45 +510,11 @@ export default function Search() {
                                     <SelectDragIndicatorWrapper>
                                         <SelectDragIndicator />
                                     </SelectDragIndicatorWrapper>
-                                    <SelectItem value="" label="Toutes les catégories" />
-                                    {categories.map((category) => (
-                                        <SelectItem 
-                                            key={category} 
-                                            value={category} 
-                                            label={category} 
-                                        />
-                                    ))}
-                                </SelectContent>
-                            </SelectPortal>
-                        </Select>
-
-                        <Select 
-                            onValueChange={setSelectedBrand}
-                            className="flex-1"
-                        >
-                            <SelectTrigger className="h-12 bg-white/90 rounded-xl">
-                                <SelectInput
-                                    placeholder="Marque"
-                                    value={selectedBrand}
-                                />
-                                <Box className="mr-2">
-                                    <Icon as={FilterIcon} className="w-5 h-5 text-gray-500" />
-                                </Box>
-                            </SelectTrigger>
-                            <SelectPortal>
-                                <SelectBackdrop />
-                                <SelectContent>
-                                    <SelectDragIndicatorWrapper>
-                                        <SelectDragIndicator />
-                                    </SelectDragIndicatorWrapper>
-                                    <SelectItem value="" label="Toutes les marques" />
-                                    {brands.map((brand) => (
-                                        <SelectItem 
-                                            key={brand} 
-                                            value={brand} 
-                                            label={brand} 
-                                        />
-                                    ))}
+                                    <SelectItem value="" label="Tous les pays" />
+                                    <SelectItem value="france" label="France" />
+                                    <SelectItem value="usa" label="États-Unis" />
+                                    <SelectItem value="canada" label="Canada" />
+                                    <SelectItem value="tunisia" label="Tunisie" />
                                 </SelectContent>
                             </SelectPortal>
                         </Select>
@@ -658,19 +545,56 @@ export default function Search() {
                         <Text className="mt-4">Recherche en cours...</Text>
                     </Box>
                 ) : searchResults.length > 0 ? (
-                    <FlashList
-                        data={searchResults}
-                        renderItem={renderProductItem}
-                        keyExtractor={(item) => item.code || item._id || Math.random().toString()}
-                        estimatedItemSize={200}
-                        contentContainerStyle={{ padding: 16 }}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={onRefresh}
-                            />
-                        }
-                    />
+                    <VStack className="flex-1">
+                        {searchResults.map((product, index) => (
+                            <Pressable 
+                                key={index} 
+                                onPress={() => viewProductDetails(product)}
+                                className="mb-4"
+                            >
+                                <Card className="p-3 bg-white">
+                                    <HStack space="md" className="items-center">
+                                        <Avatar size="md">
+                                            {product.image_small_url ? (
+                                                <AvatarImage 
+                                                    source={{ uri: product.image_small_url }} 
+                                                    alt={product.product_name}
+                                                />
+                                            ) : (
+                                                <AvatarFallbackText>{product.product_name?.[0] || '?'}</AvatarFallbackText>
+                                            )}
+                                        </Avatar>
+                                        
+                                        <VStack className="flex-1">
+                                            <HStack className="justify-between items-center">
+                                                <Text className="font-medium flex-1" numberOfLines={1}>
+                                                    {product.product_name || 'Sans nom'}
+                                                </Text>
+                                                
+                                                {product.nutriscore_grade && (
+                                                    <Box 
+                                                        className={`w-6 h-6 rounded-full items-center justify-center ml-1 ${
+                                                            getNutriscoreColor(product.nutriscore_grade)
+                                                        }`}
+                                                    >
+                                                        <Text className="text-white text-xs font-bold">
+                                                            {product.nutriscore_grade.toUpperCase()}
+                                                        </Text>
+                                                    </Box>
+                                                )}
+                                            </HStack>
+                                            
+                                            {product.brands && (
+                                                <Text className="text-sm text-muted-500" numberOfLines={1}>
+                                                    {product.brands}
+                                                </Text>
+                                            )}
+                                        </VStack>
+                                    </HStack>
+                                </Card>
+                            </Pressable>
+                        ))}
+                    </VStack>
                 ) : searchTerm.length >= 2 ? (
                     <Box className="flex-1 justify-center items-center">
                         <Text className="text-lg text-gray-500">Aucun résultat trouvé</Text>
@@ -708,6 +632,24 @@ export default function Search() {
             </VStack>
         );
     };
+
+    // Helper function to get color based on nutriscore
+    function getNutriscoreColor(grade: string): string {
+        switch (grade.toLowerCase()) {
+            case 'a':
+                return 'bg-green-600';
+            case 'b':
+                return 'bg-green-500';
+            case 'c':
+                return 'bg-yellow-500';
+            case 'd':
+                return 'bg-orange-500';
+            case 'e':
+                return 'bg-red-600';
+            default:
+                return 'bg-gray-500';
+        }
+    }
 
     return (
         <View className="flex-1">
