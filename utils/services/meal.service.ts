@@ -24,8 +24,14 @@ export const createNewMeal = async (
   await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
     console.log('Creating new meal...');
+    // On peut maintenant utiliser le type complet car la base de données a été mise à jour
     const newMeal: Omit<MealOrmProps, 'id'> = {
-      ...data,
+      type: data.type,
+      name: data.name,
+      description: data.description,
+      cuisine: data.cuisine,
+      unit: data.unit,
+      quantity: data.quantity,
       calories: totalMacros.totalCalories,
       carbs: totalMacros.totalCarbs,
       fat: totalMacros.totalFats,

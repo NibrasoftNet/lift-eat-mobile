@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, Link } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Box } from '../ui/box';
@@ -89,9 +89,9 @@ export default function MealForm({
   const router = useRouter();
   const toast = useToast();
   const { user } = useSessionStore();
-  const { selectedIngredients, totalMacros } = useIngredientStore();
+  const { selectedIngredients, totalMacros, resetIngredients } = useIngredientStore();
   const [image, setImage] = useState<
-    Buffer<ArrayBufferLike> | string | undefined
+    Buffer | string | null | undefined
   >(`${defaultValues.image}`);
   const [isImageActionSheetOpen, setIsImageActionSheetOpen] =
     useState<boolean>(false);
@@ -109,6 +109,16 @@ export default function MealForm({
     resolver: zodResolver(mealSchema),
     defaultValues,
   });
+
+  // Réinitialiser les ingrédients lors de la sortie du composant
+  useEffect(() => {
+    // Cette fonction sera exécutée lors du nettoyage (unmount) du composant
+    return () => {
+      // Réinitialiser les ingrédients sélectionnés si l'utilisateur quitte sans enregistrer
+      resetIngredients();
+      console.log('Ingrédients réinitialisés car l\'utilisateur a quitté sans enregistrer');
+    };
+  }, [resetIngredients]);
 
   // Handle the image picker logic
   const handleImagePicker = async () => {

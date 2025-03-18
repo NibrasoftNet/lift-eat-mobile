@@ -39,7 +39,7 @@ export type MealDefaultValuesProps = {
   carbs: number;
   fat: number;
   protein: number;
-  image?: Buffer<ArrayBufferLike>;
+  image?: Buffer | null;
   creatorId: number;
   ingredients: any;
 };

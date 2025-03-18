@@ -8,7 +8,9 @@ import {
   HandPlatter,
   MinusCircle,
   PlusCircle,
+  SquareSigma,
   UtensilsCrossedIcon,
+  Weight,
 } from 'lucide-react-native';
 import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -18,6 +20,7 @@ import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import { useIngredientStore } from '../../utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '../../types/ingredient.type';
+import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 
 const IngredientCard: React.FC<{
   item: IngredientWithStandardProps;
@@ -36,68 +39,42 @@ const IngredientCard: React.FC<{
     }
   };
 
+  // Utiliser l'ID unique de l'ingrédient pour éviter les collisions d'ID stables
+  const uniqueKey = `ingredient-${item.ingredientStandardId}-${index}`;
+
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 100)}
-      className="rounded-xl overflow-hidden mb-2"
+      className="rounded-xl overflow-hidden mb-4"
+      key={uniqueKey}
     >
       <Card className={`w-full items-center gap-2 p-2`}>
-        <HStack className="w-full items-center justify-between">
-          <HStack className="flex-1 items-center gap-2">
-            <Box className="flex-col items-center justify-center w-16 h-16">
-              <Avatar>
-                <AvatarFallbackText>
-                  {item.ingredientsStandard.name?.slice(0, 2).toUpperCase()}
-                </AvatarFallbackText>
-                {item.ingredientsStandard.image ? (
-                  <AvatarImage
-                    className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
-                    source={{ uri: `${item.ingredientsStandard.image}` }}
-                  />
-                ) : (
-                  <Icon as={HandPlatter} size="lg" className="stroke-white" />
-                )}
-              </Avatar>
-            </Box>
-            <VStack className="flex-1">
-              <Text className="text-xl font-bold">
-                {item.ingredientsStandard.name}
-              </Text>
-              <Text className="text-sm">
-                {item.quantity} • {item.ingredientsStandard.unit}
-              </Text>
-            </VStack>
-          </HStack>
-          <HStack className="items-center gap-2">
-            <Button
-              onPress={() => handleQuantityChange('decrease')}
-              disabled={newQuantity <= item.ingredientsStandard.quantity}
-              action="secondary"
-              className="w-12 h-12 bg-transparent disabled:bg-secondary-500 disabled:text-white"
-            >
-              <ButtonIcon as={MinusCircle} className="w-10 h-10" />
-            </Button>
-            <Text>{newQuantity}</Text>
-            <Button
-              onPress={() => handleQuantityChange('increase')}
-              action="secondary"
-              className="w-12 h-12 bg-transparent"
-            >
-              <ButtonIcon as={PlusCircle} className="w-10 h-10" />
-            </Button>
-          </HStack>
-        </HStack>
-        <Divider
-          orientation="horizontal"
-          className="w-full h-0.5 bg-gray-100"
-        />
-        <VStack className="mt-4">
+        <Box className="h-28 w-full items-center justify-center">
+          <Avatar className="border-2 border-tertiary-500 w-36 h-36 shadow-xl">
+            <AvatarFallbackText>
+              {item.ingredientsStandard.name?.slice(0, 2).toUpperCase()}
+            </AvatarFallbackText>
+            {item.ingredientsStandard.image ? (
+              <AvatarImage
+                className="border-2 border-tertiary-500 w-36 h-36 shadow-xl"
+                source={{ uri: `${item.ingredientsStandard.image}` }}
+              />
+            ) : (
+              <Icon as={HandPlatter} size="lg" className="stroke-white" />
+            )}
+          </Avatar>
+        </Box>
+        
+        <VStack className="mt-4 w-full">
           <HStack className="items-center justify-between mb-2">
             <HStack space="sm" className="items-center flex-1">
               <Icon as={UtensilsCrossedIcon} className="text-gray-600" />
-              <Text className="capitalize text-xl font-semibold">
-                Macronutrients
-              </Text>
+              <VStack className="flex-1">
+                <Text className="font-semibold text-sm">{item.ingredientsStandard.name}</Text>
+                <Text className="text-sm">
+                  {item.ingredientsStandard.unit}
+                </Text>
+              </VStack>
             </HStack>
             <NutritionBox
               title="Calories"
@@ -108,40 +85,47 @@ const IngredientCard: React.FC<{
               valueClassName="bg-red-300"
             />
           </HStack>
-          <HStack className="justify-around pt-3 border-t border-gray-100">
-            <NutritionBox
-              title="Carbs"
-              value={item.carbs}
-              unit="Gr"
-              className="w-24"
-              titleClassName="bg-amber-500"
-              valueClassName="bg-amber-300"
-            />
+          
+          <HStack className="items-center justify-center w-full">
+            <HStack className="gap-2 items-center">
+              <Icon as={SquareSigma} size="md" />
+              <Text>Quantity:</Text>
+              <HStack className="items-center gap-2">
+                <Button
+                  onPress={() => handleQuantityChange('decrease')}
+                  disabled={newQuantity <= item.ingredientsStandard.quantity}
+                  action="secondary"
+                  className="w-8 h-8 bg-transparent disabled:bg-secondary-500 disabled:text-white"
+                >
+                  <ButtonIcon as={MinusCircle} className="w-6 h-6" />
+                </Button>
+                <Text>{newQuantity}</Text>
+                <Button
+                  onPress={() => handleQuantityChange('increase')}
+                  action="secondary"
+                  className="w-8 h-8 bg-transparent"
+                >
+                  <ButtonIcon as={PlusCircle} className="w-6 h-6" />
+                </Button>
+              </HStack>
+            </HStack>
             <Divider
               orientation="vertical"
-              className="w-0.5 h-14 bg-gray-100 mx-3"
+              className={`w-0.5 h-14 bg-gray-100 mx-3`}
             />
-            <NutritionBox
-              title="Fats"
-              value={item.fat}
-              unit="Gr"
-              className="w-24"
-              titleClassName="bg-green-500"
-              valueClassName="bg-green-300"
-            />
-            <Divider
-              orientation="vertical"
-              className="w-0.5 h-14 bg-gray-300 mx-3"
-            />
-            <NutritionBox
-              title="Protein"
-              value={item.protein}
-              unit="Gr"
-              className="w-24"
-              titleClassName="bg-blue-500"
-              valueClassName="bg-blue-300"
-            />
+            <HStack className="gap-2 items-center">
+              <Icon as={Weight} size="md" />
+              <Text>Unit:</Text>
+              <Text>{item.ingredientsStandard.unit}</Text>
+            </HStack>
           </HStack>
+          
+          <MacrosDetailsBox
+            carbs={item.carbs}
+            fats={item.fat}
+            protein={item.protein}
+            unit={'Gr'}
+          />
         </VStack>
       </Card>
     </Animated.View>

@@ -70,7 +70,7 @@ export interface ScanResult {
   isValid: boolean;
   message: string;
   product: Product | null;
-  meal: Meal | null;
+  ingredient: Ingredients | null;
 }
 
 /**
@@ -128,7 +128,7 @@ class OpenFoodFactsService {
           isValid: false,
           message: 'Code-barres invalide ou vide',
           product: null,
-          meal: null,
+          ingredient: null,
         };
       }
 
@@ -139,18 +139,18 @@ class OpenFoodFactsService {
           isValid: false,
           message: `Le produit avec le code-barres "${barcode}" n'a pas été trouvé dans la base de données Open Food Facts. Essayez un autre produit ou vérifiez que le code-barres est correct.`,
           product: null,
-          meal: null,
+          ingredient: null,
         };
       }
 
-      // Convert product to meal format
-      const meal = this.convertProductToMeal(product);
+      // Convert product to ingredient format
+      const ingredient = this.convertProductToIngredient(product);
 
       return {
         isValid: true,
         message: 'Produit trouvé avec succès',
         product,
-        meal,
+        ingredient,
       };
     } catch (error) {
       console.error('Error during barcode scan:', error);
@@ -171,23 +171,43 @@ class OpenFoodFactsService {
         isValid: false,
         message: errorMessage,
         product: null,
-        meal: null,
+        ingredient: null,
       };
     }
   }
 
   /**
-   * Converts an Open Food Facts product to the app's meal format
+   * Converts an Open Food Facts product to an ingredient format for the app
    * @param product The product from Open Food Facts
-   * @returns A meal object compatible with the app
+   * @returns An ingredient object compatible with the app
    */
-  convertProductToMeal(product: Product): Meal {
+  convertProductToIngredient(product: Product): Ingredients {
     // Calculate nutrition values, defaulting to 0 if not available
     const calories = Math.round(product.nutriments?.energy_100g || 0);
     const proteins = Math.round(product.nutriments?.proteins_100g || 0);
     const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
     const fats = Math.round(product.nutriments?.fat_100g || 0);
 
+    // Create ingredient from product
+    const ingredient: Ingredients = {
+      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
+      name: product.product_name || 'Produit sans nom',
+      calories: calories,
+      protein: proteins,
+      carbs: carbs,
+      fat: fats,
+      quantity: 1,
+      unit: product.serving_size ? 'portion' : 'grammes',
+    };
+
+    return ingredient;
+  }
+
+  // Conserver la fonction convertProductToMeal pour la compatibilité avec le code existant
+  // mais l'implémenter pour utiliser convertProductToIngredient
+  convertProductToMeal(product: Product): Meal {
+    const ingredient = this.convertProductToIngredient(product);
+    
     // Get product image URL
     let productImage: ImageSourcePropType | null = null;
 
@@ -205,28 +225,16 @@ class OpenFoodFactsService {
       productImage = defaultImage;
     }
 
-    // Create ingredient from product
-    const ingredient: Ingredients = {
-      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
-      name: product.product_name || 'Produit sans nom',
-      calories: calories,
-      protein: proteins,
-      carbs: carbs,
-      fats: fats,
-      quantity: 1,
-      unit: 'portion',
-    };
-
     // Generate a meal object compatible with the app's structure
     const meal: Meal = {
       id: parseInt(product.code) || Math.floor(Math.random() * 100000),
       name: product.product_name || 'Produit sans nom',
-      image: productImage, // Use product image URL or default
-      type: MealTypeEnum.SNACK, // Default type, can be changed by user
-      calories: calories,
-      protein: proteins,
-      carbs: carbs,
-      fats: fats,
+      image: productImage,
+      type: MealTypeEnum.SNACK,
+      calories: ingredient.calories,
+      protein: ingredient.protein,
+      carbs: ingredient.carbs,
+      fat: ingredient.fat,
       cuisineType: CuisineTypeEnum.GENERAL,
       unit: MealUnitEnum.SERVING,
       quantity: 1,

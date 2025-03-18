@@ -12,7 +12,7 @@ export interface Ingredients {
   name: string;
   calories: number;
   carbs: number;
-  fats: number;
+  fat: number;
   protein: number;
   unit: string;
   quantity: number;
@@ -25,7 +25,7 @@ export interface Meal {
   type: MealTypeEnum;
   calories: number;
   carbs: number;
-  fats: number;
+  fat: number;
   protein: number;
   cuisineType: CuisineTypeEnum;
   unit: MealUnitEnum;
@@ -39,7 +39,7 @@ export interface DailyPlan {
   week: number;
   calories: number;
   carbs: number;
-  fats: number;
+  fat: number;
   protein: number;
   meals: Meal[];
 }
@@ -55,7 +55,7 @@ export interface NutritionPlan {
   durationWeeks: number;
   calories: number;
   carbs: number;
-  fats: number;
+  fat: number;
   protein: number;
   dailyPlans: DailyPlan[];
 }
