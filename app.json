@@ -5,9 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "splash": {
-      "image": "./assets/images/splash_image.jpg",
-      "enableFullScreenImage_legacy": true,
-      "resizeMode": "cover"
+      "image": "./assets/images/auth/login_background.jpg",
+      "resizeMode": "cover",
+      "backgroundColor": "#21273F"
     },
     "scheme": "Lift&Eat",
     "userInterfaceStyle": "automatic",
@@ -28,15 +28,6 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
       "expo-sqlite",
       "expo-localization",
       "expo-asset"

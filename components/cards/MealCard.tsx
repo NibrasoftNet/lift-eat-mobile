@@ -28,6 +28,7 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '../ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import DeletionModal from '@/components/modals/DeletionModal';
+import OptionsDrawer from '@/components/drawers/OptionsDrawer';
 
 const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   item,
@@ -37,6 +38,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
   const handleMealCardPress = (meal: MealOrmProps) => {
@@ -95,109 +97,127 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
         entering={FadeInUp.delay(index * 100)}
         className="mb-4 rounded-xl overflow-hidden"
       >
-        <Pressable onPress={() => handleMealCardPress(item)}>
-          <Card className="items-center gap-2">
-            <HStack className="w-full h-4 items-center justify-end">
-              <Menu
-                placement="right top"
-                offset={5}
-                disabledKeys={['Settings']}
-                trigger={({ ...triggerProps }) => {
-                  return (
-                    <Button
-                      action="secondary"
-                      {...triggerProps}
-                      className="bg-transparent m-0 p-0"
-                    >
-                      <ButtonIcon
-                        as={ThreeDotsIcon}
-                        className="text-black w-8 h-8"
-                      />
-                    </Button>
-                  );
-                }}
-              >
-                <MenuItem
-                  key="Edit Plan"
-                  textValue="Edit Plan"
-                  onPress={() => router.push(`/meals/my-meals/edit/${item.id}`)}
+        <Pressable
+          onPress={() => handleMealCardPress(item)}
+          onLongPress={() => setShowOptionsDrawer(true)}
+        >
+          {({ pressed }) => (
+            <Card
+              className={`items-center gap-2 ${pressed && 'bg-secondary-500'}`}
+            >
+              <HStack className="w-full h-4 items-center justify-end">
+                <Menu
+                  placement="right top"
+                  offset={5}
+                  disabledKeys={['Settings']}
+                  trigger={({ ...triggerProps }) => {
+                    return (
+                      <Button
+                        action="secondary"
+                        {...triggerProps}
+                        className="bg-transparent m-0 p-0"
+                      >
+                        <ButtonIcon
+                          as={ThreeDotsIcon}
+                          className="text-black w-8 h-8"
+                        />
+                      </Button>
+                    );
+                  }}
                 >
-                  <Icon as={EditIcon} size="sm" className="mr-2" />
-                  <MenuItemLabel size="sm">Edit</MenuItemLabel>
-                </MenuItem>
-                <MenuItem
-                  key="Delete Plan"
-                  textValue="Delete Plan"
-                  onPress={() => setShowModal(true)}
-                >
-                  <Icon as={TrashIcon} size="sm" className="mr-2" />
-                  <MenuItemLabel size="sm">Delete</MenuItemLabel>
-                </MenuItem>
-              </Menu>
-            </HStack>
-            <Box className="h-28 w-full items-center justify-center">
-              <Avatar className="border-2 border-tertiary-500 w-36 h-36 shadow-xl">
-                <AvatarFallbackText>
-                  {item.name?.slice(0, 2).toUpperCase()}
-                </AvatarFallbackText>
-                {item.image ? (
-                  <AvatarImage
-                    className="border-2 border-tertiary-500 w-36 h-36 shadow-xl"
-                    source={{
-                      uri: `${item.image}`,
-                    }}
+                  <MenuItem
+                    key="Edit Plan"
+                    textValue="Edit Plan"
+                    onPress={() =>
+                      router.push(`/meals/my-meals/edit/${item.id}`)
+                    }
+                  >
+                    <Icon as={EditIcon} size="sm" className="mr-2" />
+                    <MenuItemLabel size="sm">Edit</MenuItemLabel>
+                  </MenuItem>
+                  <MenuItem
+                    key="Delete Plan"
+                    textValue="Delete Plan"
+                    onPress={() => setShowModal(true)}
+                  >
+                    <Icon as={TrashIcon} size="sm" className="mr-2" />
+                    <MenuItemLabel size="sm">Delete</MenuItemLabel>
+                  </MenuItem>
+                </Menu>
+              </HStack>
+              <Box className="h-28 w-full items-center justify-center">
+                <Avatar className="border-2 border-tertiary-500 w-36 h-36 shadow-xl">
+                  <AvatarFallbackText>
+                    {item.name?.slice(0, 2).toUpperCase()}
+                  </AvatarFallbackText>
+                  {item.image ? (
+                    <AvatarImage
+                      className="border-2 border-tertiary-500 w-36 h-36 shadow-xl"
+                      source={{
+                        uri: `${item.image}`,
+                      }}
+                    />
+                  ) : (
+                    <Icon as={HandPlatter} size="lg" className="stroke-white" />
+                  )}
+                </Avatar>
+              </Box>
+              <VStack className="mt-4">
+                <HStack className="items-center justify-between mb-2">
+                  <HStack space="sm" className="items-center flex-1">
+                    <Icon as={UtensilsCrossedIcon} className="text-gray-600" />
+                    <VStack className="flex-1">
+                      <Text className="font-semibold text-sm">{item.name}</Text>
+                      <Text className="text-sm">
+                        {item.type} • {item.cuisine}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <NutritionBox
+                    title="Calories"
+                    value={item.calories}
+                    unit="KCal"
+                    className="w-24"
+                    titleClassName="bg-red-500"
+                    valueClassName="bg-red-300"
                   />
-                ) : (
-                  <Icon as={HandPlatter} size="lg" className="stroke-white" />
-                )}
-              </Avatar>
-            </Box>
-            <VStack className="mt-4">
-              <HStack className="items-center justify-between mb-2">
-                <HStack space="sm" className="items-center flex-1">
-                  <Icon as={UtensilsCrossedIcon} className="text-gray-600" />
-                  <VStack className="flex-1">
-                    <Text className="font-semibold text-sm">{item.name}</Text>
-                    <Text className="text-sm">
-                      {item.type} • {item.cuisine}
-                    </Text>
-                  </VStack>
                 </HStack>
-                <NutritionBox
-                  title="Calories"
-                  value={item.calories}
-                  unit="KCal"
-                  className="w-24"
-                  titleClassName="bg-red-500"
-                  valueClassName="bg-red-300"
+                <HStack className="items-center justify-center w-full">
+                  <HStack className="gap-2 items-center">
+                    <Icon as={SquareSigma} size="md" />
+                    <Text>Serving:</Text>
+                    <Text>{item.quantity}</Text>
+                  </HStack>
+                  <Divider
+                    orientation="vertical"
+                    className={`w-0.5 h-14 bg-gray-100 mx-3`}
+                  />
+                  <HStack className="gap-2 items-center">
+                    <Icon as={Weight} size="md" />
+                    <Text>Unit:</Text>
+                    <Text>{item.unit}</Text>
+                  </HStack>
+                </HStack>
+                <MacrosDetailsBox
+                  carbs={item.carbs}
+                  fats={item.fat}
+                  protein={item.protein}
+                  unit={'Gr'}
                 />
-              </HStack>
-              <HStack className="items-center justify-center w-full">
-                <HStack className="gap-2 items-center">
-                  <Icon as={SquareSigma} size="md" />
-                  <Text>Serving:</Text>
-                  <Text>{item.quantity}</Text>
-                </HStack>
-                <Divider
-                  orientation="vertical"
-                  className={`w-0.5 h-14 bg-gray-100 mx-3`}
-                />
-                <HStack className="gap-2 items-center">
-                  <Icon as={Weight} size="md" />
-                  <Text>Unit:</Text>
-                  <Text>{item.unit}</Text>
-                </HStack>
-              </HStack>
-              <MacrosDetailsBox
-                carbs={item.carbs}
-                fats={item.fat}
-                protein={item.protein}
-                unit={'Gr'}
-              />
-            </VStack>
-          </Card>
+              </VStack>
+            </Card>
+          )}
         </Pressable>
       </Animated.View>
+      <OptionsDrawer
+        showOptionDrawer={showOptionDrawer}
+        setShowOptionsDrawer={setShowOptionsDrawer}
+        disableEdit={false}
+        disableDelete={false}
+        onDetail={() => router.push(`/meals/my-meals/details/${item.id}`)}
+        onEdit={() => router.push(`/meals/my-meals/edit/${item.id}`)}
+        onDelete={() => setShowModal(true)}
+      />
       <DeletionModal
         title="Delete single meal"
         description="Are you sure you want to delete this meal? This action cannot be undone."

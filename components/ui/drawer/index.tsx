@@ -20,6 +20,7 @@ const SCOPE = 'MODAL';
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const sizes: { [key: string]: number } = {
+  xs: 0.15,
   sm: 0.25,
   md: 0.5,
   lg: 0.75,
@@ -44,6 +45,7 @@ const drawerStyle = tva({
   base: 'w-full h-full web:pointer-events-none relative',
   variants: {
     size: {
+      xs: '',
       sm: '',
       md: '',
       lg: '',

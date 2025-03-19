@@ -4,7 +4,7 @@ import { Text } from '../ui/text';
 
 import { Icon, TrashIcon } from '../ui/icon';
 
-import { Button, ButtonText } from '../ui/button';
+import { Button, ButtonSpinner, ButtonText } from '../ui/button';
 
 import {
   Modal,
@@ -15,8 +15,7 @@ import {
   ModalHeader,
 } from '../ui/modal';
 import { Heading } from '../ui/heading';
-
-import { Spinner } from '../ui/spinner';
+import { Colors } from '@/utils/constants/Colors';
 
 interface DeletionModalProps {
   title: string;
@@ -70,8 +69,11 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
             <ButtonText>Cancel</ButtonText>
           </Button>
           <Button onPress={handleDelete} size="sm" className="flex-grow">
-            {isPending && <Spinner size="small" />}
-            <ButtonText>Delete</ButtonText>
+            {isPending ? (
+              <ButtonSpinner color={Colors.light.icon} />
+            ) : (
+              <ButtonText>Delete</ButtonText>
+            )}
           </Button>
         </ModalFooter>
       </ModalContent>
