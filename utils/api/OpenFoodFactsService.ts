@@ -64,13 +64,27 @@ export interface SearchParams {
 }
 
 /**
+ * Information about a product necessary for display in the scanner
+ */
+export interface ProductResult {
+  name: string;
+  image: ImageSourcePropType | null;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  brands?: string;
+  categories?: string;
+  nutriscore_grade?: string;
+}
+
+/**
  * Result of a barcode scan validation
  */
 export interface ScanResult {
   isValid: boolean;
   message: string;
-  product: Product | null;
-  meal: Meal | null;
+  productResult: ProductResult | null;
 }
 
 /**
@@ -127,8 +141,7 @@ class OpenFoodFactsService {
         return {
           isValid: false,
           message: 'Code-barres invalide ou vide',
-          product: null,
-          meal: null,
+          productResult: null,
         };
       }
 
@@ -137,20 +150,27 @@ class OpenFoodFactsService {
       if (!product) {
         return {
           isValid: false,
-          message: `Le produit avec le code-barres "${barcode}" n'a pas été trouvé dans la base de données Open Food Facts. Essayez un autre produit ou vérifiez que le code-barres est correct.`,
-          product: null,
-          meal: null,
+          message: `Le produit avec le code-barres "${barcode}" n'a pas été trouvé . Essayez un autre produit ou vérifiez que le code-barres est correct.`,
+          productResult: null,
         };
       }
 
-      // Convert product to meal format
-      const meal = this.convertProductToMeal(product);
+      // Convert product to productResult format
+      const productResult = this.convertProductToProductResult(product);
+      
+      // Check if productResult is null (this happens when all nutritional values are 0)
+      if (!productResult) {
+        return {
+          isValid: false,
+          message: `Le produit "${product.product_name || 'sans nom'}" (code-barres: ${barcode}) a été trouvé mais toutes les valeurs nutritionnelles sont à zéro. Essayez un autre produit.`,
+          productResult: null,
+        };
+      }
 
       return {
         isValid: true,
         message: 'Produit trouvé avec succès',
-        product,
-        meal,
+        productResult,
       };
     } catch (error) {
       console.error('Error during barcode scan:', error);
@@ -170,29 +190,36 @@ class OpenFoodFactsService {
       return {
         isValid: false,
         message: errorMessage,
-        product: null,
-        meal: null,
+        productResult: null,
       };
     }
   }
 
   /**
-   * Converts an Open Food Facts product to the app's meal format
+   * Converts an Open Food Facts product to a simplified object with product information
    * @param product The product from Open Food Facts
-   * @returns A meal object compatible with the app
+   * @returns A simplified object with product information or null if product is invalid
    */
-  convertProductToMeal(product: Product): Meal {
+  convertProductToProductResult(product: Product): ProductResult | null {
+    // Return null if product is null
+    if (!product) {
+      return null;
+    }
+
     // Calculate nutrition values, defaulting to 0 if not available
     const calories = Math.round(product.nutriments?.energy_100g || 0);
     const proteins = Math.round(product.nutriments?.proteins_100g || 0);
     const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
     const fats = Math.round(product.nutriments?.fat_100g || 0);
+    
+    // Return null if ALL nutrition values are 0
+    if (calories === 0 && proteins === 0 && carbs === 0 && fats === 0) {
+      console.log('All nutrition values are 0 for product:', product.code);
+      return null;
+    }
 
     // Get product image URL
-    let productImage: ImageSourcePropType | null = null;
-
-    // Default image as fallback
-    const defaultImage: ImageSourcePropType = require('@/assets/images/seed/kouskousi.jpg');
+    let productImage: ImageSourcePropType | null = require('../../assets/images/image-non-disponible.jpg');
 
     // Check for product images in priority order
     if (product.image_url) {
@@ -201,39 +228,20 @@ class OpenFoodFactsService {
       productImage = { uri: product.image_front_url };
     } else if (product.image_small_url) {
       productImage = { uri: product.image_small_url };
-    } else {
-      productImage = defaultImage;
     }
 
-    // Create ingredient from product
-    const ingredient: Ingredients = {
-      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
+    // Return a simplified object with product information
+    return {
       name: product.product_name || 'Produit sans nom',
+      image: productImage,
       calories: calories,
       protein: proteins,
       carbs: carbs,
       fats: fats,
-      quantity: 1,
-      unit: 'portion',
+      brands: product.brands,
+      categories: product.categories,
+      nutriscore_grade: product.nutriscore_grade,
     };
-
-    // Generate a meal object compatible with the app's structure
-    const meal: Meal = {
-      id: parseInt(product.code) || Math.floor(Math.random() * 100000),
-      name: product.product_name || 'Produit sans nom',
-      image: productImage, // Use product image URL or default
-      type: MealTypeEnum.SNACK, // Default type, can be changed by user
-      calories: calories,
-      protein: proteins,
-      carbs: carbs,
-      fats: fats,
-      cuisineType: CuisineTypeEnum.GENERAL,
-      unit: MealUnitEnum.SERVING,
-      quantity: 1,
-      ingredients: [ingredient],
-    };
-
-    return meal;
   }
 
   /**
