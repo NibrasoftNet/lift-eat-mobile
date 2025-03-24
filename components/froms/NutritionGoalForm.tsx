@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -33,17 +33,24 @@ import {
   nutritionGoalSchema,
   NutritionGoalSchemaFormData,
 } from '@/utils/validation/plan/nutrition-goal.validation';
+import { createPlan } from '@/utils/services/plan.service';
+import { usePlanStore } from '@/utils/store/planStore';
 
 export default function NutritionGoalForm({
   defaultValues,
   operation,
+  userId,
 }: {
   defaultValues: NutritionGoalDefaultValueProps;
   operation: 'create' | 'update';
+  userId: number;
 }) {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
+  
+  // Utiliser le store Zustand pour les plans
+  const resetPlanStore = usePlanStore((state) => state.resetPlanStore);
 
   const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
 
@@ -65,18 +72,27 @@ export default function NutritionGoalForm({
     setValue('goalUnit', unit);
   };
 
-  /* const { mutateAsync, isPending } = useMutation({
+  // Mutation pour créer un plan nutritionnel
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: NutritionGoalSchemaFormData) => {
-      return await updateUser(drizzleDb, defaultValues.id, data);
+      return await createPlan(drizzleDb, data, userId);
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+    onSuccess: async (planId) => {
+      await queryClient.invalidateQueries({ queryKey: ['my-plans'] });
+      resetPlanStore(); // Réinitialiser le store après la création
+
+      // Rediriger vers la page de détails du plan
+      router.push({
+        pathname: '/(root)/(tabs)/plans/my-plans/details/[id]',
+        params: { id: planId.toString() }
+      });
     },
-  });*/
+  });
 
   const onSubmit = async (data: NutritionGoalSchemaFormData) => {
     try {
-      // const updatedUser = await mutateAsync(data);
+      const planId = await mutateAsync(data);
+      
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -85,8 +101,8 @@ export default function NutritionGoalForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success update profile"
+              title="Plan Created"
+              description="Your nutrition plan has been created successfully!"
             />
           );
         },
@@ -294,9 +310,14 @@ export default function NutritionGoalForm({
           <ButtonText>Cancel</ButtonText>
         </Button>
         {/* Submit Button */}
-        <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
-          <ButtonSpinner color={Colors.light.icon} />
-          <ButtonText>Create</ButtonText>
+        <Button 
+          className="w-2/5" 
+          size="sm" 
+          onPress={handleSubmit(onSubmit)}
+          isDisabled={isPending}
+        >
+          {isPending && <ButtonSpinner color={Colors.light.icon} />}
+          <ButtonText>{operation === 'create' ? 'Create' : 'Update'}</ButtonText>
         </Button>
       </HStack>
     </VStack>

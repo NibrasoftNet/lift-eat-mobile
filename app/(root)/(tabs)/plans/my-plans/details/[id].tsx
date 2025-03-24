@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ImageBackground, ScrollView } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -14,17 +14,18 @@ import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
 import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { getPlanDetails } from '@/utils/services/plan.service';
+import { getPlanDetails, addMealToDailyPlan } from '@/utils/services/plan.service';
 import { Icon } from '@/components/ui/icon';
 import {
   ChevronLeft,
   ChevronRight,
   CircleChevronLeft,
+  Plus,
 } from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
 import PlanMealCard from '@/components/cards/PlanMealCard';
@@ -33,12 +34,15 @@ import NutritionBox from '@/components/boxes/NutritionBox';
 export default function PlanDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const drizzleDb = useDrizzleDb();
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const daysOfWeek = Object.values(DayEnum);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<
     MealOrmProps[] | undefined
   >([]);
+  const [selectedDailyPlanId, setSelectedDailyPlanId] = useState<number | null>(null);
 
   const {
     data: singlePlan,
@@ -59,6 +63,7 @@ export default function PlanDetailsScreen() {
           dailyPlan.day === selectedDay && dailyPlan.week === selectedWeek,
       );
       setFilteredDailyMeals(filteredPlans?.meals);
+      setSelectedDailyPlanId(filteredPlans?.id || null);
     }
   }, [selectedDay, selectedWeek, singlePlan]);
 
@@ -96,6 +101,21 @@ export default function PlanDetailsScreen() {
     if (dailyPlan) {
       // Navigate to the daily plan details or display them in a modal
       console.log('Selected Daily Plan:', dailyPlan);
+    }
+  };
+
+  const handleAddMeals = () => {
+    if (selectedDailyPlanId) {
+      // Naviguer vers le sélecteur de repas avec les paramètres nécessaires
+      router.push({
+        pathname: '/(root)/(tabs)/meals/my-meals/selector',
+        params: { 
+          dailyPlanId: selectedDailyPlanId.toString(),
+          planId: id,
+          day: selectedDay,
+          week: selectedWeek.toString()
+        }
+      });
     }
   };
 
@@ -206,6 +226,14 @@ export default function PlanDetailsScreen() {
               </Text>
             )}
           </Animated.View>
+          {/* Bouton pour ajouter des repas */}
+          <Button 
+            className="mt-4 bg-primary-500 self-end mr-4" 
+            onPress={handleAddMeals}
+          >
+            <ButtonIcon as={Plus} />
+            <ButtonText>Add Meals</ButtonText>
+          </Button>
         </Box>
       </ScrollView>
     </QueryStateHandler>

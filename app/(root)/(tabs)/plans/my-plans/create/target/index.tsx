@@ -45,6 +45,7 @@ export default function CreateNutritionTarget() {
       <NutritionGoalForm
         defaultValues={nutritionGoalDefaultValueProps}
         operation="create"
+        userId={actualUser?.id || 0}
       />
     </QueryStateHandler>
   );
