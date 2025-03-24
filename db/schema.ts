@@ -33,12 +33,26 @@ import {
   DayUnitArray,
   PlanGeneratedWithArray,
   PlanGeneratedWithEnum,
+  ProviderEnum,
+  RoleEnum,
 } from '@/utils/enum/general.enum';
+import { sql } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().default('John'),
   email: text('email').notNull().unique(),
+  provider: text('provider', {
+    enum: [ProviderEnum.email, ProviderEnum.oauth_google],
+  })
+    .notNull()
+    .default(ProviderEnum.email),
+  role: text('role', { enum: [RoleEnum.USER, RoleEnum.USER] })
+    .notNull()
+    .default(RoleEnum.USER),
+  age: integer('age').notNull().default(20),
   gender: text('gender', { enum: GenderTypeArray })
     .notNull()
     .default(GenderEnum.MALE),
@@ -65,6 +79,8 @@ export const users = sqliteTable('users', {
 
 // Ingredient Standard Table
 export const ingredientsStandard = sqliteTable('ingredients_standard', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().default('felfel'),
   unit: text('unit', {
@@ -80,6 +96,8 @@ export const ingredientsStandard = sqliteTable('ingredients_standard', {
 
 // Ingredients Table (Each ingredient belongs to only ONE meal)
 export const mealIngredients = sqliteTable('meal_ingredients', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   quantity: real('quantity').notNull().default(1),
   calories: real('calories').notNull().default(17),
@@ -98,6 +116,8 @@ export const mealIngredients = sqliteTable('meal_ingredients', {
 
 // Meals table (independent meal)
 export const meals = sqliteTable('meals', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   type: text('type', {
     enum: MealTypeArray,
@@ -130,6 +150,8 @@ export const meals = sqliteTable('meals', {
 
 // Daily Plans table (independent plans)
 export const dailyPlan = sqliteTable('daily_plan', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   week: integer('week').notNull().default(1),
   calories: real('calories').notNull().default(17),
@@ -154,6 +176,8 @@ export const dailyPlan = sqliteTable('daily_plan', {
 
 // Junction Table for Many-to-Many Relationship between dailyPlan and meals
 export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   // Foreign key to dailyPlan table
   dailyPlanId: integer('daily_plan_id')
@@ -168,6 +192,8 @@ export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
 
 // Plan Table
 export const plan = sqliteTable('plan', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }), // Custom ID like 'plan-001'
   name: text('name').notNull().default('PlanB'),
   goal: text('goal', {

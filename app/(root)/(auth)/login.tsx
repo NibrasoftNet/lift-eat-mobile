@@ -104,15 +104,15 @@ export default function Login() {
       <ImageBackground
         source={login_background}
         className="size-full object-cover"
-        blurRadius={5}
+        blurRadius={100}
       >
-        <VStack className="size-full p-4 items-center justify-center gap-4">
+        <VStack className="size-full p-4 items-center justify-center gap-2">
           <Image
             source={app_logo}
-            className="h-48 w-48 object-contain mb-5 rounded-xl"
+            className="h-48 w-48 object-contain rounded-xl"
             style={{ alignSelf: 'center' }}
           />
-          <Card className="flex w-full bg-transparent items-center justify-center gap-4">
+          <Card className="flex w-full bg-transparent items-center justify-center">
             <Text className="text-center text-4xl font-bold  text-white">
               Login
             </Text>
@@ -120,7 +120,7 @@ export default function Login() {
               Login to your account
             </Text>
           </Card>
-          <Card className="w-full bg-transparent rounded-2xl border border-white pb-6 gap-4">
+          <Card className="w-full bg-transparent gap-2">
             <FormControl isInvalid={!!errors.email}>
               <FormControlLabel>
                 <FormControlLabelText className="text-white">
@@ -199,12 +199,14 @@ export default function Login() {
             </HStack>
           </Card>
           <Button
-            className="w-full h-12  justify-center items-center my-4"
-            size="sm"
+            className="w-full justify-center items-center"
             onPress={handleSubmit(onSubmit)}
           >
-            {isPending && <ButtonSpinner color={Colors.light.icon} />}
-            <ButtonText>Submit</ButtonText>
+            {isPending ? (
+              <ButtonSpinner color={Colors.light.icon} />
+            ) : (
+              <ButtonText>Login</ButtonText>
+            )}
           </Button>
 
           <Text className="text-white text-lg font-semibold">

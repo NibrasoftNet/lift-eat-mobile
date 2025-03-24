@@ -37,7 +37,7 @@ cssInterop(PrimitiveIcon, {
 });
 
 const buttonStyle = tva({
-  base: 'group/button rounded bg-primary-500 flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2',
+  base: 'group/button rounded-2xl bg-primary-500 flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2',
   variants: {
     action: {
       primary:
@@ -60,10 +60,10 @@ const buttonStyle = tva({
 
     size: {
       xs: 'px-3.5 h-8',
-      sm: 'px-4 h-9',
-      md: 'px-5 h-10',
-      lg: 'px-6 h-11',
-      xl: 'px-7 h-12',
+      sm: 'px-4 h-12',
+      md: 'px-5 h-14',
+      lg: 'px-6 h-16',
+      xl: 'px-7 h-18',
     },
   },
   compoundVariants: [
@@ -119,7 +119,7 @@ const buttonStyle = tva({
 });
 
 const buttonTextStyle = tva({
-  base: 'text-typography-0 font-semibold web:select-none',
+  base: 'text-typography-0 font-semibold web:select-none text-xl',
   parentVariants: {
     action: {
       primary:
@@ -140,7 +140,7 @@ const buttonTextStyle = tva({
     size: {
       xs: 'text-xs',
       sm: 'text-sm',
-      md: 'text-base',
+      md: 'text-xl',
       lg: 'text-lg',
       xl: 'text-xl',
     },

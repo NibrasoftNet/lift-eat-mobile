@@ -218,8 +218,11 @@ export default function NewPassword() {
           </Button>
           {/* Submit Button */}
           <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
-            {isPending && <ButtonSpinner color={Colors.light.icon} />}
-            <ButtonText>Update</ButtonText>
+            {isPending ? (
+              <ButtonSpinner color={Colors.light.icon} />
+            ) : (
+              <ButtonText>Update</ButtonText>
+            )}
           </Button>
         </HStack>
       </VStack>

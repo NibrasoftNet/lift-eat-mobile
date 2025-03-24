@@ -127,7 +127,6 @@ export default function UserProfileForm({
 
   return (
     <VStack space="md" className="w-full justify-between mt-2">
-
       <Card className="w-full bg-transparent pb-6 gap-4">
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>
@@ -210,8 +209,11 @@ export default function UserProfileForm({
       </Card>
       {/* Submit Button */}
       <Button onPress={handleSubmit(onSubmit)} className="rounded-md">
-        {isPending && <ButtonSpinner color={Colors.light.icon} />}
-        <ButtonText>Update</ButtonText>
+        {isPending ? (
+          <ButtonSpinner color={Colors.light.icon} />
+        ) : (
+          <ButtonText>Update</ButtonText>
+        )}
       </Button>
 
       {/* Actionsheet for selecting image source */}
@@ -225,20 +227,24 @@ export default function UserProfileForm({
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
           {/* Horizontal layout with icons */}
-          <HStack className='w-full justify-around mt-4'>
+          <HStack className="w-full justify-around mt-4">
             <Pressable
               onPress={() => handleImageSelection('camera')}
-              className='border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2'
+              className="border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2"
             >
               <Icon as={Camera} className="w-16 h-16" />
-              <ActionsheetItemText className='text-lg font-semibold'>Camera</ActionsheetItemText>
+              <ActionsheetItemText className="text-lg font-semibold">
+                Camera
+              </ActionsheetItemText>
             </Pressable>
             <Pressable
               onPress={() => handleImageSelection('gallery')}
-              className='border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2'
+              className="border rounded-md flex flex-col items-center justify-center w-44 h-44 gap-2"
             >
               <Icon as={Images} className="w-16 h-16" />
-              <ActionsheetItemText className='text-lg font-semibold'>Gallery</ActionsheetItemText>
+              <ActionsheetItemText className="text-lg font-semibold">
+                Gallery
+              </ActionsheetItemText>
             </Pressable>
           </HStack>
         </ActionsheetContent>

@@ -150,7 +150,7 @@ export default function PlanDetailsScreen() {
 
             {/* Animated Week Number */}
             <Box className="flex flex-row items-center justify-center">
-              <Text className="text-2xl font-bold text-blue-500">Week-</Text>
+              <Text className="text-2xl font-bold text-primary-500">Week-</Text>
               <Animated.Text
                 className="text-xl font-bold text-blue-500"
                 style={[animatedWeekStyle]}
@@ -187,7 +187,7 @@ export default function PlanDetailsScreen() {
             entering={FadeInUp.delay(300)}
             className="flex-1 gap-2"
           >
-            <Box className="flex w-full rounded-lg bg-gray-300 shodow-xl p-4">
+            <Box className="flex w-full rounded-lg bg-blue-600 shodow-xl p-4">
               <Text className="text-lg text-black font-semibold">
                 Daily Meal Plans
               </Text>
