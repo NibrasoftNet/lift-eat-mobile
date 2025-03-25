@@ -65,7 +65,7 @@ async function prepareUserWithImages() {
         return {
           ...user,
           profileImage:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
       return user;
@@ -85,7 +85,7 @@ async function prepareIngredientStandardWithImages() {
         return {
           ...ingStandard,
           image:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
       return ingStandard;
@@ -104,7 +104,7 @@ async function prepareMealsWithImages() {
         return {
           ...meal,
           image:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer<ArrayBufferLike>,
+            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
       return meal;

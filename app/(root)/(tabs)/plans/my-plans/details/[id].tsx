@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ImageBackground, ScrollView } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -11,34 +11,43 @@ import Animated, {
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
+import { VStack } from '@/components/ui/vstack';
 import { Pressable } from '@/components/ui/pressable';
 import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { getPlanDetails } from '@/utils/services/plan.service';
+import { getPlanDetails, addMealToDailyPlan } from '@/utils/services/plan.service';
 import { Icon } from '@/components/ui/icon';
 import {
   ChevronLeft,
   ChevronRight,
   CircleChevronLeft,
+  Plus,
 } from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
 import PlanMealCard from '@/components/cards/PlanMealCard';
 import NutritionBox from '@/components/boxes/NutritionBox';
+import MealsDrawer from '@/components/drawers/MealsDrawer';
+import MacrosDetailsBox from '@/components/boxes/MacrosDetailsBox';
 
 export default function PlanDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const drizzleDb = useDrizzleDb();
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const daysOfWeek = Object.values(DayEnum);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<
     MealOrmProps[] | undefined
   >([]);
+  const [selectedDailyPlanId, setSelectedDailyPlanId] = useState<number | null>(null);
+  // État pour contrôler l'affichage du drawer
+  const [showMealsDrawer, setShowMealsDrawer] = useState<boolean>(false);
 
   const {
     data: singlePlan,
@@ -59,6 +68,7 @@ export default function PlanDetailsScreen() {
           dailyPlan.day === selectedDay && dailyPlan.week === selectedWeek,
       );
       setFilteredDailyMeals(filteredPlans?.meals);
+      setSelectedDailyPlanId(filteredPlans?.id || null);
     }
   }, [selectedDay, selectedWeek, singlePlan]);
 
@@ -99,6 +109,29 @@ export default function PlanDetailsScreen() {
     }
   };
 
+  const handleAddMeals = () => {
+    if (selectedDailyPlanId) {
+      // Au lieu de naviguer vers un autre écran, montrer le drawer des repas
+      setShowMealsDrawer(true);
+    }
+  };
+
+  const handleMealsAdded = async () => {
+    // Rafraîchir les données après l'ajout de repas
+    await queryClient.invalidateQueries({ queryKey: [`plan-${id}`] });
+  };
+
+  // Fonction pour ajouter un repas au plan journalier
+  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number) => {
+    try {
+      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId);
+      return true;
+    } catch (error) {
+      console.error("Error adding meal to plan:", error);
+      return false;
+    }
+  };
+
   return (
     <QueryStateHandler<PlanWithDailyPlansAndMealsOrmProps>
       data={singlePlan}
@@ -127,14 +160,43 @@ export default function PlanDetailsScreen() {
                     />
                   </Pressable>
                 </Link>
-                <NutritionBox
-                  title="Colories"
-                  value={singlePlan?.calories!}
-                  unit="Kcal"
-                  className="w-24"
-                  titleClassName="bg-red-500"
-                  valueClassName="bg-red-300"
-                />
+                <VStack space="sm" className="items-end">
+                  <Text className="text-white font-bold text-lg">Nutrition Totale</Text>
+                  <HStack space="sm">
+                    <NutritionBox
+                      title="Cal"
+                      value={singlePlan?.calories!}
+                      unit="Kcal"
+                      className="w-20 h-12"
+                      titleClassName="bg-red-500"
+                      valueClassName="bg-red-300"
+                    />
+                    <NutritionBox
+                      title="Carbs"
+                      value={singlePlan?.carbs!}
+                      unit="g"
+                      className="w-20 h-12"
+                      titleClassName="bg-amber-500"
+                      valueClassName="bg-amber-300"
+                    />
+                    <NutritionBox
+                      title="Fats"
+                      value={singlePlan?.fat!}
+                      unit="g"
+                      className="w-20 h-12"
+                      titleClassName="bg-green-500"
+                      valueClassName="bg-green-300"
+                    />
+                    <NutritionBox
+                      title="Prot"
+                      value={singlePlan?.protein!}
+                      unit="g"
+                      className="w-20 h-12"
+                      titleClassName="bg-blue-500"
+                      valueClassName="bg-blue-300"
+                    />
+                  </HStack>
+                </VStack>
               </HStack>
             </ImageBackground>
           </Animated.View>
@@ -193,6 +255,42 @@ export default function PlanDetailsScreen() {
               </Text>
             </Box>
 
+            {/* Carte des valeurs nutritionnelles du jour sélectionné */}
+            {singlePlan?.dailyPlans.find(dp => dp.day === selectedDay && dp.week === selectedWeek) && (
+              <Animated.View
+                entering={FadeInDown.delay(150)}
+                className="bg-white rounded-xl shadow-md p-3 mb-4"
+              >
+                <Text className="text-primary-600 font-bold text-md mb-2">
+                  Valeurs nutritionnelles du jour
+                </Text>
+                {(() => {
+                  const selectedDailyPlan = singlePlan.dailyPlans.find(dp => dp.day === selectedDay && dp.week === selectedWeek);
+                  const fatValue = selectedDailyPlan?.fat || 0;
+                  return (
+                    <>
+                      <MacrosDetailsBox
+                        carbs={selectedDailyPlan?.carbs || 0}
+                        fats={parseFloat(fatValue.toFixed(1))}
+                        protein={selectedDailyPlan?.protein || 0}
+                        unit="g"
+                      />
+                      <HStack className="justify-center mt-2">
+                        <NutritionBox
+                          title="Cal"
+                          value={selectedDailyPlan?.calories || 0}
+                          unit="KCal"
+                          className="w-32"
+                          titleClassName="bg-red-500"
+                          valueClassName="bg-red-300"
+                        />
+                      </HStack>
+                    </>
+                  );
+                })()}
+              </Animated.View>
+            )}
+
             {filteredDailyMeals && filteredDailyMeals.length > 0 ? (
               <FlashList
                 data={filteredDailyMeals}
@@ -206,8 +304,29 @@ export default function PlanDetailsScreen() {
               </Text>
             )}
           </Animated.View>
+          {/* Bouton pour ajouter des repas */}
+          <Button 
+            className="mt-4 bg-primary-500 self-end mr-4" 
+            onPress={handleAddMeals}
+          >
+            <ButtonIcon as={Plus} />
+            <ButtonText>Add Meals</ButtonText>
+          </Button>
         </Box>
       </ScrollView>
+
+      {/* Composant Drawer pour ajouter des repas */}
+      {selectedDailyPlanId && (
+        <MealsDrawer
+          showMealsDrawer={showMealsDrawer}
+          setShowMealsDrawer={setShowMealsDrawer}
+          dailyPlanId={selectedDailyPlanId}
+          planId={parseInt(id)}
+          onMealsAdded={handleMealsAdded}
+          drizzleDb={drizzleDb}
+          onAddMealToPlan={handleAddMealToPlan}
+        />
+      )}
     </QueryStateHandler>
   );
 }

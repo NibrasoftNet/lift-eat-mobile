@@ -32,6 +32,8 @@ export const createNewMeal = async (
       protein: totalMacros.totalProtein,
       creatorId: creatorId,
       image: data.image ?? null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     const insertedMeal = await drizzleDb
       .insert(meals)
@@ -51,6 +53,8 @@ export const createNewMeal = async (
         carbs: ingredient.carbs,
         fat: ingredient.fat,
         protein: ingredient.protein,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }));
 
     await drizzleDb.insert(mealIngredients).values(mealIngredientsData);
@@ -186,6 +190,8 @@ export const updateMeal = async (
         carbs: ingredient.carbs,
         fat: ingredient.fat,
         protein: ingredient.protein,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }));
 
     await drizzleDb.insert(mealIngredients).values(mealIngredientsData);
