@@ -71,8 +71,7 @@ export default function Scanner() {
       setScanResult({
         isValid: false,
         message: "Une erreur s'est produite lors de la vérification du produit",
-        product: null,
-        meal: null,
+        productResult: null,
       });
       setShowErrorSheet(true);
     } finally {
@@ -103,12 +102,12 @@ export default function Scanner() {
 
   // Render product details when found
   const renderProductDetails = () => {
-    if (!scanResult?.meal) return null;
+    if (!scanResult?.productResult) return null;
 
-    const meal = scanResult.meal;
+    const product = scanResult.productResult;
     // Ensure we always have a valid image source
     const imageSource: ImageSourcePropType =
-      meal.image || require('@/assets/images/seed/kouskousi.jpg');
+      product.image || require('@/assets/images/image-non-disponible.jpg');
 
     return (
       <View className="flex-1">
@@ -119,7 +118,7 @@ export default function Scanner() {
             className="w-full h-full absolute"
             resizeMode="cover"
             blurRadius={25}
-            alt={`${meal.name} background`}
+            alt={`${product.name} background`}
           />
           <BlurView intensity={100} className="absolute w-full h-full" />
         </View>
@@ -132,16 +131,16 @@ export default function Scanner() {
                 source={imageSource}
                 className="w-full h-48"
                 resizeMode="cover"
-                alt={meal.name}
+                alt={product.name}
               />
               <Box className="p-4">
                 <VStack space="xs">
                   <Text className="text-2xl font-bold text-gray-900">
-                    {meal.name}
+                    {product.name}
                   </Text>
-                  {scanResult.product?.brands && (
+                  {product.brands && (
                     <Text className="text-sm text-gray-500">
-                      {scanResult.product.brands}
+                      {product.brands}
                     </Text>
                   )}
                 </VStack>
@@ -156,80 +155,48 @@ export default function Scanner() {
               <HStack className="justify-between">
                 <Box className="items-center bg-gray-200 rounded-lg p-3 flex-1">
                   <Text className="text-2xl font-bold text-gray-800">
-                    {meal.calories}
+                    {product.calories}
                   </Text>
                   <Text className="text-sm text-gray-600">Calories</Text>
                 </Box>
                 <Box className="items-center bg-blue-100 rounded-lg p-3 flex-1 ml-2">
                   <Text className="text-2xl font-bold text-blue-600">
-                    {meal.protein}g
+                    {product.protein}g
                   </Text>
                   <Text className="text-sm text-blue-600">Protéines</Text>
                 </Box>
                 <Box className="items-center bg-green-100 rounded-lg p-3 flex-1 ml-2">
                   <Text className="text-2xl font-bold text-green-600">
-                    {meal.carbs}g
+                    {product.carbs}g
                   </Text>
                   <Text className="text-sm text-green-600">Carbs</Text>
                 </Box>
                 <Box className="items-center bg-orange-100 rounded-lg p-3 flex-1 ml-2">
                   <Text className="text-2xl font-bold text-orange-600">
-                    {meal.fats}g
+                    {product.fats}g
                   </Text>
                   <Text className="text-sm text-orange-600">Fats</Text>
                 </Box>
               </HStack>
             </Card>
 
-            {/* Ingredients */}
-            {meal.ingredients && meal.ingredients.length > 0 && (
-              <Card className="p-4 bg-white/80 backdrop-blur-md">
-                <Text className="text-lg font-semibold mb-4 text-gray-900">
-                  Ingrédients
-                </Text>
-                <VStack space="sm" className="bg-gray-50/90 rounded-lg p-2">
-                  {meal.ingredients.map((ingredient, index) => (
-                    <Fragment key={ingredient.id}>
-                      {index > 0 && <Divider className="bg-gray-200" />}
-                      <HStack className="justify-between items-center py-2 px-3">
-                        <VStack>
-                          <Text className="font-medium text-gray-900">
-                            {ingredient.name}
-                          </Text>
-                          <HStack space="sm" className="items-center">
-                            <Text className="text-sm text-gray-500">
-                              {ingredient.quantity} {ingredient.unit}
-                            </Text>
-                            <Text className="text-gray-400">•</Text>
-                            <Text className="text-sm text-gray-500">
-                              {ingredient.calories} kcal
-                            </Text>
-                          </HStack>
-                        </VStack>
-                      </HStack>
-                    </Fragment>
-                  ))}
-                </VStack>
-              </Card>
-            )}
-
             {/* Additional product info */}
-            {scanResult.product?.categories && (
+            {product.categories && (
               <Card className="p-4 bg-white/80 backdrop-blur-md">
                 <Text className="text-lg font-semibold mb-2 text-gray-900">
                   Informations additionnelles
                 </Text>
                 <VStack space="xs">
-                  {scanResult.product.categories && (
+                  {product.categories && (
                     <Text className="text-sm text-gray-700">
                       <Text className="font-bold">Categories:</Text>{' '}
-                      {scanResult.product.categories}
+                      {product.categories}
                     </Text>
                   )}
-                  {scanResult.product.nutriscore_grade && (
+                  {product.nutriscore_grade && (
                     <Text className="text-sm text-gray-700">
                       <Text className="font-bold">Nutriscore:</Text>{' '}
-                      {scanResult.product.nutriscore_grade.toUpperCase()}
+                      {product.nutriscore_grade.toUpperCase()}
                     </Text>
                   )}
                 </VStack>
@@ -317,7 +284,7 @@ export default function Scanner() {
             </Text>
             <Text className="text-base text-red-600 text-center">
               {scanResult?.message ||
-                "Le produit n'a pas été trouvé dans la base de données Open Food Facts."}
+                "Le produit n'a pas été trouvé ."}
             </Text>
             <ActionsheetItem
               className="bg-red-500 rounded-lg mt-2"
