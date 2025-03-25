@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import {
   ScrollView,
@@ -20,7 +20,6 @@ import {
   CircleChevronLeft,
   Search as SearchIcon,
   UtensilsCrossedIcon,
-  Info,
 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import {
@@ -29,19 +28,28 @@ import {
   AvatarImage,
 } from '@/components/ui/avatar';
 import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
-import OpenFoodFactsService, { Product, ProductResult, SearchParams } from '@/utils/api/OpenFoodFactsService';
+import OpenFoodFactsService, {
+  ProductResult,
+  SearchParams,
+} from '@/utils/api/OpenFoodFactsService';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { cuisineOptions } from '@/utils/constants/constant';
+import { FlashList } from '@shopify/flash-list';
+import OpenFoodSearchCard from '@/components/cards/OpenFoodSearchCard';
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<ProductResult[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<ProductResult | null>(null);
-  const [selectedCuisine, setSelectedCuisine] = useState<CuisineTypeEnum | undefined>(undefined);
+  const [selectedProduct, setSelectedProduct] = useState<ProductResult | null>(
+    null,
+  );
+  const [selectedCuisine, setSelectedCuisine] = useState<
+    CuisineTypeEnum | undefined
+  >(undefined);
   const router = useRouter();
   const toast = useToast();
 
@@ -68,9 +76,10 @@ export default function Search() {
         const cuisineTag = selectedCuisine.toLowerCase();
         params = { ...params, tag: cuisineTag };
       }
-      
+
       console.log('Search params:', params);
-      const results = await OpenFoodFactsService.searchProductsWithResults(params);
+      const results =
+        await OpenFoodFactsService.searchProductsWithResults(params);
       console.log(`Got ${results.length} results back from service`);
 
       if (results && results.length > 0) {
@@ -84,8 +93,8 @@ export default function Search() {
               <MultiPurposeToast
                 id={toastId}
                 color={ToastTypeEnum.INFOS}
-                title='Aucun résultat'
-                description='Aucun produit trouvé avec ce terme de recherche'
+                title="Aucun résultat"
+                description="Aucun produit trouvé avec ce terme de recherche"
               />
             );
           },
@@ -101,8 +110,8 @@ export default function Search() {
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title='Erreur de recherche'
-              description='Une erreur est survenue lors de la recherche'
+              title="Erreur de recherche"
+              description="Une erreur est survenue lors de la recherche"
             />
           );
         },
@@ -114,7 +123,7 @@ export default function Search() {
 
   const handleCuisineSelect = (cuisine: CuisineTypeEnum | undefined) => {
     setSelectedCuisine(cuisine);
-    console.log("Cuisine sélectionnée:", cuisine);
+    console.log('Cuisine sélectionnée:', cuisine);
     // Si une recherche a déjà été effectuée, relancer avec le nouveau filtre
     if (searchQuery.trim()) {
       handleSearch();
@@ -130,7 +139,7 @@ export default function Search() {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
@@ -166,7 +175,10 @@ export default function Search() {
                     <ButtonText className="text-black">All</ButtonText>
                   </Button>
                   {cuisineOptions.map((cuisineType) => (
-                    <VStack key={cuisineType.name} className="w-16 h-20 items-center">
+                    <VStack
+                      key={cuisineType.name}
+                      className="w-16 h-20 items-center"
+                    >
                       <Button
                         onPress={() => handleCuisineSelect(cuisineType.name)}
                         className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
@@ -181,16 +193,24 @@ export default function Search() {
                           style={{ alignSelf: 'center' }}
                         />
                       </Button>
-                      <Text className="text-sm capitalize">{cuisineType.name}</Text>
+                      <Text className="text-sm capitalize">
+                        {cuisineType.name}
+                      </Text>
                     </VStack>
                   ))}
                 </>
               </ScrollView>
             </Box>
-            <Divider orientation="horizontal" className={`w-full h-0.5 bg-gray-100`} />
-            
+            <Divider
+              orientation="horizontal"
+              className={`w-full h-0.5 bg-gray-100`}
+            />
+
             {/* Champ de recherche */}
-            <Input variant="outline" className="bg-white/90 rounded-xl h-12 p-2">
+            <Input
+              variant="outline"
+              className="bg-white/90 rounded-xl h-12 p-2"
+            >
               <InputIcon as={SearchIcon} className="text-gray-400" />
               <InputField
                 placeholder="Rechercher un produit..."
@@ -199,8 +219,12 @@ export default function Search() {
                 onSubmitEditing={handleSearch}
               />
             </Input>
-            
-            <Button onPress={handleSearch} disabled={isLoading} className="mb-2">
+
+            <Button
+              onPress={handleSearch}
+              disabled={isLoading}
+              className="mb-2"
+            >
               <ButtonText>Rechercher</ButtonText>
               <ButtonIcon as={SearchIcon} className="ml-2" />
             </Button>
@@ -211,63 +235,19 @@ export default function Search() {
                 <Text className="mt-2">Recherche en cours...</Text>
               </Box>
             ) : (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                  gap: 10,
-                  paddingBottom: 20,
-                }}
-              >
-                {searchResults.map((product, index) => (
-                  <Pressable key={index} onPress={() => handleSelectProduct(product)}>
-                    <Card className="p-3">
-                      <HStack space="sm" className="items-center">
-                        <Avatar size="md">
-                          {product.image ? (
-                            <AvatarImage
-                              source={product.image}
-                              className="w-full h-full"
-                            />
-                          ) : (
-                            <AvatarFallbackText>{product.name.slice(0, 2).toUpperCase()}</AvatarFallbackText>
-                          )}
-                        </Avatar>
-                        <VStack className="flex-1">
-                          <Text className="font-semibold">{product.name}</Text>
-                          <Text className="text-xs text-gray-600">
-                            {product.brands || 'Marque inconnue'} • {product.categories || 'Catégorie inconnue'}
-                          </Text>
-                        </VStack>
-                      </HStack>
-                      <Divider orientation="horizontal" className="w-full h-0.5 bg-gray-100 my-2" />
-                      <HStack className="justify-between">
-                        <Box className="bg-red-100 px-3 py-1 rounded-full">
-                          <Text className="text-xs font-semibold text-red-700">
-                            Calories {product.calories || 0} KCal
-                          </Text>
-                        </Box>
-                        <HStack space="md">
-                          <Box className="bg-yellow-100 px-3 py-1 rounded-full">
-                            <Text className="text-xs font-semibold text-yellow-700">
-                              Carbs {product.carbs || 0} g
-                            </Text>
-                          </Box>
-                          <Box className="bg-green-100 px-3 py-1 rounded-full">
-                            <Text className="text-xs font-semibold text-green-700">
-                              Fats {product.fats || 0} g
-                            </Text>
-                          </Box>
-                          <Box className="bg-blue-100 px-3 py-1 rounded-full">
-                            <Text className="text-xs font-semibold text-blue-700">
-                              Protein {product.protein || 0} g
-                            </Text>
-                          </Box>
-                        </HStack>
-                      </HStack>
-                    </Card>
-                  </Pressable>
-                ))}
-              </ScrollView>
+              <FlashList
+                data={searchResults}
+                renderItem={({ item, index }) => (
+                  <OpenFoodSearchCard
+                    product={item}
+                    handleSelectProduct={() => handleSelectProduct(item)}
+                    index={index}
+                  />
+                )}
+                keyExtractor={(item, index) => String(index)}
+                estimatedItemSize={200}
+                contentContainerStyle={{ padding: 16 }}
+              />
             )}
           </>
         ) : (
@@ -278,7 +258,11 @@ export default function Search() {
               paddingBottom: 20,
             }}
           >
-            <Button variant="outline" onPress={handleBackToResults} className="self-start mb-2">
+            <Button
+              variant="outline"
+              onPress={handleBackToResults}
+              className="self-start mb-2"
+            >
               <ButtonText>Retour aux résultats</ButtonText>
             </Button>
 
@@ -294,7 +278,11 @@ export default function Search() {
                   />
                 ) : (
                   <AvatarFallbackText>
-                    <Icon as={UtensilsCrossedIcon} size="lg" className="stroke-white" />
+                    <Icon
+                      as={UtensilsCrossedIcon}
+                      size="lg"
+                      className="stroke-white"
+                    />
                   </AvatarFallbackText>
                 )}
               </Avatar>
@@ -308,7 +296,8 @@ export default function Search() {
                     {selectedProduct?.name}
                   </Text>
                   <Text className="text-sm">
-                    {selectedProduct?.brands || 'Marque inconnue'} • {selectedProduct?.categories || 'Catégorie inconnue'}
+                    {selectedProduct?.brands || 'Marque inconnue'} •{' '}
+                    {selectedProduct?.categories || 'Catégorie inconnue'}
                   </Text>
                 </VStack>
               </HStack>
@@ -320,7 +309,9 @@ export default function Search() {
                 <HStack className="gap-2 items-center">
                   <Text>Nutriscore:</Text>
                   <Text className="font-semibold">
-                    {selectedProduct?.nutriscore_grade ? selectedProduct.nutriscore_grade.toUpperCase() : 'Non disponible'}
+                    {selectedProduct?.nutriscore_grade
+                      ? selectedProduct.nutriscore_grade.toUpperCase()
+                      : 'Non disponible'}
                   </Text>
                 </HStack>
               </HStack>
