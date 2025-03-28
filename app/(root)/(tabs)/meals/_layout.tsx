@@ -16,7 +16,6 @@ export default function MealsLayout() {
           textTransform: 'capitalize',
         },
         tabBarStyle: {
-          backgroundColor: 'white',
           paddingVertical: 0,
         },
         tabBarItemStyle: {
@@ -24,7 +23,7 @@ export default function MealsLayout() {
           padding: 0,
           margin: 10,
         },
-        tabBarActiveTintColor: 'blue',
+        tabBarActiveTintColor: 'orange',
         tabBarInactiveTintColor: 'gray',
       }}
     >

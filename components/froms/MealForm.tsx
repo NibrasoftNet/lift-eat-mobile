@@ -154,6 +154,7 @@ export default function MealForm({
           );
         },
       });
+      await queryClient.invalidateQueries({ queryKey: ['my-meals'] });
       router.push('/meals/my-meals');
     },
     onError: (error: any) => {
@@ -202,7 +203,7 @@ export default function MealForm({
         <HStack className="w-full h-8 justify-between">
           <Link href="/meals/my-meals" asChild>
             <Pressable>
-              <Icon as={CircleChevronLeft} className="w-10 h-10 text-black" />
+              <Icon as={CircleChevronLeft} className="w-10 h-10" />
             </Pressable>
           </Link>
           <Button
@@ -213,13 +214,13 @@ export default function MealForm({
             {isPending ? (
               <ButtonSpinner color={Colors.blue.background} />
             ) : (
-              <ButtonIcon as={Save} className="w-10 h-10 text-black" />
+              <ButtonIcon as={Save} className="w-10 h-10" />
             )}
           </Button>
         </HStack>
         <Box className="flex-col items-center justify-center">
           <Pressable onPress={handleImagePicker}>
-            <Avatar className="flex item center justify center w-32 h-32 rounded-full shadow-2xl border border-amber-500">
+            <Avatar className="flex item center justify center w-32 h-32 rounded-full shadow-2xl border border-tertiary-500">
               <AvatarFallbackText className="text-3xl">M</AvatarFallbackText>
               {image ? (
                 <AvatarImage
@@ -471,7 +472,7 @@ export default function MealForm({
                     control={control}
                     name="quantity"
                     render={({ field: { onChange, onBlur, value } }) => (
-                      <Input size="md">
+                      <Input className="h-10 rounded-md border">
                         <InputField
                           keyboardType="numeric"
                           placeholder="Quantity"

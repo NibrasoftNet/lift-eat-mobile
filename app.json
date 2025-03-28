@@ -4,12 +4,13 @@
     "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/logo.jpg",
     "splash": {
       "image": "./assets/images/auth/login_background.jpg",
       "resizeMode": "cover",
       "backgroundColor": "#21273F"
     },
-    "scheme": "Lift&Eat",
+    "scheme": "lift-and-eat",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,14 +18,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/images/logo.jpg"
+      },
+      "package": "com.nibrasoftnet.liftandeat"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logo_no_pb.png"
     },
     "plugins": [
       "expo-router",
@@ -34,6 +35,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "581cddfa-2371-4db1-a11c-0a98f258f6e5"
+      }
     }
   }
 }

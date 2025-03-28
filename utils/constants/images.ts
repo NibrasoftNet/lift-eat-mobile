@@ -1,5 +1,4 @@
-import intro01 from '@/assets/images/intro/intro01.png';
-import intro02 from '@/assets/images/intro/intro02.png';
+import introBackground from '@/assets/images/intro/intro_background.jpg';
 import balanceDiet from '@/assets/images/goal/balance-diet.jpg';
 import muscleGainDiet from '@/assets/images/goal/muscle-gain-diet.jpg';
 import looseFatDiet from '@/assets/images/goal/loose-fat-diet.jpg';
@@ -14,10 +13,10 @@ import breackfast from '@/assets/images/meals/breakfast.png';
 import lunch from '@/assets/images/meals/lunch.png';
 import snacks from '@/assets/images/meals/snacks.png';
 import dinner from '@/assets/images/meals/dinner.png';
+import all from '@/assets/images/all.png';
 
 export {
-  intro01,
-  intro02,
+  introBackground,
   balanceDiet,
   muscleGainDiet,
   looseFatDiet,
@@ -32,4 +31,5 @@ export {
   lunch,
   snacks,
   dinner,
+  all,
 };

@@ -117,10 +117,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                         {...triggerProps}
                         className="bg-transparent m-0 p-0"
                       >
-                        <ButtonIcon
-                          as={ThreeDotsIcon}
-                          className="text-black w-8 h-8"
-                        />
+                        <ButtonIcon as={ThreeDotsIcon} className="w-8 h-8" />
                       </Button>
                     );
                   }}

@@ -32,14 +32,14 @@ export const QueryStateHandler = <T,>({
       isFetchedAfterMount
     ) {
       return (
-        <VStack className="w-full h-full items-center justify-center gap-2">
+        <VStack className="flex-1 w-full h-full items-center justify-center gap-2">
           <Spinner />
           <Text size="md">Please Wait</Text>
         </VStack>
       );
     }
     return (
-      <VStack className="w-full h-full items-center justify-center">
+      <VStack className="flex-1 w-full h-full items-center justify-center">
         <Card
           size="md"
           variant="elevated"
@@ -48,7 +48,7 @@ export const QueryStateHandler = <T,>({
           <Heading size="md" className="mb-1">
             Data Not Found
           </Heading>
-          <Text size="sm">Login again to get access to your profile</Text>
+          <Text size="sm">No result has been found</Text>
           <Link href="/login">
             <Text size="sm">Back to login</Text>
           </Link>

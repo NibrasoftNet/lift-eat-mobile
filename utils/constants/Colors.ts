@@ -2,9 +2,10 @@
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
-// Define the primary and secondary colors
-const primaryColor = '#3b82f6'; // bg-blue-500
-const secondaryColor = '#f59e0b'; // bg-amber-500
+// Define the colors
+const primaryColor = '#3361A2'; // Hex equivalent of your RGB '51 97 162'
+const secondaryColor = '#6B7280'; // Neutral gray (Tailwind's "gray-500")
+const tertiaryColor = '#FF9F00'; // Hex for RGB 255 159 0
 
 // Define the tint colors for light and dark modes
 const tintColorLight = primaryColor; // Use primary color for light mode
@@ -29,20 +30,28 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
   primary: {
-    text: '#FFFFFF',
-    background: primaryColor,
-    tint: primaryColor,
-    icon: '#FFFFFF',
-    tabIconDefault: '#FFFFFF',
-    tabIconSelected: primaryColor,
+    text: '#FFFFFF', // White text (optimal contrast)
+    background: primaryColor, // Your exact navy (RGB 51,97,162)
+    tint: '#7F9FD1', // Lighter navy tint (RGB ~127,159,209)
+    icon: '#FFFFFF', // White icons
+    tabIconDefault: '#9CA3AF', // gray-400 for inactive tabs
+    tabIconSelected: primaryColor, // Navy for active tab
   },
   secondary: {
-    text: '#ECEDEE',
-    background: secondaryColor,
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: '#FFFFFF', // White text for contrast on mid-gray
+    background: secondaryColor, // Gray background
+    tint: '#9CA3AF', // Lighter gray for highlights (Tailwind's "gray-400")
+    icon: '#FFFFFF', // White icons
+    tabIconDefault: '#D1D5DB', // Light gray for inactive tabs ("gray-300")
+    tabIconSelected: secondaryColor, // Base gray for active tab
+  },
+  tertiary: {
+    text: '#000000', // Black (optimal contrast on amber)
+    background: tertiaryColor, // Your exact amber (RGB 255,159,0)
+    tint: '#FFC245', // Lighter amber tint (RGB 255,194,69)
+    icon: '#000000', // Black icons
+    tabIconDefault: '#D1D5DB', // gray-300 for inactive tabs
+    tabIconSelected: tertiaryColor, // Amber for active tab
   },
   blue: {
     light: '#DBEAFE',

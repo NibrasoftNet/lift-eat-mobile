@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
@@ -15,12 +14,14 @@ import { getMealsList } from '@/utils/services/meal.service';
 import { MealOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { SearchIcon, SoupIcon } from 'lucide-react-native';
-import { Image, ScrollView } from 'react-native';
-import { Button, ButtonText } from '@/components/ui/button';
+import { RefreshControl } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
-import { cuisineOptions, mealsTypeOptions } from '@/utils/constants/constant';
+import { Colors } from '@/utils/constants/Colors';
+import { Card } from '@/components/ui/card';
+import MealTypeBox from '@/components/boxes/MealTypeBox';
+import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
 
 export default function MyMealsScreen() {
   const router = useRouter();
@@ -81,92 +82,23 @@ export default function MyMealsScreen() {
     router.push('/meals/my-meals/create');
   };
 
+  // Create a handler for pull-to-refresh
+  const onRefresh = React.useCallback(async () => {
+    await refetch();
+  }, []);
+
   // @ts-ignore
   return (
     <VStack className="flex-1 p-2">
-      <Box className="w-full h-18 p-2 justify-center">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            gap: 10,
-          }}
-        >
-          <>
-            <Button
-              onPress={() => handleCuisineSelect(undefined)}
-              className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                selectedCuisine === undefined
-                  ? 'border-amber-500'
-                  : 'border-gray-200'
-              }`}
-            >
-              <ButtonText className="text-black">All</ButtonText>
-            </Button>
-            {cuisineOptions.map((cuisineType) => (
-              <VStack key={cuisineType.name} className="w-16 h-20 items-center">
-                <Button
-                  onPress={() => handleCuisineSelect(cuisineType.name)}
-                  className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                    selectedCuisine === cuisineType.name
-                      ? 'border-amber-500'
-                      : 'border-gray-200'
-                  }`}
-                >
-                  <Image
-                    source={cuisineType.icon}
-                    className="h-14 w-14 object-contain rounded-full"
-                    style={{ alignSelf: 'center' }}
-                  />
-                </Button>
-                <Text className="text-sm capitalize">{cuisineType.name}</Text>
-              </VStack>
-            ))}
-          </>
-        </ScrollView>
-      </Box>
+      <CuisineTypeBox
+        selectedCuisine={selectedCuisine}
+        handleCuisineSelect={handleCuisineSelect}
+      />
       <Divider orientation="horizontal" className={`w-fit h-0.5 bg-gray-500`} />
-      <Box className="w-full h-18 p-2 justify-center">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            gap: 10,
-          }}
-        >
-          <>
-            <Button
-              onPress={() => handleMealTypeSelect(undefined)}
-              className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                selectedMealType === undefined
-                  ? 'border-amber-500'
-                  : 'border-gray-200'
-              }`}
-            >
-              <ButtonText className="text-black">All</ButtonText>
-            </Button>
-            {mealsTypeOptions.map((mealType) => (
-              <VStack key={mealType.name} className="w-16 h-20 items-center">
-                <Button
-                  onPress={() => handleMealTypeSelect(mealType.name)}
-                  className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
-                    selectedMealType === mealType.name
-                      ? 'border-amber-500'
-                      : 'border-gray-200'
-                  }`}
-                >
-                  <Image
-                    source={mealType.icon}
-                    className="h-14 w-14 object-contain rounded-full"
-                    style={{ alignSelf: 'center' }}
-                  />
-                </Button>
-                <Text className="text-sm capitalize">{mealType.name}</Text>
-              </VStack>
-            ))}
-          </>
-        </ScrollView>
-      </Box>
+      <MealTypeBox
+        selectedMealType={selectedMealType}
+        handleMealTypeSelect={handleMealTypeSelect}
+      />
       <Input variant="outline" className="bg-white/90 rounded-xl h-12 p-2">
         <InputIcon as={SearchIcon} className="text-gray-400" />
         <InputField
@@ -182,22 +114,31 @@ export default function MyMealsScreen() {
         isPending={isPending}
         isRefetching={isRefetching}
       >
-        {myMealsList?.length === 0 ? (
-          <Box className="gap-4 w-full h-full items-center">
-            <Icon as={SoupIcon} className="w-16 h-16" />
-            <Text>No meals available.</Text>
-          </Box>
-        ) : (
-          <FlashList
-            data={myMealsList}
-            renderItem={({ item, index }) => (
-              <MealCard item={item} index={index} />
-            )}
-            keyExtractor={(item) => String(item.id)}
-            estimatedItemSize={20}
-            contentContainerStyle={{ padding: 16 }}
-          />
-        )}
+        <FlashList
+          data={myMealsList}
+          renderItem={({ item, index }) => (
+            <MealCard item={item} index={index} />
+          )}
+          ListEmptyComponent={
+            <VStack className="w-full h-full items-center justify-center bg-red-500">
+              <Card className="items-center gap-4 border border-secondary-500">
+                <Icon as={SoupIcon} className="w-16 h-16" />
+                <Text>No meals available.</Text>
+              </Card>
+            </VStack>
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={onRefresh}
+              colors={[Colors.primary.background, Colors.tertiary.background]}
+              tintColor={Colors.tertiary.tint}
+            />
+          }
+          keyExtractor={(item) => String(item.id)}
+          estimatedItemSize={20}
+          contentContainerStyle={{ padding: 16 }}
+        />
       </QueryStateHandler>
       <Fab
         size="md"

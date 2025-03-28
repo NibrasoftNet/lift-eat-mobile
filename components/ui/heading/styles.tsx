@@ -11,7 +11,7 @@ export const headingStyle = tva({
       true: 'truncate',
     },
     bold: {
-      true: 'font-bold',
+      true: 'font-bold font-ubuntu-light',
     },
     underline: {
       true: 'underline',
@@ -33,11 +33,11 @@ export const headingStyle = tva({
       '4xl': 'text-5xl',
       '3xl': 'text-4xl',
       '2xl': 'text-3xl',
-      'xl': 'text-2xl',
-      'lg': 'text-xl',
-      'md': 'text-lg',
-      'sm': 'text-base',
-      'xs': 'text-sm',
+      xl: 'text-2xl',
+      lg: 'text-xl',
+      md: 'text-lg',
+      sm: 'text-base',
+      xs: 'text-sm',
     },
   },
 });

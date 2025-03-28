@@ -1,6 +1,4 @@
-import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '../enum/meal.enum';
 import { ImageSourcePropType } from 'react-native';
-import { Ingredients, Meal } from '../../types/plan.type';
 
 /**
  * Types for Open Food Facts API responses
@@ -61,8 +59,8 @@ export interface SearchParams {
   page?: number;
   page_size?: number;
   sort_by?: string;
-  lang?: string;  // Ajout du paramètre de langue
-  tag?: string;   // Ajout du paramètre de tag pour filtrer par cuisine
+  lang?: string; // Ajout du paramètre de langue
+  tag?: string; // Ajout du paramètre de tag pour filtrer par cuisine
 }
 
 /**
@@ -159,7 +157,7 @@ class OpenFoodFactsService {
 
       // Convert product to productResult format
       const productResult = this.convertProductToProductResult(product);
-      
+
       // Check if productResult is null (this happens when all nutritional values are 0)
       if (!productResult) {
         return {
@@ -213,7 +211,7 @@ class OpenFoodFactsService {
     const proteins = Math.round(product.nutriments?.proteins_100g || 0);
     const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
     const fats = Math.round(product.nutriments?.fat_100g || 0);
-    
+
     // Return null if ALL nutrition values are 0
     if (calories === 0 && proteins === 0 && carbs === 0 && fats === 0) {
       console.log('All nutrition values are 0 for product:', product.code);
@@ -266,24 +264,24 @@ class OpenFoodFactsService {
 
       // Créer une nouvelle copie des paramètres pour éviter de modifier l'original
       let searchParams = { ...params };
-      
+
       // Set default language to french if not specified
       if (!searchParams.lang) {
         searchParams.lang = 'fr';
       }
-      
+
       // Ajout d'un paramètre pour obtenir plus de résultats
       if (!searchParams.page_size) {
         searchParams.page_size = 50;
       }
-      
+
       // Gérer le tag de cuisine plus directement
       let tagAdded = false;
       if (searchParams.tag) {
         console.log(`Filtrage par cuisine: ${searchParams.tag}`);
-        
+
         // Ajouter des termes spécifiques à la recherche selon la cuisine
-        switch(searchParams.tag.toLowerCase()) {
+        switch (searchParams.tag.toLowerCase()) {
           case 'african':
             if (searchParams.search_terms) {
               searchParams.search_terms += ' african';
@@ -428,7 +426,7 @@ class OpenFoodFactsService {
             tagAdded = true;
             break;
         }
-        
+
         // Supprimer le tag des paramètres pour éviter duplication
         const { tag, ...otherParams } = searchParams;
         searchParams = otherParams as SearchParams;
@@ -441,14 +439,14 @@ class OpenFoodFactsService {
         url.searchParams.append('tag_contains_0', 'contains');
         url.searchParams.append('tag_0', searchParams.search_terms);
       }
-      
+
       // Add all other parameters
       Object.entries(searchParams).forEach(([key, value]) => {
         if (value !== undefined) {
           url.searchParams.append(key, value.toString());
         }
       });
-      
+
       console.log('Recherche de produits avec URL:', url.toString());
 
       const response = await fetch(url.toString());
@@ -458,12 +456,14 @@ class OpenFoodFactsService {
       }
 
       const data = (await response.json()) as OpenFoodFactsResponse;
-      
+
       // Log search results count
       if (data && data.products) {
-        console.log(`Trouvé ${data.products.length} produits pour la recherche: ${searchParams.search_terms} ${params.tag ? `avec cuisine ${params.tag}` : ''}`);
+        console.log(
+          `Trouvé ${data.products.length} produits pour la recherche: ${searchParams.search_terms} ${params.tag ? `avec cuisine ${params.tag}` : ''}`,
+        );
       }
-      
+
       return data;
     } catch (error) {
       console.error('Error searching products:', error);
@@ -479,20 +479,23 @@ class OpenFoodFactsService {
   async searchProductsWithResults(
     params: SearchParams,
   ): Promise<ProductResult[]> {
-    console.log('[DEBUG] Paramètres de recherche reçus:', JSON.stringify(params, null, 2));
-    
+    console.log(
+      '[DEBUG] Paramètres de recherche reçus:',
+      JSON.stringify(params, null, 2),
+    );
+
     try {
       let searchTerm = params.search_terms ? params.search_terms.trim() : '';
       let cuisineFilter = params.tag ? params.tag.toLowerCase() : '';
-      
+
       console.log('[DEBUG] Terme recherché:', searchTerm);
       console.log('[DEBUG] Filtre cuisine:', cuisineFilter);
-      
+
       // Modification de l'approche pour imiter l'application mobile OpenFoodFacts
-      
+
       // 1. Déterminer le code pays selon la cuisine sélectionnée
       let countryCode = '';
-      switch(cuisineFilter) {
+      switch (cuisineFilter) {
         case 'tunisian':
           countryCode = 'tn'; // Code pour Tunisie
           break;
@@ -510,10 +513,10 @@ class OpenFoodFactsService {
           break;
         // Autres cas selon besoin
       }
-      
+
       // 2. Construire l'URL comme le fait l'application mobile
       let url;
-      
+
       if (countryCode && cuisineFilter) {
         // Si un pays est spécifié, utiliser l'URL spécifique au pays
         // Format: https://[pays].openfoodfacts.org/cgi/search.pl?search_terms=...
@@ -522,59 +525,67 @@ class OpenFoodFactsService {
         // Sinon utiliser l'URL globale
         url = new URL('https://world.openfoodfacts.org/cgi/search.pl');
       }
-      
+
       // 3. Ajouter les paramètres de base (similaires à l'application mobile)
       url.searchParams.append('action', 'process');
       url.searchParams.append('json', '1');
       url.searchParams.append('page_size', '50');
-      
+
       // 4. Ajouter le terme de recherche
       if (searchTerm) {
         url.searchParams.append('search_terms', searchTerm);
       }
-      
+
       // 5. Paramètres anti-cache pour éviter les problèmes de mise en cache
       url.searchParams.append('nocache', Date.now().toString());
-      
+
       // 6. Ajoutez des paramètres supplémentaires pour améliorer les résultats
       // Rechercher dans les noms de produits, les marques et les catégories
       url.searchParams.append('search_simple', '1');
-      url.searchParams.append('sort_by', 'popularity');  // Trier par popularité
-      
+      url.searchParams.append('sort_by', 'popularity'); // Trier par popularité
+
       console.log('[DEBUG] URL complète:', url.toString());
-      
+
       // Faire la requête avec en-têtes anti-cache
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          'User-Agent': 'Lift Eat Mobile/1.0 (recherche de produits alimentaires)',
-        }
+          Pragma: 'no-cache',
+          Expires: '0',
+          'User-Agent':
+            'Lift Eat Mobile/1.0 (recherche de produits alimentaires)',
+        },
       });
-      
+
       console.log('[DEBUG] Statut de la réponse:', response.status);
-      
+
       if (!response.ok) {
         throw new Error(`Erreur API: ${response.status}`);
       }
-      
+
       // Afficher les 200 premiers caractères pour le débogage
       const responseClone = response.clone();
       const textData = await responseClone.text();
-      console.log('[DEBUG] Début de la réponse brute:', textData.substring(0, 200) + '...');
-      
+      console.log(
+        '[DEBUG] Début de la réponse brute:',
+        textData.substring(0, 200) + '...',
+      );
+
       // Conversion en JSON
       const data = await response.json();
-      
+
       // Si pas de produits, essayer une recherche alternative
       if (!data.products || data.products.length === 0) {
-        console.log('[DEBUG] Aucun produit trouvé dans le pays, essai avec recherche mondiale...');
-        
+        console.log(
+          '[DEBUG] Aucun produit trouvé dans le pays, essai avec recherche mondiale...',
+        );
+
         // Si la recherche par pays n'a rien donné, essayer une recherche mondiale
         if (countryCode) {
-          const worldUrl = new URL('https://world.openfoodfacts.org/cgi/search.pl');
+          const worldUrl = new URL(
+            'https://world.openfoodfacts.org/cgi/search.pl',
+          );
           worldUrl.searchParams.append('action', 'process');
           worldUrl.searchParams.append('json', '1');
           worldUrl.searchParams.append('page_size', '50');
@@ -582,43 +593,51 @@ class OpenFoodFactsService {
           worldUrl.searchParams.append('nocache', Date.now().toString());
           worldUrl.searchParams.append('search_simple', '1');
           worldUrl.searchParams.append('sort_by', 'popularity');
-          
+
           console.log('[DEBUG] URL recherche mondiale:', worldUrl.toString());
-          
+
           const worldResponse = await fetch(worldUrl.toString(), {
             method: 'GET',
             headers: {
               'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
+              Pragma: 'no-cache',
+              Expires: '0',
+            },
           });
-          
+
           if (worldResponse.ok) {
             const worldData = await worldResponse.json();
             if (worldData.products && worldData.products.length > 0) {
               data.products = worldData.products;
-              console.log('[DEBUG] Trouvé', worldData.products.length, 'produits en recherche mondiale');
+              console.log(
+                '[DEBUG] Trouvé',
+                worldData.products.length,
+                'produits en recherche mondiale',
+              );
             }
           }
         }
-        
+
         // Si toujours aucun résultat
         if (!data.products || data.products.length === 0) {
           console.log('[DEBUG] Aucun produit trouvé après recherche mondiale');
           return [];
         }
       }
-      
+
       console.log('[DEBUG] Nombre de produits reçus:', data.products.length);
-      
+
       // Filtrer pour avoir uniquement des produits avec nom
       const validProducts = data.products.filter((product: any) => {
         return product && (product.product_name || product.product_name_fr);
       });
-      
-      console.log('[DEBUG] Après filtrage basique:', validProducts.length, 'produits valides');
-      
+
+      console.log(
+        '[DEBUG] Après filtrage basique:',
+        validProducts.length,
+        'produits valides',
+      );
+
       // Convertir en ProductResult
       const results = validProducts.map((product: any) => {
         // Image
@@ -632,16 +651,17 @@ class OpenFoodFactsService {
         } else {
           image = require('../../assets/images/image-non-disponible.jpg');
         }
-        
+
         // Nom du produit (préférer français si disponible)
-        const name = product.product_name_fr || product.product_name || 'Produit sans nom';
-        
+        const name =
+          product.product_name_fr || product.product_name || 'Produit sans nom';
+
         // Valeurs nutritionnelles (avec fallback à 0)
         const calories = Math.round(product.nutriments?.energy_100g || 0);
         const protein = Math.round(product.nutriments?.proteins_100g || 0);
         const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
         const fats = Math.round(product.nutriments?.fat_100g || 0);
-        
+
         return {
           name,
           image,
@@ -651,10 +671,10 @@ class OpenFoodFactsService {
           fats,
           brands: product.brands,
           categories: product.categories,
-          nutriscore_grade: product.nutriscore_grade
+          nutriscore_grade: product.nutriscore_grade,
         };
       });
-      
+
       console.log('[DEBUG] Retourne', results.length, 'résultats finaux');
       return results;
     } catch (error) {
