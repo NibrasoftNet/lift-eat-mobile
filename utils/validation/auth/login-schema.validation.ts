@@ -5,7 +5,7 @@ export const loginSchema = z.object({
   email: z
     .string()
     .email({ message: 'Email invalide!' })
-    .transform((val) => val.toLowerCase()),
+    .transform((val) => val.trim().toLowerCase()),
   password: passwordSchema,
 });
 

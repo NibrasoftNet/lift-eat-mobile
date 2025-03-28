@@ -1,22 +1,12 @@
 import { VStack } from '@/components/ui/vstack';
-import React, { useEffect, useState } from 'react';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Grid, GridItem } from '@/components/ui/grid';
-import Animated, {
-  FadeInDown, FadeInLeft,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import React from 'react';
+import { Button, ButtonText } from '@/components/ui/button';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ImageBackground, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {
-  GenderEnum,
-  PhysicalActivityEnum,
-} from '@/utils/enum/user-gender-activity.enum';
 import {
   FormControl,
   FormControlError,
@@ -28,21 +18,18 @@ import {
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { useQueryClient } from '@tanstack/react-query';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
-import { Colors } from '@/utils/constants/Colors';
-import { GetGoalImages, GetPhysicalActivityImages } from '@/utils/utils';
+import { GetGoalImages } from '@/utils/utils';
 import {
   CalculateCaloriesIntakeDefaultValueProps,
   CalculateCaloriesIntakeFormData,
   calculateCaloriesIntakeSchema,
 } from '@/utils/validation/plan/calculate-calories-intake.validation';
-import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { activityOptions } from '@/utils/constants/constant';
+import GenderFormInput from '@/components/forms-input/GenderFormInput';
+import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
 
 export default function CalculateCaloriesIntakeForm({
   defaultValues,
@@ -52,13 +39,6 @@ export default function CalculateCaloriesIntakeForm({
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
-
-  const [genderUnit, setGenderUnit] = useState<GenderEnum>(
-    defaultValues.gender,
-  );
-  const [activityUnit, setActivityUnit] = useState<PhysicalActivityEnum>(
-    defaultValues.physicalActivity,
-  );
 
   // Init Tanstack Query client
   const queryClient = useQueryClient();
@@ -73,54 +53,8 @@ export default function CalculateCaloriesIntakeForm({
     defaultValues,
   });
 
-  const handleGenderUnitChange = (unit: GenderEnum) => {
-    setGenderUnit(unit);
-    setValue('gender', unit);
-  };
-
-
-  const handleActivityUnitChange = (level: PhysicalActivityEnum) => {
-    setActivityUnit(level);
-    setValue('physicalActivity', level);
-  };
-
-  // Shared values for Male and Female bar widths
-  const maleBarWidth = useSharedValue(genderUnit === GenderEnum.MALE ? 100 : 0); // 100% = blue, 0% = gray
-  const femaleBarWidth = useSharedValue(
-    genderUnit === GenderEnum.FEMALE ? 100 : 0,
-  ); // 100% = orange, 0% = gray
-
-
-  // Animate bar width
-  useEffect(() => {
-    maleBarWidth.value = withTiming(genderUnit === GenderEnum.MALE ? 100 : 0, {
-      duration: 300,
-    });
-    femaleBarWidth.value = withTiming(
-      genderUnit === GenderEnum.FEMALE ? 100 : 0,
-      { duration: 300 },
-    );
-  }, [genderUnit]);
-
-
-  // Animated style for Male bar
-  const maleBarStyles = useAnimatedStyle(() => {
-    return {
-      width: `${maleBarWidth.value}%`, // Animate width from 0% to 100% or vice versa
-      backgroundColor: 'blue', // Blue color for Male bar
-    };
-  });
-
-  // Animated style for Female bar
-  const femaleBarStyles = useAnimatedStyle(() => {
-    return {
-      width: `${femaleBarWidth.value}%`, // Animate width from 0% to 100% or vice versa
-      backgroundColor: 'orange', // Orange color for Female bar
-    };
-  });
-
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
-    router.push('/plans/my-plans/create/target')
+    console.log('calories', data);
   };
 
   return (
@@ -178,88 +112,16 @@ export default function CalculateCaloriesIntakeForm({
         </FormControl>
       </Card>
       {/* Gender Selection */}
-      <Card className="rounded-lg flex flex-col gap-2">
-        <Grid
-          className="w-full h-16 gap-2"
-          _extra={{ className: 'grid-cols-2' }}
-          style={{ position: 'relative' }}
-        >
-          {/* Male Button */}
-          <GridItem
-            _extra={{ className: 'col-span-1' }}
-            className="bg-gray-200 border border-gray-300 rounded-md"
-          >
-            <Button
-              onPress={() => handleGenderUnitChange(GenderEnum.MALE)}
-              className="w-full h-full bg-transparent"
-            >
-              <ButtonText className="text-gray-500">
-                {GenderEnum.MALE}
-              </ButtonText>
-            </Button>
-            {/* Blue animated bar for Male Button */}
-            <Animated.View
-              className="absolute bottom-0 h-1"
-              style={[maleBarStyles, { left: 0 }]} // Animate from left to right
-            />
-          </GridItem>
-
-          {/* Female Button */}
-          <GridItem
-            _extra={{ className: 'col-span-1' }}
-            className="bg-gray-200 border border-gray-300 rounded-md"
-          >
-            <Button
-              onPress={() => handleGenderUnitChange(GenderEnum.FEMALE)}
-              className="w-full h-full bg-transparent"
-            >
-              <ButtonText className="text-gray-500">
-                {GenderEnum.FEMALE}
-              </ButtonText>
-            </Button>
-            {/* Orange animated bar for Female Button */}
-            <Animated.View
-              className="absolute bottom-0 h-1"
-              style={[femaleBarStyles, { right: 0 }]} // Animate from right to left
-            />
-          </GridItem>
-        </Grid>
-      </Card>
+      <GenderFormInput
+        defaultGender={defaultValues.gender}
+        setValue={setValue}
+      />
+      {/* Physical activity Selection */}
+      <PhysicalActivityFormInput
+        defaultPhysicalActivity={defaultValues.physicalActivity}
+        setValue={setValue}
+      />
       {/* Activity Selection (2x2 Grid) */}
-      <Card className="rounded-lg flex flex-col gap-2">
-        <Grid
-          className="w-full h-52 gap-2"
-          _extra={{ className: 'grid-cols-2' }}
-          style={{ position: 'relative' }}
-        >
-          {activityOptions.map((activity, index) => (
-            <GridItem
-              key={activity.level}
-              _extra={{ className: 'col-span-1' }}
-              className="rounded-md"
-            >
-              <ImageBackground
-                source={GetPhysicalActivityImages[activity.level]}
-                className="w-full object-cover h-24"
-                blurRadius={3}
-              >
-                <Animated.View
-                  className={`w-full h-1 rounded-md ${activity.level === activityUnit ? "bg-primary-500" : "bg-secondary-500"}`}
-                />
-                <Button
-                  onPress={() => handleActivityUnitChange(activity.level)}
-                  className="flex flex-col items-center justify-center w-full h-24 bg-transparent"
-                >
-                  <ButtonText className="text-white capitalize">
-                    {activity.level}
-                  </ButtonText>
-                </Button>
-                {/* Animated Indicator for Activity Selection */}
-              </ImageBackground>
-            </GridItem>
-          ))}
-        </Grid>
-      </Card>
       <HStack className="w-full justify-between items-center mt-4 gap-2">
         {/* Submit Button */}
         <Button
@@ -271,7 +133,7 @@ export default function CalculateCaloriesIntakeForm({
         </Button>
         {/* Submit Button */}
         <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
-          <ButtonSpinner color={Colors.light.icon} />
+          {/*<ButtonSpinner color={Colors.light.icon} />*/}
           <ButtonText>Create</ButtonText>
         </Button>
       </HStack>

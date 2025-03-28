@@ -4,8 +4,8 @@ import { View } from 'react-native';
 import { Colors } from '@/utils/constants/Colors';
 import { Icon } from '@/components/ui/icon';
 import {
-  Atom,
   ChartNoAxesCombined,
+  Flame,
   Layers,
   Notebook,
   ScanQrCode,
@@ -76,7 +76,7 @@ export default function TabLayout() {
                   elevation: 5,
                 }}
               >
-                <Icon as={Atom} className="w-8 h-8 text-white" />
+                <Icon as={Flame} className="w-10 h-10 text-white" />
               </View>
             </View>
           ),

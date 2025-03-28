@@ -4,7 +4,7 @@ export const forgetPasswordSchema = z.object({
   email: z
     .string()
     .email({ message: 'Email invalide!' })
-    .transform((val) => val.toLowerCase()),
+    .transform((val) => val.trim().toLowerCase()),
 });
 
 export type ForgetPasswordFormData = z.infer<typeof forgetPasswordSchema>;

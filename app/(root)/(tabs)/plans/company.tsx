@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
+import { Colors } from '@/utils/constants/Colors';
 
 export default function CompanyPlans() {
   const handleValueChange = (value: number) => {
@@ -15,6 +16,11 @@ export default function CompanyPlans() {
         step={1}
         unit="Kg"
         onValueChange={handleValueChange}
+        centerLineStyle={{
+          height: 80,
+          width: 4,
+          backgroundColor: Colors.tertiary.background,
+        }}
       />
     </View>
   );

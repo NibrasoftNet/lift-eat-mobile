@@ -101,125 +101,109 @@ export default function Login() {
 
   return (
     <>
-      <ImageBackground
-        source={login_background}
-        className="size-full object-cover"
-        blurRadius={100}
-      >
-        <VStack className="size-full p-4 items-center justify-center gap-2">
-          <Image
-            source={app_logo}
-            className="h-48 w-48 object-contain rounded-xl"
-            style={{ alignSelf: 'center' }}
-          />
-          <Card className="flex w-full bg-transparent items-center justify-center">
-            <Text className="text-center text-4xl font-bold  text-white">
-              Login
-            </Text>
-            <Text className="text-center text-2xl font-semibold text-white">
-              Login to your account
-            </Text>
-          </Card>
-          <Card className="w-full bg-transparent gap-2">
-            <FormControl isInvalid={!!errors.email}>
-              <FormControlLabel>
-                <FormControlLabelText className="text-white">
-                  Email
-                </FormControlLabelText>
-              </FormControlLabel>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, value } }) => (
-                  <Input className="w-full">
-                    <InputField
-                      type="text"
-                      placeholder="email"
-                      value={value}
-                      onChangeText={onChange}
-                      className="placeholder:text-white"
-                    />
-                  </Input>
-                )}
-              />
-              {errors.email && (
-                <FormControlError>
-                  <FormControlErrorIcon as={AlertCircleIcon} />
-                  <FormControlErrorText>
-                    {errors.email.message}
-                  </FormControlErrorText>
-                </FormControlError>
-              )}
-            </FormControl>
-
-            <FormControl isInvalid={!!errors.password}>
-              <FormControlLabel>
-                <FormControlLabelText className="text-white">
-                  Password
-                </FormControlLabelText>
-              </FormControlLabel>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, value } }) => (
-                  <Input className="w-full">
-                    <InputField
-                      type="password"
-                      placeholder="password"
-                      value={value}
-                      onChangeText={onChange}
-                      className="placeholder:text-white"
-                    />
-                  </Input>
-                )}
-              />
-              {errors.password && (
-                <FormControlError>
-                  <FormControlErrorIcon as={AlertCircleIcon} />
-                  <FormControlErrorText>
-                    {errors.password.message ||
-                      'At least 6 characters are required.'}
-                  </FormControlErrorText>
-                </FormControlError>
-              )}
-            </FormControl>
-            <HStack className="flex items-center justify-end">
-              <Text className="text-lg font-semibold text-white">
-                Forget Password ?
-              </Text>
-              <Button
-                className="bg-transparent ml-2"
-                size="sm"
-                onPress={() => setShowModal(true)}
-              >
-                <ButtonText className="text-lg underline text-amber-500">
-                  Recover
-                </ButtonText>
-              </Button>
-            </HStack>
-          </Card>
-          <Button
-            className="w-full justify-center items-center"
-            onPress={handleSubmit(onSubmit)}
-          >
-            {isPending ? (
-              <ButtonSpinner color={Colors.light.icon} />
-            ) : (
-              <ButtonText>Login</ButtonText>
-            )}
-          </Button>
-
-          <Text className="text-white text-lg font-semibold">
-            Don't have an account?{' '}
-            <Text
-              className="text-amber-500 text-lg font-semibold underline"
-              onPress={() => router.push('./register')}
-            >
-              Sign Up
-            </Text>
+      <VStack className="size-full p-4 items-center justify-center gap-2">
+        <Image
+          source={app_logo}
+          className="h-48 w-48 object-contain rounded-xl"
+          style={{ alignSelf: 'center' }}
+        />
+        <Card className="flex w-full bg-transparent items-center justify-center">
+          <Text className="text-center text-4xl font-bold">Login</Text>
+          <Text className="text-center text-2xl font-semibold">
+            Login to your account
           </Text>
-        </VStack>
-      </ImageBackground>
+        </Card>
+        <Card className="w-full bg-transparent gap-4 m-0 p-0">
+          <FormControl isInvalid={!!errors.email}>
+            <FormControlLabel>
+              <FormControlLabelText>Email</FormControlLabelText>
+            </FormControlLabel>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <Input className="w-full">
+                  <InputField
+                    type="text"
+                    placeholder="email"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                </Input>
+              )}
+            />
+            {errors.email && (
+              <FormControlError>
+                <FormControlErrorIcon as={AlertCircleIcon} />
+                <FormControlErrorText>
+                  {errors.email.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.password}>
+            <FormControlLabel>
+              <FormControlLabelText>Password</FormControlLabelText>
+            </FormControlLabel>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <Input className="w-full">
+                  <InputField
+                    type="password"
+                    placeholder="password"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                </Input>
+              )}
+            />
+            {errors.password && (
+              <FormControlError>
+                <FormControlErrorIcon as={AlertCircleIcon} />
+                <FormControlErrorText>
+                  {errors.password.message ||
+                    'At least 6 characters are required.'}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+          <HStack className="flex items-center justify-end">
+            <Text className="text-lg font-semibold">Forget Password ?</Text>
+            <Button
+              className="bg-transparent ml-2"
+              size="sm"
+              onPress={() => setShowModal(true)}
+            >
+              <ButtonText className="text-lg underline text-tertiary-500">
+                Recover
+              </ButtonText>
+            </Button>
+          </HStack>
+        </Card>
+        <Button
+          className="w-full justify-center items-center"
+          onPress={handleSubmit(onSubmit)}
+        >
+          {isPending ? (
+            <ButtonSpinner color={Colors.light.icon} />
+          ) : (
+            <ButtonText>Login</ButtonText>
+          )}
+        </Button>
+
+        <Text className="text-lg font-semibold">
+          Don't have an account?{' '}
+          <Text
+            className="text-tertiary-500 text-lg font-semibold underline"
+            onPress={() => router.push('./register')}
+          >
+            Sign Up
+          </Text>
+        </Text>
+      </VStack>
       <ForgetPasswordModal showModal={showModal} setShowModal={setShowModal} />
     </>
   );

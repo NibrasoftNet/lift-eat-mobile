@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text } from 'react-native';
 import { Box } from '../ui/box';
+import { HStack } from '../ui/hstack';
+import { Text } from '../ui/text';
 
 interface NutritionBoxProps {
   title: string;
@@ -24,18 +25,33 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
       className={`flex rounded-md items-center drop-shadow-xl ${className}`} // Apply passed className for the entire box
     >
       {/* Top Section (Title) */}
-      <View className={`w-full rounded-t-xl ${titleClassName}`}>
+      <HStack
+        className={`w-full justify-center rounded-t-xl ${titleClassName}`}
+      >
         {/* Apply titleClassName */}
         <Text className={`font-semibold text-center text-white`}>{title}</Text>
-      </View>
+      </HStack>
 
       {/* Bottom Section (Value) */}
-      <View className={`w-full rounded-b-xl ${valueClassName}`}>
+      <HStack
+        className={`w-full rounded-b-xl ${valueClassName} p-1 justify-center gap-2 items-center`}
+      >
         {/* Apply valueClassName */}
         <Text className={`text-gray-600 font-semibold text-center`}>
           {value} {unit}
         </Text>
-      </View>
+        {/*
+        <PieChart
+          donut
+          radius={10}
+          innerRadius={5}
+          data={[
+            { value: 70, color: 'purple' },
+            { value: 30, color: 'lightgray' },
+          ]}
+          innerCircleColor="gray"
+        />*/}
+      </HStack>
     </Box>
   );
 };

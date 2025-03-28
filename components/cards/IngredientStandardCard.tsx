@@ -29,10 +29,8 @@ const IngredientStandardCard: React.FC<{
   index: number;
 }> = ({ item, index }) => {
   const router = useRouter();
-
   // Zustand store hooks
   const { selectedIngredients, toggleIngredient } = useIngredientStore();
-
   // State to track if item is selected
   const [isSelected, setIsSelected] = useState<boolean>(false);
 
@@ -50,7 +48,7 @@ const IngredientStandardCard: React.FC<{
       className="rounded-xl overflow-hidden mb-2"
     >
       <Card
-        className={`w-full items-center gap-2 p-2 ${isSelected ? 'bg-amber-500' : 'bg-white'}`}
+        className={`w-full items-center gap-2 p-2 transition-all ease-in-out duration-300 ${isSelected ? 'bg-secondary-500' : 'bg-white'}`}
       >
         <HStack className="w-full items-center justify-between">
           <HStack className="flex-1 items-center gap-2">

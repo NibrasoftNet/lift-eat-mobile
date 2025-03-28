@@ -11,20 +11,15 @@ export default function PlansLayout() {
         tabBarIconStyle: { display: 'none' },
         tabBarPosition: 'top',
         tabBarLabelStyle: {
-          fontSize: 14,
           fontWeight: 'bold',
           textTransform: 'capitalize',
-        },
-        tabBarStyle: {
-          backgroundColor: 'white',
-          paddingVertical: 0,
         },
         tabBarItemStyle: {
           height: '100%',
           padding: 0,
           margin: 10,
         },
-        tabBarActiveTintColor: 'blue',
+        tabBarActiveTintColor: 'orange',
         tabBarInactiveTintColor: 'gray',
       }}
     >
@@ -33,7 +28,13 @@ export default function PlansLayout() {
         name="my-plans"
         options={{
           tabBarLabel: ({ focused, color }) => (
-            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+            <Text
+              style={{
+                color,
+                fontWeight: focused ? 'bold' : 'normal',
+                fontSize: focused ? 16 : 14,
+              }}
+            >
               Mine
             </Text>
           ),
@@ -45,7 +46,13 @@ export default function PlansLayout() {
         name="community"
         options={{
           tabBarLabel: ({ focused, color }) => (
-            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+            <Text
+              style={{
+                color,
+                fontWeight: focused ? 'bold' : 'normal',
+                fontSize: focused ? 16 : 14,
+              }}
+            >
               Community
             </Text>
           ),
@@ -57,7 +64,13 @@ export default function PlansLayout() {
         name="company"
         options={{
           tabBarLabel: ({ focused, color }) => (
-            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+            <Text
+              style={{
+                color,
+                fontWeight: focused ? 'bold' : 'normal',
+                fontSize: focused ? 16 : 14,
+              }}
+            >
               Company
             </Text>
           ),

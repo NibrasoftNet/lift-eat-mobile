@@ -1,31 +1,29 @@
-import {Card} from "@/components/ui/card";
-import {Image, ImageSourcePropType} from "react-native";
-import {VStack} from "@/components/ui/vstack";
-import {Heading} from "@/components/ui/heading";
-import {Text} from "@/components/ui/text";
+import { VStack } from '@/components/ui/vstack';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { HStack } from '../ui/hstack';
+import Animated, { SlideInLeft } from 'react-native-reanimated';
 
 type IntroCardProps = {
-    title: string;
-    description: string;
-    imageUrl: ImageSourcePropType;
-}
+  title: string;
+  description: string;
+};
 
-export const IntroCard = ({title, description, imageUrl}: IntroCardProps) => {
-    return (
-        <Card className="p-5 rounded-lg max-w-[360px] m-3">
-            <Image
-                source={imageUrl}
-                className="w-full h-4/6"
-                resizeMode="contain"
-            />
-            <VStack className="mb-6">
-                <Heading className="text-3xl text-center mb-2 text-typography-700">
-                    {title}
-                </Heading>
-                <Text className="text-md text-center">
-                    {description}
-                </Text>
-            </VStack>
-        </Card>
-    )
-}
+export const IntroCard = ({ title, description }: IntroCardProps) => {
+  return (
+    <Animated.View
+      entering={SlideInLeft.delay(300).duration(1000).springify().damping(12)}
+    >
+      <HStack className="bg-transparent rounded-lg">
+        <VStack className="mb-6">
+          <Heading className="text-3xl text-tertiary-500 text-center mb-2 ">
+            {title}
+          </Heading>
+          <Text className="font-ubuntu-medium text-lg text-tertiary-500 text-center">
+            {description}
+          </Text>
+        </VStack>
+      </HStack>
+    </Animated.View>
+  );
+};

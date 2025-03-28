@@ -13,6 +13,7 @@ import { PlanOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import PlanCard from '@/components/cards/PlanCard';
 import { getPlansList } from '@/utils/services/plan.service';
+import { VStack } from '@/components/ui/vstack';
 
 export default function MyPlansScreen() {
   const router = useRouter();
@@ -40,11 +41,9 @@ export default function MyPlansScreen() {
       isPending={isPending}
       isRefetching={isRefetching}
     >
-      <Box className="flex-1 bg-gray-50">
-        <Box className="flex-row justify-between items-center p-4 bg-white border-b border-gray-100">
-          <Text className="text-2xl font-bold text-gray-900">
-            Nutrition Plans
-          </Text>
+      <VStack className="flex-1">
+        <Box className="flex-row justify-between items-center p-4 border-b border-primary-100">
+          <Text className="text-2xl font-bold">Nutrition Plans</Text>
           <Link href="/plans/my-plans/create">
             <Icon as={SoupIcon} className="w-8 h-8" />
           </Link>
@@ -69,7 +68,7 @@ export default function MyPlansScreen() {
           <FabIcon as={AddIcon} />
           <FabLabel>New Plan</FabLabel>
         </Fab>
-      </Box>
+      </VStack>
     </QueryStateHandler>
   );
 }

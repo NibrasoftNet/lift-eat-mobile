@@ -16,7 +16,7 @@ import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { Mail } from 'lucide-react-native';
 import { useMutation } from '@tanstack/react-query';
-import { useSignUp } from '@clerk/clerk-react';
+/* import { useSignUp } from '@clerk/clerk-react'; */
 import { useRouter } from 'expo-router';
 import { useToast } from '../ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
@@ -30,7 +30,7 @@ export default function AuthDrawer({
   showDrawer: boolean;
   setShowDrawer: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  /*  const { isLoaded, signUp, setActive } = useSignUp(); */
   const router = useRouter();
   const toast = useToast();
   const [otp, setOtp] = useState<string>('');
@@ -38,12 +38,15 @@ export default function AuthDrawer({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async () => {
-      if (!isLoaded) return;
+      await new Promise((resolve) =>
+        resolve({ success: true, message: 'Otp...' }),
+      );
+      router.replace('/analytics');
+      /*      if (!isLoaded) return;
       // Use the otp the user provided to attempt verification
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code: otp,
       });
-      console.log('qazxsw', signUpAttempt);
       // If verification was completed, set the session to active
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
@@ -53,7 +56,7 @@ export default function AuthDrawer({
         // If the status is not complete, check why. User may need to
         // complete further steps.
         console.error(JSON.stringify(signUpAttempt, null, 2));
-      }
+      }*/
     },
     onSuccess: async () => {
       toast.show({
@@ -95,7 +98,7 @@ export default function AuthDrawer({
 
   const handleResendOtp = async () => {
     try {
-      await signUp?.prepareEmailAddressVerification();
+      /* await signUp?.prepareEmailAddressVerification(); */
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
