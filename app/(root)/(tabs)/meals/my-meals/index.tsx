@@ -26,7 +26,7 @@ import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
 export default function MyMealsScreen() {
   const router = useRouter();
   const drizzleDb = useDrizzleDb();
-  const { user } = useSessionStore();
+  const { resetIngredients } = useIngredientStore();
   const [searchMealName, setSearchMealName] = useState<string | undefined>(
     undefined,
   );
@@ -75,7 +75,6 @@ export default function MyMealsScreen() {
     setSearchMealName(mealName);
     await refetch();
   };
-  const { resetIngredients } = useIngredientStore();
 
   const handleNewMeal = () => {
     resetIngredients();
@@ -120,7 +119,7 @@ export default function MyMealsScreen() {
             <MealCard item={item} index={index} />
           )}
           ListEmptyComponent={
-            <VStack className="w-full h-full items-center justify-center bg-red-500">
+            <VStack className="w-full h-full items-center justify-center">
               <Card className="items-center gap-4 border border-secondary-500">
                 <Icon as={SoupIcon} className="w-16 h-16" />
                 <Text>No meals available.</Text>

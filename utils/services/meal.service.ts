@@ -21,7 +21,7 @@ export const createNewMeal = async (
   totalMacros: TotalMacrosProps,
   creatorId: number,
 ) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  //await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
     console.log('Creating new meal...');
     const newMeal: Omit<MealOrmProps, 'id'> = {
@@ -74,8 +74,6 @@ export const getMealsList = async (
   mealType?: MealTypeEnum,
   mealName?: string,
 ) => {
-  // Simulate a delay (e.g., 2 seconds)
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   try {
     let query = drizzleDb.select().from(meals).$dynamic();
 
@@ -150,7 +148,6 @@ export const updateMeal = async (
   selectedIngredients: IngredientWithStandardProps[],
   totalMacros: TotalMacrosProps,
 ) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate delay
   try {
     console.log('Updating meal...');
 
@@ -211,8 +208,6 @@ export const deleteMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
   try {
     console.log(`Deleting meal with ID: ${mealId}...`);
 

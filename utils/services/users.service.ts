@@ -17,8 +17,6 @@ export const findOrCreateUser = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   email: string,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  await new Promise((resolve) => setTimeout(resolve, 5000));
   try {
     const userData = {
       email,
@@ -53,8 +51,6 @@ export const updateUser = async (
   userId: number,
   data: UserProfileFormData | UserDetailsFormData | UserGenderActivityFormData,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  await new Promise((resolve) => setTimeout(resolve, 5000));
   try {
     // Perform the update
     await drizzleDb

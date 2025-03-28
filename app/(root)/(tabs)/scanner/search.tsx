@@ -20,7 +20,6 @@ import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
-import { cuisineOptions } from '@/utils/constants/constant';
 import { FlashList } from '@shopify/flash-list';
 import OpenFoodSearchCard from '@/components/cards/OpenFoodSearchCard';
 import { useQuery } from '@tanstack/react-query';

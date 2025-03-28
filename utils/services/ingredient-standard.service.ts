@@ -7,8 +7,6 @@ export const getIngredientStandardList = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   ingredientName?: string,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
   try {
     // Fetch all meals
     let query = drizzleDb.select().from(ingredientsStandard).$dynamic();

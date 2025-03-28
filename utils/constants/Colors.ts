@@ -55,15 +55,19 @@ export const Colors = {
   },
   blue: {
     light: '#DBEAFE',
-    background: '#2337C6',
+    background: '#2563EB',
   },
   red: {
     light: '#FEE2E2',
     background: '#D60404',
   },
+  amber: {
+    light: '#FEE2E2',
+    background: '#D97706',
+  },
   green: {
     light: '#DCFCE7',
-    background: '#29CC29',
+    background: '#059669',
     icon: '#29CC29',
   },
 };
