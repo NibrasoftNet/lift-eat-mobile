@@ -40,17 +40,6 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
         <Text className={`text-gray-600 font-semibold text-center`}>
           {value} {unit}
         </Text>
-        {/*
-        <PieChart
-          donut
-          radius={10}
-          innerRadius={5}
-          data={[
-            { value: 70, color: 'purple' },
-            { value: 30, color: 'lightgray' },
-          ]}
-          innerCircleColor="gray"
-        />*/}
       </HStack>
     </Box>
   );

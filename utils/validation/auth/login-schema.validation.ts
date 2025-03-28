@@ -4,8 +4,10 @@ import { passwordSchema } from './password-schema.validation';
 export const loginSchema = z.object({
   email: z
     .string()
-    .email({ message: 'Email invalide!' })
-    .transform((val) => val.trim().toLowerCase()),
+    .transform((val) => val.trim().toLowerCase()) // Trim & lowercase first
+    .refine((val) => z.string().email().safeParse(val).success, {
+      message: 'Email invalide!',
+    }),
   password: passwordSchema,
 });
 

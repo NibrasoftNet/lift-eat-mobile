@@ -5,8 +5,10 @@ export const registerSchema = z.object({
   name: z.string().min(2).max(10),
   email: z
     .string()
-    .email({ message: 'Email invalide!' })
-    .transform((val) => val.trim().toLowerCase()),
+    .transform((val) => val.trim().toLowerCase()) // Trim & lowercase first
+    .refine((val) => z.string().email().safeParse(val).success, {
+      message: 'Email invalide!',
+    }),
   password: passwordSchema,
 });
 

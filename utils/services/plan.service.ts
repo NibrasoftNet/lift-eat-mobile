@@ -11,14 +11,16 @@ import {
 } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { NutritionGoalSchemaFormData } from '../validation/plan/nutrition-goal.validation';
-import { DayEnum, DayUnitArray, DailyPlanGeneratedWithEnum, PlanGeneratedWithEnum } from '../enum/general.enum';
+import {
+  DayUnitArray,
+  DailyPlanGeneratedWithEnum,
+  PlanGeneratedWithEnum,
+} from '../enum/general.enum';
 import { WeightUnitEnum } from '../enum/user-details.enum';
 
 export const getPlansList = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  await new Promise((resolve) => setTimeout(resolve, 5000));
   try {
     // Fetch all meals
     return await drizzleDb.query.plan.findMany();
@@ -32,8 +34,6 @@ export const getPlanDetails = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   planId: string,
 ) => {
-  // Simulate a delay (e.g., 5 seconds)
-  await new Promise((resolve) => setTimeout(resolve, 5000));
   try {
     // Fetch the plan
     const foundPlan = await drizzleDb.query.plan.findFirst({
@@ -134,7 +134,7 @@ export const getPlanWithDailyPlans = async (
 export const createPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   data: NutritionGoalSchemaFormData,
-  userId: number
+  userId: number,
 ): Promise<number> => {
   try {
     // Create a new plan object with appropriate data
@@ -180,15 +180,12 @@ export const createPlan = async (
 export const createDailyPlans = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   planId: number,
-  durationWeeks: number
+  durationWeeks: number,
 ): Promise<void> => {
   try {
-    // Calculate total days
-    const totalDays = durationWeeks * 7;
-    
     // Prepare data for bulk insertion
     const dailyPlansData: Omit<DailyPlanOrmProps, 'id'>[] = [];
-    
+
     for (let week = 1; week <= durationWeeks; week++) {
       // Create a plan for each day of the week
       for (const day of DayUnitArray) {
@@ -206,7 +203,7 @@ export const createDailyPlans = async (
         });
       }
     }
-    
+
     // Insert all daily plans in a single transaction
     await drizzleDb.insert(dailyPlan).values(dailyPlansData);
   } catch (error) {
@@ -221,7 +218,7 @@ export const createDailyPlans = async (
 export const updatePlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   planId: number,
-  data: Partial<PlanOrmProps>
+  data: Partial<PlanOrmProps>,
 ): Promise<void> => {
   try {
     await drizzleDb
@@ -242,27 +239,27 @@ export const updatePlan = async (
  */
 export const deletePlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
-  planId: number
+  planId: number,
 ): Promise<void> => {
   try {
     // Find all daily plans for this plan
     const dailyPlans = await drizzleDb.query.dailyPlan.findMany({
       where: eq(dailyPlan.planId, planId),
     });
-    
+
     // Get all daily plan IDs
-    const dailyPlanIds = dailyPlans.map(dp => dp.id);
-    
+    const dailyPlanIds = dailyPlans.map((dp) => dp.id);
+
     // Delete all meal relationships
     if (dailyPlanIds.length > 0) {
       await drizzleDb
         .delete(dailyPlanMeals)
         .where(inArray(dailyPlanMeals.dailyPlanId, dailyPlanIds));
     }
-    
+
     // Delete all daily plans
     await drizzleDb.delete(dailyPlan).where(eq(dailyPlan.planId, planId));
-    
+
     // Delete the plan
     await drizzleDb.delete(plan).where(eq(plan.id, planId));
   } catch (error) {
@@ -277,7 +274,7 @@ export const deletePlan = async (
 export const addMealToDailyPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   dailyPlanId: number,
-  mealId: number
+  mealId: number,
 ): Promise<void> => {
   try {
     // Add meal to daily plan
@@ -285,27 +282,28 @@ export const addMealToDailyPlan = async (
       dailyPlanId,
       mealId,
     });
-    
+
     // Get meal to update nutrition values
     const meal = await drizzleDb.query.meals.findFirst({
       where: eq(meals.id, mealId),
     });
-    
+
     if (!meal) {
       throw new Error('Meal not found');
     }
-    
+
     // Get daily plan current values
     const currentDailyPlan = await drizzleDb.query.dailyPlan.findFirst({
       where: eq(dailyPlan.id, dailyPlanId),
     });
-    
+
     if (!currentDailyPlan) {
       throw new Error('Daily plan not found');
     }
-    
+
     // Update daily plan nutrition values
-    await drizzleDb.update(dailyPlan)
+    await drizzleDb
+      .update(dailyPlan)
       .set({
         calories: currentDailyPlan.calories + meal.calories,
         carbs: currentDailyPlan.carbs + meal.carbs,
@@ -314,7 +312,7 @@ export const addMealToDailyPlan = async (
         updatedAt: new Date().toISOString(),
       })
       .where(eq(dailyPlan.id, dailyPlanId));
-      
+
     // Update total plan statistics as well
     const planQuery = await drizzleDb.query.dailyPlan.findFirst({
       where: eq(dailyPlan.id, dailyPlanId),
@@ -322,20 +320,27 @@ export const addMealToDailyPlan = async (
         planId: true,
       },
     });
-    
+
     if (planQuery) {
       const allDailyPlans = await drizzleDb.query.dailyPlan.findMany({
         where: eq(dailyPlan.planId, planQuery.planId),
       });
-      
+
       // Calculate total nutrition values for the plan
-      const totalCalories = allDailyPlans.reduce((sum, dp) => sum + dp.calories, 0);
+      const totalCalories = allDailyPlans.reduce(
+        (sum, dp) => sum + dp.calories,
+        0,
+      );
       const totalCarbs = allDailyPlans.reduce((sum, dp) => sum + dp.carbs, 0);
       const totalFat = allDailyPlans.reduce((sum, dp) => sum + dp.fat, 0);
-      const totalProtein = allDailyPlans.reduce((sum, dp) => sum + dp.protein, 0);
-      
+      const totalProtein = allDailyPlans.reduce(
+        (sum, dp) => sum + dp.protein,
+        0,
+      );
+
       // Update plan with new totals
-      await drizzleDb.update(plan)
+      await drizzleDb
+        .update(plan)
         .set({
           calories: totalCalories,
           carbs: totalCarbs,
