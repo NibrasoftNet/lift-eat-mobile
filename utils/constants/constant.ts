@@ -23,6 +23,8 @@ import {
   united_states,
 } from '@/utils/constants/flags';
 
+export const defaultPageSize = 10;
+
 export const activityOptions = [
   {
     level: PhysicalActivityEnum.LOW,
