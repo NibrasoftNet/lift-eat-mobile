@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { getIngredientStandardList } from '@/utils/services/ingredient-standard.service';
 import { CircleChevronDown, SearchIcon } from 'lucide-react-native';
@@ -23,6 +23,7 @@ import {
 import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
+import { ActivityIndicator } from 'react-native';
 
 export default function IngredientsDrawer({
   showIngredientsDrawer,
@@ -42,12 +43,18 @@ export default function IngredientsDrawer({
     isPending,
     isFetching,
     isLoading,
+    isFetchingNextPage,
     isRefetching,
     refetch,
-  } = useQuery({
-    queryKey: [`ingredients-standard-list`],
-    queryFn: async () =>
-      await getIngredientStandardList(drizzleDb, searchIngredientName),
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['ingredients-standard-list', searchIngredientName],
+    queryFn: ({ pageParam = 1 }) =>
+      getIngredientStandardList(drizzleDb, pageParam, 10, searchIngredientName),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    select: (data) => data.pages.flatMap((page) => page.data),
   });
 
   const handleIngredientNameSearch = async (
@@ -106,8 +113,18 @@ export default function IngredientsDrawer({
                   <IngredientStandardCard item={item} index={index} />
                 )}
                 keyExtractor={(item) => String(item.id)}
-                estimatedItemSize={20}
+                estimatedItemSize={300}
                 contentContainerStyle={{ padding: 8 }}
+                onEndReached={() => {
+                  console.log('hasNextPage', hasNextPage);
+                  if (hasNextPage) fetchNextPage();
+                }}
+                onEndReachedThreshold={0.8}
+                ListFooterComponent={() =>
+                  isFetchingNextPage ? (
+                    <ActivityIndicator size="large" color="#000" />
+                  ) : null
+                }
               />
             </QueryStateHandler>
           </VStack>
