@@ -32,9 +32,18 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { CloudAlert } from 'lucide-react-native';
+import { tokenCache } from '@/cache';
+import { ConvexReactClient } from 'convex/react';
+import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
+import { ConvexProviderWithClerk } from 'convex/react-clerk';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
+
+// Init convex client
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
+});
 
 const InitialLayout = () => {
   const router = useRouter();
@@ -43,7 +52,7 @@ const InitialLayout = () => {
     if (!user) {
       router.replace('/login');
     } else {
-      router.replace('/analytics');
+      router.replace('/intro');
     }
   }, []);
 
@@ -70,7 +79,14 @@ export default function ProjectLayout() {
   const db = drizzle(expoDb);
   const { success, error } = useMigrations(db, migrations);
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Ubuntu-Regular': require('../assets/fonts/Ubuntu-Regular.ttf'),
+    'Ubuntu-Bold': require('../assets/fonts/Ubuntu-Bold.ttf'),
+    'Ubuntu-BoldItalic': require('../assets/fonts/Ubuntu-BoldItalic.ttf'),
+    'Ubuntu-Italic': require('../assets/fonts/Ubuntu-Italic.ttf'),
+    'Ubuntu-Light': require('../assets/fonts/Ubuntu-Light.ttf'),
+    'Ubuntu-LightItalic': require('../assets/fonts/Ubuntu-LightItalic.ttf'),
+    'Ubuntu-Medium': require('../assets/fonts/Ubuntu-Medium.ttf'),
+    'Ubuntu-MediumItalic': require('../assets/fonts/Ubuntu-MediumItalic.ttf'),
   });
 
   const queryClient = new QueryClient({
@@ -84,9 +100,8 @@ export default function ProjectLayout() {
   useAppState();
 
   useEffect(() => {
-    console.log(success, 'errr', error);
     if (error) {
-      console.log('error occurred', error);
+      console.log('errr', error);
     }
     if (success) {
       addDummyData(db);
@@ -100,6 +115,7 @@ export default function ProjectLayout() {
   }, [loaded]);
 
   if (!loaded) {
+    console.log('Font not loaded');
     return null;
   }
 
@@ -114,7 +130,7 @@ export default function ProjectLayout() {
       <Icon as={CloudAlert} className="w-10 h-10 text-red-500" />
       <Text>Oops! Something went wrong:</Text>
       <Text>{error.toString()}</Text>
-      <Button className="w-full mt-10 text-white" onPress={resetError}>
+      <Button className="w-full mt-10 mx-2" onPress={resetError}>
         <ButtonText>Reset</ButtonText>
       </Button>
     </VStack>
@@ -124,20 +140,29 @@ export default function ProjectLayout() {
     <GluestackUIProvider mode="system">
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
-          <Suspense fallback={<ActivityIndicator size="large" />}>
-            <SQLiteProvider
-              databaseName={DATABASE_NAME}
-              options={{ enableChangeListener: true }}
-              useSuspense
-            >
-              <DrizzleProvider>
-                <ErrorBoundary FallbackComponent={ErrorFallback}>
-                  <InitialLayout />
-                  <StatusBar style="auto" hidden={true} />
-                </ErrorBoundary>
-              </DrizzleProvider>
-            </SQLiteProvider>
-          </Suspense>
+          <ClerkProvider
+            tokenCache={tokenCache}
+            publishableKey="pk_test_YW1hemluZy13ZXJld29sZi02NS5jbGVyay5hY2NvdW50cy5kZXYk"
+          >
+            <ClerkLoaded>
+              <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+                <Suspense fallback={<ActivityIndicator size="large" />}>
+                  <SQLiteProvider
+                    databaseName={DATABASE_NAME}
+                    options={{ enableChangeListener: true }}
+                    useSuspense
+                  >
+                    <DrizzleProvider>
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        <InitialLayout />
+                        <StatusBar style="auto" hidden={true} />
+                      </ErrorBoundary>
+                    </DrizzleProvider>
+                  </SQLiteProvider>
+                </Suspense>
+              </ConvexProviderWithClerk>
+            </ClerkLoaded>
+          </ClerkProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </GluestackUIProvider>
