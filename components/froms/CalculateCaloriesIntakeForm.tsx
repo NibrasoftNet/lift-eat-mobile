@@ -30,6 +30,8 @@ import {
 } from '@/utils/validation/plan/calculate-calories-intake.validation';
 import GenderFormInput from '@/components/forms-input/GenderFormInput';
 import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
+import MultiPurposeToast from '@/components/MultiPurposeToast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
 
 export default function CalculateCaloriesIntakeForm({
   defaultValues,
@@ -54,51 +56,92 @@ export default function CalculateCaloriesIntakeForm({
   });
 
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
-    console.log('calories', data);
+    try {
+      // Sauvegarder les données si nécessaire
+      console.log('calories', data);
+      
+      // Navigation vers l'étape suivante en utilisant un chemin relatif
+      router.push('/(root)/(tabs)/plans/my-plans/create/target');
+      
+      // Afficher un message de succès
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title="Data Saved"
+              description="Your calorie intake data has been saved successfully!"
+            />
+          );
+        },
+      });
+    } catch (error) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Error"
+              description={error instanceof Error ? error.message : 'An error occurred while saving your data'}
+            />
+          );
+        },
+      });
+    }
   };
 
   return (
-    <VStack space="md" className="w-full max-w-sm mx-auto mt-2">
+    <VStack space="lg" className="w-full max-w-sm mx-auto px-4 py-2">
       <Animated.View
         entering={FadeInDown.delay(300)}
-        className={`rounded-xl h-24 shadow-lg mb-4 overflow-hidden flex items-center justify-center`}
+        className="rounded-2xl overflow-hidden shadow-lg bg-white"
       >
         <ImageBackground
           source={GetGoalImages['GAIN_MUSCLE']}
-          className="size-full object-cover"
-          blurRadius={10}
+          className="w-full h-32"
+          blurRadius={8}
         >
-          <VStack className={`flex rounded-xl items-center m-4`}>
-            <View className={`w-48 rounded-t-xl bg-black py-0.5 px-2`}>
-              <Text className={`font-semibold text-center text-white`}>
-                Nutrition data
-              </Text>
-            </View>
-            <View className={`w-48 rounded-b-xl bg-gray-200 py-0.5 px-2`}>
-              <Text className={`text-gray-600 font-semibold text-center`}>
-                Update your data
-              </Text>
-            </View>
-          </VStack>
+          <View className="h-full bg-black/30 justify-center items-center">
+            <Text className="text-xl font-bold text-white mb-2">
+              Nutrition Data
+            </Text>
+            <Text className="text-sm text-gray-200">
+              Calculate your daily needs
+            </Text>
+          </View>
         </ImageBackground>
       </Animated.View>
-      <Card>
+
+      <Card className="rounded-xl shadow-sm bg-white p-4">
+        <Text className="text-lg font-semibold text-gray-800 mb-4">
+          Personal Information
+        </Text>
+        
         {/* Age Input */}
-        <FormControl isInvalid={!!errors.age}>
+        <FormControl isInvalid={!!errors.age} className="mb-4">
           <FormControlLabel>
-            <FormControlLabelText>Age</FormControlLabelText>
+            <FormControlLabelText className="text-gray-700 font-medium">
+              Age
+            </FormControlLabelText>
           </FormControlLabel>
           <Controller
             control={control}
             name="age"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Input className="my-1" size="md">
+              <Input className="mt-1" size="md">
                 <InputField
                   keyboardType="numeric"
-                  placeholder="Age"
+                  placeholder="Enter your age"
                   onBlur={onBlur}
                   onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
                   value={value.toString()}
+                  className="bg-gray-50"
                 />
               </Input>
             )}
@@ -111,30 +154,39 @@ export default function CalculateCaloriesIntakeForm({
           )}
         </FormControl>
       </Card>
+
       {/* Gender Selection */}
-      <GenderFormInput
-        defaultGender={defaultValues.gender}
-        setValue={setValue}
-      />
+      <Card className="rounded-xl shadow-sm bg-white p-4">
+        <GenderFormInput
+          defaultGender={defaultValues.gender}
+          setValue={setValue}
+        />
+      </Card>
+
       {/* Physical activity Selection */}
-      <PhysicalActivityFormInput
-        defaultPhysicalActivity={defaultValues.physicalActivity}
-        setValue={setValue}
-      />
-      {/* Activity Selection (2x2 Grid) */}
-      <HStack className="w-full justify-between items-center mt-4 gap-2">
-        {/* Submit Button */}
+      <Card className="rounded-xl shadow-sm bg-white p-4">
+        <PhysicalActivityFormInput
+          defaultPhysicalActivity={defaultValues.physicalActivity}
+          setValue={setValue}
+        />
+      </Card>
+
+      {/* Buttons */}
+      <HStack className="w-full justify-between items-center mt-4 px-2">
         <Button
-          className="w-2/5 bg-tertiary-500"
-          size="sm"
+          className="w-[45%] bg-gray-200"
+          size="lg"
+          variant="outline"
           onPress={() => router.back()}
         >
-          <ButtonText>Cancel</ButtonText>
+          <ButtonText className="text-gray-700">Cancel</ButtonText>
         </Button>
-        {/* Submit Button */}
-        <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>
-          {/*<ButtonSpinner color={Colors.light.icon} />*/}
-          <ButtonText>Create</ButtonText>
+        <Button
+          className="w-[45%] bg-blue-600"
+          size="lg"
+          onPress={handleSubmit(onSubmit)}
+        >
+          <ButtonText className="text-white">Continue</ButtonText>
         </Button>
       </HStack>
     </VStack>

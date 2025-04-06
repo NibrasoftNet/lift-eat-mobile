@@ -1,7 +1,6 @@
 import { VStack } from '@/components/ui/vstack';
 import React, { useState } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
 import { Controller, useForm } from 'react-hook-form';
@@ -25,7 +24,6 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
-import { Colors } from '@/utils/constants/Colors';
 import { GetGoalImages } from '@/utils/utils';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import {
@@ -126,51 +124,55 @@ export default function NutritionGoalForm({
   };
 
   return (
-    <VStack space="md" className="w-full max-w-sm mx-auto mt-2">
+    <VStack space="lg" className="w-full max-w-sm mx-auto px-4 py-2">
       <Animated.View
         entering={FadeInDown.delay(300)}
-        className={`rounded-xl h-24 shadow-lg mb-4 overflow-hidden flex items-center justify-center`}
+        className="rounded-2xl overflow-hidden shadow-lg bg-white"
       >
         <ImageBackground
           source={GetGoalImages['GAIN_MUSCLE']}
-          className="size-full object-cover"
-          blurRadius={10}
+          className="w-full h-32"
+          blurRadius={8}
         >
-          <VStack className={`flex rounded-xl items-center m-4`}>
-            <View className={`w-48 rounded-t-xl bg-black py-0.5 px-2`}>
-              <Text className={`font-semibold text-center text-white`}>
-                Nutrition data
-              </Text>
-            </View>
-            <View className={`w-48 rounded-b-xl bg-gray-200 py-0.5 px-2`}>
-              <Text className={`text-gray-600 font-semibold text-center`}>
-                Update your data
-              </Text>
-            </View>
-          </VStack>
+          <View className="h-full bg-black/30 justify-center items-center">
+            <Text className="text-xl font-bold text-white mb-2">
+              Set Your Goals
+            </Text>
+            <Text className="text-sm text-gray-200">
+              Define your nutrition targets
+            </Text>
+          </View>
         </ImageBackground>
       </Animated.View>
-      <Card className="rounded-lg flex flex-col gap-2">
-        {/* Initial Goal Input */}
-        <FormControl isInvalid={!!errors.initialWeight}>
+
+      <Card className="rounded-xl shadow-sm bg-white p-4">
+        <Text className="text-lg font-semibold text-gray-800 mb-4">
+          Weight Goals
+        </Text>
+
+        {/* Initial Weight Input */}
+        <FormControl isInvalid={!!errors.initialWeight} className="mb-4">
           <FormControlLabel>
-            <FormControlLabelText>Initial Weight</FormControlLabelText>
+            <FormControlLabelText className="text-gray-700 font-medium">
+              Initial Weight (kg)
+            </FormControlLabelText>
           </FormControlLabel>
           <Controller
             control={control}
             name="initialWeight"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                className="my-1"
+                className="mt-1"
                 size="md"
                 isDisabled={goalUnit === GoalEnum.MAINTAIN}
               >
                 <InputField
                   keyboardType="numeric"
-                  placeholder={`Enter you Goal ${goalUnit}`}
+                  placeholder="Enter your current weight"
                   onBlur={onBlur}
                   onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
                   value={value.toString()}
+                  className="bg-gray-50"
                 />
               </Input>
             )}
@@ -184,26 +186,30 @@ export default function NutritionGoalForm({
             </FormControlError>
           )}
         </FormControl>
-        {/* Target Goal Input */}
-        <FormControl isInvalid={!!errors.targetWeight}>
+
+        {/* Target Weight Input */}
+        <FormControl isInvalid={!!errors.targetWeight} className="mb-4">
           <FormControlLabel>
-            <FormControlLabelText>Target Weight</FormControlLabelText>
+            <FormControlLabelText className="text-gray-700 font-medium">
+              Target Weight (kg)
+            </FormControlLabelText>
           </FormControlLabel>
           <Controller
             control={control}
             name="targetWeight"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                className="my-1"
+                className="mt-1"
                 size="md"
                 isDisabled={goalUnit === GoalEnum.MAINTAIN}
               >
                 <InputField
                   keyboardType="numeric"
-                  placeholder={`Enter you Goal ${goalUnit}`}
+                  placeholder="Enter your target weight"
                   onBlur={onBlur}
                   onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
                   value={value.toString()}
+                  className="bg-gray-50"
                 />
               </Input>
             )}
@@ -217,75 +223,85 @@ export default function NutritionGoalForm({
             </FormControlError>
           )}
         </FormControl>
-        <Grid
-          className="w-full h-16 gap-2"
-          _extra={{ className: 'grid-cols-3' }}
-          style={{ position: 'relative' }}
-        >
-          <GridItem
-            _extra={{ className: 'col-span-1' }}
-            className="bg-gray-200 border border-gray-300 rounded-md"
+
+        {/* Goal Type Selection */}
+        <Text className="text-gray-700 font-medium mb-2">Goal Type</Text>
+        <View className="flex-row justify-between mb-4">
+          <Button
+            className={`flex-1 mx-1 ${
+              goalUnit === GoalEnum.MAINTAIN
+                ? 'bg-blue-600'
+                : 'bg-gray-200'
+            }`}
+            onPress={() => handleGoalUnitChange(GoalEnum.MAINTAIN)}
           >
-            <Button
-              onPress={() => handleGoalUnitChange(GoalEnum.MAINTAIN)}
-              className={`w-full h-full ${goalUnit === GoalEnum.MAINTAIN ? 'bg-blue-500' : 'bg-transparent'}`}
+            <ButtonText
+              className={
+                goalUnit === GoalEnum.MAINTAIN
+                  ? 'text-white'
+                  : 'text-gray-700'
+              }
             >
-              <ButtonText
-                className={`text-center ${goalUnit === GoalEnum.MAINTAIN ? 'text-white' : 'text-black'}`}
-              >
-                Maintain
-              </ButtonText>
-            </Button>
-          </GridItem>
-          <GridItem
-            _extra={{ className: 'col-span-1' }}
-            className="bg-gray-200 border border-gray-300 rounded-md"
+              Maintain
+            </ButtonText>
+          </Button>
+          <Button
+            className={`flex-1 mx-1 ${
+              goalUnit === GoalEnum.WEIGHT_LOSS
+                ? 'bg-blue-600'
+                : 'bg-gray-200'
+            }`}
+            onPress={() => handleGoalUnitChange(GoalEnum.WEIGHT_LOSS)}
           >
-            <Button
-              onPress={() => handleGoalUnitChange(GoalEnum.WEIGHT_LOSS)}
-              className={`w-full h-full ${goalUnit === GoalEnum.WEIGHT_LOSS ? 'bg-blue-500' : 'bg-transparent'}`}
+            <ButtonText
+              className={
+                goalUnit === GoalEnum.WEIGHT_LOSS
+                  ? 'text-white'
+                  : 'text-gray-700'
+              }
             >
-              <ButtonText
-                className={`text-center ${goalUnit === GoalEnum.WEIGHT_LOSS ? 'text-white' : 'text-black'}`}
-              >
-                Lose weight
-              </ButtonText>
-            </Button>
-          </GridItem>
-          <GridItem
-            _extra={{ className: 'col-span-1' }}
-            className="bg-gray-200 border border-gray-300 rounded-md"
+              Lose
+            </ButtonText>
+          </Button>
+          <Button
+            className={`flex-1 mx-1 ${
+              goalUnit === GoalEnum.GAIN_MUSCLE
+                ? 'bg-blue-600'
+                : 'bg-gray-200'
+            }`}
+            onPress={() => handleGoalUnitChange(GoalEnum.GAIN_MUSCLE)}
           >
-            <Button
-              onPress={() => handleGoalUnitChange(GoalEnum.GAIN_MUSCLE)}
-              className={`w-full h-full ${goalUnit === GoalEnum.GAIN_MUSCLE ? 'bg-blue-500' : 'bg-transparent'}`}
+            <ButtonText
+              className={
+                goalUnit === GoalEnum.GAIN_MUSCLE
+                  ? 'text-white'
+                  : 'text-gray-700'
+              }
             >
-              <ButtonText
-                className={`text-center ${goalUnit === GoalEnum.GAIN_MUSCLE ? 'text-white' : 'text-black'}`}
-              >
-                Gain Muscle
-              </ButtonText>
-            </Button>
-          </GridItem>
-        </Grid>
-      </Card>
-      <Card className="rounded-lg flex flex-col gap-2">
-        {/* Target Goal Input */}
-        <FormControl isInvalid={!!errors.durationWeeks}>
+              Gain
+            </ButtonText>
+          </Button>
+        </View>
+
+        {/* Duration Input */}
+        <FormControl isInvalid={!!errors.durationWeeks} className="mb-4">
           <FormControlLabel>
-            <FormControlLabelText>Target weeks</FormControlLabelText>
+            <FormControlLabelText className="text-gray-700 font-medium">
+              Duration (weeks)
+            </FormControlLabelText>
           </FormControlLabel>
           <Controller
             control={control}
             name="durationWeeks"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Input className="my-1" size="md">
+              <Input className="mt-1" size="md">
                 <InputField
                   keyboardType="numeric"
-                  placeholder={`Enter you Durantion in weeks`}
+                  placeholder="Enter duration in weeks"
                   onBlur={onBlur}
                   onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
                   value={value.toString()}
+                  className="bg-gray-50"
                 />
               </Input>
             )}
@@ -300,24 +316,28 @@ export default function NutritionGoalForm({
           )}
         </FormControl>
       </Card>
-      <HStack className="w-full justify-between items-center mt-4 gap-2">
-        {/* Submit Button */}
+
+      {/* Buttons */}
+      <HStack className="w-full justify-between items-center mt-4 px-2">
         <Button
-          className="w-2/5 bg-tertiary-500"
-          size="sm"
+          className="w-[45%] bg-gray-200"
+          size="lg"
+          variant="outline"
           onPress={() => router.back()}
         >
-          <ButtonText>Cancel</ButtonText>
+          <ButtonText className="text-gray-700">Cancel</ButtonText>
         </Button>
-        {/* Submit Button */}
-        <Button 
-          className="w-2/5" 
-          size="sm" 
+        <Button
+          className="w-[45%] bg-blue-600"
+          size="lg"
           onPress={handleSubmit(onSubmit)}
           isDisabled={isPending}
         >
-          {isPending && <ButtonSpinner color={Colors.light.icon} />}
-          <ButtonText>{operation === 'create' ? 'Create' : 'Update'}</ButtonText>
+          {isPending ? (
+            <ButtonSpinner color="white" />
+          ) : (
+            <ButtonText className="text-white">Create Plan</ButtonText>
+          )}
         </Button>
       </HStack>
     </VStack>
