@@ -2,8 +2,10 @@ import React from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
 import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
+import useSessionStore from '@/utils/store/sessionStore';
 
 export default function EditNutritionTarget() {
+  const { user } = useSessionStore();
   const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps =
     {
       initialWeight: 50,
@@ -15,6 +17,7 @@ export default function EditNutritionTarget() {
     <NutritionGoalForm
       defaultValues={nutritionGoalDefaultValueProps}
       operation='update'
+      userId={user?.id ?? 0}
     />
   );
 }
