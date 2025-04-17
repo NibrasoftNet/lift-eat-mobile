@@ -5,6 +5,8 @@ import * as schema from '@/db/schema';
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 import { View, ActivityIndicator } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 // ✅ Use the correct type for Drizzle database
 type DrizzleDbType = ExpoSQLiteDatabase<typeof schema> | null;
@@ -19,9 +21,10 @@ export const DrizzleProvider = ({ children }: { children: ReactNode }) => {
   // ✅ Ensure drizzleDb has the correct inferred type
   const drizzleDb = useMemo(() => {
     try {
+      logger.info(LogCategory.DATABASE, 'Initializing Drizzle ORM');
       return drizzle<typeof schema>(db, { schema });
     } catch (err) {
-      console.error('Failed to initialize Drizzle:', err);
+      logger.error(LogCategory.DATABASE, 'Failed to initialize Drizzle', err);
       setError(err instanceof Error ? err : new Error('Failed to initialize database'));
       return null;
     }
@@ -31,12 +34,30 @@ export const DrizzleProvider = ({ children }: { children: ReactNode }) => {
     const initDb = async () => {
       try {
         if (drizzleDb) {
-          // Vérifier que la base de données est accessible
-          await drizzleDb.query.users.findFirst();
+          logger.info(LogCategory.DATABASE, 'Vérification de l\'accès à la base de données');
+          
+          // Vérifier que chaque table est accessible pour détecter des problèmes spécifiques
+          try {
+            await drizzleDb.query.users.findFirst();
+            logger.info(LogCategory.DATABASE, 'Table users accessible');
+          } catch (tableErr) {
+            logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la table users', tableErr);
+            throw new Error(`Erreur d'accès à la table users: ${tableErr instanceof Error ? tableErr.message : String(tableErr)}`);
+          }
+          
+          // Vérifier les autres tables importantes
+          try {
+            await drizzleDb.query.meals.findFirst();
+            logger.info(LogCategory.DATABASE, 'Table meals accessible');
+          } catch (tableErr) {
+            logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la table meals', tableErr);
+          }
+          
+          logger.info(LogCategory.DATABASE, 'Base de données initialisée avec succès');
           setIsInitialized(true);
         }
       } catch (err) {
-        console.error('Database access error:', err);
+        logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la base de données', err);
         setError(err instanceof Error ? err : new Error('Failed to access database'));
       }
     };
@@ -47,10 +68,12 @@ export const DrizzleProvider = ({ children }: { children: ReactNode }) => {
   useDrizzleStudio(db);
 
   if (error) {
+    logger.error(LogCategory.DATABASE, 'Affichage de l\'erreur d\'initialisation', { message: error.message });
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text>Erreur d'initialisation de la base de données:</Text>
-        <Text>{error.message}</Text>
+        <Text className="text-lg font-bold mb-2">Erreur d'initialisation de la base de données:</Text>
+        <Text className="text-base mb-4">{error.message}</Text>
+        <Text className="text-sm mb-1 text-gray-600">Essayez de redémarrer l'application ou de réinstaller si le problème persiste.</Text>
       </View>
     );
   }
