@@ -7,24 +7,24 @@ import '@/global.css';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { useFonts } from 'expo-font';
 import ErrorBoundary from 'react-native-error-boundary';
-import { Stack, useRouter } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useOnlineManager } from '@/hooks/useOnlineManager';
 import { useAppState } from '@/hooks/useAppState';
-
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import { ActivityIndicator, GestureResponderEvent } from 'react-native';
+import { ActivityIndicator, GestureResponderEvent, View } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
+import MCPProvider from '@/utils/providers/MCPProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import '@/i18n';
 import { VStack } from '@/components/ui/vstack';
@@ -33,51 +33,23 @@ import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { CloudAlert } from 'lucide-react-native';
 import { tokenCache } from '@/cache';
-import { ConvexReactClient } from 'convex/react';
-import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import { ConvexProviderWithClerk } from 'convex/react-clerk';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
 
-// Init convex client
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
-  unsavedChangesWarning: false,
-});
-
-const InitialLayout = () => {
-  const router = useRouter();
-  const { user } = useSessionStore();
-  useEffect(() => {
-    if (!user) {
-      router.replace('/login');
-    } else {
-      router.replace('/intro');
-    }
-  }, []);
-
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'none',
-        orientation: 'portrait',
-        navigationBarHidden: true,
-        statusBarHidden: true,
-      }}
-    >
-      <Stack.Screen name="(root)" options={{ headerShown: false }} />
-      <Stack.Screen name="intro" options={{ headerShown: false }} />
-      <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-    </Stack>
-  );
-};
+// Temporarily commented out for Convex branch work
+// const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+//   unsavedChangesWarning: false,
+// });
 
 export default function ProjectLayout() {
   const colorScheme = useColorScheme();
+  const [isDbReady, setIsDbReady] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
   const expoDb = openDatabaseSync(DATABASE_NAME);
   const db = drizzle(expoDb);
-  const { success, error } = useMigrations(db, migrations);
+  const { success, error: migrationError } = useMigrations(db, migrations);
   const [loaded] = useFonts({
     'Ubuntu-Regular': require('../assets/fonts/Ubuntu-Regular.ttf'),
     'Ubuntu-Bold': require('../assets/fonts/Ubuntu-Bold.ttf'),
@@ -90,33 +62,68 @@ export default function ProjectLayout() {
   });
 
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: 2 } },
+    defaultOptions: { 
+      queries: { 
+        retry: 2,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 30, // 30 minutes
+      } 
+    },
   });
-  // Enable Tanstack query dev tools
-  useReactQueryDevTools(queryClient);
 
   // Use the custom hooks
   useOnlineManager();
   useAppState();
 
   useEffect(() => {
-    if (error) {
-      console.log('errr', error);
-    }
-    if (success) {
-      addDummyData(db);
-    }
-  }, [success]);
+    const initDb = async () => {
+      try {
+        if (migrationError) {
+          throw migrationError;
+        }
+        if (success) {
+          await addDummyData(db);
+          setIsDbReady(true);
+        }
+      } catch (err) {
+        console.error('Database initialization error:', err);
+        setError(err instanceof Error ? err : new Error('Database initialization failed'));
+      }
+    };
+
+    initDb();
+  }, [success, migrationError]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    const hideSplash = async () => {
+      try {
+        if (loaded && isDbReady) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (err) {
+        console.error('Error hiding splash screen:', err);
+      }
+    };
 
-  if (!loaded) {
-    console.log('Font not loaded');
-    return null;
+    hideSplash();
+  }, [loaded, isDbReady]);
+
+  if (!loaded || !isDbReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <VStack className="size-full items-center justify-center gap-4 p-4">
+        <Icon as={CloudAlert} className="w-10 h-10 text-red-500" />
+        <Text>Une erreur est survenue lors de l'initialisation:</Text>
+        <Text>{error.message}</Text>
+      </VStack>
+    );
   }
 
   const ErrorFallback = ({
@@ -128,10 +135,10 @@ export default function ProjectLayout() {
   }) => (
     <VStack className="size-full items-center justify-center gap-4 p-4">
       <Icon as={CloudAlert} className="w-10 h-10 text-red-500" />
-      <Text>Oops! Something went wrong:</Text>
+      <Text>Une erreur est survenue:</Text>
       <Text>{error.toString()}</Text>
       <Button className="w-full mt-10 mx-2" onPress={resetError}>
-        <ButtonText>Reset</ButtonText>
+        <ButtonText>Réessayer</ButtonText>
       </Button>
     </VStack>
   );
@@ -140,29 +147,36 @@ export default function ProjectLayout() {
     <GluestackUIProvider mode="system">
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
-          <ClerkProvider
+          {/* Temporarily commented out for Convex branch work */}
+          {/* <ClerkProvider
             tokenCache={tokenCache}
-            publishableKey="pk_test_YW1hemluZy13ZXJld29sZi02NS5jbGVyay5hY2NvdW50cy5kZXYk"
+            publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
           >
             <ClerkLoaded>
-              <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-                <Suspense fallback={<ActivityIndicator size="large" />}>
+              <ConvexProviderWithClerk client={convex} useAuth={useAuth}> */}
+                <Suspense fallback={
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                }>
                   <SQLiteProvider
                     databaseName={DATABASE_NAME}
                     options={{ enableChangeListener: true }}
                     useSuspense
                   >
                     <DrizzleProvider>
-                      <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        <InitialLayout />
-                        <StatusBar style="auto" hidden={true} />
-                      </ErrorBoundary>
+                      <MCPProvider>
+                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                          <Slot />
+                          <StatusBar style="auto" hidden={true} />
+                        </ErrorBoundary>
+                      </MCPProvider>
                     </DrizzleProvider>
                   </SQLiteProvider>
                 </Suspense>
-              </ConvexProviderWithClerk>
+              {/* </ConvexProviderWithClerk>
             </ClerkLoaded>
-          </ClerkProvider>
+          </ClerkProvider> */}
         </QueryClientProvider>
       </ThemeProvider>
     </GluestackUIProvider>

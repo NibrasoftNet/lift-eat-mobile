@@ -10,12 +10,32 @@
     },
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "distribution": "internal",
+        "gradleCommand": ":app:assembleRelease",
+        "withoutCredentials": true
       },
-      "distribution": "internal"
+      "env": {
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_API_URL": "https://example.com/api"
+      }
     },
     "production": {
       "autoIncrement": true
+    },
+    "local": {
+      "android": {
+        "buildType": "apk",
+        "distribution": "internal",
+        "gradleCommand": ":app:assembleRelease",
+        "withoutCredentials": true,
+        "releaseChannel": "default"
+      },
+      "extends": "preview",
+      "env": {
+        "EXPO_PUBLIC_DEBUG_MODE": "false",
+        "EXPO_PUBLIC_API_URL": "https://example.com/api"
+      }
     }
   },
   "submit": {

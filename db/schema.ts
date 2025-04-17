@@ -183,11 +183,17 @@ export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
   dailyPlanId: integer('daily_plan_id')
     .references(() => dailyPlan.id) // References the id column in dailyPlan
     .notNull(),
-
   // Foreign key to meals table
   mealId: integer('meal_id')
     .references(() => meals.id) // References the id column in meals
     .notNull(),
+  // Quantity in grams
+  quantity: real('quantity').notNull().default(10),
+  // Calculated nutritional values for this specific meal-plan relation
+  calories: real('calories'),
+  carbs: real('carbs'),
+  fat: real('fat'),
+  protein: real('protein'),
 });
 
 // Plan Table

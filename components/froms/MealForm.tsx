@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, Link } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Box } from '../ui/box';
@@ -89,7 +89,7 @@ export default function MealForm({
   const router = useRouter();
   const toast = useToast();
   const { user } = useSessionStore();
-  const { selectedIngredients, totalMacros } = useIngredientStore();
+  const { selectedIngredients, totalMacros, totalWeight, mealWeight, setMealWeight } = useIngredientStore();
   const [image, setImage] = useState<
     Buffer<ArrayBufferLike> | string | undefined
   >(`${defaultValues.image}`);
@@ -109,6 +109,15 @@ export default function MealForm({
     resolver: zodResolver(mealSchema),
     defaultValues,
   });
+  
+  // Synchronize the meal weight with the total ingredients weight
+  useEffect(() => {
+    if (operation === 'create' || (operation === 'update' && totalWeight > 0 && mealWeight === 0)) {
+      // Only auto-update if we're creating a new meal or if updating a meal with no previously set mealWeight
+      setValue('quantity', totalWeight);
+      setMealWeight(totalWeight);
+    }
+  }, [totalWeight, setValue, setMealWeight, operation, mealWeight]);
 
   // Handle the image picker logic
   const handleImagePicker = async () => {
@@ -478,9 +487,12 @@ export default function MealForm({
                           placeholder="Quantity"
                           onBlur={onBlur}
                           aria-valuemin={1}
-                          onChangeText={(val) =>
-                            onChange(val ? parseInt(val, 10) : 0)
-                          }
+                          onChangeText={(val) => {
+                            const newValue = val ? parseInt(val, 10) : 0;
+                            onChange(newValue);
+                            // Update the meal weight in the store when the user changes the quantity
+                            setMealWeight(newValue);
+                          }}
                           value={value.toString()}
                         />
                       </Input>
@@ -499,11 +511,13 @@ export default function MealForm({
             </Grid>
           </Card>
           <MacrosInfoCard
-            calories={totalMacros?.totalCalories!}
-            carbs={totalMacros?.totalCarbs!}
-            fats={totalMacros?.totalFats!}
-            protein={totalMacros?.totalProtein!}
-            unit="Gr"
+            calories={totalMacros.totalCalories}
+            carbs={totalMacros.totalCarbs}
+            fats={totalMacros.totalFats}
+            protein={totalMacros.totalProtein}
+            unit={defaultValues.unit}
+            totalWeight={totalWeight}
+            mealWeight={mealWeight}
           />
           {selectedIngredients.length ? (
             <FlashList

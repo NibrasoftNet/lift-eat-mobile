@@ -20,6 +20,7 @@ import {
 } from '@/db/seeds';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
+import { eq, sql } from 'drizzle-orm';
 
 // Static image paths using require()
 const images = {
@@ -115,22 +116,47 @@ async function prepareMealsWithImages() {
 // Function to add dummy data
 export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   console.log('Adding seed data...');
-  const value = AsyncStorage.getItemSync('dbInitialized');
-
-  if (value) {
-    console.log('Seed data already exists ...');
-    return;
-    /*db.run(sql`DELETE FROM ${users}`);
-    db.run(sql`DELETE FROM ${ingredientsStandard}`);
+  
+  // Vérifier si les données existent déjà dans la base de données
+  // au lieu de se fier uniquement au flag dans AsyncStorage
+  try {
+    // Vérifier si la table meals contient des données
+    const existingMeals = await db.select({ count: sql`count(*)` }).from(meals).get();
+    const existingPlans = await db.select({ count: sql`count(*)` }).from(plan).get();
+    const existingIngredients = await db.select({ count: sql`count(*)` }).from(ingredientsStandard).get();
+    
+    // Convertir les résultats en nombres pour comparaison
+    const mealsCount = existingMeals ? Number(existingMeals.count) : 0;
+    const plansCount = existingPlans ? Number(existingPlans.count) : 0; 
+    const ingredientsCount = existingIngredients ? Number(existingIngredients.count) : 0;
+    
+    // Si toutes les tables principales contiennent des données, on considère que la DB est initialisée
+    if (mealsCount > 0 && plansCount > 0 && ingredientsCount > 0) {
+      console.log('Les données seed existent déjà dans la base de données...');
+      // Mettre à jour le flag pour la prochaine fois
+      AsyncStorage.setItemSync('dbInitialized', 'true');
+      return;
+    }
+    
+    // Si on arrive ici, c'est que les tables sont vides ou incomplètes, alors on charge les données
+    console.log('Les tables sont vides, chargement des données seed...');
+    
+    // On s'assure que les tables sont vides avant de charger les données
+    db.run(sql`DELETE FROM ${dailyPlanMeals}`);
+    db.run(sql`DELETE FROM ${dailyPlan}`);
+    db.run(sql`DELETE FROM ${plan}`);
     db.run(sql`DELETE FROM ${mealIngredients}`);
     db.run(sql`DELETE FROM ${meals}`);
-    db.run(sql`DELETE FROM ${dailyPlan}`);
-    db.run(sql`DELETE FROM ${dailyPlanMeals}`);
-    db.run(sql`DELETE FROM ${plan}`);*/
+    db.run(sql`DELETE FROM ${ingredientsStandard}`);
+    db.run(sql`DELETE FROM ${users}`);
+    
+  } catch (error) {
+    console.error('Erreur lors de la vérification des données existantes:', error);
+    // En cas d'erreur, on suppose que les tables n'existent pas et on continue l'initialisation
   }
 
-  console.log('Inserting new list...');
-
+  console.log('Insertion des nouvelles données seed...');
+  
   // Process users with images
   const usersWithImage = await prepareUserWithImages();
   console.log('Preparation Users completed: success...');
@@ -220,15 +246,38 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   const dailyPlanMealsData: Omit<
     DailyPlanMealsOrmProps,
     'id' | 'createdAt' | 'updatedAt'
-  >[] = dailyPlanIds.map((dailyPlan) => {
-    const selectedMealId =
-      mealIds[Math.floor(Math.random() * mealIds.length)].id;
-
-    return {
-      dailyPlanId: dailyPlan.id,
-      mealId: selectedMealId,
-    };
-  });
+  >[] = await Promise.all(dailyPlanIds.map(async (dailyPlan) => {
+    const selectedMealId = mealIds[Math.floor(Math.random() * mealIds.length)].id;
+    
+    // Récupérer les informations nutritionnelles du repas sélectionné
+    try {
+      const selectedMeal = await db.select().from(meals).where(eq(meals.id, selectedMealId)).get();
+      
+      // Utiliser les valeurs du repas sélectionné
+      return {
+        dailyPlanId: dailyPlan.id,
+        mealId: selectedMealId,
+        quantity: 1, // Quantité par défaut (100% de la portion originale)
+        calories: selectedMeal?.calories || 0,
+        carbs: selectedMeal?.carbs || 0,
+        fat: selectedMeal?.fat || 0,
+        protein: selectedMeal?.protein || 0
+      };
+    } catch (error) {
+      console.error('Error retrieving meal data for seeding:', error);
+      
+      // En cas d'erreur, utiliser des valeurs par défaut
+      return {
+        dailyPlanId: dailyPlan.id,
+        mealId: selectedMealId,
+        quantity: 1,
+        calories: 0,
+        carbs: 0,
+        fat: 0,
+        protein: 0
+      };
+    }
+  }));
 
   await db.insert(dailyPlanMeals).values(dailyPlanMealsData);
   console.log('Inserting Daily Plan Meals completed: success...');

@@ -91,9 +91,9 @@ export default function PlanDetailsScreen() {
   };
 
   // Fonction pour ajouter un repas au plan journalier
-  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number) => {
+  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10) => {
     try {
-      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId);
+      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity);
       return true;
     } catch (error) {
       console.error('Error adding meal to plan:', error);

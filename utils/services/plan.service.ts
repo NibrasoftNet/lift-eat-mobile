@@ -275,15 +275,10 @@ export const addMealToDailyPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   dailyPlanId: number,
   mealId: number,
+  quantity: number = 10, // Default to 10 grams
 ): Promise<void> => {
   try {
-    // Add meal to daily plan
-    await drizzleDb.insert(dailyPlanMeals).values({
-      dailyPlanId,
-      mealId,
-    });
-
-    // Get meal to update nutrition values
+    // Get meal to calculate nutrition values
     const meal = await drizzleDb.query.meals.findFirst({
       where: eq(meals.id, mealId),
     });
@@ -291,6 +286,26 @@ export const addMealToDailyPlan = async (
     if (!meal) {
       throw new Error('Meal not found');
     }
+
+    // Calculer le ratio de la quantité demandée par rapport à la quantité d'origine du repas
+    const ratio = quantity / meal.quantity;
+
+    // Calculate adjusted nutritional values based on ratio
+    const adjustedCalories = meal.calories * ratio;
+    const adjustedCarbs = meal.carbs * ratio;
+    const adjustedFat = meal.fat * ratio;
+    const adjustedProtein = meal.protein * ratio;
+
+    // Add meal to daily plan with custom quantity and calculated nutritional values
+    await drizzleDb.insert(dailyPlanMeals).values({
+      dailyPlanId,
+      mealId,
+      quantity,
+      calories: adjustedCalories,
+      carbs: adjustedCarbs,
+      fat: adjustedFat,
+      protein: adjustedProtein,
+    });
 
     // Get daily plan current values
     const currentDailyPlan = await drizzleDb.query.dailyPlan.findFirst({
@@ -301,14 +316,14 @@ export const addMealToDailyPlan = async (
       throw new Error('Daily plan not found');
     }
 
-    // Update daily plan nutrition values
+    // Update daily plan nutrition values with the adjusted values
     await drizzleDb
       .update(dailyPlan)
       .set({
-        calories: currentDailyPlan.calories + meal.calories,
-        carbs: currentDailyPlan.carbs + meal.carbs,
-        fat: currentDailyPlan.fat + meal.fat,
-        protein: currentDailyPlan.protein + meal.protein,
+        calories: currentDailyPlan.calories + adjustedCalories,
+        carbs: currentDailyPlan.carbs + adjustedCarbs,
+        fat: currentDailyPlan.fat + adjustedFat,
+        protein: currentDailyPlan.protein + adjustedProtein,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(dailyPlan.id, dailyPlanId));

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { getMealsList } from '@/utils/services/meal.service';
-import { CircleChevronDown, SearchIcon } from 'lucide-react-native';
+import { CircleChevronDown, SearchIcon, MinusCircle, PlusCircle } from 'lucide-react-native';
 /* Custom Providers */
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite/driver';
@@ -43,16 +43,35 @@ interface MealsDrawerProps {
   planId: number;
   onMealsAdded?: () => Promise<void>;
   drizzleDb: ExpoSQLiteDatabase<typeof schema>;
-  onAddMealToPlan: (dailyPlanId: number, mealId: number) => Promise<boolean>;
+  onAddMealToPlan: (dailyPlanId: number, mealId: number, quantity: number) => Promise<boolean>;
 }
 
 // Version simplifiée du composant MealCard pour le contexte du drawer
-const SimpleMealCard: React.FC<{ 
-  item: MealOrmProps; 
+const SimpleMealCard: React.FC<{
+  item: MealOrmProps;
   index: number;
   isSelected: boolean;
   onToggle: () => void;
-}> = ({ item, index, isSelected, onToggle }) => {
+  onAdjustQuantity: (newQuantity: number) => void;
+  quantity?: number;
+}> = ({ item, index, isSelected, onToggle, onAdjustQuantity, quantity = 10 }) => {
+  const [inputQuantity, setInputQuantity] = useState(quantity.toString());
+
+  const handleQuantityChange = (value: string) => {
+    const newValue = parseInt(value) || 0;
+    setInputQuantity(value);
+    if (newValue > 0) {
+      onAdjustQuantity(newValue);
+    }
+  };
+
+  const adjustQuantity = (increment: boolean) => {
+    const step = 10;
+    const newQuantity = increment ? quantity + step : Math.max(1, quantity - step);
+    setInputQuantity(newQuantity.toString());
+    onAdjustQuantity(newQuantity);
+  };
+
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 50)}
@@ -92,10 +111,38 @@ const SimpleMealCard: React.FC<{
             </Text>
           </Box>
         </HStack>
+        
+        {isSelected && (
+          <HStack space="sm" className="mt-2 items-center justify-end">
+            <Pressable onPress={() => adjustQuantity(false)}>
+              <MinusCircle size={24} color="#666" />
+            </Pressable>
+            <Input
+              size="sm"
+              variant="outline"
+              className="w-20"
+            >
+              <InputField
+                textAlign="center"
+                value={inputQuantity}
+                onChangeText={handleQuantityChange}
+                inputMode="numeric"
+              />
+            </Input>
+            <Text className="text-gray-600">g</Text>
+            <Pressable onPress={() => adjustQuantity(true)}>
+              <PlusCircle size={24} color="#666" />
+            </Pressable>
+          </HStack>
+        )}
       </Pressable>
     </Animated.View>
   );
 };
+
+interface MealQuantities {
+  [mealId: number]: number;
+}
 
 const MealsDrawer: React.FC<MealsDrawerProps> = ({
   showMealsDrawer,
@@ -112,6 +159,7 @@ const MealsDrawer: React.FC<MealsDrawerProps> = ({
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineTypeEnum | undefined>(undefined);
   // État pour les repas sélectionnés
   const [selectedMeals, setSelectedMeals] = useState<MealOrmProps[]>([]);
+  const [mealQuantities, setMealQuantities] = useState<MealQuantities>({});
   
   // Hooks utilisables partout
   const toast = useToast();
@@ -162,15 +210,34 @@ const MealsDrawer: React.FC<MealsDrawerProps> = ({
     await refetch();
   };
 
-  // Fonction pour gérer la sélection d'un repas
-  const toggleMealSelection = (meal: MealOrmProps) => {
-    if (selectedMeals.some(selected => selected.id === meal.id)) {
+  // Fonction pour gérer la sélection des repas
+  const handleMealToggle = (meal: MealOrmProps) => {
+    const isSelected = selectedMeals.some((m) => m.id === meal.id);
+    
+    if (isSelected) {
       // Désélectionner le repas
-      setSelectedMeals(selectedMeals.filter(selected => selected.id !== meal.id));
+      setSelectedMeals(selectedMeals.filter((m) => m.id !== meal.id));
+      
+      // Supprimer la quantité enregistrée pour ce repas
+      const updatedQuantities = { ...mealQuantities };
+      delete updatedQuantities[meal.id];
+      setMealQuantities(updatedQuantities);
     } else {
-      // Sélectionner le repas
+      // Sélectionner le repas et initialiser sa quantité
       setSelectedMeals([...selectedMeals, meal]);
+      setMealQuantities({
+        ...mealQuantities,
+        [meal.id]: 10, // Valeur par défaut (10g)
+      });
     }
+  };
+  
+  // Fonction pour ajuster la quantité d'un repas sélectionné
+  const adjustQuantity = (mealId: number, newQuantity: number) => {
+    setMealQuantities({
+      ...mealQuantities,
+      [mealId]: newQuantity,
+    });
   };
 
   // Fonction pour ajouter les repas sélectionnés au plan
@@ -190,9 +257,10 @@ const MealsDrawer: React.FC<MealsDrawerProps> = ({
     }
 
     try {
-      // Ajouter chaque repas sélectionné au plan journalier en utilisant la fonction passée en props
+      // Ajouter chaque repas sélectionné au plan journalier avec sa quantité personnalisée
       for (const meal of selectedMeals) {
-        const success = await onAddMealToPlan(dailyPlanId, meal.id);
+        const mealQuantity = mealQuantities[meal.id] || 10; // Utiliser la quantité personnalisée ou 10 par défaut
+        const success = await onAddMealToPlan(dailyPlanId, meal.id, mealQuantity);
         if (!success) {
           throw new Error("Erreur lors de l'ajout du repas au plan");
         }
@@ -213,27 +281,25 @@ const MealsDrawer: React.FC<MealsDrawerProps> = ({
           );
         },
       });
-
-      // Réinitialiser la sélection
-      setSelectedMeals([]);
       
-      // Fermer le drawer
+      // Vider la sélection et fermer le drawer
+      setSelectedMeals([]);
+      setMealQuantities({});
       setShowMealsDrawer(false);
       
-      // Rafraîchir les données
+      // Callback pour rafraîchir les données du plan
       if (onMealsAdded) {
         await onMealsAdded();
       }
+      
     } catch (error) {
-      console.error("Error adding meals to plan:", error);
+      console.error("Erreur lors de l'ajout des repas:", error);
       toast.show({
         placement: "top",
         render: ({ id }) => {
           return (
             <Toast action="error" variant="solid">
-              <ToastTitle>
-                {error instanceof Error ? error.message : "Erreur lors de l'ajout des repas"}
-              </ToastTitle>
+              <ToastTitle>Erreur lors de l'ajout des repas</ToastTitle>
             </Toast>
           );
         },
@@ -400,7 +466,9 @@ const MealsDrawer: React.FC<MealsDrawerProps> = ({
                         item={item} 
                         index={index}
                         isSelected={selectedMeals.some(meal => meal.id === item.id)}
-                        onToggle={() => toggleMealSelection(item)}
+                        onToggle={() => handleMealToggle(item)}
+                        onAdjustQuantity={(newQuantity) => adjustQuantity(item.id, newQuantity)}
+                        quantity={mealQuantities[item.id]}
                       />
                     )}
                     keyExtractor={(item) => String(item.id)}
