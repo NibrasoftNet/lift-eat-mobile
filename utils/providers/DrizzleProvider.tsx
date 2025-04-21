@@ -53,6 +53,21 @@ export const DrizzleProvider = ({ children }: { children: ReactNode }) => {
             logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la table meals', tableErr);
           }
           
+          // Vérifier l'accès aux nouvelles tables de progression
+          try {
+            await drizzleDb.query.dailyProgress.findFirst();
+            logger.info(LogCategory.DATABASE, 'Table dailyProgress accessible');
+          } catch (tableErr) {
+            logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la table dailyProgress', tableErr);
+          }
+          
+          try {
+            await drizzleDb.query.dailyMealProgress.findFirst();
+            logger.info(LogCategory.DATABASE, 'Table dailyMealProgress accessible');
+          } catch (tableErr) {
+            logger.error(LogCategory.DATABASE, 'Erreur d\'accès à la table dailyMealProgress', tableErr);
+          }
+          
           logger.info(LogCategory.DATABASE, 'Base de données initialisée avec succès');
           setIsInitialized(true);
         }

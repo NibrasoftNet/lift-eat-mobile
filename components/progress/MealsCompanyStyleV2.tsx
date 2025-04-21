@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import {
   GestureHandlerRootView,
@@ -13,13 +13,37 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
+import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
+import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
+import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { markMealAsConsumed } from '@/utils/services/progress.service';
+import { useToast } from '../ui/toast';
+import { Box } from '../ui/box';
+
+// Extension du type MealWithProgress pour inclure dailyPlanMealId
+interface MealWithProgressExtended extends MealWithProgress {
+  dailyPlanMealId?: number;
+}
+
+interface MealsCompanyStyleV2Props {
+  selectedDate: string;
+  dailyProgress: DailyProgressOrmProps;
+  mealsWithProgress: MealWithProgress[];
+  onMealStatusChange: () => void;
+}
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
 
 type Item = {
-  id: string;
-  text: string;
+  id: number;
+  name: string;
+  type: string;
   mealType: MealType;
+  carbs: number;
+  protein: number;
+  fat: number;
+  progress?: DailyMealProgressOrmProps | null;
+  dailyPlanMealId?: number;
 };
 
 type MealList = {
@@ -114,6 +138,14 @@ const DraggableItem = ({
                     droppedOnMealType = 'snacks';
                   }
 
+                  console.log("Dropped at:", {
+                    x: nativeEvent.absoluteX,
+                    y: nativeEvent.absoluteY,
+                    relativeY,
+                    droppedOnRight,
+                    droppedOnMealType
+                  });
+
                   translateX.value = withSpring(0);
                   translateY.value = withSpring(0);
                   runOnJS(onDragEnd)(droppedOnRight, droppedOnMealType);
@@ -128,8 +160,8 @@ const DraggableItem = ({
                   animatedStyle,
                 ]}
               >
-                <Text>{item.text}</Text>
-                <Text style={styles.mealTypeText}>{item.mealType}</Text>
+                <Text>{item.name}</Text>
+                <Text style={styles.mealTypeText}>{item.type}</Text>
               </Animated.View>
             </PanGestureHandler>
           </Animated.View>
@@ -139,24 +171,22 @@ const DraggableItem = ({
   );
 };
 
-const MealsSelect = () => {
+const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
+  selectedDate,
+  dailyProgress,
+  mealsWithProgress,
+  onMealStatusChange,
+}) => {
+  const drizzleDb = useDrizzleDb();
+  const toast = useToast();
+  const { setMealsWithProgress } = useProgressStore();
+
+  // Initialize empty lists
   const initialLeftList: MealList = {
-    breakfast: [
-      { id: '1', text: 'Oatmeal', mealType: 'breakfast' },
-      { id: '2', text: 'Yogurt', mealType: 'breakfast' },
-    ],
-    lunch: [
-      { id: '3', text: 'Salad', mealType: 'lunch' },
-      { id: '4', text: 'Sandwich', mealType: 'lunch' },
-    ],
-    dinner: [
-      { id: '5', text: 'Pasta', mealType: 'dinner' },
-      { id: '6', text: 'Steak', mealType: 'dinner' },
-    ],
-    snacks: [
-      { id: '7', text: 'Fruits', mealType: 'snacks' },
-      { id: '8', text: 'Nuts', mealType: 'snacks' },
-    ],
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snacks: [],
   };
 
   const initialRightList: MealList = {
@@ -168,10 +198,67 @@ const MealsSelect = () => {
 
   const [leftList, setLeftList] = useState<MealList>(initialLeftList);
   const [rightList, setRightList] = useState<MealList>(initialRightList);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
 
-  const handleDragStart = (id: string) => {
+  // Déterminer le type de repas
+  const determineMealType = (type: string | null): MealType => {
+    if (!type) return 'snacks';
+    
+    const lowerType = type.toLowerCase();
+    
+    if (lowerType.includes('breakfast')) return 'breakfast';
+    if (lowerType.includes('lunch')) return 'lunch';
+    if (lowerType.includes('dinner')) return 'dinner';
+    
+    return 'snacks';
+  };
+
+  // Populate lists on component mount
+  useEffect(() => {
+    console.log("MealsCompanyStyleV2 - Initialisation avec", mealsWithProgress.length, "repas");
+    
+    const available: MealList = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    };
+    
+    const consumed: MealList = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    };
+    
+    mealsWithProgress.forEach((meal) => {
+      const mealType = determineMealType(meal.type);
+      const mealItem: Item = {
+        id: meal.id,
+        name: meal.name,
+        type: meal.type || '',
+        mealType: mealType,
+        carbs: meal.carbs || 0,
+        protein: meal.protein || 0,
+        fat: meal.fat || 0,
+        progress: meal.progress,
+        dailyPlanMealId: (meal as MealWithProgressExtended).dailyPlanMealId,
+      };
+      
+      if (meal.progress && meal.progress.consomme) {
+        consumed[mealType].push(mealItem);
+      } else {
+        available[mealType].push(mealItem);
+      }
+    });
+    
+    setLeftList(available);
+    setRightList(consumed);
+    setMealsWithProgress(mealsWithProgress);
+  }, [mealsWithProgress, setMealsWithProgress]);
+
+  const handleDragStart = (id: number) => {
     setActiveId(id);
     // If the dragged item isn't selected, clear the selection
     if (!selectedItems.has(id)) {
@@ -179,8 +266,9 @@ const MealsSelect = () => {
     }
   };
 
-  const handleDragEnd = (
-    id: string,
+  // Handler for when a drag operation ends
+  const handleDragEnd = async (
+    id: number,
     droppedOnRight: boolean,
     droppedOnMealType: MealType,
   ) => {
@@ -239,11 +327,61 @@ const MealsSelect = () => {
         [droppedOnMealType]: [...prev[droppedOnMealType], ...updatedItems],
       }));
 
+      // Update meal status in the database for each moved item
+      try {
+        for (const item of foundItems) {
+          if (!dailyProgress) {
+            throw new Error('Données de progression quotidienne manquantes');
+          }
+
+          if (!item.dailyPlanMealId) {
+            throw new Error('Identifiant de repas quotidien manquant');
+          }
+
+          // Call service to mark meal as consumed or not consumed
+          await markMealAsConsumed(
+            drizzleDb,
+            dailyProgress.id,
+            item.id,
+            item.dailyPlanMealId,
+            droppedOnRight // true if consumed, false if not consumed
+          );
+        }
+
+        // Show success notification
+        toast.show({
+          placement: "top",
+          render: () => (
+            <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
+              <Text style={styles.toastText}>
+                {droppedOnRight 
+                  ? 'Repas marqué comme consommé !' 
+                  : 'Repas remis dans la liste "à consommer"'}
+              </Text>
+            </Box>
+          )
+        });
+
+        // Notify parent component to refresh data
+        onMealStatusChange();
+      } catch (error: any) {
+        toast.show({
+          placement: "top",
+          render: () => (
+            <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
+              <Text style={styles.toastText}>
+                Erreur: {error.message || 'Une erreur est survenue'}
+              </Text>
+            </Box>
+          )
+        });
+      }
+
       setSelectedItems(new Set());
     }
   };
 
-  const toggleItemSelection = (id: string) => {
+  const toggleItemSelection = (id: number) => {
     const newSelectedItems = new Set(selectedItems);
     if (newSelectedItems.has(id)) {
       newSelectedItems.delete(id);
@@ -261,37 +399,49 @@ const MealsSelect = () => {
             <Text style={styles.sublistTitle}>
               {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
             </Text>
-            {list[mealType].map((item) => (
-              <DraggableItem
-                key={item.id}
-                item={item}
-                isActive={activeId === item.id || selectedItems.has(item.id)}
-                isSelected={selectedItems.has(item.id)}
-                onDragStart={() => handleDragStart(item.id)}
-                onDragEnd={(droppedOnRight, droppedOnMealType) =>
-                  handleDragEnd(item.id, droppedOnRight, droppedOnMealType)
-                }
-                onSelect={() => toggleItemSelection(item.id)}
-              />
-            ))}
+            {list[mealType].length === 0 ? (
+              <Text style={styles.emptyText}>Aucun repas</Text>
+            ) : (
+              list[mealType].map((item) => (
+                <DraggableItem
+                  key={item.id}
+                  item={item}
+                  isActive={activeId === item.id || selectedItems.has(item.id)}
+                  isSelected={selectedItems.has(item.id)}
+                  onDragStart={() => handleDragStart(item.id)}
+                  onDragEnd={(droppedOnRight, droppedOnMealType) =>
+                    handleDragEnd(item.id, droppedOnRight, droppedOnMealType)
+                  }
+                  onSelect={() => toggleItemSelection(item.id)}
+                />
+              ))
+            )}
           </View>
         ))}
       </ScrollView>
     );
   };
 
+  if (mealsWithProgress.length === 0) {
+    return (
+      <View style={styles.noMealsContainer}>
+        <Text style={styles.noMealsText}>Aucun repas disponible pour cette date.</Text>
+      </View>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.listsContainer}>
         {/* Left List */}
         <View style={[styles.list, styles.leftList]}>
-          <Text style={styles.listTitle}>Available Meals</Text>
+          <Text style={styles.listTitle}>À consommer</Text>
           {renderSublist(leftList, true)}
         </View>
 
         {/* Right List */}
         <View style={[styles.list, styles.rightList]}>
-          <Text style={styles.listTitle}>Selected Meals</Text>
+          <Text style={styles.listTitle}>Consommés</Text>
           {renderSublist(rightList, false)}
         </View>
       </View>
@@ -317,10 +467,10 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   leftList: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#e3f2fd', // Light blue background for left list
   },
   rightList: {
-    backgroundColor: '#fff8e1',
+    backgroundColor: '#fff8e1', // Light yellow background for right list
   },
   listTitle: {
     fontSize: 16,
@@ -349,25 +499,49 @@ const styles = StyleSheet.create({
     padding: 15,
     margin: 5,
     borderRadius: 5,
-    borderWidth: 1,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
   },
   activeItem: {
-    borderColor: '#2196f3',
-    backgroundColor: '#bbdefb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
+    backgroundColor: '#f5f5f5',
   },
-  inactiveItem: {
-    borderColor: '#ddd',
-    backgroundColor: 'white',
-  },
+  inactiveItem: {},
   selectedItem: {
-    borderColor: '#4caf50',
-    backgroundColor: '#c8e6c9',
+    borderWidth: 2,
+    borderColor: '#007AFF',
   },
   mealTypeText: {
     fontSize: 12,
     color: '#666',
-    marginTop: 4,
   },
+  emptyText: {
+    textAlign: 'center',
+    color: '#aaa',
+    padding: 10,
+    fontStyle: 'italic',
+    fontSize: 12,
+  },
+  noMealsContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  noMealsText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  toastText: {
+    color: 'white',
+    fontWeight: 'bold',
+  }
 });
 
-export default MealsSelect;
+export default MealsCompanyStyleV2;

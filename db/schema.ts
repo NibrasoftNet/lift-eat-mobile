@@ -257,3 +257,53 @@ export type IngredientWithStandardOrmProps = MealIngredientsOrmProps & {
 export type MealWithIngredientAndStandardOrmProps = MealOrmProps & {
   mealIngredients: IngredientWithStandardOrmProps[];
 };
+
+// Table pour suivre la progression quotidienne globale
+export const dailyProgress = sqliteTable('daily_progress', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  date: text('date').notNull(), // Format ISO
+  pourcentageCompletion: real('pourcentage_completion').notNull().default(0),
+  calories: real('calories').notNull().default(0),
+  carbs: real('carbs').notNull().default(0),
+  fat: real('fat').notNull().default(0),
+  protein: real('protein').notNull().default(0),
+  // Foreign key to users table
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+  // Foreign key to plan table (référence au plan courant uniquement)
+  planId: integer('plan_id')
+    .references(() => plan.id)
+    .notNull(),
+});
+
+// Table pour suivre l'état de chaque repas
+export const dailyMealProgress = sqliteTable('daily_meal_progress', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  consomme: integer({ mode: 'boolean' }).notNull().default(false),
+  pourcentageConsomme: real('pourcentage_consomme').notNull().default(100),
+  caloriesEffectives: real('calories_effectives').notNull().default(0),
+  proteinEffectives: real('protein_effectives').notNull().default(0),
+  carbsEffectives: real('carbs_effectives').notNull().default(0),
+  fatEffectives: real('fat_effectives').notNull().default(0),
+  // Foreign key to dailyProgress table
+  dailyProgressId: integer('daily_progress_id')
+    .references(() => dailyProgress.id)
+    .notNull(),
+  // Foreign key to dailyPlanMeals table
+  dailyPlanMealId: integer('daily_plan_meal_id')
+    .references(() => dailyPlanMeals.id)
+    .notNull(),
+  // Foreign key to meals table
+  mealId: integer('meal_id')
+    .references(() => meals.id)
+    .notNull(),
+});
+
+// Types pour les nouvelles tables
+export type DailyProgressOrmProps = typeof dailyProgress.$inferSelect;
+export type DailyMealProgressOrmProps = typeof dailyMealProgress.$inferSelect;

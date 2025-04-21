@@ -9,7 +9,7 @@ import {
   plan,
   PlanOrmProps,
 } from '../../db/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
 import { NutritionGoalSchemaFormData } from '../validation/plan/nutrition-goal.validation';
 import {
   DayUnitArray,
@@ -368,5 +368,235 @@ export const addMealToDailyPlan = async (
   } catch (error) {
     console.error('Error adding meal to daily plan:', error);
     throw new Error('Failed to add meal to daily plan');
+  }
+};
+
+/**
+ * Update the quantity of a meal in a daily plan
+ */
+/**
+ * Get the current quantity of a meal in a daily plan
+ */
+export const getMealQuantityInPlan = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  dailyPlanId: number,
+  mealId: number,
+): Promise<number> => {
+  try {
+    // Get the current meal-plan relationship
+    const relation = await drizzleDb.query.dailyPlanMeals.findFirst({
+      where: and(
+        eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
+        eq(dailyPlanMeals.mealId, mealId)
+      )
+    });
+
+    if (!relation) {
+      throw new Error('Meal not found in this plan');
+    }
+
+    return relation.quantity;
+  } catch (error) {
+    console.error('Error getting meal quantity in plan:', error);
+    throw new Error('Failed to get meal quantity in plan');
+  }
+};
+
+/**
+ * Update the quantity of a meal in a daily plan
+ */
+export const updateMealQuantityInPlan = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  dailyPlanId: number,
+  mealId: number,
+  newQuantity: number,
+): Promise<void> => {
+  try {
+    // Get the original meal to calculate new nutrition values
+    const meal = await drizzleDb.query.meals.findFirst({
+      where: eq(meals.id, mealId),
+    });
+
+    if (!meal) {
+      throw new Error('Meal not found');
+    }
+
+    // Get the current meal-plan relationship
+    const currentRelation = await drizzleDb.query.dailyPlanMeals.findFirst({
+      where: (fields) => 
+        eq(dailyPlanMeals.dailyPlanId, dailyPlanId) && 
+        eq(dailyPlanMeals.mealId, mealId)
+    });
+
+    if (!currentRelation) {
+      throw new Error('Meal not found in this plan');
+    }
+
+    // Calculate the ratio for the new quantity based on the original meal
+    const ratio = newQuantity / meal.quantity;
+
+    // Calculate adjusted nutritional values based on ratio
+    const adjustedCalories = meal.calories * ratio;
+    const adjustedCarbs = meal.carbs * ratio;
+    const adjustedFat = meal.fat * ratio;
+    const adjustedProtein = meal.protein * ratio;
+
+    // Calculate the difference in nutritional values
+    const caloriesDiff = adjustedCalories - (currentRelation.calories || 0);
+    const carbsDiff = adjustedCarbs - (currentRelation.carbs || 0);
+    const fatDiff = adjustedFat - (currentRelation.fat || 0);
+    const proteinDiff = adjustedProtein - (currentRelation.protein || 0);
+
+    // Update the meal-plan relationship with new values
+    await drizzleDb
+      .update(dailyPlanMeals)
+      .set({
+        quantity: newQuantity,
+        calories: adjustedCalories,
+        carbs: adjustedCarbs,
+        fat: adjustedFat,
+        protein: adjustedProtein,
+      })
+      .where(
+        and(
+          eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
+          eq(dailyPlanMeals.mealId, mealId)
+        )
+      );
+
+    // Get daily plan current values
+    const currentDailyPlan = await drizzleDb.query.dailyPlan.findFirst({
+      where: eq(dailyPlan.id, dailyPlanId),
+    });
+
+    if (!currentDailyPlan) {
+      throw new Error('Daily plan not found');
+    }
+
+    // Update daily plan nutrition values with the adjusted values
+    await drizzleDb
+      .update(dailyPlan)
+      .set({
+        calories: currentDailyPlan.calories + caloriesDiff,
+        carbs: currentDailyPlan.carbs + carbsDiff,
+        fat: currentDailyPlan.fat + fatDiff,
+        protein: currentDailyPlan.protein + proteinDiff,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(dailyPlan.id, dailyPlanId));
+
+    // Update total plan statistics as well
+    const planQuery = await drizzleDb.query.dailyPlan.findFirst({
+      where: eq(dailyPlan.id, dailyPlanId),
+      columns: {
+        planId: true,
+      },
+    });
+
+    if (planQuery) {
+      const allDailyPlans = await drizzleDb.query.dailyPlan.findMany({
+        where: eq(dailyPlan.planId, planQuery.planId),
+      });
+
+      // Calculate total nutrition values for the plan
+      const totalCalories = allDailyPlans.reduce(
+        (sum, dp) => sum + dp.calories,
+        0,
+      );
+      const totalCarbs = allDailyPlans.reduce((sum, dp) => sum + dp.carbs, 0);
+      const totalFat = allDailyPlans.reduce((sum, dp) => sum + dp.fat, 0);
+      const totalProtein = allDailyPlans.reduce(
+        (sum, dp) => sum + dp.protein,
+        0,
+      );
+
+      // Update plan with new totals
+      await drizzleDb
+        .update(plan)
+        .set({
+          calories: totalCalories,
+          carbs: totalCarbs,
+          fat: totalFat,
+          protein: totalProtein,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(plan.id, planQuery.planId));
+    }
+  } catch (error) {
+    console.error('Error updating meal quantity in plan:', error);
+    throw new Error('Failed to update meal quantity in plan');
+  }
+};
+
+/**
+ * Set a plan as the current plan for a user
+ * This will set all other plans for this user to current=false
+ */
+export const setCurrentPlan = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  planId: number,
+  userId: number,
+): Promise<void> => {
+  try {
+    // Verify the plan exists and belongs to the user
+    const targetPlan = await drizzleDb.query.plan.findFirst({
+      where: and(
+        eq(plan.id, planId),
+        eq(plan.userId, userId)
+      ),
+    });
+
+    if (!targetPlan) {
+      throw new Error('Plan not found or does not belong to this user');
+    }
+
+    // Start a transaction to ensure data consistency
+    await drizzleDb.transaction(async (tx) => {
+      // 1. Set all plans for this user to current=false
+      await tx
+        .update(plan)
+        .set({ 
+          current: false,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(plan.userId, userId));
+
+      // 2. Set the target plan to current=true
+      await tx
+        .update(plan)
+        .set({ 
+          current: true,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(plan.id, planId));
+    });
+    
+    console.log(`Plan ${planId} set as current for user ${userId}`);
+  } catch (error) {
+    console.error('Error setting current plan:', error);
+    throw new Error('Failed to set current plan');
+  }
+};
+
+/**
+ * Get the current plan for a user
+ */
+export const getCurrentPlan = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  userId: number,
+) => {
+  try {
+    // Find the plan marked as current for this user
+    const currentPlan = await drizzleDb.query.plan.findFirst({
+      where: and(
+        eq(plan.userId, userId),
+        eq(plan.current, true)
+      ),
+    });
+
+    return currentPlan;
+  } catch (error) {
+    console.error('Error getting current plan:', error);
+    throw error;
   }
 };

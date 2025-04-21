@@ -200,7 +200,14 @@ export default function PlanDetailsScreen() {
             {filteredDailyMeals && filteredDailyMeals.length > 0 ? (
               <FlashList
                 data={filteredDailyMeals}
-                renderItem={({ item }) => <PlanMealCard meal={item} />}
+                renderItem={({ item }) => (
+                  <PlanMealCard 
+                    meal={item} 
+                    drizzleDb={drizzleDb} 
+                    onMealDeleted={handleMealsAdded}
+                    dailyPlanId={selectedDailyPlanId}
+                  />
+                )}
                 keyExtractor={(item) => String(item.id)}
                 estimatedItemSize={10}
               />
