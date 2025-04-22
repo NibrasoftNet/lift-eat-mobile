@@ -1,9 +1,7 @@
 import { GEMINI_API_KEY, GEMINI_API_BASE_URL } from '@/utils/constants/Config';
-import { generateUserContext } from './user-context.service';
-import nutritionDatabaseService from './nutrition-database.service';
-import { buildEnrichedPrompt, determinePromptType } from './ia/promptBuilder';
-import { detectDatabaseAction, cleanResponseText } from './ia/responseParser';
-import { processDatabaseAction } from './ia/iaActions';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+// Suppression de l'import de iaService pour éliminer le cycle d'importation
 
 interface GeminiResponse {
   candidates: {
@@ -15,6 +13,11 @@ interface GeminiResponse {
   }[];
 }
 
+/**
+ * Service pour interagir avec l'API Gemini de Google
+ * Ce service fait désormais partie de l'architecture IA et délègue 
+ * les opérations avancées au IAService
+ */
 export class GeminiService {
   private static instance: GeminiService;
   private apiKey: string;
@@ -38,26 +41,21 @@ export class GeminiService {
    */
   public setCurrentUserId(userId: number): void {
     this.currentUserId = userId;
-    console.log(`Current user ID set to: ${userId}`);
+    // Ne pas appeler directement iaService.setCurrentUserId ici pour éviter le cycle d'importation
+    logger.info(LogCategory.IA, `Current user ID set to: ${userId}`);
   }
 
+  /**
+   * Génère une réponse basique depuis l'API Gemini
+   * Pour les fonctionnalités avancées, utilisez directement iaService
+   */
   async generateResponse(prompt: string): Promise<string> {
     try {
-      // Enrichir le prompt avec le contexte utilisateur si disponible
-      let enrichedPrompt = prompt;
+      // Désormais, ce service ne délègue plus à iaService pour éviter le cycle d'importation
+      // Il gère uniquement les appels directs à l'API Gemini
       
-      if (this.currentUserId) {
-        try {
-          // Déterminer le type de prompt et construire un prompt enrichi
-          const promptType = determinePromptType(prompt);
-          enrichedPrompt = await buildEnrichedPrompt(this.currentUserId, prompt, promptType);
-          
-          console.log('Prompt enriched with user context');
-        } catch (error) {
-          console.warn('Failed to enrich prompt with user context:', error);
-          // Continuer avec le prompt original en cas d'erreur
-        }
-      }
+      // Sinon, faire une requête basique à l'API Gemini
+      logger.info(LogCategory.IA, `Sending basic prompt to Gemini API: "${prompt.substring(0, 50)}..."`);
 
       const response = await fetch(
         `${this.baseUrl}/v1/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
@@ -71,7 +69,7 @@ export class GeminiService {
               {
                 parts: [
                   {
-                    text: enrichedPrompt,
+                    text: prompt,
                   },
                 ],
               },
@@ -91,23 +89,9 @@ export class GeminiService {
         throw new Error('No response from Gemini API');
       }
 
-      const responseText = data.candidates[0].content.parts[0].text;
-      
-      // Process response to check for database actions
-      const detectedAction = detectDatabaseAction(responseText);
-      if (detectedAction.type !== 'NONE' && this.currentUserId) {
-        if (detectedAction.isValid) {
-          await processDatabaseAction(detectedAction, this.currentUserId);
-        } else {
-          console.warn(`Action détectée mais invalide: ${detectedAction.validationMessage}`);
-          // On pourrait ici enregistrer l'erreur ou notifier l'utilisateur
-        }
-      }
-
-      // Return the response without the action tags (if they exist)
-      return cleanResponseText(responseText);
+      return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      console.error('Error generating response:', error);
+      logger.error(LogCategory.IA, `Error generating response: ${error instanceof Error ? error.message : String(error)}`);
       return 'Sorry, I encountered an error while processing your request.';
     }
   }

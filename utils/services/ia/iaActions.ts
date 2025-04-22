@@ -1,5 +1,12 @@
-import nutritionDatabaseService from '../nutrition-database.service';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { DetectedAction } from './responseParser';
+import { 
+  IaMealType, 
+  IaPlanType, 
+  IaIngredientType 
+} from '@/utils/validation/ia/ia.schemas';
 
 /**
  * Exécute les actions détectées dans la réponse de l'IA
@@ -11,20 +18,20 @@ export async function processDatabaseAction(action: DetectedAction, userId: numb
   try {
     // Vérifier si l'action est valide avant de l'exécuter
     if (!action.isValid) {
-      console.error(`Action non valide: ${action.validationMessage}`);
+      logger.error(LogCategory.IA, `Action non valide: ${action.validationMessage}`);
       return;
     }
     
     // Utiliser les données typées et validées par Zod
     if (action.type === 'ADD_MEAL' && action.parsedData) {
-      await processMealAction(action.parsedData, userId);
+      await processMealAction(action.parsedData as IaMealType, userId);
     } else if (action.type === 'ADD_PLAN' && action.parsedData) {
-      await processPlanAction(action.parsedData, userId);
+      await processPlanAction(action.parsedData as IaPlanType, userId);
     } else if (action.type === 'ADD_INGREDIENT' && action.parsedData) {
-      await processIngredientAction(action.parsedData, userId);
+      await processIngredientAction(action.parsedData as IaIngredientType, userId);
     }
   } catch (error) {
-    console.error('Error processing database action:', error);
+    logger.error(LogCategory.IA, `Error processing database action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -34,15 +41,20 @@ export async function processDatabaseAction(action: DetectedAction, userId: numb
  * @param mealData Données du repas validées
  * @param userId ID de l'utilisateur
  */
-async function processMealAction(mealData: any, userId: number): Promise<void> {
+async function processMealAction(mealData: IaMealType, userId: number): Promise<void> {
   try {
-    await nutritionDatabaseService.addMeal({
-      ...mealData,
-      creatorId: userId
-    });
-    console.log('Meal added to database:', mealData.name);
+    logger.info(LogCategory.IA, `Processing meal action: ${mealData.name}`);
+    
+    // MODIFICATION: Utiliser le MCP Server au lieu de nutritionDatabaseService
+    const result = await sqliteMCPServer.addMealViaMCP(mealData, userId);
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    
+    logger.info(LogCategory.IA, `Meal added to database via MCP: ${mealData.name} (ID: ${result.mealId})`);
   } catch (error) {
-    console.error('Error processing meal action:', error);
+    logger.error(LogCategory.IA, `Error processing meal action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -52,15 +64,20 @@ async function processMealAction(mealData: any, userId: number): Promise<void> {
  * @param planData Données du plan validées
  * @param userId ID de l'utilisateur
  */
-async function processPlanAction(planData: any, userId: number): Promise<void> {
+async function processPlanAction(planData: IaPlanType, userId: number): Promise<void> {
   try {
-    await nutritionDatabaseService.addPlan({
-      ...planData,
-      creatorId: userId
-    });
-    console.log('Plan added to database:', planData.name);
+    logger.info(LogCategory.IA, `Processing plan action: ${planData.name}`);
+    
+    // MODIFICATION: Utiliser le MCP Server au lieu de nutritionDatabaseService
+    const result = await sqliteMCPServer.addPlanViaMCP(planData, userId);
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    
+    logger.info(LogCategory.IA, `Plan added to database via MCP: ${planData.name} (ID: ${result.planId})`);
   } catch (error) {
-    console.error('Error processing plan action:', error);
+    logger.error(LogCategory.IA, `Error processing plan action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -70,14 +87,24 @@ async function processPlanAction(planData: any, userId: number): Promise<void> {
  * @param ingredientData Données de l'ingrédient validées
  * @param userId ID de l'utilisateur (non utilisé pour les ingrédients)
  */
-async function processIngredientAction(ingredientData: any, userId: number): Promise<void> {
+async function processIngredientAction(ingredientData: IaIngredientType, userId: number): Promise<void> {
   try {
-    await nutritionDatabaseService.addIngredient({
-      ...ingredientData
-    });
-    console.log('Ingredient added to database:', ingredientData.name);
+    logger.info(LogCategory.IA, `Processing ingredient action: ${ingredientData.name}`);
+    
+    // MODIFICATION: Utiliser le MCP Server au lieu de nutritionDatabaseService
+    const result = await sqliteMCPServer.addIngredientViaMCP(ingredientData);
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    
+    const status = result.alreadyExists 
+      ? `Ingredient already exists: ${ingredientData.name} (ID: ${result.ingredientId})`
+      : `Ingredient added to database via MCP: ${ingredientData.name} (ID: ${result.ingredientId})`;
+    
+    logger.info(LogCategory.IA, status);
   } catch (error) {
-    console.error('Error processing ingredient action:', error);
+    logger.error(LogCategory.IA, `Error processing ingredient action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
