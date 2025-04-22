@@ -15,7 +15,12 @@ import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { TotalMacrosProps } from '@/types/meal.type';
 import { logger } from './logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 
+/**
+ * Crée un nouveau repas avec ses ingrédients associés
+ * @deprecated Utilisez directement sqliteMCPServer.createNewMealViaMCP pour une meilleure centralisation
+ */
 export const createNewMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   data: MealFormData,
@@ -25,68 +30,27 @@ export const createNewMeal = async (
 ) => {
   const startTime = logger.startPerformanceLog('createNewMeal');
   try {
-    logger.info(LogCategory.DATABASE, 'Creating new meal', { mealName: data.name });
+    logger.info(LogCategory.DATABASE, 'Creating new meal via MCP Server', { mealName: data.name });
 
-    // Start a transaction to ensure data consistency
-    return await drizzleDb.transaction(async (tx) => {
-      // 1. Insert meal
-      // Make sure we're using the meal weight for nutritional values
-      const newMeal: Omit<MealOrmProps, 'id'> = {
-        ...data,
-        calories: totalMacros.totalCalories,
-        carbs: totalMacros.totalCarbs,
-        fat: totalMacros.totalFats,
-        protein: totalMacros.totalProtein,
-        creatorId,
-        image: data.image ?? null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      logger.debug(LogCategory.DATABASE, 'Creating meal with adjusted nutrition values', {
-        mealWeight: data.quantity,
-        totalIngredientsWeight: selectedIngredients.reduce((sum, ing) => sum + ing.quantity, 0),
-        nutritionValues: {
-          calories: totalMacros.totalCalories,
-          carbs: totalMacros.totalCarbs,
-          fat: totalMacros.totalFats,
-          protein: totalMacros.totalProtein,
-        }
-      });
+    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    const result = await sqliteMCPServer.createNewMealViaMCP(
+      data,
+      selectedIngredients,
+      {
+        totalCalories: totalMacros.totalCalories,
+        totalCarbs: totalMacros.totalCarbs,
+        totalFats: totalMacros.totalFats,
+        totalProtein: totalMacros.totalProtein
+      },
+      creatorId
+    );
 
-      const insertedMeal = await tx
-        .insert(meals)
-        .values(newMeal)
-        .returning({ id: meals.id });
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create meal via MCP Server');
+    }
 
-      if (!insertedMeal || insertedMeal.length === 0) {
-        throw new Error('Failed to insert meal');
-      }
-
-      // 2. Batch insert ingredients
-      if (selectedIngredients.length > 0) {
-        const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
-          selectedIngredients.map((ingredient) => ({
-            mealId: insertedMeal[0].id,
-            ingredientStandardId: ingredient.ingredientStandardId,
-            quantity: ingredient.quantity,
-            calories: ingredient.calories,
-            carbs: ingredient.carbs,
-            fat: ingredient.fat,
-            protein: ingredient.protein,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }));
-
-        await tx.insert(mealIngredients).values(mealIngredientsData);
-        logger.debug(LogCategory.DATABASE, 'Inserted meal ingredients', {
-          mealId: insertedMeal[0].id,
-          ingredientCount: selectedIngredients.length,
-        });
-      }
-
-      return insertedMeal[0];
-    });
+    // Maintenir la compatibilité avec l'API actuelle
+    return { id: result.mealId };
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to create meal', { error });
     throw error;
@@ -95,6 +59,10 @@ export const createNewMeal = async (
   }
 };
 
+/**
+ * Récupère une liste de repas avec filtrage optionnel
+ * @deprecated Utilisez directement sqliteMCPServer.getMealsListViaMCP pour une meilleure centralisation
+ */
 export const getMealsList = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   cuisine?: CuisineTypeEnum,
@@ -103,27 +71,22 @@ export const getMealsList = async (
 ) => {
   const startTime = logger.startPerformanceLog('getMealsList');
   try {
-    logger.info(LogCategory.DATABASE, 'Fetching meals list', {
+    logger.info(LogCategory.DATABASE, 'Fetching meals list via MCP Server', {
       filters: { cuisine, mealType, mealName },
     });
 
-    // Build conditions array for better query optimization
-    const conditions = [];
-    if (cuisine) conditions.push(eq(meals.cuisine, cuisine));
-    if (mealType) conditions.push(eq(meals.type, mealType));
-    if (mealName) conditions.push(like(meals.name, `%${mealName}%`));
+    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    const result = await sqliteMCPServer.getMealsListViaMCP(cuisine, mealType, mealName);
 
-    const query = drizzleDb
-      .select()
-      .from(meals)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(meals.createdAt);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch meals list via MCP Server');
+    }
 
-    const results = await query.execute();
-    logger.debug(LogCategory.DATABASE, 'Meals list fetched', {
-      count: results.length,
+    logger.debug(LogCategory.DATABASE, 'Meals list fetched via MCP Server', {
+      count: result.meals.length,
     });
-    return results;
+    
+    return result.meals;
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to fetch meals list', { error });
     throw error;
@@ -132,65 +95,36 @@ export const getMealsList = async (
   }
 };
 
+/**
+ * Récupère un repas spécifique avec tous ses ingrédients
+ * @deprecated Utilisez directement sqliteMCPServer.getMealByIdWithIngredientsViaMCP pour une meilleure centralisation
+ */
 export const getMealByIdWithIngredients = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
   const startTime = logger.startPerformanceLog('getMealByIdWithIngredients');
   try {
-    logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients', { mealId });
+    logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients via MCP Server', { mealId });
 
-    // Optimize by fetching meal and ingredients in parallel
-    const [meal, mealIngredientRecords] = await Promise.all([
-      drizzleDb.query.meals.findFirst({
-        where: eq(meals.id, mealId),
-      }),
-      drizzleDb.query.mealIngredients.findMany({
-        where: eq(mealIngredients.mealId, mealId),
-      }),
-    ]);
+    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(mealId);
 
-    if (!meal) {
-      logger.warn(LogCategory.DATABASE, 'Meal not found', { mealId });
-      return null;
+    if (!result.success) {
+      throw new Error(result.error || `Failed to fetch meal with ID ${mealId} via MCP Server`);
     }
 
-    if (mealIngredientRecords.length === 0) {
-      logger.debug(LogCategory.DATABASE, 'Meal has no ingredients', { mealId });
-      return { ...meal, mealIngredients: [] };
-    }
-
-    // Fetch ingredient standards in one query
-    const ingredientStandardIds = mealIngredientRecords.map(
-      (mi) => mi.ingredientStandardId,
-    );
-    const ingredientStandardRecords =
-      await drizzleDb.query.ingredientsStandard.findMany({
-        where: inArray(ingredientsStandard.id, ingredientStandardIds),
-      });
-
-    // Create a map for O(1) lookups
-    const ingredientStandardMap = new Map(
-      ingredientStandardRecords.map((is) => [is.id, is]),
-    );
-
-    // Combine results efficiently
-    const mealWithIngredients: MealWithIngredientAndStandardOrmProps = {
-      ...meal,
-      mealIngredients: mealIngredientRecords.map((mi) => ({
-        ...mi,
-        ingredientsStandard: ingredientStandardMap.get(mi.ingredientStandardId)!,
-      })),
-    };
-
-    logger.debug(LogCategory.DATABASE, 'Meal fetched with ingredients', {
+    logger.debug(LogCategory.DATABASE, 'Meal with ingredients fetched via MCP Server', {
       mealId,
-      ingredientCount: mealWithIngredients.mealIngredients.length,
+      ingredientsCount: result.ingredients?.length || 0,
     });
 
-    return mealWithIngredients;
+    return { 
+      meal: result.meal,
+      ingredients: result.ingredients || [] 
+    };
   } catch (error) {
-    logger.error(LogCategory.DATABASE, 'Failed to fetch meal by ID', {
+    logger.error(LogCategory.DATABASE, 'Failed to fetch meal with ingredients', {
       mealId,
       error,
     });
@@ -200,6 +134,10 @@ export const getMealByIdWithIngredients = async (
   }
 };
 
+/**
+ * Met à jour un repas existant avec ses ingrédients
+ * @deprecated Utilisez directement sqliteMCPServer.updateMealViaMCP pour une meilleure centralisation
+ */
 export const updateMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   data: MealFormData,
@@ -208,72 +146,34 @@ export const updateMeal = async (
 ) => {
   const startTime = logger.startPerformanceLog('updateMeal');
   try {
-    logger.info(LogCategory.DATABASE, 'Updating meal', {
+    logger.info(LogCategory.DATABASE, 'Updating meal via MCP Server', {
       mealId: data.id,
       mealName: data.name,
     });
 
-    return await drizzleDb.transaction(async (tx) => {
-      // 1. Update meal - exclude id from the update values
-      const { id, ...updateData } = data;
-      
-      logger.debug(LogCategory.DATABASE, 'Updating meal with adjusted nutrition values', {
-        mealId: id,
-        mealWeight: data.quantity,
-        totalIngredientsWeight: selectedIngredients.reduce((sum, ing) => sum + ing.quantity, 0),
-        nutritionValues: {
-          calories: totalMacros.totalCalories,
-          carbs: totalMacros.totalCarbs,
-          fat: totalMacros.totalFats,
-          protein: totalMacros.totalProtein,
-        }
-      });
-      
-      const updatedMeal = await tx
-        .update(meals)
-        .set({
-          ...updateData,
-          calories: totalMacros.totalCalories,
-          carbs: totalMacros.totalCarbs,
-          fat: totalMacros.totalFats,
-          protein: totalMacros.totalProtein,
-          image: data.image ?? null,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(meals.id, id!))
-        .returning({ id: meals.id });
-
-      if (!updatedMeal || updatedMeal.length === 0) {
-        throw new Error('Failed to update meal');
+    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    const result = await sqliteMCPServer.updateMealViaMCP(
+      data,
+      selectedIngredients,
+      {
+        totalCalories: totalMacros.totalCalories,
+        totalCarbs: totalMacros.totalCarbs,
+        totalFats: totalMacros.totalFats,
+        totalProtein: totalMacros.totalProtein
       }
+    );
 
-      // 2. Delete old ingredients and insert new ones in a transaction
-      await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, id!));
+    if (!result.success) {
+      throw new Error(result.error || `Failed to update meal ${data.id} via MCP Server`);
+    }
 
-      if (selectedIngredients.length > 0) {
-        const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
-          selectedIngredients.map((ingredient) => ({
-            mealId: id!,
-            ingredientStandardId: ingredient.ingredientStandardId,
-            quantity: ingredient.quantity,
-            calories: ingredient.calories,
-            carbs: ingredient.carbs,
-            fat: ingredient.fat,
-            protein: ingredient.protein,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }));
-
-        await tx.insert(mealIngredients).values(mealIngredientsData);
-      }
-
-      logger.debug(LogCategory.DATABASE, 'Meal updated successfully', {
-        mealId: id,
-        newIngredientCount: selectedIngredients.length,
-      });
-
-      return updatedMeal[0];
+    logger.debug(LogCategory.DATABASE, 'Meal updated successfully via MCP Server', {
+      mealId: data.id,
+      newIngredientCount: selectedIngredients.length,
     });
+
+    // Maintenir la compatibilité avec l'API actuelle
+    return { id: result.mealId };
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to update meal', {
       mealId: data.id,
@@ -285,31 +185,29 @@ export const updateMeal = async (
   }
 };
 
+/**
+ * Supprime un repas et ses ingrédients associés
+ * @deprecated Utilisez directement sqliteMCPServer.deleteMealViaMCP pour une meilleure centralisation
+ */
 export const deleteMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
   const startTime = logger.startPerformanceLog('deleteMeal');
   try {
-    logger.info(LogCategory.DATABASE, 'Deleting meal', { mealId });
+    logger.info(LogCategory.DATABASE, 'Deleting meal via MCP Server', { mealId });
 
-    return await drizzleDb.transaction(async (tx) => {
-      // Delete meal ingredients first (foreign key constraint)
-      await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, mealId));
-      
-      // Then delete the meal
-      const deletedMeal = await tx
-        .delete(meals)
-        .where(eq(meals.id, mealId))
-        .returning({ id: meals.id });
+    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    const result = await sqliteMCPServer.deleteMealViaMCP(mealId);
 
-      if (!deletedMeal || deletedMeal.length === 0) {
-        throw new Error('Failed to delete meal');
-      }
+    if (!result.success) {
+      throw new Error(result.error || `Failed to delete meal ${mealId} via MCP Server`);
+    }
 
-      logger.debug(LogCategory.DATABASE, 'Meal deleted successfully', { mealId });
-      return deletedMeal[0];
-    });
+    logger.debug(LogCategory.DATABASE, 'Meal deleted successfully via MCP Server', { mealId });
+    
+    // Maintenir la compatibilité avec l'API actuelle
+    return { id: result.mealId };
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to delete meal', { mealId, error });
     throw error;

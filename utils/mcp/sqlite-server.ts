@@ -8,9 +8,11 @@ import {
   dailyPlan,
   dailyPlanMeals,
   plan,
-  users 
+  users,
+  PlanOrmProps,
+  DailyPlanOrmProps 
 } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, like, inArray } from 'drizzle-orm';
 import { 
   IaIngredientType,
   IaMealType,
@@ -26,8 +28,12 @@ import {
 } from '@/utils/enum/meal.enum';
 import { 
   PlanGeneratedWithEnum,
-  DayEnum
+  DayEnum,
+  DayUnitArray,
+  DailyPlanGeneratedWithEnum
 } from '@/utils/enum/general.enum';
+import { WeightUnitEnum } from '@/utils/enum/user-details.enum';
+import { NutritionGoalSchemaFormData } from '@/utils/validation/plan/nutrition-goal.validation';
 
 /**
  * SQLite MCP Server
@@ -560,32 +566,31 @@ ASSISTANT CAPABILITIES:
         };
       }
       
+      // Définir les colonnes utilisateur valides (hors id)
+      const userColumns = [
+        'age', 'gender', 'weight', 'weightUnit',
+        'height', 'heightUnit', 'physicalActivity'
+      ];
+      
       // Filtrer pour ne garder que les préférences qui sont réellement fournies
       const validPreferences: Record<string, any> = {};
       
-      if (preferences.age !== undefined) validPreferences.age = preferences.age;
-      if (preferences.gender !== undefined) validPreferences.gender = preferences.gender;
-      if (preferences.weight !== undefined) validPreferences.weight = preferences.weight;
-      if (preferences.weightUnit !== undefined) validPreferences.weightUnit = preferences.weightUnit;
-      if (preferences.height !== undefined) validPreferences.height = preferences.height;
-      if (preferences.heightUnit !== undefined) validPreferences.heightUnit = preferences.heightUnit;
-      if (preferences.physicalActivity !== undefined) validPreferences.physicalActivity = preferences.physicalActivity;
-      
-      // Si aucune préférence valide n'est fournie, retourner une erreur
-      if (Object.keys(validPreferences).length === 0) {
-        return { 
-          success: false, 
-          error: 'No valid preferences provided' 
-        };
+      for (const key in preferences) {
+        // Vérifier si key est une clé valide de preferences et dans userColumns
+        if (key in preferences && userColumns.includes(key) && key !== 'id') {
+          // Utiliser une assertion de type pour indiquer que l'accès est sécurisé
+          validPreferences[key] = preferences[key as keyof typeof preferences];
+        }
       }
       
-      // Mettre à jour les préférences
+      if (Object.keys(validPreferences).length === 0) {
+        throw new Error('No valid preferences to update');
+      }
+      
+      // Mettre à jour les préférences de l'utilisateur
       await this.db
         .update(users)
-        .set({
-          ...validPreferences,
-          updatedAt: sql`CURRENT_TIMESTAMP`
-        })
+        .set(validPreferences)
         .where(eq(users.id, userId));
       
       logger.info(LogCategory.DATABASE, `Updated preferences for user ${userId}: ${JSON.stringify(validPreferences)}`);
@@ -596,6 +601,1165 @@ ASSISTANT CAPABILITIES:
       return { 
         success: false, 
         error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Crée un nouveau repas avec ses ingrédients associés via le MCP server
+   * @param data Données du formulaire de repas
+   * @param selectedIngredients Liste des ingrédients sélectionnés
+   * @param totalMacros Totaux des macronutriments calculés
+   * @param creatorId ID de l'utilisateur créateur
+   * @returns Résultat de l'opération avec l'ID du repas créé ou une erreur
+   */
+  public async createNewMealViaMCP(
+    data: any, // MealFormData (importation évitée pour simplifier)
+    selectedIngredients: any[], // IngredientWithStandardProps[] (importation évitée pour simplifier)
+    totalMacros: { totalCalories: number; totalCarbs: number; totalFats: number; totalProtein: number },
+    creatorId: number
+  ): Promise<{ success: boolean; mealId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        logger.info(LogCategory.DATABASE, `Creating new meal "${data.name}" via MCP Server`);
+        
+        // 1. Créer le repas
+        const newMeal = {
+          ...data,
+          calories: totalMacros.totalCalories,
+          carbs: totalMacros.totalCarbs,
+          fat: totalMacros.totalFats,
+          protein: totalMacros.totalProtein,
+          creatorId,
+          image: data.image ?? null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        
+        const insertedMeal = await tx
+          .insert(meals)
+          .values(newMeal)
+          .returning({ id: meals.id });
+        
+        if (!insertedMeal || insertedMeal.length === 0) {
+          throw new Error('Failed to insert meal');
+        }
+        
+        const mealId = insertedMeal[0].id;
+        logger.info(LogCategory.DATABASE, `Created meal with ID ${mealId}`);
+        
+        // 2. Ajouter les ingrédients si fournis
+        if (selectedIngredients && selectedIngredients.length > 0) {
+          logger.info(LogCategory.DATABASE, `Adding ${selectedIngredients.length} ingredients to meal ${mealId}`);
+          
+          const mealIngredientsData = selectedIngredients.map((ingredient) => ({
+            mealId: mealId,
+            ingredientStandardId: ingredient.ingredientStandardId,
+            quantity: ingredient.quantity,
+            calories: ingredient.calories,
+            carbs: ingredient.carbs,
+            fat: ingredient.fat,
+            protein: ingredient.protein,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
+          
+          await tx.insert(mealIngredients).values(mealIngredientsData);
+          logger.info(LogCategory.DATABASE, `Added ${selectedIngredients.length} ingredients to meal ${mealId}`);
+        }
+        
+        return { success: true, mealId };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in createNewMealViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+  
+  /**
+   * Récupère une liste de repas avec filtrage optionnel
+   * @param cuisine Filtrer par type de cuisine
+   * @param mealType Filtrer par type de repas
+   * @param mealName Filtrer par nom (recherche approximative)
+   * @returns Liste des repas filtrés
+   */
+  public async getMealsListViaMCP(
+    cuisine?: CuisineTypeEnum,
+    mealType?: MealTypeEnum,
+    mealName?: string,
+  ): Promise<{ success: boolean; meals: any[]; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Fetching meals list via MCP Server', {
+        filters: { cuisine, mealType, mealName },
+      });
+
+      // Construire un tableau de conditions pour optimiser la requête
+      const conditions = [];
+      if (cuisine) conditions.push(eq(meals.cuisine, cuisine));
+      if (mealType) conditions.push(eq(meals.type, mealType));
+      if (mealName) conditions.push(like(meals.name, `%${mealName}%`));
+
+      const query = this.db
+        .select()
+        .from(meals)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(meals.createdAt);
+
+      const results = await query.execute();
+      logger.debug(LogCategory.DATABASE, 'Meals list fetched successfully via MCP', {
+        count: results.length,
+      });
+      
+      return { 
+        success: true, 
+        meals: results 
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getMealsListViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error),
+        meals: []
+      };
+    }
+  }
+  
+  /**
+   * Récupère un repas spécifique avec tous ses ingrédients
+   * @param mealId Identifiant du repas à récupérer
+   * @returns Données du repas avec ses ingrédients ou une erreur
+   */
+  public async getMealByIdWithIngredientsViaMCP(
+    mealId: number
+  ): Promise<{ success: boolean; meal?: any; ingredients?: any[]; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients via MCP Server', { mealId });
+
+      // Optimisation en récupérant le repas et les ingrédients en parallèle
+      const [meal, mealIngredientRecords] = await Promise.all([
+        this.db.query.meals.findFirst({
+          where: eq(meals.id, mealId),
+        }),
+        this.db.query.mealIngredients.findMany({
+          where: eq(mealIngredients.mealId, mealId),
+        }),
+      ]);
+
+      if (!meal) {
+        logger.warn(LogCategory.DATABASE, `Meal not found with ID ${mealId}`);
+        return { success: false, error: `Meal not found with ID ${mealId}` };
+      }
+
+      // Si aucun ingrédient, retourner le repas seul
+      if (mealIngredientRecords.length === 0) {
+        logger.debug(LogCategory.DATABASE, `Meal ${mealId} has no ingredients`);
+        return { success: true, meal, ingredients: [] };
+      }
+
+      // Récupérer les données des ingrédients standards pour les ingrédients du repas
+      const standardIngredientIds = mealIngredientRecords.map((i: { ingredientStandardId: number }) => i.ingredientStandardId);
+      
+      const standardIngredients = await this.db
+        .select()
+        .from(ingredientsStandard)
+        .where(inArray(ingredientsStandard.id, standardIngredientIds));
+
+      // Combiner les données de mealIngredients et ingredientsStandard
+      const ingredients = mealIngredientRecords.map((mealIngredient: { ingredientStandardId: number }) => {
+        const standardIngredient = standardIngredients.find(
+          (s: { id: number }) => s.id === mealIngredient.ingredientStandardId
+        );
+        
+        return {
+          ...mealIngredient,
+          standard: standardIngredient || null
+        };
+      });
+
+      logger.debug(LogCategory.DATABASE, `Meal ${mealId} fetched with ${ingredients.length} ingredients via MCP Server`);
+      
+      return { 
+        success: true, 
+        meal, 
+        ingredients 
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getMealByIdWithIngredientsViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+  
+  /**
+   * Met à jour un repas existant avec ses ingrédients via le MCP server
+   * @param data Données du formulaire de repas incluant l'ID du repas à mettre à jour
+   * @param selectedIngredients Liste des ingrédients sélectionnés (nouveaux et existants)
+   * @param totalMacros Totaux des macronutriments calculés
+   * @returns Résultat de l'opération avec l'ID du repas mis à jour ou une erreur
+   */
+  public async updateMealViaMCP(
+    data: any, // MealFormData (importation évitée pour simplifier)
+    selectedIngredients: any[], // IngredientWithStandardProps[] (importation évitée pour simplifier)
+    totalMacros: { totalCalories: number; totalCarbs: number; totalFats: number; totalProtein: number }
+  ): Promise<{ success: boolean; mealId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      const mealId = data.id;
+      if (!mealId) {
+        return { success: false, error: 'Meal ID is required for update' };
+      }
+      
+      logger.info(LogCategory.DATABASE, `Updating meal "${data.name}" (ID: ${mealId}) via MCP Server`);
+      
+      // Vérifier si le repas existe
+      const mealExists = await this.db
+        .select({ id: meals.id })
+        .from(meals)
+        .where(eq(meals.id, mealId))
+        .limit(1);
+        
+      if (mealExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot update: Meal with ID ${mealId} not found`);
+        return { success: false, error: `Meal with ID ${mealId} not found` };
+      }
+
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // 1. Exclure l'id des données de mise à jour
+        const { id, ...updateData } = data;
+        
+        logger.debug(LogCategory.DATABASE, `Updating meal ${mealId} with adjusted nutrition values`);
+        
+        // 2. Mettre à jour le repas
+        const updatedMeal = await tx
+          .update(meals)
+          .set({
+            ...updateData,
+            calories: totalMacros.totalCalories,
+            carbs: totalMacros.totalCarbs,
+            fat: totalMacros.totalFats,
+            protein: totalMacros.totalProtein,
+            image: data.image ?? null,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(meals.id, mealId))
+          .returning({ id: meals.id });
+
+        if (!updatedMeal || updatedMeal.length === 0) {
+          throw new Error(`Failed to update meal ${mealId}`);
+        }
+        
+        // 3. Supprimer les anciens ingrédients
+        await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, mealId));
+        logger.debug(LogCategory.DATABASE, `Deleted existing ingredients for meal ${mealId}`);
+
+        // 4. Insérer les nouveaux ingrédients
+        if (selectedIngredients && selectedIngredients.length > 0) {
+          const mealIngredientsData = selectedIngredients.map((ingredient) => ({
+            mealId: mealId,
+            ingredientStandardId: ingredient.ingredientStandardId,
+            quantity: ingredient.quantity,
+            calories: ingredient.calories,
+            carbs: ingredient.carbs,
+            fat: ingredient.fat,
+            protein: ingredient.protein,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
+
+          await tx.insert(mealIngredients).values(mealIngredientsData);
+          logger.debug(LogCategory.DATABASE, `Added ${selectedIngredients.length} ingredients to updated meal ${mealId}`);
+        }
+
+        logger.info(LogCategory.DATABASE, `Successfully updated meal ${mealId} via MCP Server`);
+        return { success: true, mealId };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in updateMealViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+  
+  /**
+   * Ajoute un plan journalier à un plan existant via le MCP server
+   * @param planId ID du plan parent
+   * @param dailyPlanData Données du plan journalier à ajouter
+   * @returns Résultat de l'opération avec l'ID du plan journalier créé ou une erreur
+   */
+  public async addDailyPlanViaMCP(
+    planId: number,
+    dailyPlanData: {
+      day: DayEnum;
+      week?: number;
+      calories?: number;
+      carbs?: number;
+      protein?: number;
+      fat?: number;
+    }
+  ): Promise<{ success: boolean; dailyPlanId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Adding daily plan for day ${dailyPlanData.day} to plan ${planId} via MCP Server`);
+      
+      // Vérifier si le plan existe
+      const planExists = await this.db
+        .select({ id: plan.id })
+        .from(plan)
+        .where(eq(plan.id, planId))
+        .limit(1);
+        
+      if (planExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot add daily plan: Plan with ID ${planId} not found`);
+        return { success: false, error: `Plan with ID ${planId} not found` };
+      }
+
+      // Créer le plan journalier
+      const result = await this.db
+        .insert(dailyPlan)
+        .values({
+          planId,
+          day: dailyPlanData.day,
+          week: dailyPlanData.week || 1,
+          calories: dailyPlanData.calories || 0,
+          carbs: dailyPlanData.carbs || 0,
+          protein: dailyPlanData.protein || 0,
+          fat: dailyPlanData.fat || 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .returning({ id: dailyPlan.id });
+
+      if (!result || result.length === 0) {
+        throw new Error('Failed to create daily plan');
+      }
+      
+      const dailyPlanId = result[0].id;
+      logger.info(LogCategory.DATABASE, `Successfully created daily plan ${dailyPlanId} for plan ${planId} via MCP Server`);
+      
+      return { success: true, dailyPlanId };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in addDailyPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Supprime un repas et ses ingrédients associés via le MCP server
+   * @param mealId Identifiant du repas à supprimer
+   * @returns Résultat de l'opération
+   */
+  public async deleteMealViaMCP(
+    mealId: number
+  ): Promise<{ success: boolean; mealId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Deleting meal ${mealId} via MCP Server`);
+      
+      // Vérifier si le repas existe
+      const mealExists = await this.db
+        .select({ id: meals.id })
+        .from(meals)
+        .where(eq(meals.id, mealId))
+        .limit(1);
+        
+      if (mealExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot delete: Meal with ID ${mealId} not found`);
+        return { success: false, error: `Meal with ID ${mealId} not found` };
+      }
+
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // 1. Supprimer les ingrédients associés (contrainte de clé étrangère)
+        await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, mealId));
+        logger.debug(LogCategory.DATABASE, `Deleted ingredients for meal ${mealId}`);
+        
+        // 2. Supprimer le repas
+        const deletedMeal = await tx
+          .delete(meals)
+          .where(eq(meals.id, mealId))
+          .returning({ id: meals.id });
+
+        if (!deletedMeal || deletedMeal.length === 0) {
+          throw new Error(`Failed to delete meal ${mealId}`);
+        }
+
+        logger.info(LogCategory.DATABASE, `Successfully deleted meal ${mealId} via MCP Server`);
+        return { success: true, mealId };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in deleteMealViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Récupère la liste de tous les plans nutritionnels
+   * @returns Liste des plans ou une erreur
+   */
+  public async getPlansListViaMCP(): Promise<{ success: boolean; plans?: any[]; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Fetching all nutrition plans via MCP Server`);
+      
+      const plansResult = await this.db.query.plan.findMany();
+      
+      logger.info(LogCategory.DATABASE, `Successfully fetched ${plansResult.length} plans via MCP Server`);
+      
+      return { 
+        success: true, 
+        plans: plansResult 
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getPlansListViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Récupère les détails d'un plan nutritionnel et ses plans journaliers
+   * @param planId Identifiant du plan à récupérer
+   * @returns Détails du plan avec ses plans journaliers ou une erreur
+   */
+  public async getPlanDetailsViaMCP(
+    planId: number | string
+  ): Promise<{ success: boolean; plan?: any; dailyPlans?: any[]; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      // Convertir l'ID en nombre si nécessaire
+      const numericPlanId = typeof planId === 'string' ? Number(planId) : planId;
+      
+      logger.info(LogCategory.DATABASE, `Fetching details for plan ${numericPlanId} via MCP Server`);
+      
+      // Récupérer le plan
+      const foundPlan = await this.db.query.plan.findFirst({
+        where: eq(plan.id, numericPlanId),
+      });
+      
+      if (!foundPlan) {
+        logger.warn(LogCategory.DATABASE, `Plan with ID ${numericPlanId} not found`);
+        return { success: false, error: `Plan with ID ${numericPlanId} not found` };
+      }
+      
+      // Récupérer tous les plans journaliers associés
+      const dailyPlans = await this.db.query.dailyPlan.findMany({
+        where: eq(dailyPlan.planId, numericPlanId),
+      });
+      
+      logger.info(LogCategory.DATABASE, `Successfully fetched plan ${numericPlanId} with ${dailyPlans.length} daily plans via MCP Server`);
+      
+      return { 
+        success: true, 
+        plan: foundPlan, 
+        dailyPlans: dailyPlans 
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getPlanDetailsViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Récupère un plan nutritionnel avec ses plans journaliers et leurs repas associés
+   * @param planId Identifiant du plan à récupérer
+   * @returns Plan complet avec plans journaliers et repas ou une erreur
+   */
+  public async getPlanWithDailyPlansViaMCP(
+    planId: number
+  ): Promise<{ success: boolean; plan?: any; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Fetching plan ${planId} with daily plans via MCP Server`);
+      
+      // Récupérer le plan
+      const foundPlan = await this.db.query.plan.findFirst({
+        where: eq(plan.id, planId),
+      });
+      
+      if (!foundPlan) {
+        logger.warn(LogCategory.DATABASE, `Plan with ID ${planId} not found`);
+        return { success: false, error: `Plan with ID ${planId} not found` };
+      }
+      
+      // Récupérer tous les plans journaliers associés
+      const dailyPlans = await this.db.query.dailyPlan.findMany({
+        where: eq(dailyPlan.planId, planId),
+      });
+      
+      logger.info(LogCategory.DATABASE, `Successfully fetched plan ${planId} with ${dailyPlans.length} daily plans via MCP Server`);
+      
+      return { 
+        success: true, 
+        plan: {
+          ...foundPlan,
+          dailyPlans: dailyPlans
+        }
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getPlanWithDailyPlansViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Crée un nouveau plan nutritionnel via le MCP server
+   * @param data Données du plan à créer
+   * @param userId ID de l'utilisateur propriétaire du plan
+   * @returns Résultat de l'opération avec l'ID du plan créé ou une erreur
+   */
+  public async createPlanViaMCP(
+    data: NutritionGoalSchemaFormData,
+    userId: number
+  ): Promise<{ success: boolean; planId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Creating nutrition plan for user ${userId} via MCP Server`);
+      
+      // Vérifier si l'utilisateur existe
+      const userExists = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (userExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot create plan: User with ID ${userId} not found`);
+        return { success: false, error: `User with ID ${userId} not found` };
+      }
+      
+      // Créer un nouveau plan avec les données appropriées
+      const newPlan: Omit<PlanOrmProps, 'id'> = {
+        name: `Plan ${new Date().toLocaleDateString()}`,
+        goal: data.goalUnit,
+        unit: WeightUnitEnum.KG, // Utilisation d'une valeur par défaut car non définie dans le schéma
+        initialWeight: data.initialWeight,
+        targetWeight: data.targetWeight,
+        durationWeeks: data.durationWeeks,
+        calories: 0, // Sera calculé plus tard
+        carbs: 0,
+        fat: 0,
+        protein: 0,
+        type: PlanGeneratedWithEnum.MANUAL,
+        public: true,
+        current: false,
+        completed: false,
+        userId: userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // 1. Insérer le plan dans la base de données et récupérer l'ID
+        const [insertedPlan] = await tx
+          .insert(plan)
+          .values(newPlan)
+          .returning({ id: plan.id });
+        
+        // 2. Créer les plans journaliers automatiquement
+        await this.createDailyPlansViaMCP(insertedPlan.id, data.durationWeeks, tx);
+        
+        logger.info(LogCategory.DATABASE, `Successfully created plan ${insertedPlan.id} for user ${userId} via MCP Server`);
+        return { success: true, planId: insertedPlan.id };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in createPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+  
+  /**
+   * Crée des plans journaliers pour un plan nutritionnel via le MCP server
+   * @param planId ID du plan nutritionnel parent
+   * @param durationWeeks Durée en semaines du plan
+   * @param transaction Instance de transaction optionnelle (pour utilisation interne)
+   * @returns Résultat de l'opération
+   */
+  public async createDailyPlansViaMCP(
+    planId: number,
+    durationWeeks: number,
+    transaction?: typeof this.db
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Creating daily plans for plan ${planId} (${durationWeeks} weeks) via MCP Server`);
+      
+      // Vérifier si le plan existe
+      if (!transaction) {
+        const planExists = await this.db
+          .select({ id: plan.id })
+          .from(plan)
+          .where(eq(plan.id, planId))
+          .limit(1);
+          
+        if (planExists.length === 0) {
+          logger.warn(LogCategory.DATABASE, `Cannot create daily plans: Plan with ID ${planId} not found`);
+          return { success: false, error: `Plan with ID ${planId} not found` };
+        }
+      }
+      
+      // Préparer les données pour l'insertion en bloc
+      const dailyPlansData: Omit<DailyPlanOrmProps, 'id'>[] = [];
+      
+      for (let week = 1; week <= durationWeeks; week++) {
+        // Créer un plan pour chaque jour de la semaine
+        for (const day of DayUnitArray) {
+          dailyPlansData.push({
+            week,
+            day,
+            calories: 0, // Sera calculé plus tard
+            carbs: 0,
+            fat: 0,
+            protein: 0,
+            type: DailyPlanGeneratedWithEnum.MANUAL,
+            planId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+      
+      // Insérer tous les plans journaliers en une seule transaction
+      const db = transaction || this.db;
+      await db.insert(dailyPlan).values(dailyPlansData);
+      
+      logger.info(LogCategory.DATABASE, `Successfully created ${dailyPlansData.length} daily plans for plan ${planId} via MCP Server`);
+      return { success: true };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in createDailyPlansViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Met à jour un plan nutritionnel existant via le MCP server
+   * @param planId ID du plan à mettre à jour
+   * @param data Données à mettre à jour
+   * @returns Résultat de l'opération
+   */
+  public async updatePlanViaMCP(
+    planId: number,
+    data: Partial<PlanOrmProps>
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Updating plan ${planId} via MCP Server`);
+      
+      // Vérifier si le plan existe
+      const planExists = await this.db
+        .select({ id: plan.id })
+        .from(plan)
+        .where(eq(plan.id, planId))
+        .limit(1);
+        
+      if (planExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot update: Plan with ID ${planId} not found`);
+        return { success: false, error: `Plan with ID ${planId} not found` };
+      }
+      
+      // Mettre à jour le plan
+      await this.db
+        .update(plan)
+        .set({
+          ...data,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(plan.id, planId));
+      
+      logger.info(LogCategory.DATABASE, `Successfully updated plan ${planId} via MCP Server`);
+      return { success: true };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in updatePlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+  
+  /**
+   * Supprime un plan nutritionnel et toutes ses données associées via le MCP server
+   * @param planId ID du plan à supprimer
+   * @returns Résultat de l'opération
+   */
+  public async deletePlanViaMCP(
+    planId: number
+  ): Promise<{ success: boolean; planId?: number; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Deleting plan ${planId} via MCP Server`);
+      
+      // Vérifier si le plan existe
+      const planExists = await this.db
+        .select({ id: plan.id })
+        .from(plan)
+        .where(eq(plan.id, planId))
+        .limit(1);
+        
+      if (planExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot delete: Plan with ID ${planId} not found`);
+        return { success: false, error: `Plan with ID ${planId} not found` };
+      }
+
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // 1. Trouver tous les plans journaliers pour ce plan
+        const dailyPlans = await tx.query.dailyPlan.findMany({
+          where: eq(dailyPlan.planId, planId),
+        });
+
+        // 2. Récupérer tous les IDs des plans journaliers
+        const dailyPlanIds = dailyPlans.map((dp: { id: number }) => dp.id);
+
+        // 3. Supprimer toutes les relations de repas
+        if (dailyPlanIds.length > 0) {
+          await tx
+            .delete(dailyPlanMeals)
+            .where(inArray(dailyPlanMeals.dailyPlanId, dailyPlanIds));
+          
+          logger.debug(LogCategory.DATABASE, `Deleted meal relationships for ${dailyPlanIds.length} daily plans`);
+        }
+
+        // 4. Supprimer tous les plans journaliers
+        await tx.delete(dailyPlan).where(eq(dailyPlan.planId, planId));
+        logger.debug(LogCategory.DATABASE, `Deleted daily plans for plan ${planId}`);
+
+        // 5. Supprimer le plan
+        await tx.delete(plan).where(eq(plan.id, planId));
+
+        logger.info(LogCategory.DATABASE, `Successfully deleted plan ${planId} via MCP Server`);
+        return { success: true, planId };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in deletePlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Ajoute un repas à un plan journalier via le MCP server
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas à ajouter
+   * @param quantity Quantité du repas (par défaut: 10 grammes)
+   * @returns Résultat de l'opération
+   */
+  /**
+   * Met à jour la quantité d'un repas dans un plan journalier via le MCP server
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas à mettre à jour
+   * @param newQuantity Nouvelle quantité du repas
+   * @returns Résultat de l'opération
+   */
+  public async updateMealQuantityInPlanViaMCP(
+    dailyPlanId: number,
+    mealId: number,
+    newQuantity: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Updating meal ${mealId} quantity to ${newQuantity} in daily plan ${dailyPlanId} via MCP Server`);
+      
+      // 1. Vérification que le repas existe
+      const meal = await this.db.query.meals.findFirst({
+        where: eq(meals.id, mealId),
+      });
+
+      if (!meal) {
+        logger.warn(LogCategory.DATABASE, `Cannot update meal: Meal with ID ${mealId} not found`);
+        return { success: false, error: `Meal with ID ${mealId} not found` };
+      }
+
+      // 2. Vérification que le plan journalier existe
+      const currentDailyPlan = await this.db.query.dailyPlan.findFirst({
+        where: eq(dailyPlan.id, dailyPlanId),
+      });
+
+      if (!currentDailyPlan) {
+        logger.warn(LogCategory.DATABASE, `Cannot update meal: Daily plan with ID ${dailyPlanId} not found`);
+        return { success: false, error: `Daily plan with ID ${dailyPlanId} not found` };
+      }
+
+      // 3. Vérification que la relation repas-plan existe
+      const currentRelation = await this.db.query.dailyPlanMeals.findFirst({
+        where: (fields: any) => 
+          eq(dailyPlanMeals.dailyPlanId, dailyPlanId) && 
+          eq(dailyPlanMeals.mealId, mealId)
+      });
+
+      if (!currentRelation) {
+        logger.warn(LogCategory.DATABASE, `Cannot update: Meal ${mealId} not found in daily plan ${dailyPlanId}`);
+        return { success: false, error: `Meal not found in this daily plan` };
+      }
+
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // Calculer le ratio pour la nouvelle quantité basé sur le repas original
+        const ratio = newQuantity / meal.quantity;
+
+        // Calculer les valeurs nutritionnelles ajustées en fonction du ratio
+        const adjustedCalories = meal.calories * ratio;
+        const adjustedCarbs = meal.carbs * ratio;
+        const adjustedFat = meal.fat * ratio;
+        const adjustedProtein = meal.protein * ratio;
+
+        // Calculer la différence en valeurs nutritionnelles
+        const caloriesDiff = adjustedCalories - (currentRelation.calories || 0);
+        const carbsDiff = adjustedCarbs - (currentRelation.carbs || 0);
+        const fatDiff = adjustedFat - (currentRelation.fat || 0);
+        const proteinDiff = adjustedProtein - (currentRelation.protein || 0);
+
+        // 4. Mettre à jour la relation repas-plan avec les nouvelles valeurs
+        await tx
+          .update(dailyPlanMeals)
+          .set({
+            quantity: newQuantity,
+            calories: adjustedCalories,
+            carbs: adjustedCarbs,
+            fat: adjustedFat,
+            protein: adjustedProtein,
+          })
+          .where(
+            and(
+              eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
+              eq(dailyPlanMeals.mealId, mealId)
+            )
+          );
+
+        // 5. Mettre à jour les valeurs nutritionnelles du plan journalier
+        await tx
+          .update(dailyPlan)
+          .set({
+            calories: currentDailyPlan.calories + caloriesDiff,
+            carbs: currentDailyPlan.carbs + carbsDiff,
+            fat: currentDailyPlan.fat + fatDiff,
+            protein: currentDailyPlan.protein + proteinDiff,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(dailyPlan.id, dailyPlanId));
+
+        // 6. Mettre à jour les statistiques totales du plan principal
+        const planId = currentDailyPlan.planId;
+
+        // Récupérer tous les plans journaliers du plan principal
+        const allDailyPlans = await tx.query.dailyPlan.findMany({
+          where: eq(dailyPlan.planId, planId),
+        });
+
+        // Calculer les valeurs nutritionnelles totales pour le plan
+        const totalCalories = allDailyPlans.reduce(
+          (sum: number, dp: { calories: number }) => sum + dp.calories,
+          0,
+        );
+        const totalCarbs = allDailyPlans.reduce((sum: number, dp: { carbs: number }) => sum + dp.carbs, 0);
+        const totalFat = allDailyPlans.reduce((sum: number, dp: { fat: number }) => sum + dp.fat, 0);
+        const totalProtein = allDailyPlans.reduce(
+          (sum: number, dp: { protein: number }) => sum + dp.protein,
+          0,
+        );
+
+        // Mettre à jour le plan avec les nouveaux totaux
+        await tx
+          .update(plan)
+          .set({
+            calories: totalCalories,
+            carbs: totalCarbs,
+            fat: totalFat,
+            protein: totalProtein,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(plan.id, planId));
+
+        logger.info(LogCategory.DATABASE, `Successfully updated meal ${mealId} quantity in daily plan ${dailyPlanId} via MCP Server`);
+        return { success: true };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in updateMealQuantityInPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Définit un plan comme plan courant pour un utilisateur via le MCP server
+   * @param planId ID du plan à définir comme courant
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération
+   */
+  public async setCurrentPlanViaMCP(
+    planId: number,
+    userId: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Setting plan ${planId} as current for user ${userId} via MCP Server`);
+      
+      // Vérifier si le plan existe et appartient à l'utilisateur
+      const targetPlan = await this.db.query.plan.findFirst({
+        where: and(
+          eq(plan.id, planId),
+          eq(plan.userId, userId)
+        ),
+      });
+      
+      if (!targetPlan) {
+        logger.warn(LogCategory.DATABASE, `Cannot set current: Plan with ID ${planId} not found or does not belong to user ${userId}`);
+        return { success: false, error: `Plan not found or does not belong to this user` };
+      }
+      
+      // Utiliser une transaction pour assurer la cohérence des données
+      await this.db.transaction(async (tx: typeof this.db) => {
+        // 1. Définir tous les plans de cet utilisateur comme non courants
+        await tx
+          .update(plan)
+          .set({ 
+            current: false,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(plan.userId, userId));
+        
+        // 2. Définir le plan cible comme courant
+        await tx
+          .update(plan)
+          .set({ 
+            current: true,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(plan.id, planId));
+      });
+      
+      logger.info(LogCategory.DATABASE, `Successfully set plan ${planId} as current for user ${userId} via MCP Server`);
+      return { success: true };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in setCurrentPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+  
+  /**
+   * Récupère le plan courant d'un utilisateur via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Plan courant ou une erreur
+   */
+  public async getCurrentPlanViaMCP(
+    userId: number
+  ): Promise<{ success: boolean; plan?: any; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting current plan for user ${userId} via MCP Server`);
+      
+      // Vérifier si l'utilisateur existe
+      const userExists = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (userExists.length === 0) {
+        logger.warn(LogCategory.DATABASE, `Cannot get current plan: User with ID ${userId} not found`);
+        return { success: false, error: `User with ID ${userId} not found` };
+      }
+      
+      // Trouver le plan marqué comme courant pour cet utilisateur
+      const currentPlan = await this.db.query.plan.findFirst({
+        where: and(
+          eq(plan.userId, userId),
+          eq(plan.current, true)
+        ),
+      });
+      
+      if (!currentPlan) {
+        logger.info(LogCategory.DATABASE, `No current plan found for user ${userId}`);
+        return { success: true, plan: null };
+      }
+      
+      logger.info(LogCategory.DATABASE, `Successfully got current plan for user ${userId} via MCP Server`);
+      return { success: true, plan: currentPlan };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getCurrentPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+  
+  public async addMealToDailyPlanViaMCP(
+    dailyPlanId: number,
+    mealId: number,
+    quantity: number = 10
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Adding meal ${mealId} to daily plan ${dailyPlanId} (quantity: ${quantity}) via MCP Server`);
+      
+      // 1. Vérification que le repas existe
+      const meal = await this.db.query.meals.findFirst({
+        where: eq(meals.id, mealId),
+      });
+
+      if (!meal) {
+        logger.warn(LogCategory.DATABASE, `Cannot add meal: Meal with ID ${mealId} not found`);
+        return { success: false, error: `Meal with ID ${mealId} not found` };
+      }
+
+      // 2. Vérification que le plan journalier existe
+      const currentDailyPlan = await this.db.query.dailyPlan.findFirst({
+        where: eq(dailyPlan.id, dailyPlanId),
+      });
+
+      if (!currentDailyPlan) {
+        logger.warn(LogCategory.DATABASE, `Cannot add meal: Daily plan with ID ${dailyPlanId} not found`);
+        return { success: false, error: `Daily plan with ID ${dailyPlanId} not found` };
+      }
+
+      // 3. Vérification si le repas est déjà ajouté au plan journalier (pour éviter les doublons)
+      const existingRelation = await this.db
+        .select()
+        .from(dailyPlanMeals)
+        .where(
+          and(
+            eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
+            eq(dailyPlanMeals.mealId, mealId)
+          )
+        )
+        .limit(1);
+
+      if (existingRelation.length > 0) {
+        logger.warn(LogCategory.DATABASE, `Meal ${mealId} is already added to daily plan ${dailyPlanId}`);
+        return { success: false, error: `Meal is already added to this daily plan` };
+      }
+
+      // Utiliser une transaction pour assurer l'intégrité des données
+      return await this.db.transaction(async (tx: typeof this.db) => {
+        // Calculer le ratio de la quantité demandée par rapport à la quantité d'origine du repas
+        const ratio = quantity / meal.quantity;
+
+        // Calculer les valeurs nutritionnelles ajustées en fonction du ratio
+        const adjustedCalories = meal.calories * ratio;
+        const adjustedCarbs = meal.carbs * ratio;
+        const adjustedFat = meal.fat * ratio;
+        const adjustedProtein = meal.protein * ratio;
+
+        // 4. Ajouter le repas au plan journalier avec la quantité personnalisée et les valeurs nutritionnelles calculées
+        await tx.insert(dailyPlanMeals).values({
+          dailyPlanId,
+          mealId,
+          quantity,
+          calories: adjustedCalories,
+          carbs: adjustedCarbs,
+          fat: adjustedFat,
+          protein: adjustedProtein,
+        });
+
+        // 5. Mettre à jour les valeurs nutritionnelles du plan journalier
+        await tx
+          .update(dailyPlan)
+          .set({
+            calories: currentDailyPlan.calories + adjustedCalories,
+            carbs: currentDailyPlan.carbs + adjustedCarbs,
+            fat: currentDailyPlan.fat + adjustedFat,
+            protein: currentDailyPlan.protein + adjustedProtein,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(dailyPlan.id, dailyPlanId));
+
+        // 6. Mettre à jour les statistiques totales du plan principal
+        const planId = currentDailyPlan.planId;
+
+        // Récupérer tous les plans journaliers du plan principal
+        const allDailyPlans = await tx.query.dailyPlan.findMany({
+          where: eq(dailyPlan.planId, planId),
+        });
+
+        // Calculer les valeurs nutritionnelles totales pour le plan
+        const totalCalories = allDailyPlans.reduce(
+          (sum: number, dp: { calories: number }) => sum + dp.calories,
+          0,
+        );
+        const totalCarbs = allDailyPlans.reduce((sum: number, dp: { carbs: number }) => sum + dp.carbs, 0);
+        const totalFat = allDailyPlans.reduce((sum: number, dp: { fat: number }) => sum + dp.fat, 0);
+        const totalProtein = allDailyPlans.reduce(
+          (sum: number, dp: { protein: number }) => sum + dp.protein,
+          0,
+        );
+
+        // Mettre à jour le plan avec les nouveaux totaux
+        await tx
+          .update(plan)
+          .set({
+            calories: totalCalories,
+            carbs: totalCarbs,
+            fat: totalFat,
+            protein: totalProtein,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(plan.id, planId));
+
+        logger.info(LogCategory.DATABASE, `Successfully added meal ${mealId} to daily plan ${dailyPlanId} via MCP Server`);
+        return { success: true };
+      });
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in addMealToDailyPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
       };
     }
   }

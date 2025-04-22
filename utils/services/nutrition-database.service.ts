@@ -17,6 +17,10 @@ import {
   PlanGeneratedWithEnum,
   DayEnum
 } from '@/utils/enum/general.enum';
+import { GoalEnum } from '@/utils/enum/user-details.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export class NutritionDatabaseService {
   private static instance: NutritionDatabaseService;
@@ -37,6 +41,7 @@ export class NutritionDatabaseService {
 
   /**
    * Add a standard ingredient to the database
+   * @deprecated Use sqliteMCPServer.addIngredientViaMCP instead
    */
   public async addIngredient({
     name,
@@ -60,47 +65,29 @@ export class NutritionDatabaseService {
         throw new Error('Database not initialized');
       }
 
-      // Check if ingredient already exists
-      const existingIngredients = await this.db
-        .select()
-        .from(ingredientsStandard)
-        .where(eq(ingredientsStandard.name, name))
-        .limit(1);
+      logger.info(LogCategory.DATABASE, `[Deprecated] Adding ingredient "${name}" via NutritionDatabaseService`);
+      
+      // Utiliser la méthode MCP pour ajouter l'ingrédient
+      const result = await sqliteMCPServer.addIngredientViaMCP({
+        name,
+        unit,
+        quantity,
+        calories,
+        carbs,
+        protein,
+        fat
+      });
 
-      if (existingIngredients.length > 0) {
-        console.log(`Ingredient "${name}" already exists, skipping creation`);
-        return { success: true, ingredientId: existingIngredients[0].id, alreadyExists: true };
-      }
-
-      // Create the ingredient
-      const result = await this.db
-        .insert(ingredientsStandard)
-        .values({
-          name,
-          unit,
-          quantity,
-          calories,
-          carbs,
-          protein,
-          fat
-        })
-        .returning({ id: ingredientsStandard.id });
-
-      if (!result || result.length === 0) {
-        throw new Error('Failed to create ingredient');
-      }
-
-      const ingredientId = result[0].id;
-      console.log(`Created new ingredient "${name}" with ID ${ingredientId}`);
-      return { success: true, ingredientId, alreadyExists: false };
+      return result;
     } catch (error) {
-      console.error('Failed to add ingredient:', error);
-      return { success: false, error: (error as Error).message };
+      logger.error(LogCategory.DATABASE, `Failed to add ingredient: ${error instanceof Error ? error.message : String(error)}`);
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
   /**
    * Add a meal to the database
+   * @deprecated Use sqliteMCPServer.addMealViaMCP instead
    */
   public async addMeal({
     name,
@@ -142,104 +129,51 @@ export class NutritionDatabaseService {
         throw new Error('Database not initialized');
       }
 
-      // Calculer les valeurs nutritionnelles totales à partir des ingrédients
-      let totalCalories = 0;
-      let totalCarbs = 0;
-      let totalProtein = 0;
-      let totalFat = 0;
-      let totalIngredientWeight = 0;
+      logger.info(LogCategory.DATABASE, `[Deprecated] Adding meal "${name}" via NutritionDatabaseService`);
+      
+      // Convertir les données pour la méthode MCP
+      const meal = {
+        name,
+        type,
+        description,
+        cuisine,
+        calories,
+        carbs,
+        protein,
+        fat,
+        quantity,
+        unit,
+        image: null,
+        ingredients: ingredients.map(ingredient => ({
+          name: ingredient.name,
+          quantity: ingredient.quantity || 1,
+          unit: ingredient.unit || MealUnitEnum.GRAMMES,
+          calories: ingredient.calories || 0,
+          carbs: ingredient.carbs || 0,
+          protein: ingredient.protein || 0,
+          fat: ingredient.fat || 0
+        }))
+      };
+      
+      // Utiliser la méthode MCP pour ajouter le repas
+      const result = await sqliteMCPServer.addMealViaMCP(meal, creatorId);
 
-      if (ingredients && ingredients.length > 0) {
-        for (const ingredient of ingredients) {
-          const ingredientQuantity = ingredient.quantity || 1;
-          totalCalories += (ingredient.calories || 0) * ingredientQuantity;
-          totalCarbs += (ingredient.carbs || 0) * ingredientQuantity;
-          totalProtein += (ingredient.protein || 0) * ingredientQuantity;
-          totalFat += (ingredient.fat || 0) * ingredientQuantity;
-          totalIngredientWeight += ingredientQuantity;
-        }
-
-        // Si les valeurs ont été calculées à partir des ingrédients et une quantité est spécifiée,
-        // ajuster les valeurs nutritionnelles en fonction du ratio (quantité du repas / poids total des ingrédients)
-        if (totalIngredientWeight > 0) {
-          const ratio = quantity / totalIngredientWeight;
-          calories = totalCalories * ratio;
-          carbs = totalCarbs * ratio;
-          protein = totalProtein * ratio;
-          fat = totalFat * ratio;
-        }
-      }
-
-      // Create the meal
-      const result = await this.db
-        .insert(meals)
-        .values({
-          name,
-          type,
-          description,
-          cuisine,
-          calories,
-          carbs,
-          protein,
-          fat,
-          quantity,
-          unit,
-          creatorId
-        })
-        .returning({ id: meals.id });
-
-      if (!result || result.length === 0) {
-        throw new Error('Failed to create meal');
-      }
-
-      const mealId = result[0].id;
-
-      // Add ingredients if provided
-      if (ingredients && ingredients.length > 0) {
-        for (const ingredient of ingredients) {
-          // First, create or get the standard ingredient
-          const { success, ingredientId } = await this.addIngredient({
-            name: ingredient.name,
-            unit: ingredient.unit || MealUnitEnum.GRAMMES,
-            quantity: 100, // Standard quantity for reference
-            calories: ingredient.calories || 0,
-            carbs: ingredient.carbs || 0,
-            protein: ingredient.protein || 0,
-            fat: ingredient.fat || 0
-          });
-
-          if (success && ingredientId) {
-            // Now add the relationship between meal and ingredient
-            await this.db
-              .insert(mealIngredients)
-              .values({
-                mealId,
-                ingredientStandardId: ingredientId,
-                quantity: ingredient.quantity || 1,
-                calories: ingredient.calories || 0,
-                carbs: ingredient.carbs || 0,
-                protein: ingredient.protein || 0,
-                fat: ingredient.fat || 0
-              });
-          }
-        }
-      }
-
-      return { success: true, mealId };
+      return result;
     } catch (error) {
-      console.error('Failed to add meal:', error);
-      return { success: false, error: (error as Error).message };
+      logger.error(LogCategory.DATABASE, `Failed to add meal: ${error instanceof Error ? error.message : String(error)}`);
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
   /**
    * Add a plan to the database
+   * @deprecated Use sqliteMCPServer.addPlanViaMCP instead
    */
   public async addPlan({
     name,
     description = '',
     generatedWith = PlanGeneratedWithEnum.MANUAL,
-    goal = 'MAINTAIN',
+    goal = GoalEnum.MAINTAIN,
     calories = 0,
     carbs = 0,
     protein = 0,
@@ -249,7 +183,7 @@ export class NutritionDatabaseService {
     name: string;
     description?: string;
     generatedWith?: PlanGeneratedWithEnum;
-    goal?: string;
+    goal?: GoalEnum;
     calories?: number;
     carbs?: number;
     protein?: number;
@@ -261,36 +195,34 @@ export class NutritionDatabaseService {
         throw new Error('Database not initialized');
       }
 
-      // Create the plan
-      const result = await this.db
-        .insert(plan)
-        .values({
-          name,
-          description,
-          generatedWith,
-          goal,
-          calories,
-          carbs,
-          protein,
-          fat,
-          creatorId
-        })
-        .returning({ id: plan.id });
+      logger.info(LogCategory.DATABASE, `[Deprecated] Adding plan "${name}" via NutritionDatabaseService`);
+      
+      // Convertir les données pour la méthode MCP
+      const planData = {
+        name,
+        description,
+        generatedWith,
+        goal,
+        calories,
+        carbs,
+        protein,
+        fat,
+        meals: [] // Pas de repas à ce stade
+      };
+      
+      // Utiliser la méthode MCP pour ajouter le plan
+      const result = await sqliteMCPServer.addPlanViaMCP(planData, creatorId);
 
-      if (!result || result.length === 0) {
-        throw new Error('Failed to create plan');
-      }
-
-      const planId = result[0].id;
-      return { success: true, planId };
+      return result;
     } catch (error) {
-      console.error('Failed to add plan:', error);
-      return { success: false, error: (error as Error).message };
+      logger.error(LogCategory.DATABASE, `Failed to add plan: ${error instanceof Error ? error.message : String(error)}`);
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
   /**
    * Add a daily plan to an existing plan
+   * @deprecated Use sqliteMCPServer.addDailyPlanViaMCP instead
    */
   public async addDailyPlan({
     planId,
@@ -312,33 +244,28 @@ export class NutritionDatabaseService {
     try {
       if (!this.db) {
         throw new Error('Database not initialized');
-      }
-
-      // Create the daily plan
-      const result = await this.db
-        .insert(dailyPlan)
-        .values({
-          planId,
-          day,
-          week,
-          calories,
-          carbs,
-          protein,
-          fat,
-        })
-        .returning({ id: dailyPlan.id });
-
-      if (!result || result.length === 0) {
-        throw new Error('Failed to create daily plan');
-      }
-
-      const dailyPlanId = result[0].id;
-      return { success: true, dailyPlanId };
-    } catch (error) {
-      console.error('Failed to add daily plan:', error);
-      return { success: false, error: (error as Error).message };
     }
+
+    logger.info(LogCategory.DATABASE, `[Deprecated] Adding daily plan for day ${day} to plan ${planId} via NutritionDatabaseService`);
+    
+    // Utiliser la méthode MCP pour ajouter le plan journalier
+    const dailyPlanData = {
+      day,
+      week,
+      calories,
+      carbs,
+      protein,
+      fat
+    };
+    
+    const result = await sqliteMCPServer.addDailyPlanViaMCP(planId, dailyPlanData);
+
+    return result;
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Failed to add daily plan: ${error instanceof Error ? error.message : String(error)}`);
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
+}
 
   /**
    * Parse the nutrition object from AI response
