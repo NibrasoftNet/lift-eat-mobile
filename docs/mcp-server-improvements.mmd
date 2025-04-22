@@ -1,0 +1,56 @@
+graph TB
+    subgraph "État Actuel du MCP Server"
+        A[SQLiteMCPServer] --> B[Méthodes de Lecture]
+        B --> B1[getCurrentUser]
+        B --> B2[getUserNutritionalPreferences]
+        B --> B3[getUserFavoriteMeals]
+        B --> B4[getUserActivePlans]
+        B --> B5[generateUserContext]
+        A -.-> C[Méthodes d'Écriture]
+        C -.-> C1[Méthodes manquantes]
+    end
+
+    subgraph "Corrections Nécessaires"
+        D[Implémentation Méthodes d'Écriture] --> D1[addMealViaMCP]
+        D --> D2[addPlanViaMCP]
+        D --> D3[addIngredientViaMCP]
+        D --> D4[updateUserPreferences]
+        
+        E[Améliorations Techniques] --> E1[Typage précis]
+        E --> E2[Gestion des transactions]
+        E --> E3[Validation des données]
+        E --> E4[Gestion des erreurs]
+        
+        F[Fonctionnalités Manquantes] --> F1[Support des ingrédients]
+        F --> F2[Relations meal_ingredients]
+        F --> F3[Relations dailyPlan_meals]
+        F --> F4[Historique des repas]
+    end
+
+    subgraph "Corrections Prioritaires"
+        G[1. Ajouter les méthodes d'écriture essentielles]
+        H[2. Améliorer le typage des paramètres/retours]
+        I[3. Implémenter la gestion des transactions]
+        J[4. Ajouter la validation des données]
+    end
+
+    subgraph "Interface pour Services IA"
+        K[Méthodes du IAService]
+        K --> K1[API pour création de repas]
+        K --> K2[API pour création de plans]
+        K --> K3[API pour optimisation de plan]
+        K --> K4[API pour substitution d'ingrédients]
+        
+        L[Flux de Données] --> L1[Service IA ⟹ MCP Server ⟹ BD]
+        L1 --> L2[Réception réponse IA]
+        L2 --> L3[Parsing et validation]
+        L3 --> L4[Écriture via MCP]
+    end
+
+classDef current fill:#f9f,stroke:#333,stroke-width:2px;
+classDef missing fill:#bbf,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
+classDef priority fill:#bfb,stroke:#333,stroke-width:2px;
+
+class A,B,B1,B2,B3,B4,B5 current;
+class C,C1,D,D1,D2,D3,D4,F,F1,F2,F3,F4 missing;
+class G,H,I,J priority;

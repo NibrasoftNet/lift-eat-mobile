@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/icon';
 import {
   ChartNoAxesCombined,
   Flame,
-  Layers,
+  MessageSquareText,
   Notebook,
   ScanQrCode,
 } from 'lucide-react-native';
@@ -22,10 +22,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="analytics"
+        name="assistant"
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon as={Layers} className="w-8 h-8" color={color} />
+            <Icon as={MessageSquareText} className="w-8 h-8" color={color} />
           ),
         }}
       />

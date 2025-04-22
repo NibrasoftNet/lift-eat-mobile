@@ -27,6 +27,8 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import DeletionModal from '@/components/modals/DeletionModal';
 import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { deletePlan, setCurrentPlan } from '@/utils/services/plan.service';
+import useSessionStore from '@/utils/store/sessionStore';
 
 const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   item,
@@ -35,6 +37,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   const router = useRouter();
   const toast = useToast();
   const drizzleDb = useDrizzleDb();
+  const { user } = useSessionStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -43,11 +46,9 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: async () =>
-      await new Promise((resolve) =>
-        resolve({ success: true, message: 'Plan deleted successfully' }),
-      ),
+  // Mutation pour supprimer un plan
+  const { mutateAsync: deleteAsync, isPending: isDeletePending } = useMutation({
+    mutationFn: async () => await deletePlan(drizzleDb, item.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -57,8 +58,8 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title={`Success delete Plan`}
-              description={`Success delete Plan`}
+              title={`Plan deleted`}
+              description={`The plan has been successfully deleted`}
             />
           );
         },
@@ -70,7 +71,6 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
       setShowModal(false);
     },
     onError: (error: any) => {
-      // Show error toast
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -79,7 +79,55 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title={`Failure delete Plan`}
+              title={`Failed to delete plan`}
+              description={error.toString()}
+            />
+          );
+        },
+      });
+    },
+  });
+
+  // Mutation pour définir un plan comme courant
+  const { mutateAsync: setCurrentAsync, isPending: isCurrentPending } = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error('User not authenticated');
+      return await setCurrentPlan(drizzleDb, item.id, user.id);
+    },
+    onSuccess: async () => {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.SUCCESS}
+              title={`Plan set as current`}
+              description={`"${item.name}" is now your current plan`}
+            />
+          );
+        },
+      });
+      // Invalider à la fois les plans et les données de progression
+      await queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey.some((key) => 
+            key?.toString().startsWith('my-plans') || 
+            key?.toString().startsWith('progress')
+          ),
+      });
+    },
+    onError: (error: any) => {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title={`Failed to set plan as current`}
               description={error.toString()}
             />
           );
@@ -89,7 +137,11 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   });
 
   const handlePlanDelete = async () => {
-    await mutateAsync();
+    await deleteAsync();
+  };
+
+  const handleSetCurrentPlan = async () => {
+    await setCurrentAsync();
   };
 
   return (
@@ -147,6 +199,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
                       key="Select Current"
                       textValue="Select Current"
                       disabled={item.current}
+                      onPress={handleSetCurrentPlan}
                     >
                       <Icon as={GlobeIcon} size="sm" className="mr-2" />
                       <MenuItemLabel size="sm">Select Current</MenuItemLabel>
@@ -218,7 +271,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
         description="Are you sure you want to delete this plan? This action cannot be undone."
         showModal={showModal}
         setShowModal={setShowModal}
-        isPending={isPending}
+        isPending={isDeletePending}
         handleDelete={() => handlePlanDelete()}
       />
     </>

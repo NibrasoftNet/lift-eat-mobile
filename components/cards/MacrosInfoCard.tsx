@@ -1,4 +1,5 @@
 import { HStack } from '../ui/hstack';
+import { VStack } from '../ui/vstack';
 import { Text } from '../ui/text';
 import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
@@ -11,17 +12,36 @@ const MacrosInfoCard = ({
   fats,
   protein,
   unit,
+  totalWeight,
+  mealWeight,
 }: {
   calories: number;
   carbs: number;
   fats: number;
   protein: number;
   unit: string;
+  totalWeight?: number;
+  mealWeight?: number;
 }) => {
   return (
     <Card className="gap-2">
       <HStack className="items-center justify-between">
-        <Text className="font-semibold text-lg">Nutrition Data</Text>
+        <VStack className="gap-1">
+          <Text className="font-semibold text-lg">Nutrition Data</Text>
+          {totalWeight && mealWeight ? (
+            <VStack className="gap-0">
+              <Text className="text-xs text-gray-600">
+                Ingrédients: {totalWeight}g • Repas final: {mealWeight}g
+              </Text>
+              {totalWeight !== mealWeight && (
+                <Text className="text-xs text-gray-600">
+                  Facteur d'ajustement: {(totalWeight / mealWeight).toFixed(2)} 
+                  (Valeurs ÷ {(totalWeight / mealWeight).toFixed(2)})
+                </Text>
+              )}
+            </VStack>
+          ) : null}
+        </VStack>
         {/* Calories */}
         <NutritionBox
           title="Calories"

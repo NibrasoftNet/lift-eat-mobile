@@ -13,6 +13,8 @@ import { and, eq, inArray, like } from 'drizzle-orm';
 import { MealFormData } from '../validation/meal/meal.validation';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { TotalMacrosProps } from '@/types/meal.type';
+import { logger } from './logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export const createNewMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
@@ -21,50 +23,75 @@ export const createNewMeal = async (
   totalMacros: TotalMacrosProps,
   creatorId: number,
 ) => {
-  //await new Promise((resolve) => setTimeout(resolve, 3000));
+  const startTime = logger.startPerformanceLog('createNewMeal');
   try {
-    console.log('Creating new meal...');
-    const newMeal: Omit<MealOrmProps, 'id'> = {
-      ...data,
-      calories: totalMacros.totalCalories,
-      carbs: totalMacros.totalCarbs,
-      fat: totalMacros.totalFats,
-      protein: totalMacros.totalProtein,
-      creatorId: creatorId,
-      image: data.image ?? null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    const insertedMeal = await drizzleDb
-      .insert(meals)
-      .values(newMeal)
-      .returning({ id: meals.id });
+    logger.info(LogCategory.DATABASE, 'Creating new meal', { mealName: data.name });
 
-    if (!insertedMeal || insertedMeal.length === 0) {
-      throw new Error('Failed to insert meal');
-    }
-    // ✅ Insert selected ingredients into mealIngredients table
-    const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
-      selectedIngredients.map((ingredient) => ({
-        mealId: insertedMeal[0].id,
-        ingredientStandardId: ingredient.ingredientStandardId,
-        quantity: ingredient.quantity,
-        calories: ingredient.calories,
-        carbs: ingredient.carbs,
-        fat: ingredient.fat,
-        protein: ingredient.protein,
+    // Start a transaction to ensure data consistency
+    return await drizzleDb.transaction(async (tx) => {
+      // 1. Insert meal
+      // Make sure we're using the meal weight for nutritional values
+      const newMeal: Omit<MealOrmProps, 'id'> = {
+        ...data,
+        calories: totalMacros.totalCalories,
+        carbs: totalMacros.totalCarbs,
+        fat: totalMacros.totalFats,
+        protein: totalMacros.totalProtein,
+        creatorId,
+        image: data.image ?? null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }));
+      };
+      
+      logger.debug(LogCategory.DATABASE, 'Creating meal with adjusted nutrition values', {
+        mealWeight: data.quantity,
+        totalIngredientsWeight: selectedIngredients.reduce((sum, ing) => sum + ing.quantity, 0),
+        nutritionValues: {
+          calories: totalMacros.totalCalories,
+          carbs: totalMacros.totalCarbs,
+          fat: totalMacros.totalFats,
+          protein: totalMacros.totalProtein,
+        }
+      });
 
-    await drizzleDb.insert(mealIngredients).values(mealIngredientsData);
-    console.log(
-      `Inserted ${selectedIngredients.length} ingredients for meal ID: ${insertedMeal[0].id}`,
-    );
-    return insertedMeal[0];
+      const insertedMeal = await tx
+        .insert(meals)
+        .values(newMeal)
+        .returning({ id: meals.id });
+
+      if (!insertedMeal || insertedMeal.length === 0) {
+        throw new Error('Failed to insert meal');
+      }
+
+      // 2. Batch insert ingredients
+      if (selectedIngredients.length > 0) {
+        const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
+          selectedIngredients.map((ingredient) => ({
+            mealId: insertedMeal[0].id,
+            ingredientStandardId: ingredient.ingredientStandardId,
+            quantity: ingredient.quantity,
+            calories: ingredient.calories,
+            carbs: ingredient.carbs,
+            fat: ingredient.fat,
+            protein: ingredient.protein,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
+
+        await tx.insert(mealIngredients).values(mealIngredientsData);
+        logger.debug(LogCategory.DATABASE, 'Inserted meal ingredients', {
+          mealId: insertedMeal[0].id,
+          ingredientCount: selectedIngredients.length,
+        });
+      }
+
+      return insertedMeal[0];
+    });
   } catch (error) {
-    console.error('Error crete new meal:', error); // Debugging log
+    logger.error(LogCategory.DATABASE, 'Failed to create meal', { error });
     throw error;
+  } finally {
+    logger.endPerformanceLog('createNewMeal', startTime);
   }
 };
 
@@ -74,25 +101,34 @@ export const getMealsList = async (
   mealType?: MealTypeEnum,
   mealName?: string,
 ) => {
+  const startTime = logger.startPerformanceLog('getMealsList');
   try {
-    let query = drizzleDb.select().from(meals).$dynamic();
+    logger.info(LogCategory.DATABASE, 'Fetching meals list', {
+      filters: { cuisine, mealType, mealName },
+    });
 
-    if (cuisine && mealType) {
-      query.where(and(eq(meals.cuisine, cuisine), eq(meals.type, mealType)));
-    } else if (cuisine) {
-      query.where(eq(meals.cuisine, cuisine));
-    } else if (mealType) {
-      query.where(eq(meals.type, mealType));
-    }
+    // Build conditions array for better query optimization
+    const conditions = [];
+    if (cuisine) conditions.push(eq(meals.cuisine, cuisine));
+    if (mealType) conditions.push(eq(meals.type, mealType));
+    if (mealName) conditions.push(like(meals.name, `%${mealName}%`));
 
-    if (mealName) {
-      query.where(like(meals.name, `%${mealName}%`));
-    }
+    const query = drizzleDb
+      .select()
+      .from(meals)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(meals.createdAt);
 
-    return await query.execute();
+    const results = await query.execute();
+    logger.debug(LogCategory.DATABASE, 'Meals list fetched', {
+      count: results.length,
+    });
+    return results;
   } catch (error) {
-    console.error('Error get meals list:', error); // Debugging log
+    logger.error(LogCategory.DATABASE, 'Failed to fetch meals list', { error });
     throw error;
+  } finally {
+    logger.endPerformanceLog('getMealsList', startTime);
   }
 };
 
@@ -100,24 +136,31 @@ export const getMealByIdWithIngredients = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
+  const startTime = logger.startPerformanceLog('getMealByIdWithIngredients');
   try {
-    // 1. Fetch the meal
-    const foundMeal = await drizzleDb.query.meals.findFirst({
-      where: eq(meals.id, mealId),
-    });
+    logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients', { mealId });
 
-    if (!foundMeal) return null;
-    // 2. Fetch all related meal ingredients
-    const mealIngredientRecords =
-      await drizzleDb.query.mealIngredients.findMany({
+    // Optimize by fetching meal and ingredients in parallel
+    const [meal, mealIngredientRecords] = await Promise.all([
+      drizzleDb.query.meals.findFirst({
+        where: eq(meals.id, mealId),
+      }),
+      drizzleDb.query.mealIngredients.findMany({
         where: eq(mealIngredients.mealId, mealId),
-      });
+      }),
+    ]);
 
-    if (mealIngredientRecords.length === 0) {
-      return { ...foundMeal, mealIngredients: [] };
+    if (!meal) {
+      logger.warn(LogCategory.DATABASE, 'Meal not found', { mealId });
+      return null;
     }
 
-    // 3.️ Fetch all related ingredient standards
+    if (mealIngredientRecords.length === 0) {
+      logger.debug(LogCategory.DATABASE, 'Meal has no ingredients', { mealId });
+      return { ...meal, mealIngredients: [] };
+    }
+
+    // Fetch ingredient standards in one query
     const ingredientStandardIds = mealIngredientRecords.map(
       (mi) => mi.ingredientStandardId,
     );
@@ -125,20 +168,35 @@ export const getMealByIdWithIngredients = async (
       await drizzleDb.query.ingredientsStandard.findMany({
         where: inArray(ingredientsStandard.id, ingredientStandardIds),
       });
-    // 4. Combine results efficiently using a Map
+
+    // Create a map for O(1) lookups
+    const ingredientStandardMap = new Map(
+      ingredientStandardRecords.map((is) => [is.id, is]),
+    );
+
+    // Combine results efficiently
     const mealWithIngredients: MealWithIngredientAndStandardOrmProps = {
-      ...foundMeal,
+      ...meal,
       mealIngredients: mealIngredientRecords.map((mi) => ({
         ...mi,
-        ingredientsStandard: ingredientStandardRecords.find(
-          (is) => is.id === mi.ingredientStandardId,
-        )!,
+        ingredientsStandard: ingredientStandardMap.get(mi.ingredientStandardId)!,
       })),
     };
+
+    logger.debug(LogCategory.DATABASE, 'Meal fetched with ingredients', {
+      mealId,
+      ingredientCount: mealWithIngredients.mealIngredients.length,
+    });
+
     return mealWithIngredients;
   } catch (error) {
-    console.error('Error fetching meal by ID:', error);
+    logger.error(LogCategory.DATABASE, 'Failed to fetch meal by ID', {
+      mealId,
+      error,
+    });
     throw error;
+  } finally {
+    logger.endPerformanceLog('getMealByIdWithIngredients', startTime);
   }
 };
 
@@ -148,59 +206,82 @@ export const updateMeal = async (
   selectedIngredients: IngredientWithStandardProps[],
   totalMacros: TotalMacrosProps,
 ) => {
+  const startTime = logger.startPerformanceLog('updateMeal');
   try {
-    console.log('Updating meal...');
+    logger.info(LogCategory.DATABASE, 'Updating meal', {
+      mealId: data.id,
+      mealName: data.name,
+    });
 
-    // Update the meal in the meals table
-    const updatedMeal = await drizzleDb
-      .update(meals)
-      .set({
-        ...data,
-        id: data?.id!,
-        calories: totalMacros.totalCalories,
-        carbs: totalMacros.totalCarbs,
-        fat: totalMacros.totalFats,
-        protein: totalMacros.totalProtein,
-        image: data.image ?? null,
-      })
-      .where(eq(meals.id, data?.id!)) // Use the id from data to find the meal
-      .returning({ id: meals.id });
+    return await drizzleDb.transaction(async (tx) => {
+      // 1. Update meal - exclude id from the update values
+      const { id, ...updateData } = data;
+      
+      logger.debug(LogCategory.DATABASE, 'Updating meal with adjusted nutrition values', {
+        mealId: id,
+        mealWeight: data.quantity,
+        totalIngredientsWeight: selectedIngredients.reduce((sum, ing) => sum + ing.quantity, 0),
+        nutritionValues: {
+          calories: totalMacros.totalCalories,
+          carbs: totalMacros.totalCarbs,
+          fat: totalMacros.totalFats,
+          protein: totalMacros.totalProtein,
+        }
+      });
+      
+      const updatedMeal = await tx
+        .update(meals)
+        .set({
+          ...updateData,
+          calories: totalMacros.totalCalories,
+          carbs: totalMacros.totalCarbs,
+          fat: totalMacros.totalFats,
+          protein: totalMacros.totalProtein,
+          image: data.image ?? null,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(meals.id, id!))
+        .returning({ id: meals.id });
 
-    if (!updatedMeal || updatedMeal.length === 0) {
-      throw new Error('Failed to update meal');
-    }
+      if (!updatedMeal || updatedMeal.length === 0) {
+        throw new Error('Failed to update meal');
+      }
 
-    // Delete old meal ingredients
-    await drizzleDb
-      .delete(mealIngredients)
-      .where(eq(mealIngredients.mealId, data?.id!));
+      // 2. Delete old ingredients and insert new ones in a transaction
+      await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, id!));
 
-    console.log(`Deleted old ingredients for meal ID: ${data.id}`);
+      if (selectedIngredients.length > 0) {
+        const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
+          selectedIngredients.map((ingredient) => ({
+            mealId: id!,
+            ingredientStandardId: ingredient.ingredientStandardId,
+            quantity: ingredient.quantity,
+            calories: ingredient.calories,
+            carbs: ingredient.carbs,
+            fat: ingredient.fat,
+            protein: ingredient.protein,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }));
 
-    // Insert new meal ingredients
-    const mealIngredientsData: Omit<MealIngredientsOrmProps, 'id'>[] =
-      selectedIngredients.map((ingredient) => ({
-        mealId: data?.id!,
-        ingredientStandardId: ingredient.ingredientStandardId,
-        quantity: ingredient.quantity,
-        calories: ingredient.calories,
-        carbs: ingredient.carbs,
-        fat: ingredient.fat,
-        protein: ingredient.protein,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
+        await tx.insert(mealIngredients).values(mealIngredientsData);
+      }
 
-    await drizzleDb.insert(mealIngredients).values(mealIngredientsData);
+      logger.debug(LogCategory.DATABASE, 'Meal updated successfully', {
+        mealId: id,
+        newIngredientCount: selectedIngredients.length,
+      });
 
-    console.log(
-      `Inserted ${selectedIngredients.length} new ingredients for meal ID: ${data.id}`,
-    );
-
-    return updatedMeal[0];
+      return updatedMeal[0];
+    });
   } catch (error) {
-    console.error('Error updating meal:', error); // Debugging log
+    logger.error(LogCategory.DATABASE, 'Failed to update meal', {
+      mealId: data.id,
+      error,
+    });
     throw error;
+  } finally {
+    logger.endPerformanceLog('updateMeal', startTime);
   }
 };
 
@@ -208,30 +289,31 @@ export const deleteMeal = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
 ) => {
+  const startTime = logger.startPerformanceLog('deleteMeal');
   try {
-    console.log(`Deleting meal with ID: ${mealId}...`);
+    logger.info(LogCategory.DATABASE, 'Deleting meal', { mealId });
 
-    // Step 1: Delete associated mealIngredients
-    await drizzleDb
-      .delete(mealIngredients)
-      .where(eq(mealIngredients.mealId, mealId));
+    return await drizzleDb.transaction(async (tx) => {
+      // Delete meal ingredients first (foreign key constraint)
+      await tx.delete(mealIngredients).where(eq(mealIngredients.mealId, mealId));
+      
+      // Then delete the meal
+      const deletedMeal = await tx
+        .delete(meals)
+        .where(eq(meals.id, mealId))
+        .returning({ id: meals.id });
 
-    console.log(`Deleted mealIngredients for meal ID: ${mealId}`);
+      if (!deletedMeal || deletedMeal.length === 0) {
+        throw new Error('Failed to delete meal');
+      }
 
-    // Step 2: Delete the meal
-    const deletedMeal = await drizzleDb
-      .delete(meals)
-      .where(eq(meals.id, mealId))
-      .returning({ id: meals.id });
-
-    if (!deletedMeal || deletedMeal.length === 0) {
-      throw new Error('Failed to delete meal'); // Throw error if deletion fails
-    }
-
-    console.log(`Successfully deleted meal with ID: ${mealId}`);
-    return deletedMeal[0]; // Return the deleted meal ID
+      logger.debug(LogCategory.DATABASE, 'Meal deleted successfully', { mealId });
+      return deletedMeal[0];
+    });
   } catch (error) {
-    console.error(`Error deleting meal with ID: ${mealId}:`, error); // Log the error
-    throw error; // Rethrow the error to propagate it to the caller
+    logger.error(LogCategory.DATABASE, 'Failed to delete meal', { mealId, error });
+    throw error;
+  } finally {
+    logger.endPerformanceLog('deleteMeal', startTime);
   }
 };

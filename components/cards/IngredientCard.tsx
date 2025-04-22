@@ -71,7 +71,7 @@ const IngredientCard: React.FC<{
           <HStack className="items-center gap-2">
             <Button
               onPress={() => handleQuantityChange('decrease')}
-              disabled={newQuantity <= item.ingredientsStandard.quantity}
+              disabled={newQuantity <= 0}
               action="secondary"
               className="w-12 h-12 bg-transparent disabled:bg-secondary-500 disabled:text-white"
             >

@@ -91,9 +91,9 @@ export default function PlanDetailsScreen() {
   };
 
   // Fonction pour ajouter un repas au plan journalier
-  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number) => {
+  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10) => {
     try {
-      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId);
+      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity);
       return true;
     } catch (error) {
       console.error('Error adding meal to plan:', error);
@@ -200,7 +200,14 @@ export default function PlanDetailsScreen() {
             {filteredDailyMeals && filteredDailyMeals.length > 0 ? (
               <FlashList
                 data={filteredDailyMeals}
-                renderItem={({ item }) => <PlanMealCard meal={item} />}
+                renderItem={({ item }) => (
+                  <PlanMealCard 
+                    meal={item} 
+                    drizzleDb={drizzleDb} 
+                    onMealDeleted={handleMealsAdded}
+                    dailyPlanId={selectedDailyPlanId}
+                  />
+                )}
                 keyExtractor={(item) => String(item.id)}
                 estimatedItemSize={10}
               />

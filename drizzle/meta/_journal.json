@@ -29,6 +29,41 @@
       "when": 1742425317825,
       "tag": "0003_oval_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1744720904927,
+      "tag": "0004_boring_kronos",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1744745248134,
+      "tag": "0005_goofy_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1744808141972,
+      "tag": "0006_amused_nekra",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1744812345831,
+      "tag": "0007_nasty_reavers",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1745254506524,
+      "tag": "0008_furry_gideon",
+      "breakpoints": true
     }
   ]
 }
