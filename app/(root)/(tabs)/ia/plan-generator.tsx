@@ -9,39 +9,27 @@ import PlanGeneratorForm from '@/components/ia/PlanGeneratorForm';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { eq } from 'drizzle-orm';
-import { users } from '@/db/schema';
+import { useUserContext } from '@/utils/providers/UserContextProvider';
 import iaService from '@/utils/services/ia/ia.service';
 import { IaPlanType } from '@/utils/validation/ia/ia.schemas';
 
 export default function PlanGeneratorScreen() {
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
   const drizzleDb = useDrizzleDb();
   
-  // Récupérer l'ID de l'utilisateur actuel
+  // Récupérer l'utilisateur actuel via le contexte global et configurer le service IA
   useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        // Pour cette démo, nous prenons le premier utilisateur de la base de données
-        // Dans une application réelle, vous utiliseriez un système d'authentification
-        const userResults = await drizzleDb.select().from(users).limit(1);
-        
-        if (userResults.length > 0) {
-          const userId = userResults[0].id;
-          setCurrentUserId(userId);
-          
-          // Configurer le service IA avec l'ID de l'utilisateur actuel
-          iaService.setCurrentUserId(userId);
-        } else {
-          console.warn('No users found in the database');
-        }
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
-
-    getCurrentUser();
-  }, [drizzleDb]);
+    // Si aucun utilisateur n'est chargé dans le contexte, récupérer l'utilisateur 1 par défaut
+    if (!currentUser && !isUserLoading) {
+      refreshUser(1);
+    }
+    
+    // Configurer le service IA avec l'ID de l'utilisateur actuel quand disponible
+    if (currentUser) {
+      iaService.setCurrentUserId(currentUser.id);
+      console.log(`IA Plan Generator configured with user ID: ${currentUser.id}`);
+    }
+  }, [currentUser, isUserLoading, refreshUser]);
 
   const handlePlanGenerated = (plan: IaPlanType) => {
     // Cette fonction pourrait être utilisée pour naviguer vers le détail du plan
@@ -65,7 +53,7 @@ export default function PlanGeneratorScreen() {
       </ThemedView>
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {currentUserId ? (
+        {currentUser ? (
           <PlanGeneratorForm onPlanGenerated={handlePlanGenerated} />
         ) : (
           <ThemedView style={styles.loadingContainer}>

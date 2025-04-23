@@ -9,39 +9,27 @@ import MealGeneratorForm from '@/components/ia/MealGeneratorForm';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { eq } from 'drizzle-orm';
-import { users } from '@/db/schema';
+import { useUserContext } from '@/utils/providers/UserContextProvider';
 import iaService from '@/utils/services/ia/ia.service';
 import { IaMealType } from '@/utils/validation/ia/ia.schemas';
 
 export default function MealGeneratorScreen() {
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
   const drizzleDb = useDrizzleDb();
-  
-  // Récupérer l'ID de l'utilisateur actuel
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        // Pour cette démo, nous prenons le premier utilisateur de la base de données
-        // Dans une application réelle, vous utiliseriez un système d'authentification
-        const userResults = await drizzleDb.select().from(users).limit(1);
-        
-        if (userResults.length > 0) {
-          const userId = userResults[0].id;
-          setCurrentUserId(userId);
-          
-          // Configurer le service IA avec l'ID de l'utilisateur actuel
-          iaService.setCurrentUserId(userId);
-        } else {
-          console.warn('No users found in the database');
-        }
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
 
-    getCurrentUser();
-  }, [drizzleDb]);
+  // Récupérer l'utilisateur actuel via le contexte global et configurer le service IA
+  useEffect(() => {
+    // Si aucun utilisateur n'est chargé dans le contexte, récupérer l'utilisateur 1 par défaut
+    if (!currentUser && !isUserLoading) {
+      refreshUser(1);
+    }
+    
+    // Configurer le service IA avec l'ID de l'utilisateur actuel quand disponible
+    if (currentUser) {
+      iaService.setCurrentUserId(currentUser.id);
+      console.log(`IA Meal Generator configured with user ID: ${currentUser.id}`);
+    }
+  }, [currentUser, isUserLoading, refreshUser]);
 
   const handleMealGenerated = (meal: IaMealType) => {
     // Cette fonction pourrait être utilisée pour naviguer vers le détail du repas
@@ -65,7 +53,7 @@ export default function MealGeneratorScreen() {
       </ThemedView>
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {currentUserId ? (
+        {currentUser ? (
           <MealGeneratorForm onMealGenerated={handleMealGenerated} />
         ) : (
           <ThemedView style={styles.loadingContainer}>

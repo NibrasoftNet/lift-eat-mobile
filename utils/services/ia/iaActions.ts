@@ -22,13 +22,44 @@ export async function processDatabaseAction(action: DetectedAction, userId: numb
       return;
     }
     
-    // Utiliser les données typées et validées par Zod
-    if (action.type === 'ADD_MEAL' && action.parsedData) {
-      await processMealAction(action.parsedData as IaMealType, userId);
-    } else if (action.type === 'ADD_PLAN' && action.parsedData) {
-      await processPlanAction(action.parsedData as IaPlanType, userId);
-    } else if (action.type === 'ADD_INGREDIENT' && action.parsedData) {
-      await processIngredientAction(action.parsedData as IaIngredientType, userId);
+    // Traiter l'action en fonction de son type
+    switch (action.type) {
+      case 'ADD_MEAL':
+        if (action.parsedData) {
+          await processMealAction(action.parsedData as IaMealType, userId);
+        }
+        break;
+        
+      case 'ADD_PLAN':
+        if (action.parsedData) {
+          await processPlanAction(action.parsedData as IaPlanType, userId);
+        }
+        break;
+        
+      case 'ADD_INGREDIENT':
+        if (action.parsedData) {
+          await processIngredientAction(action.parsedData as IaIngredientType, userId);
+        }
+        break;
+        
+      case 'NUTRITION_PLAN':
+        await processNutritionPlanAction(action.data, userId);
+        break;
+        
+      case 'MEAL_RECOMMENDATION':
+        await processMealRecommendationAction(action.data, userId);
+        break;
+        
+      case 'PROGRESS_ANALYSIS':
+        await processProgressAnalysisAction(action.data, userId);
+        break;
+        
+      case 'NUTRITION_ADVICE':
+        await processNutritionAdviceAction(action.data, userId);
+        break;
+        
+      default:
+        logger.warn(LogCategory.IA, `Type d'action non pris en charge: ${action.type}`);
     }
   } catch (error) {
     logger.error(LogCategory.IA, `Error processing database action: ${error instanceof Error ? error.message : String(error)}`);
@@ -105,6 +136,83 @@ async function processIngredientAction(ingredientData: IaIngredientType, userId:
     logger.info(LogCategory.IA, status);
   } catch (error) {
     logger.error(LogCategory.IA, `Error processing ingredient action: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+/**
+ * Traite l'action de plan nutritionnel
+ * @param planData Données du plan nutritionnel
+ * @param userId ID de l'utilisateur
+ */
+async function processNutritionPlanAction(planData: string, userId: number): Promise<void> {
+  try {
+    logger.info(LogCategory.IA, `Processing nutrition plan action for user ${userId}`);
+    
+    // Pour l'instant, on stocke simplement l'information du plan dans les logs
+    // Ces données pourraient être utilisées pour l'historique des analyses ou
+    // pour alimenter un tableau de bord de nutrition
+    
+    logger.info(LogCategory.IA, `Nutrition plan processed for user ${userId}`);
+  } catch (error) {
+    logger.error(LogCategory.IA, `Error processing nutrition plan action: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+/**
+ * Traite l'action de recommandation de repas
+ * @param recommendationData Données de recommandation
+ * @param userId ID de l'utilisateur
+ */
+async function processMealRecommendationAction(recommendationData: string, userId: number): Promise<void> {
+  try {
+    logger.info(LogCategory.IA, `Processing meal recommendation action for user ${userId}`);
+    
+    // Pour l'instant, on stocke simplement l'information de la recommandation dans les logs
+    // Ces données pourraient être utilisées pour alimenter un historique de recommandations
+    
+    logger.info(LogCategory.IA, `Meal recommendation processed for user ${userId}`);
+  } catch (error) {
+    logger.error(LogCategory.IA, `Error processing meal recommendation action: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+/**
+ * Traite l'action d'analyse de progrès
+ * @param analysisData Données d'analyse
+ * @param userId ID de l'utilisateur
+ */
+async function processProgressAnalysisAction(analysisData: string, userId: number): Promise<void> {
+  try {
+    logger.info(LogCategory.IA, `Processing progress analysis action for user ${userId}`);
+    
+    // Pour l'instant, on stocke simplement l'information de l'analyse dans les logs
+    // Ces données pourraient être utilisées pour alimenter un historique d'analyses
+    
+    logger.info(LogCategory.IA, `Progress analysis processed for user ${userId}`);
+  } catch (error) {
+    logger.error(LogCategory.IA, `Error processing progress analysis action: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+/**
+ * Traite l'action de conseil nutritionnel
+ * @param adviceData Données de conseil
+ * @param userId ID de l'utilisateur
+ */
+async function processNutritionAdviceAction(adviceData: string, userId: number): Promise<void> {
+  try {
+    logger.info(LogCategory.IA, `Processing nutrition advice action for user ${userId}`);
+    
+    // Pour l'instant, on stocke simplement l'information du conseil dans les logs
+    // Ces données pourraient être utilisées pour alimenter un historique de conseils
+    
+    logger.info(LogCategory.IA, `Nutrition advice processed for user ${userId}`);
+  } catch (error) {
+    logger.error(LogCategory.IA, `Error processing nutrition advice action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }

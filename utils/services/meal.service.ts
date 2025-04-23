@@ -75,8 +75,19 @@ export const getMealsList = async (
       filters: { cuisine, mealType, mealName },
     });
 
+    // Récupérer l'ID utilisateur depuis le premier utilisateur dans la base de données
+    // Note: Ceci est une solution temporaire, idéalement l'ID utilisateur devrait être passé en paramètre
+    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
+    if (users.length === 0) {
+      throw new Error('No users found in the database');
+    }
+    const userId = users[0].id;
+
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    const result = await sqliteMCPServer.getMealsListViaMCP(cuisine, mealType, mealName);
+    // Conversion des énumérations en strings pour correspondre à la signature de la méthode MCP
+    const cuisineStr = cuisine ? String(cuisine) : undefined;
+    const mealTypeStr = mealType ? String(mealType) : undefined;
+    const result = await sqliteMCPServer.getMealsListViaMCP(userId, cuisineStr, mealTypeStr, mealName);
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to fetch meals list via MCP Server');
@@ -107,8 +118,16 @@ export const getMealByIdWithIngredients = async (
   try {
     logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients via MCP Server', { mealId });
 
+    // Récupérer l'ID utilisateur depuis le premier utilisateur dans la base de données
+    // Note: Ceci est une solution temporaire, idéalement l'ID utilisateur devrait être passé en paramètre
+    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
+    if (users.length === 0) {
+      throw new Error('No users found in the database');
+    }
+    const userId = users[0].id;
+
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(mealId);
+    const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(mealId, userId);
 
     if (!result.success) {
       throw new Error(result.error || `Failed to fetch meal with ID ${mealId} via MCP Server`);
@@ -152,15 +171,23 @@ export const updateMeal = async (
     });
 
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
+    // Inclure les totalMacros dans l'objet data pour la mise à jour
+    // Extrait l'ID pour s'assurer qu'il est du bon type et le réinsérer si c'est un nombre valide
+    const { id, ...dataWithoutId } = data;
+    const dataWithMacros = {
+      ...dataWithoutId,
+      // Réinsérer l'id seulement s'il s'agit d'un nombre valide
+      ...(typeof id === 'number' ? { id } : {}),
+      calories: totalMacros.totalCalories,
+      carbs: totalMacros.totalCarbs,
+      fat: totalMacros.totalFats,
+      protein: totalMacros.totalProtein
+    };
+
     const result = await sqliteMCPServer.updateMealViaMCP(
-      data,
-      selectedIngredients,
-      {
-        totalCalories: totalMacros.totalCalories,
-        totalCarbs: totalMacros.totalCarbs,
-        totalFats: totalMacros.totalFats,
-        totalProtein: totalMacros.totalProtein
-      }
+      data.id as number, // mealId en premier argument
+      dataWithMacros,    // data en second argument
+      selectedIngredients // ingredients en troisième argument (optionnel)
     );
 
     if (!result.success) {
@@ -173,7 +200,7 @@ export const updateMeal = async (
     });
 
     // Maintenir la compatibilité avec l'API actuelle
-    return { id: result.mealId };
+    return { id: data.id };
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to update meal', {
       mealId: data.id,
@@ -198,7 +225,10 @@ export const deleteMeal = async (
     logger.info(LogCategory.DATABASE, 'Deleting meal via MCP Server', { mealId });
 
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    const result = await sqliteMCPServer.deleteMealViaMCP(mealId);
+    // L'ID utilisateur est nécessaire pour la gestion du cache dans MCP
+  // Utiliser un ID par défaut de 1 si non disponible (doit être amélioré ultérieurement)
+  const userId = 1; // à remplacer par la récupération du vrai ID utilisateur quand disponible
+  const result = await sqliteMCPServer.deleteMealViaMCP(mealId, userId);
 
     if (!result.success) {
       throw new Error(result.error || `Failed to delete meal ${mealId} via MCP Server`);
@@ -207,7 +237,7 @@ export const deleteMeal = async (
     logger.debug(LogCategory.DATABASE, 'Meal deleted successfully via MCP Server', { mealId });
     
     // Maintenir la compatibilité avec l'API actuelle
-    return { id: result.mealId };
+    return { id: mealId };
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Failed to delete meal', { mealId, error });
     throw error;

@@ -27,6 +27,7 @@ import migrations from '@/drizzle/migrations';
 import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
 import MCPProvider from '@/utils/providers/MCPProvider';
+import UserContextProvider from '@/utils/providers/UserContextProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import '@/i18n';
 import { VStack } from '@/components/ui/vstack';
@@ -228,10 +229,12 @@ export default function ProjectLayout() {
                   >
                     <DrizzleProvider>
                       <MCPProvider>
-                        <ErrorBoundary FallbackComponent={ErrorFallback}>
-                          <Slot />
-                          <StatusBar style="auto" hidden={true} />
-                        </ErrorBoundary>
+                        <UserContextProvider>
+                          <ErrorBoundary FallbackComponent={ErrorFallback}>
+                            <Slot />
+                            <StatusBar style="auto" hidden={true} />
+                          </ErrorBoundary>
+                        </UserContextProvider>
                       </MCPProvider>
                     </DrizzleProvider>
                   </SQLiteProvider>

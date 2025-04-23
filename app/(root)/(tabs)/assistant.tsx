@@ -14,6 +14,7 @@ import { useGemini } from '@/hooks/useGemini';
 import { Colors } from '@/utils/constants/Colors';
 import geminiService from '@/utils/services/gemini-service';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { useUserContext } from '@/utils/providers/UserContextProvider';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import nutritionDatabaseService from '@/utils/services/nutrition-database.service';
@@ -35,52 +36,51 @@ export default function AssistantScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const { loading, generateResponse } = useGemini();
   const flatListRef = useRef<FlatList>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   
   // État pour gérer la fonctionnalité IA active
   const [activeIAFeature, setActiveIAFeature] = useState<string | null>(null);
 
-  // Récupérer l'ID de l'utilisateur actuel
+  // Récupérer l'utilisateur actuel via le contexte utilisateur global et initialiser les services
   useEffect(() => {
     // Utilisons une variable pour éviter des appels multiples
     let isUserFetched = false;
     
-    const getCurrentUser = async () => {
+    const initializeServices = async () => {
       if (isUserFetched) return; // Prévenir la récursion
       isUserFetched = true;
       
       try {
-        // Pour cette démo, nous allons simplement utiliser un ID utilisateur fixe
-        // pour éviter les problèmes avec la base de données
-        const mockUserId = 1;
-        setCurrentUserId(mockUserId);
-          
-        // Configurer le service Gemini avec l'ID de l'utilisateur actuel
-        if (geminiService && typeof geminiService.setCurrentUserId === 'function') {
-          geminiService.setCurrentUserId(mockUserId);
+        // Récupérer l'utilisateur depuis le contexte global ou l'utilisateur 1 par défaut
+        if (!currentUser && !isUserLoading) {
+          refreshUser(1);
         }
-          
-        // Initialiser le service de base de données nutritionnelle avec précaution
+        
+        // Initialiser le service de base de données nutritionnelle
         if (nutritionDatabaseService && typeof nutritionDatabaseService.initialize === 'function') {
           nutritionDatabaseService.initialize(drizzleDb);
         }
-          
-        console.log(`Assistant initialized with mock user ID: ${mockUserId}`);
+        
+        // Configurer le service Gemini avec l'ID de l'utilisateur actuel
+        if (currentUser && geminiService && typeof geminiService.setCurrentUserId === 'function') {
+          geminiService.setCurrentUserId(currentUser.id);
+          console.log(`Assistant initialized with user ID: ${currentUser.id} (${currentUser.name})`);
+        }
       } catch (error) {
         console.error('Error initializing services:', error);
       }
     };
 
-    getCurrentUser();
+    initializeServices();
     
     // Nettoyage
     return () => {
       isUserFetched = false;
     };
-  }, []);  // Suppression de la dépendance drizzleDb pour éviter les re-rendus
-
+  }, [currentUser, isUserLoading, refreshUser, drizzleDb]);
+  
   const handleSendMessage = async (text: string) => {
     // Add user message
     const userMessage: Message = {
@@ -149,7 +149,7 @@ export default function AssistantScreen() {
       <StatusBar style="dark" />
       <ThemedView style={styles.header}>
         <ThemedText type="title">Assistant Lift-Eat</ThemedText>
-        {currentUserId ? (
+        {currentUser ? (
           <ThemedText style={styles.subtitle}>Prêt à vous aider avec vos questions et tâches</ThemedText>
         ) : (
           <ThemedText style={styles.subtitle}>Chargement des préférences...</ThemedText>
@@ -308,7 +308,7 @@ export default function AssistantScreen() {
           {messages.length === 0 ? (
             <View style={styles.emptyContainer}>
               <ThemedText style={styles.emptyText}>
-                {currentUserId 
+                {currentUser 
                   ? "Bonjour ! Je suis votre assistant personnel pour Lift-Eat. Je peux vous aider avec la nutrition, l'utilisation de l'application, vos préférences, et bien plus encore. Comment puis-je vous aider aujourd'hui ?"
                   : "Chargement de vos données personnelles..."}
               </ThemedText>

@@ -32,16 +32,8 @@ export const getPlansList = async (
   try {
     logger.info(LogCategory.DATABASE, 'Fetching plans list via MCP Server');
 
-    // Ru00e9cupu00e9rer l'ID utilisateur depuis le premier utilisateur dans la base de donnu00e9es
-    // Note: Ceci est une solution temporaire, iddu00e9alement l'ID utilisateur devrait u00eatre passu00e9 en paramutire
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
-    }
-    const userId = users[0].id;
-
     // Utiliser le serveur MCP au lieu d'accu00e9der directement u00e0 la base de donnu00e9es
-    const result = await sqliteMCPServer.getPlansListViaMCP(userId);
+    const result = await sqliteMCPServer.getPlansListViaMCP();
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to fetch plans list via MCP Server');
@@ -75,18 +67,10 @@ export const getPlanDetails = async (
 ) => {
   const startTime = logger.startPerformanceLog('getPlanDetails');
   try {
-    logger.info(LogCategory.DATABASE, `Fetching plan details for plan ${planId} via MCP Server`);
-
-    // Ru00e9cupu00e9rer l'ID utilisateur depuis le premier utilisateur dans la base de donnu00e9es
-    // Note: Ceci est une solution temporaire, iddu00e9alement l'ID utilisateur devrait u00eatre passu00e9 en paramutire
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
-    }
-    const userId = users[0].id;
+    logger.info(LogCategory.DATABASE, 'Fetching plan details via MCP Server', { planId });
 
     // Utiliser le serveur MCP au lieu d'accu00e9der directement u00e0 la base de donnu00e9es
-    const result = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
+    const result = await sqliteMCPServer.getPlanDetailsViaMCP(planId);
 
     if (!result.success) {
       throw new Error(result.error || `Failed to fetch plan details for plan ${planId} via MCP Server`);
@@ -216,6 +200,7 @@ export const createDailyPlans = async (
           protein: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
+          generatedWith: DailyPlanGeneratedWithEnum.MANUAL,
         });
       }
     }

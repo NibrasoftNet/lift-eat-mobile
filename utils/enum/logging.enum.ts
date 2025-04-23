@@ -18,4 +18,6 @@ export enum LogCategory {
   UI = 'UI',
   IA = 'IA',
   PERFORMANCE = 'PERFORMANCE',
+  CACHE = 'CACHE',
+  USER = 'USER',
 }

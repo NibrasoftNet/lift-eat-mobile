@@ -11,7 +11,7 @@ import {
 } from '@/utils/validation/ia/ia.schemas';
 
 export interface DetectedAction {
-  type: 'ADD_MEAL' | 'ADD_PLAN' | 'ADD_INGREDIENT' | 'NONE';
+  type: 'ADD_MEAL' | 'ADD_PLAN' | 'ADD_INGREDIENT' | 'NUTRITION_PLAN' | 'MEAL_RECOMMENDATION' | 'PROGRESS_ANALYSIS' | 'NUTRITION_ADVICE' | 'NONE';
   data: string;
   isValid: boolean;
   validationMessage?: string;
@@ -36,6 +36,26 @@ const ACTION_TAGS = {
     START: '<ADD_INGREDIENT>',
     END: '</ADD_INGREDIENT>',
     ALTERNATIVES: ['<ADD_INGREDIENT>', '<ADD-INGREDIENT>', '<<ADD_INGREDIENT>>', '<INGREDIENT>', '<AJOUTER_INGREDIENT>']
+  },
+  NUTRITION_PLAN: {
+    START: '<NUTRITION_PLAN>',
+    END: '</NUTRITION_PLAN>',
+    ALTERNATIVES: ['<NUTRITION_PLAN>', '<NUTRITION-PLAN>', '<PLAN_NUTRITIONNEL>', '<DIET_PLAN>']
+  },
+  MEAL_RECOMMENDATION: {
+    START: '<MEAL_RECOMMENDATION>',
+    END: '</MEAL_RECOMMENDATION>',
+    ALTERNATIVES: ['<MEAL_RECOMMENDATION>', '<MEAL-RECOMMENDATION>', '<RECOMMANDATION_REPAS>', '<MEAL_SUGGESTION>']
+  },
+  PROGRESS_ANALYSIS: {
+    START: '<PROGRESS_ANALYSIS>',
+    END: '</PROGRESS_ANALYSIS>',
+    ALTERNATIVES: ['<PROGRESS_ANALYSIS>', '<PROGRESS-ANALYSIS>', '<ANALYSE_PROGRES>', '<PROGRESS_REPORT>']
+  },
+  NUTRITION_ADVICE: {
+    START: '<NUTRITION_ADVICE>',
+    END: '</NUTRITION_ADVICE>',
+    ALTERNATIVES: ['<NUTRITION_ADVICE>', '<NUTRITION-ADVICE>', '<CONSEIL_NUTRITIONNEL>', '<NUTRITION_TIP>']
   }
 };
 
@@ -83,6 +103,46 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
         isValid: validationResult.success,
         validationMessage: validationResult.message,
         parsedData: validationResult.data
+      };
+    }
+    
+    // Vérifier la présence d'un plan nutritionnel
+    const nutritionPlanAction = detectActionWithTolerance(responseText, ACTION_TAGS.NUTRITION_PLAN);
+    if (nutritionPlanAction) {
+      return {
+        type: 'NUTRITION_PLAN',
+        data: nutritionPlanAction.data,
+        isValid: true
+      };
+    }
+    
+    // Vérifier la présence d'une recommandation de repas
+    const mealRecommendationAction = detectActionWithTolerance(responseText, ACTION_TAGS.MEAL_RECOMMENDATION);
+    if (mealRecommendationAction) {
+      return {
+        type: 'MEAL_RECOMMENDATION',
+        data: mealRecommendationAction.data,
+        isValid: true
+      };
+    }
+    
+    // Vérifier la présence d'une analyse de progrès
+    const progressAnalysisAction = detectActionWithTolerance(responseText, ACTION_TAGS.PROGRESS_ANALYSIS);
+    if (progressAnalysisAction) {
+      return {
+        type: 'PROGRESS_ANALYSIS',
+        data: progressAnalysisAction.data,
+        isValid: true
+      };
+    }
+    
+    // Vérifier la présence de conseils nutritionnels
+    const nutritionAdviceAction = detectActionWithTolerance(responseText, ACTION_TAGS.NUTRITION_ADVICE);
+    if (nutritionAdviceAction) {
+      return {
+        type: 'NUTRITION_ADVICE',
+        data: nutritionAdviceAction.data,
+        isValid: true
       };
     }
   } catch (error) {
@@ -191,6 +251,34 @@ export function cleanResponseText(text: string): string {
   
   // Supprimer les balises d'ajout d'ingrédient (avec tolérance)
   for (const tag of ACTION_TAGS.INGREDIENT.ALTERNATIVES) {
+    const endTag = tag.replace('<', '</').replace('-', '_');
+    const regex = new RegExp(`${escapeRegExp(tag)}[\\s\\S]*?${escapeRegExp(endTag)}`, 'gi');
+    cleanedText = cleanedText.replace(regex, '');
+  }
+  
+  // Supprimer les balises de plan nutritionnel
+  for (const tag of ACTION_TAGS.NUTRITION_PLAN.ALTERNATIVES) {
+    const endTag = tag.replace('<', '</').replace('-', '_');
+    const regex = new RegExp(`${escapeRegExp(tag)}[\\s\\S]*?${escapeRegExp(endTag)}`, 'gi');
+    cleanedText = cleanedText.replace(regex, '');
+  }
+  
+  // Supprimer les balises de recommandation de repas
+  for (const tag of ACTION_TAGS.MEAL_RECOMMENDATION.ALTERNATIVES) {
+    const endTag = tag.replace('<', '</').replace('-', '_');
+    const regex = new RegExp(`${escapeRegExp(tag)}[\\s\\S]*?${escapeRegExp(endTag)}`, 'gi');
+    cleanedText = cleanedText.replace(regex, '');
+  }
+  
+  // Supprimer les balises d'analyse de progrès
+  for (const tag of ACTION_TAGS.PROGRESS_ANALYSIS.ALTERNATIVES) {
+    const endTag = tag.replace('<', '</').replace('-', '_');
+    const regex = new RegExp(`${escapeRegExp(tag)}[\\s\\S]*?${escapeRegExp(endTag)}`, 'gi');
+    cleanedText = cleanedText.replace(regex, '');
+  }
+  
+  // Supprimer les balises de conseils nutritionnels
+  for (const tag of ACTION_TAGS.NUTRITION_ADVICE.ALTERNATIVES) {
     const endTag = tag.replace('<', '</').replace('-', '_');
     const regex = new RegExp(`${escapeRegExp(tag)}[\\s\\S]*?${escapeRegExp(endTag)}`, 'gi');
     cleanedText = cleanedText.replace(regex, '');
