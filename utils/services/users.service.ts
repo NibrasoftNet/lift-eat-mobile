@@ -11,91 +11,6 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 
 /**
- * Function to find or create a user in the database.
- * @deprecated Utilisez directement sqliteMCPServer.findOrCreateUserViaMCP pour une meilleure centralisation
- * @param drizzleDb - Drizzle database instance.
- * @param email - User email.
- * @returns The existing or newly created user.
- */
-export const findOrCreateUser = async (
-  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
-  email: string,
-) => {
-  const startTime = logger.startPerformanceLog('findOrCreateUser');
-  try {
-    logger.info(LogCategory.DATABASE, 'Finding or creating user via MCP Server', { email });
-
-    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    const result = await sqliteMCPServer.findOrCreateUserViaMCP(email);
-
-    if (!result.success) {
-      throw new Error(result.error || `Failed to find or create user with email ${email} via MCP Server`);
-    }
-
-    logger.debug(LogCategory.DATABASE, 'User found or created via MCP Server', {
-      email,
-      userId: result.user?.id,
-    });
-    
-    return result.user;
-  } catch (error) {
-    logger.error(LogCategory.DATABASE, 'Failed to find or create user', { email, error });
-    throw error;
-  } finally {
-    logger.endPerformanceLog('findOrCreateUser', startTime);
-  }
-};
-
-/**
- * Updates user information in the database.
- * @deprecated Utilisez directement sqliteMCPServer.updateUserPreferencesViaMCP pour une meilleure centralisation
- * @param drizzleDb - Drizzle database instance.
- * @param userId - User ID to update.
- * @param data - User data to update.
- * @returns The updated user information.
- */
-export const updateUser = async (
-  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
-  userId: number,
-  data: UserProfileFormData | UserDetailsFormData | UserGenderActivityFormData,
-) => {
-  const startTime = logger.startPerformanceLog('updateUser');
-  try {
-    logger.info(LogCategory.DATABASE, 'Updating user preferences via MCP Server', { userId });
-
-    // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    // Comme les données peuvent venir de différents formulaires, nous utilisons un accès direct à la base de données
-    await drizzleDb
-      .update(users)
-      .set(data)
-      .where(eq(users.id, userId))
-      .execute();
-    
-    logger.debug(LogCategory.DATABASE, 'User updated directly in database', {
-      userId,
-    });
-
-    // Récupérer les détails de l'utilisateur mis à jour
-    const userDetailsResult = await sqliteMCPServer.getUserDetailsViaMCP(userId);
-    
-    if (!userDetailsResult.success) {
-      throw new Error(userDetailsResult.error || `Failed to fetch updated user ${userId} via MCP Server`);
-    }
-
-    logger.debug(LogCategory.DATABASE, 'User updated via MCP Server', {
-      userId,
-    });
-    
-    return userDetailsResult.user;
-  } catch (error) {
-    logger.error(LogCategory.DATABASE, 'Failed to update user', { userId, error });
-    throw error;
-  } finally {
-    logger.endPerformanceLog('updateUser', startTime);
-  }
-};
-
-/**
  * Gets user details from the database.
  * @param userId - User ID to get details for.
  * @returns The user details.
@@ -123,3 +38,9 @@ export const getUserDetails = async (userId: number) => {
     logger.endPerformanceLog('getUserDetails', startTime);
   }
 };
+
+// Remplacé par un appel direct à sqliteMCPServer.createUserViaMCP
+
+// Remplacé par un appel direct à sqliteMCPServer.validateUserExistsViaMCP
+
+// Remplacé par getUserDetails ou directement sqliteMCPServer.getUserDetailsViaMCP

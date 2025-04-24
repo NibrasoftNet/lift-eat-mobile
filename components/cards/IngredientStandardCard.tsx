@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo, useMemo } from 'react';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
@@ -13,7 +13,6 @@ import {
 import { IngredientStandardOrmProps } from '@/db/schema';
 import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
-import Animated, { FadeInUp } from 'react-native-reanimated';
 import {
   Avatar,
   AvatarFallbackText,
@@ -23,32 +22,69 @@ import { Button, ButtonIcon } from '@/components/ui/button';
 import NutritionBox from '@/components/boxes/NutritionBox';
 import { Divider } from '@/components/ui/divider';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
+import { createStableId, ItemType } from '@/utils/helpers/uniqueId';
 
-const IngredientStandardCard: React.FC<{
-  item: IngredientStandardOrmProps;
+/**
+ * Interface d'ingrédient avec un identifiant unique pour éviter les collisions de stableId
+ */
+interface IngredientWithStableId extends IngredientStandardOrmProps {
+  uniqueId?: string;
+}
+
+// Solution optimisée, pas de lecture/écriture de valeurs Reanimated pendant le rendu
+const IngredientStandardCard = memo(({ 
+  item, 
+  index 
+}: {
+  item: IngredientWithStableId;
   index: number;
-}> = ({ item, index }) => {
+}) => {
   const router = useRouter();
-  // Zustand store hooks
-  const { selectedIngredients, toggleIngredient } = useIngredientStore();
-  // State to track if item is selected
-  const [isSelected, setIsSelected] = useState<boolean>(false);
-
-  // Update isSelected when selectedIngredients changes
-  useEffect(() => {
-    const foundIndex = selectedIngredients.findIndex(
-      (ing) => ing.ingredientStandardId === item.id,
+  
+  // Zustand store hooks avec sélecteur pour éviter les re-rendus inutiles
+  const isIngredientSelected = useIngredientStore(state => {
+    const foundIndex = state.selectedIngredients.findIndex(
+      (ing) => ing.ingredientStandardId === item.id
     );
-    setIsSelected(foundIndex !== -1);
-  }, [selectedIngredients, item.id]);
+    return foundIndex !== -1;
+  });
+  
+  const toggleIngredient = useIngredientStore(state => state.toggleIngredient);
+
+  // Pre-calculer l'identifiant stable
+  const stableId = useMemo(() => {
+    return item.uniqueId || createStableId(ItemType.INGREDIENT, item.id, undefined, index);
+  }, [item.uniqueId, item.id, index]);
+  
+  // IMPORTANT: Supprimer complètement les animations pour résoudre les problèmes de performance
+  // Nous utilisons une approche statique sans animation pour éviter les warnings Reanimated
+  // et améliorer dramatiquement les performances dans les listes longues
+  
+  // Les anciennes animations causaient de nombreux warnings Reanimated et ralentissaient l'application
+  const isFirstRender = React.useRef(true);
+  
+  // Utilisons un style statique sans animations pour une performance maximale
+  // Ce code est beaucoup plus performant et évite les warnings Reanimated
+  useEffect(() => {
+    // Marquer que le premier rendu est passé
+    isFirstRender.current = false;
+  }, []);
+  
+  // Style statique remplaçant l'ancien style animé
+  // Cette approche évite complètement les problèmes de performance avec Reanimated
+  const cardStyle = {
+    opacity: 1,
+    transform: [{ translateY: 0 }]
+  };
 
   return (
-    <Animated.View
-      entering={FadeInUp.delay(index * 100)}
+    <Box
+      style={cardStyle}
       className="rounded-xl overflow-hidden mb-2"
+      key={stableId}
     >
       <Card
-        className={`w-full items-center gap-2 p-2 transition-all ease-in-out duration-300 ${isSelected ? 'bg-secondary-500' : 'bg-white'}`}
+        className={`w-full items-center gap-2 p-2 transition-all ease-in-out duration-300 ${isIngredientSelected ? 'bg-secondary-500' : 'bg-white'}`}
       >
         <HStack className="w-full items-center justify-between">
           <HStack className="flex-1 items-center gap-2">
@@ -75,12 +111,19 @@ const IngredientStandardCard: React.FC<{
             </VStack>
           </HStack>
           <Button
-            onPress={() => toggleIngredient(item)}
+            // Utiliser un handler séparé pour éviter le risque d'accès à des valeurs Reanimated pendant le rendu
+            onPress={() => {
+              // Exécuter l'action après le cycle de rendu via setTimeout(0)
+              // Cette approche évite l'accès aux shared values pendant le rendu
+              setTimeout(() => {
+                toggleIngredient(item);
+              }, 0);
+            }}
             action="secondary"
             className="w-12 h-12 bg-transparent"
           >
             <ButtonIcon
-              as={isSelected ? MinusCircle : PlusCircle}
+              as={isIngredientSelected ? MinusCircle : PlusCircle}
               className="w-10 h-10"
             />
           </Button>
@@ -142,8 +185,11 @@ const IngredientStandardCard: React.FC<{
           </HStack>
         </VStack>
       </Card>
-    </Animated.View>
+    </Box>
   );
-};
+});
+
+// Ajouter un displayName pour le débogage
+IngredientStandardCard.displayName = 'IngredientStandardCard';
 
 export default IngredientStandardCard;

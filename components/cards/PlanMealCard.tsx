@@ -14,10 +14,14 @@ import {
 import MealOptionsModal from '../modals/MealOptionsModal';
 import { useToast } from '@/components/ui/toast';
 import { Toast, ToastTitle } from '@/components/ui/toast';
-import { deleteMeal } from '@/utils/services/meal.service';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { getMealQuantityInPlan } from '@/utils/services/plan.service';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface PlanMealCardProps {
   meal: MealOrmProps;
@@ -30,6 +34,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(meal.quantity);
   const toast = useToast();
+  const queryClient = useQueryClient();
   
   useEffect(() => {
     // Si on a un dailyPlanId, on récupère la quantité actuelle du repas dans le plan
@@ -46,36 +51,45 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
     
     fetchMealQuantity();
   }, [drizzleDb, dailyPlanId, meal.id]);
-  const handleDeleteMeal = async () => {
+  const handleRemoveMealFromPlan = async () => {
     try {
-      if (drizzleDb && meal.id) {
-        await deleteMeal(drizzleDb, meal.id);
+      if (meal.id && dailyPlanId) {
+        logger.info(LogCategory.DATABASE, `Removing meal ${meal.id} from plan ${dailyPlanId} via MCP Server`);
+        
+        // Utiliser notre nouvelle fonction qui retire le repas du plan sans le supprimer complètement
+        const result = await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, meal.id);
+        
+        if (!result.success) {
+          logger.error(LogCategory.DATABASE, `Failed to remove meal ${meal.id} from plan ${dailyPlanId}: ${result.error}`);
+          throw new Error(result.error || `Failed to remove meal from plan`);
+        }
+        
+        // Invalider uniquement le cache du plan, pas celui des repas car on garde le repas en base
+        invalidateCache(queryClient, DataType.PLAN);
+        
         toast.show({
-          placement: "top",
-          render: ({ id }) => {
-            return (
-              <Toast nativeID={id} action="success" variant="solid">
-                <ToastTitle>Repas supprimé avec succès</ToastTitle>
-              </Toast>
-            );
-          },
+          render: ({ id }) => (
+            <Toast nativeID={id} action="success" variant="solid">
+              <ToastTitle>Repas retiré du plan avec succès</ToastTitle>
+            </Toast>
+          ),
         });
+
+        // Callback après suppression si fourni
         if (onMealDeleted) {
           await onMealDeleted();
         }
       }
     } catch (error) {
-      console.error('Error deleting meal:', error);
+      // Gérer l'erreur
       toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={id} action="error" variant="solid">
-              <ToastTitle>Erreur lors de la suppression</ToastTitle>
-            </Toast>
-          );
-        },
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>Erreur lors du retrait du repas du plan</ToastTitle>
+          </Toast>
+        ),
       });
+      console.error('Error removing meal from plan:', error);
     }
   };
 
@@ -125,7 +139,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
         isOpen={showOptionsModal}
         onClose={() => setShowOptionsModal(false)}
         meal={meal}
-        onDelete={handleDeleteMeal}
+        onDelete={handleRemoveMealFromPlan}
         dailyPlanId={dailyPlanId || undefined}
         currentQuantity={currentQuantity}
         drizzleDb={drizzleDb}

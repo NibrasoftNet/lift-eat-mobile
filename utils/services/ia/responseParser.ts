@@ -9,6 +9,8 @@ import {
   IaMealType,
   IaPlanType
 } from '@/utils/validation/ia/ia.schemas';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export interface DetectedAction {
   type: 'ADD_MEAL' | 'ADD_PLAN' | 'ADD_INGREDIENT' | 'NUTRITION_PLAN' | 'MEAL_RECOMMENDATION' | 'PROGRESS_ANALYSIS' | 'NUTRITION_ADVICE' | 'NONE';
@@ -70,7 +72,10 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
     // Vérifier l'ajout de repas (avec tolérance)
     const mealAction = detectActionWithTolerance(responseText, ACTION_TAGS.MEAL);
     if (mealAction) {
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Action repas détectée, contenu: ${mealAction.data.substring(0, 100)}...`);
       const validationResult = validateMeal(mealAction.data);
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation repas: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      
       return {
         type: 'ADD_MEAL',
         data: mealAction.data,
@@ -83,7 +88,10 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
     // Vérifier l'ajout de plan (avec tolérance)
     const planAction = detectActionWithTolerance(responseText, ACTION_TAGS.PLAN);
     if (planAction) {
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Action plan détectée, contenu: ${planAction.data.substring(0, 100)}...`);
       const validationResult = validatePlan(planAction.data);
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation plan: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      
       return {
         type: 'ADD_PLAN',
         data: planAction.data,
@@ -96,7 +104,10 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
     // Vérifier l'ajout d'ingrédient (avec tolérance)
     const ingredientAction = detectActionWithTolerance(responseText, ACTION_TAGS.INGREDIENT);
     if (ingredientAction) {
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Action ingrédient détectée, contenu: ${ingredientAction.data.substring(0, 100)}...`);
       const validationResult = validateIngredient(ingredientAction.data);
+      logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation ingrédient: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      
       return {
         type: 'ADD_INGREDIENT',
         data: ingredientAction.data,
@@ -146,7 +157,7 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
       };
     }
   } catch (error) {
-    console.error('Error detecting database action:', error);
+    logger.error(LogCategory.IA, `detectDatabaseAction: Erreur lors de la détection de l'action: ${error instanceof Error ? error.message : String(error)}`);
     return { 
       type: 'NONE', 
       data: '', 
@@ -202,14 +213,27 @@ function detectActionWithTolerance(
     const jsonData = jsonResult[0].trim();
     try {
       const parsed = JSON.parse(jsonData);
-      // Vérifier si le JSON contient des champs spécifiques à ce type d'action
-      if (actionTags === ACTION_TAGS.MEAL && 'type' in parsed && ('ingredients' in parsed || 'cuisine' in parsed)) {
+      // Assouplir les vérifications pour être plus tolérant aux variations du format JSON
+      if (actionTags === ACTION_TAGS.MEAL && 
+          // Vérifier seulement si c'est un objet avec au moins une propriété typique d'un repas
+          (typeof parsed === 'object' && parsed !== null && 
+           ('name' in parsed || 'type' in parsed || 'ingredients' in parsed || 'cuisine' in parsed))) {
+        logger.debug(LogCategory.IA, `detectActionWithTolerance: Détection de repas réussie, propriétés: ${Object.keys(parsed).join(', ')}`);
         return { data: jsonData };
-      } else if (actionTags === ACTION_TAGS.PLAN && 'goal' in parsed) {
+      } else if (actionTags === ACTION_TAGS.PLAN && 
+                 (typeof parsed === 'object' && parsed !== null && 
+                  ('goal' in parsed || 'days' in parsed || 'name' in parsed))) {
+        logger.debug(LogCategory.IA, `detectActionWithTolerance: Détection de plan réussie, propriétés: ${Object.keys(parsed).join(', ')}`);
         return { data: jsonData };
-      } else if (actionTags === ACTION_TAGS.INGREDIENT && 'unit' in parsed && !('ingredients' in parsed)) {
+      } else if (actionTags === ACTION_TAGS.INGREDIENT && 
+                 (typeof parsed === 'object' && parsed !== null && 
+                  ('name' in parsed || 'unit' in parsed) && !('ingredients' in parsed))) {
+        logger.debug(LogCategory.IA, `detectActionWithTolerance: Détection d'ingrédient réussie, propriétés: ${Object.keys(parsed).join(', ')}`);
         return { data: jsonData };
       }
+      
+      // Si nous arrivons ici, le format ne correspond pas à nos attentes
+      logger.debug(LogCategory.IA, `detectActionWithTolerance: Format non reconnu pour ${actionTags.START}, propriétés: ${Object.keys(parsed).join(', ')}`);
     } catch (e) {
       // Ignorer les erreurs de parsing JSON
     }

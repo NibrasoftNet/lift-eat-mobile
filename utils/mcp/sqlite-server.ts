@@ -42,14 +42,18 @@ import {
   handleDeletePlan,
   handleAddDailyPlan,
   handleGetPlansList,
-  handleGetPlanDetails
+  handleGetPlanDetails,
+  handleGetMealQuantityInPlan,
+  handleUpdateMealQuantityInPlan,
+  handleSetCurrentPlan,
+  handleGetCurrentPlan
 } from './handlers/plan-handlers';
 import { 
   handleGetMealsList,
   handleGetMealDetails,
   handleCreateMeal,
   handleCreateNewMeal,
-  handleAddMealToDailyPlan,
+  handleAddMealToDailyPlan as handleAddMealToDailyPlanMealHandler,
   handleUpdateMeal,
   handleDeleteMeal
 } from './handlers/meal-handlers';
@@ -59,14 +63,21 @@ import {
   handleUpdateIngredient,
   handleDeleteIngredient
 } from './handlers/ingredient-handlers';
-import { handleUpdateUserPreferences, handleGetUserDetails, handleCreateUser, handleValidateUserExists } from './handlers/user-handlers';
+import { 
+  handleUpdateUserPreferences, 
+  handleGetUserDetails, 
+  handleCreateUser, 
+  handleValidateUserExists,
+  handleGetDefaultUser
+} from './handlers/user-handlers';
 import {
   handleGetDailyProgressByDate,
   handleCreateDailyProgress,
   handleUpdateDailyProgress,
   handleGetMealProgressByDate,
   handleMarkMealAsConsumed,
-  handleGetMealProgressByDailyProgress
+  handleGetMealProgressByDailyProgress,
+  handleGetDailyProgressByPlan
 } from './handlers/progress-handlers';
 
 // Imports des interfaces
@@ -81,7 +92,15 @@ import {
   DeletePlanResult, 
   BasicResult,
   AddDailyPlanParams,
-  AddDailyPlanResult
+  AddDailyPlanResult,
+  GetMealQuantityInPlanParams,
+  GetMealQuantityInPlanResult,
+  UpdateMealQuantityInPlanParams,
+  UpdateMealQuantityInPlanResult,
+  SetCurrentPlanParams,
+  SetCurrentPlanResult,
+  GetCurrentPlanParams,
+  GetCurrentPlanResult
 } from './interfaces/plan-interfaces';
 import {
   GetMealsListParams,
@@ -112,7 +131,9 @@ import {
   CreateUserParams,
   CreateUserResult,
   ValidateUserExistsParams,
-  ValidateUserExistsResult
+  ValidateUserExistsResult,
+  GetDefaultUserParams,
+  GetDefaultUserResult
 } from './interfaces/user-interfaces';
 import {
   GetDailyProgressByDateParams,
@@ -126,7 +147,9 @@ import {
   MarkMealAsConsumedParams,
   MarkMealAsConsumedResult,
   GetMealProgressByDailyProgressParams,
-  GetMealProgressByDailyProgressResult
+  GetMealProgressByDailyProgressResult,
+  GetDailyProgressByPlanParams,
+  GetDailyProgressByPlanResult
 } from './interfaces/progress-interfaces';
 
 // Ajout de l'import pour les handlers IA
@@ -138,12 +161,7 @@ import {
   handleGetUserActivityHistory
 } from './handlers/ia-handlers';
 
-/**
- * Système de cache simple pour les requêtes fréquentes
- */
-// Import du nouveau système de cache optimisé
-import mcpCache, { CacheGroup, CacheDuration } from './cache/mcp-cache';
-import { buildCacheKey, getCacheDuration } from './cache/cache-config';
+import { handleRemoveMealFromDailyPlan } from './handlers/plan-handlers-extension';
 
 /**
  * SQLite MCP Server
@@ -165,7 +183,15 @@ class SQLiteMCPServer {
   }
 
   public initializeWithDb(sqliteDb: any) {
-    this.db = drizzle(sqliteDb, { schema });
+    try {
+      this.db = drizzle(sqliteDb, { schema });
+      logger.info(LogCategory.DATABASE, 'MCP Server database initialized successfully');
+      // Vérification rapide que la connexion fonctionne
+      return true;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Failed to initialize MCP Server database: ${error instanceof Error ? error.message : String(error)}`);
+      return false;
+    }
   }
 
   /**
@@ -286,36 +312,24 @@ class SQLiteMCPServer {
    */
   public async generateUserContext(userId: number): Promise<string> {
     try {
-      // Construire une clé de cache précise avec le nouveau système
-      const cacheKey = buildCacheKey(
-        CacheGroup.IA_CONTEXT,  // Groupe de cache pour le contexte utilisateur IA
-        'userContext',         // Type de donnée spécifique
-        undefined,             // Pas d'ID spécifique autre que l'utilisateur
-        userId                 // ID de l'utilisateur
-      );
+      logger.info(LogCategory.DATABASE, `Generating user context for user ${userId}`);
       
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<string>(cacheKey);
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
       
-      if (cachedData) {
-        logger.debug(LogCategory.DATABASE, `Using cached user context for user ${userId}`);
-        return cachedData;
-      }
-      
-      // Générer le contexte s'il n'est pas dans le cache
+      // Appel direct au handler pour générer le contexte
       const result = await handleGetUserContext(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for generating user context: ${accessTime.toFixed(2)}ms`);
       
       if (!result.success) {
         throw new Error(result.error);
       }
       
-      // Mettre en cache le contexte avec la durée optimisée pour les contextes IA
+      // Retourner le contexte directement sans mise en cache
       if (result.context) {
-        // Récupérer la durée optimisée depuis la configuration
-        const cacheDuration = getCacheDuration(CacheGroup.IA_CONTEXT, 'userContext');
-        mcpCache.set(cacheKey, result.context, CacheGroup.IA_CONTEXT, cacheDuration);
-        
-        logger.debug(LogCategory.DATABASE, `Stored user context in cache for ${cacheDuration/1000} seconds`);
         return result.context;
       }
       
@@ -431,52 +445,24 @@ class SQLiteMCPServer {
     limit: number = 50
   ): Promise<GetIngredientsListResult> {
     try {
-      // Construire une clé de cache standardisée pour la liste des ingrédients
-      // Format: ${group}:${subType}:${id}:${userId}
-      const searchParam = search ? `search_${search}` : 'all';
-      const listId = `${searchParam}_limit_${limit}`;
-      
-      const cacheKey = buildCacheKey(
-        CacheGroup.INGREDIENT,
-        'list',
-        listId,    // On utilise ce paramètre comme ID pour différencier les requêtes
-        undefined   // Pas d'ID utilisateur spécifique
-      );
-      
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<GetIngredientsListResult>(cacheKey);
-      
-      if (cachedData) {
-        logger.debug(LogCategory.CACHE, `Using cached ingredients list, search: ${search || 'all'}, limit: ${limit}`);
-        return cachedData;
-      }
-      
       logger.info(LogCategory.DATABASE, `Getting ingredients list via MCP, search: ${search || 'all'}, limit: ${limit}`);
       
-      // Mesurer le temps d'accès sans cache
+      // Mesurer le temps d'accès pour les logs de performance
       const startTime = performance.now();
       
+      // Appel direct au handler
       const result = await handleGetIngredientsList(this.db, { search, limit });
       
-      // Calculer et enregistrer le temps d'accès sans cache
+      // Calculer le temps d'accès pour les logs
       const accessTime = performance.now() - startTime;
-      mcpCache.recordAccessTimeWithoutCache(accessTime);
-      logger.debug(LogCategory.CACHE, `Database access time for ingredients list: ${accessTime.toFixed(2)}ms`);
-      
-      // Mettre en cache les résultats avec la durée optimisée pour les ingrédients (24h)
-      if (result.success) {
-        // Les ingrédients standards sont rarement modifiés, utilisation d'une longue durée de cache
-        mcpCache.set(cacheKey, result, CacheGroup.INGREDIENT, CacheDuration.LONG);
-        logger.debug(LogCategory.CACHE, `Stored ingredients list in cache for 24 hours`);
-      }
+      logger.debug(LogCategory.DATABASE, `Database access time for ingredients list: ${accessTime.toFixed(2)}ms`);
       
       return result;
     } catch (error) {
       logger.error(LogCategory.DATABASE, `Error getting ingredients list via MCP: ${error}`);
       return {
         success: false,
-        error: `Failed to get ingredients list: ${error}`,
-        ingredients: []
+        error: `Failed to get ingredients list: ${error}`
       };
     }
   }
@@ -545,12 +531,17 @@ class SQLiteMCPServer {
     try {
       logger.info(LogCategory.DATABASE, `Creating new meal via MCP`);
       
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appel direct au handler
       const result = await handleCreateNewMeal(this.db, { data, selectedIngredients, totalMacros, creatorId });
       
-      // Invalider le cache des repas si l'opération a réussi
-      if (result.success) {
-        mcpCache.invalidateByPrefix(`meals:list:${creatorId}`);
-      }
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for creating meal: ${accessTime.toFixed(2)}ms`);
+      
+      // L'invalidation du cache est désormais gérée par React Query au niveau des composants
       
       return result;
     } catch (error) {
@@ -574,27 +565,185 @@ class SQLiteMCPServer {
     mealId: number,
     quantity: number = 10
   ): Promise<AddMealToDailyPlanResult> {
-    return handleAddMealToDailyPlan(this.db, { dailyPlanId, mealId, quantity });
+    const startTime = logger.startPerformanceLog('addMealToDailyPlanViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Adding meal to daily plan via MCP Server', {
+        dailyPlanId, mealId, quantity
+      });
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleAddMealToDailyPlanMealHandler(this.db, {
+        dailyPlanId,
+        mealId,
+        quantity
+      });
+      
+      logger.endPerformanceLog('addMealToDailyPlanViaMCP', startTime);
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in addMealToDailyPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      logger.endPerformanceLog('addMealToDailyPlanViaMCP', startTime);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
   }
 
   /**
-   * Ajoute un plan journalier à un plan nutritionnel existant via le MCP server
-   * @param planId ID du plan nutritionnel
-   * @param dailyPlanData Données du plan journalier à ajouter
+   * Récupère la quantité d'un repas dans un plan journalier
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas
+   * @returns Résultat de l'opération avec la quantité
+   */
+  public async getMealQuantityInPlanViaMCP(
+    dailyPlanId: number,
+    mealId: number
+  ): Promise<GetMealQuantityInPlanResult> {
+    const startTime = logger.startPerformanceLog('getMealQuantityInPlanViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Getting meal quantity in plan via MCP Server', {
+        dailyPlanId, mealId
+      });
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetMealQuantityInPlan(this.db, {
+        dailyPlanId,
+        mealId
+      });
+      
+      logger.endPerformanceLog('getMealQuantityInPlanViaMCP', startTime);
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getMealQuantityInPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      logger.endPerformanceLog('getMealQuantityInPlanViaMCP', startTime);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Met à jour la quantité d'un repas dans un plan journalier
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas
+   * @param newQuantity Nouvelle quantité du repas
    * @returns Résultat de l'opération
    */
-  public async addDailyPlanViaMCP(
-    planId: number,
-    dailyPlanData: {
-      day: string,
-      week?: number,
-      calories?: number,
-      carbs?: number,
-      protein?: number,
-      fat?: number
+  public async updateMealQuantityInPlanViaMCP(
+    dailyPlanId: number,
+    mealId: number,
+    newQuantity: number
+  ): Promise<UpdateMealQuantityInPlanResult> {
+    const startTime = logger.startPerformanceLog('updateMealQuantityInPlanViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Updating meal quantity in plan via MCP Server', {
+        dailyPlanId, mealId, newQuantity
+      });
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleUpdateMealQuantityInPlan(this.db, {
+        dailyPlanId,
+        mealId,
+        newQuantity
+      });
+      
+      logger.endPerformanceLog('updateMealQuantityInPlanViaMCP', startTime);
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in updateMealQuantityInPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      logger.endPerformanceLog('updateMealQuantityInPlanViaMCP', startTime);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
     }
-  ): Promise<AddDailyPlanResult> {
-    return handleAddDailyPlan(this.db, { planId, dailyPlanData });
+  }
+
+  /**
+   * Définit un plan comme étant le plan actuel d'un utilisateur
+   * @param planId ID du plan à définir comme actuel
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération
+   */
+  public async setCurrentPlanViaMCP(
+    planId: number,
+    userId: number
+  ): Promise<SetCurrentPlanResult> {
+    const startTime = logger.startPerformanceLog('setCurrentPlanViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Setting current plan via MCP Server', {
+        planId, userId
+      });
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleSetCurrentPlan(this.db, {
+        planId,
+        userId
+      });
+      
+      logger.endPerformanceLog('setCurrentPlanViaMCP', startTime);
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in setCurrentPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      logger.endPerformanceLog('setCurrentPlanViaMCP', startTime);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Récupère le plan actuel d'un utilisateur
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec le plan actuel
+   */
+  public async getCurrentPlanViaMCP(
+    userId: number
+  ): Promise<GetCurrentPlanResult> {
+    const startTime = logger.startPerformanceLog('getCurrentPlanViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Getting current plan via MCP Server', {
+        userId
+      });
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetCurrentPlan(this.db, {
+        userId
+      });
+      
+      logger.endPerformanceLog('getCurrentPlanViaMCP', startTime);
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getCurrentPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      logger.endPerformanceLog('getCurrentPlanViaMCP', startTime);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
   }
 
   /**
@@ -609,32 +758,17 @@ class SQLiteMCPServer {
         return { success: false, error: 'Missing required userId parameter' };
       }
       
-      // Construire une clé de cache standardisée pour la liste des plans de l'utilisateur
-      const cacheKey = buildCacheKey(
-        CacheGroup.PLAN,     // Groupe de cache pour les plans
-        'plansList',         // Type de donnée spécifique
-        undefined,           // Pas d'ID spécifique
-        userId               // ID de l'utilisateur spécifique
-      );
-      
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<any>(cacheKey);
-      
-      if (cachedData) {
-        logger.debug(LogCategory.DATABASE, `Using cached data for plans list for user ${userId}`);
-        return cachedData;
-      }
-      
       logger.info(LogCategory.DATABASE, `Getting plans list via MCP for user ${userId}`);
       
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appel direct au handler
       const result = await handleGetPlansList(this.db, { userId });
       
-      // Mettre en cache les résultats avec la durée optimisée pour les plans
-      if (result.success) {
-        const cacheDuration = getCacheDuration(CacheGroup.PLAN, 'plansList');
-        mcpCache.set(cacheKey, result, CacheGroup.PLAN, cacheDuration);
-        logger.debug(LogCategory.DATABASE, `Stored plans list in cache for ${cacheDuration/1000} seconds`);
-      }
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for plans list: ${accessTime.toFixed(2)}ms`);
       
       return result;
     } catch (error) {
@@ -660,47 +794,51 @@ class SQLiteMCPServer {
    * Met à jour un plan nutritionnel existant via le MCP server
    * @param planId ID du plan à mettre à jour
    * @param data Données du plan à mettre à jour
+   * @param userId ID de l'utilisateur propriétaire du plan
    * @returns Résultat de l'opération
    */
-  public async updatePlanViaMCP(planId: number, data: Partial<PlanOrmProps>) {
-    return handleUpdatePlan(this.db, { planId, data });
+  public async updatePlanViaMCP(planId: number, data: Partial<PlanOrmProps>, userId: number): Promise<BasicResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Updating plan ${planId} via MCP Server`);
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleUpdatePlan(this.db, { planId, data, userId });
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in updatePlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
   }
 
   /**
    * Supprime un plan nutritionnel via le MCP server
    * @param planId ID du plan à supprimer
+   * @param userId ID de l'utilisateur propriétaire du plan
    * @returns Résultat de l'opération
    */
-  public async deletePlanViaMCP(planId: number) {
-    return handleDeletePlan(this.db, { planId });
-  }
-
-  /**
-   * Définit un plan comme étant le plan actuel d'un utilisateur
-   * @param planId ID du plan à définir comme actuel
-   * @param userId ID de l'utilisateur
-   * @returns Résultat de l'opération
-   */
-  public async setCurrentPlanViaMCP(planId: number, userId: number) {
-    // Stub - sera implémenté avec les handlers de plans
-    return { 
-      success: true, 
-      error: null 
-    };
-  }
-
-  /**
-   * Récupère le plan actuel d'un utilisateur
-   * @param userId ID de l'utilisateur
-   * @returns Plan actuel de l'utilisateur ou null si aucun
-   */
-  public async getCurrentPlanViaMCP(userId: number) {
-    // Stub - sera implémenté avec les handlers de plans
-    return { 
-      success: true, 
-      plan: null,
-      error: null 
-    };
+  public async deletePlanViaMCP(planId: number, userId: number): Promise<DeletePlanResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Deleting plan ${planId} via MCP Server`);
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleDeletePlan(this.db, { planId, userId });
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in deletePlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
   }
 
   /**
@@ -735,49 +873,24 @@ class SQLiteMCPServer {
   /**
    * Retourne la liste des repas, filtrée par cuisine, type et/ou nom
    * @param userId ID de l'utilisateur dont on veut récupérer les repas
-   * @param cuisine Type de cuisine (optionnel, non implémenté par le handler)
-   * @param mealType Type de repas (optionnel, non implémenté par le handler)
-   * @param mealName Nom du repas (optionnel, non implémenté par le handler)
+   * @param cuisine Type de cuisine (optionnel)
+   * @param mealType Type de repas (optionnel)
+   * @param mealName Nom du repas (optionnel)
    * @returns Liste des repas correspondant aux critères
    */
   public async getMealsListViaMCP(userId?: number, cuisine?: string, mealType?: string, mealName?: string) {
     try {
-      // Construire une clé de cache standardisée pour la liste des repas
-      const cacheKey = buildCacheKey(
-        CacheGroup.MEAL,     // Groupe de cache pour les repas
-        'mealsList',        // Type de donnée spécifique
-        undefined,          // Pas d'ID spécifique
-        userId || undefined  // ID de l'utilisateur (si fourni)
-      );
-      
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<any>(cacheKey);
-      
-      if (cachedData) {
-        logger.debug(LogCategory.DATABASE, `Using cached data for meals list of user ${userId || 'all'}`);
-        return cachedData;
-      }
-      
       logger.info(LogCategory.DATABASE, `Getting meals list for user ${userId || 'all'} via MCP`);
       
-      // Mesurer le temps d'accès sans cache
+      // Mesurer le temps d'accès pour les logs de performance
       const startTime = performance.now();
       
-      // Note: Le handler actuel ne supporte que userId comme paramètre
-      // Les autres paramètres (cuisine, mealType, mealName) ne sont pas encore supportés
+      // Appel direct au handler
       const result = await handleGetMealsList(this.db, { userId: userId || 0 });
       
-      // Calculer et enregistrer le temps d'accès sans cache
+      // Calculer le temps d'accès pour les logs
       const accessTime = performance.now() - startTime;
-      mcpCache.recordAccessTimeWithoutCache(accessTime);
-      logger.debug(LogCategory.CACHE, `Database access time for meals list: ${accessTime.toFixed(2)}ms`);
-      
-      // Mettre en cache les résultats avec la durée optimisée pour les repas
-      if (result.success) {
-        const cacheDuration = getCacheDuration(CacheGroup.MEAL, 'mealsList');
-        mcpCache.set(cacheKey, result, CacheGroup.MEAL, cacheDuration);
-        logger.debug(LogCategory.CACHE, `Stored meals list in cache for ${cacheDuration/1000} seconds`);
-      }
+      logger.debug(LogCategory.DATABASE, `Database access time for meals list: ${accessTime.toFixed(2)}ms`);
       
       return result;
     } catch (error) {
@@ -797,42 +910,17 @@ class SQLiteMCPServer {
    */
   public async getMealByIdWithIngredientsViaMCP(mealId: number, userId?: number) {
     try {
-      // Construire une clé de cache standardisée pour les détails d'un repas
-      // Si userId est fourni, inclure l'ID utilisateur dans la clé de cache pour l'isolation des données
-      const cacheKey = buildCacheKey(
-        CacheGroup.MEAL,      // Groupe de cache pour les repas
-        'mealDetails',       // Type de donnée spécifique (détails du repas)
-        mealId.toString(),    // ID du repas spécifique
-        userId               // ID utilisateur pour isolation des données
-      );
-      
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<any>(cacheKey);
-      
-      if (cachedData) {
-        logger.debug(LogCategory.DATABASE, `Using cached data for meal ${mealId} with ingredients`);
-        return cachedData;
-      }
-      
       logger.info(LogCategory.DATABASE, `Getting meal ${mealId} with ingredients via MCP`);
       
-      // Mesurer le temps d'accès sans cache
+      // Mesurer le temps d'accès pour les logs de performance
       const startTime = performance.now();
       
-      // Passer userId au handler pour garantir l'isolation des donnu00e9es entre utilisateurs
+      // Passer userId au handler pour garantir l'isolation des données entre utilisateurs
       const result = await handleGetMealDetails(this.db, { mealId, userId });
       
-      // Calculer et enregistrer le temps d'accès sans cache
+      // Calculer le temps d'accès pour les logs
       const accessTime = performance.now() - startTime;
-      mcpCache.recordAccessTimeWithoutCache(accessTime);
-      logger.debug(LogCategory.CACHE, `Database access time for meal details: ${accessTime.toFixed(2)}ms`);
-      
-      // Mettre en cache les résultats avec la durée optimisée pour les détails de repas
-      if (result.success) {
-        const cacheDuration = getCacheDuration(CacheGroup.MEAL, 'mealDetails');
-        mcpCache.set(cacheKey, result, CacheGroup.MEAL, cacheDuration);
-        logger.debug(LogCategory.CACHE, `Stored meal ${mealId} details in cache for ${cacheDuration/1000} seconds`);
-      }
+      logger.debug(LogCategory.DATABASE, `Database access time for meal details: ${accessTime.toFixed(2)}ms`);
       
       return result;
     } catch (error) {
@@ -848,36 +936,36 @@ class SQLiteMCPServer {
    * Met à jour un repas via le serveur MCP
    * @param mealId ID du repas à mettre à jour
    * @param data Données du repas à mettre à jour
-   * @param ingredients Ingrédients du repas à mettre à jour (optionnel)
+   * @param ingredients Ingrédients du repas (optionnel)
+   * @param userId ID de l'utilisateur propriétaire du repas
    * @returns Résultat de l'opération
    */
-  public async updateMealViaMCP(mealId: number, data: Partial<MealOrmProps>, ingredients?: any[]) {
+  public async updateMealViaMCP(mealId: number, data: Partial<MealOrmProps>, ingredients?: any[], userId?: number) {
     try {
-      logger.info(LogCategory.DATABASE, `Updating meal ${mealId} via MCP`);
+      if (!this.db) throw new Error("Database not initialized");
       
-      // Appeler le handler handleUpdateMeal
-      const result = await handleUpdateMeal(this.db, { mealId, data, ingredients });
-      
-      // Invalider les caches liés à ce repas et toutes les entités qui en dépendent si l'opération a réussi
-      if (result.success) {
-        // Utiliser l'invalidation en cascade pour propager l'invalidation automatiquement
-        // aux entités qui dépendent de ce repas (plans, progrès, etc.)
-        mcpCache.invalidateEntityCascade(CacheGroup.MEAL, mealId);
-        
-        // Invalider également le contexte utilisateur si l'ID créateur est disponible
-        if (data.creatorId) {
-          mcpCache.invalidateEntity(CacheGroup.USER, data.creatorId);
-          // Mesure de performance : le temps avant et après l'invalidation
-          logger.info(LogCategory.CACHE, `Cache invalidation for meal update completed`);
-        }
+      // S'assurer que userId est fourni (si non, utiliser le creatorId des données ou lancer une erreur)
+      const authenticatedUserId = userId || data.creatorId;
+      if (!authenticatedUserId) {
+        throw new Error("User ID is required for updating a meal");
       }
+      
+      logger.info(LogCategory.DATABASE, `Updating meal ${mealId} via MCP Server for user ${authenticatedUserId}`);
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleUpdateMeal(this.db, { 
+        mealId, 
+        data, 
+        ingredients, 
+        userId: authenticatedUserId 
+      });
       
       return result;
     } catch (error) {
-      logger.error(LogCategory.DATABASE, `Error updating meal via MCP: ${error}`);
-      return {
-        success: false,
-        error: `Failed to update meal: ${error}`
+      logger.error(LogCategory.DATABASE, `Error in updateMealViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
       };
     }
   }
@@ -890,21 +978,23 @@ class SQLiteMCPServer {
    */
   public async deleteMealViaMCP(mealId: number, userId: number) {
     try {
-      logger.info(LogCategory.DATABASE, `Deleting meal ${mealId} via MCP`);
+      if (!this.db) throw new Error("Database not initialized");
       
-      // Appeler le handler handleDeleteMeal
-      const result = await handleDeleteMeal(this.db, { mealId });
-      
-      // Invalider les caches liés à ce repas et toutes les entités qui en dépendent si l'opération a réussi
-      if (result.success) {
-        // Utiliser l'invalidation en cascade pour propager l'invalidation automatiquement
-        // aux entités qui dépendent de ce repas (plans, progress, etc.)
-        mcpCache.invalidateEntityCascade(CacheGroup.MEAL, mealId);
-        
-        // Invalider également le contexte utilisateur
-        mcpCache.invalidateEntity(CacheGroup.USER, userId);
-        logger.info(LogCategory.CACHE, `Cache invalidation for meal deletion completed`);
+      if (!userId) {
+        throw new Error("User ID is required for deleting a meal");
       }
+      
+      logger.info(LogCategory.DATABASE, `Deleting meal ${mealId} via MCP Server for user ${userId}`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleDeleteMeal(this.db, { mealId, userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for deleting meal: ${accessTime.toFixed(2)}ms`);
       
       return result;
     } catch (error) {
@@ -927,40 +1017,10 @@ class SQLiteMCPServer {
     try {
       logger.info(LogCategory.DATABASE, `Getting user details for user ${userId} via MCP`);
       
-      // Construire une clé de cache standardisée pour les détails d'un utilisateur
-      const cacheKey = buildCacheKey(
-        CacheGroup.USER,       // Groupe de cache pour les utilisateurs
-        'userDetails',        // Type de donnée spécifique (détails utilisateur)
-        userId.toString(),    // ID de l'utilisateur spécifique
-        undefined              // Pas d'ID utilisateur spécifique (ici redondant avec l'ID principal)
-      );
-      
-      // Récupérer depuis le cache si disponible
-      const cachedData = mcpCache.get<GetUserDetailsResult>(cacheKey);
-      
-      if (cachedData) {
-        logger.debug(LogCategory.DATABASE, `Using cached data for user ${userId} details`);
-        return cachedData;
-      }
-      
-      // Appeler le handler handleGetUserDetails
-      const startTime = performance.now();
+      // Appeler le handler handleGetUserDetails avec mesure de performance
+      const startTime = logger.startPerformanceLog('getUserDetailsViaMCP');
       const result = await handleGetUserDetails(this.db, { userId });
-      const endTime = performance.now();
-      
-      // Enregistrer les métriques de performance
-      const accessTime = endTime - startTime;
-      logger.debug(
-        LogCategory.CACHE, 
-        `Database access time for user details: ${accessTime.toFixed(2)}ms`
-      );
-      
-      // Mettre en cache le résultat si l'opération a réussi
-      if (result.success) {
-        // Obtenir la durée du cache pour les détails utilisateur (normalement moyenne durée)
-        const cacheDuration = getCacheDuration(CacheGroup.USER, 'details');
-        mcpCache.set(cacheKey, result, CacheGroup.USER, cacheDuration);
-      }
+      const endTime = logger.endPerformanceLog('getUserDetailsViaMCP', startTime);
       
       return result;
     } catch (error) {
@@ -1152,6 +1212,94 @@ class SQLiteMCPServer {
         success: false, 
         error: error instanceof Error ? error.message : String(error) 
       };
+    }
+  }
+
+  /**
+   * Récupère les progressions quotidiennes associées à un plan via le MCP server
+   * @param userId ID de l'utilisateur
+   * @param planId ID du plan
+   * @returns Résultat de l'opération avec les progressions quotidiennes ou une erreur
+   */
+  public async getDailyProgressByPlanViaMCP(
+    userId: number,
+    planId: number
+  ): Promise<GetDailyProgressByPlanResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      const result = await handleGetDailyProgressByPlan(this.db, { userId, planId });
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getDailyProgressByPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Get a default user or a specific user by ID if provided
+   * @param userId Optional user ID to try first
+   * @returns Result with the user or error
+   */
+  public async getDefaultUserViaMCP(userId?: number): Promise<GetDefaultUserResult> {
+    const startTime = logger.startPerformanceLog('getDefaultUserViaMCP');
+    
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, 'Getting default user via MCP Server', { userId });
+      
+      // Construire les paramètres pour le handler
+      const params: GetDefaultUserParams = {};
+      if (userId) {
+        params.userId = userId;
+      }
+      
+         // Appeler le handler avec les paramètres
+         const result = await handleGetDefaultUser(this.db, params);
+      
+         logger.endPerformanceLog('getDefaultUserViaMCP',startTime);
+         return result;
+       } catch (error) {
+         logger.error(LogCategory.DATABASE, `Error in getDefaultUserViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+         logger.endPerformanceLog('getDefaultUserViaMCP',startTime );
+         
+         return {
+           success: false,
+           error: error instanceof Error ? error.message : String(error)
+         };
+    }
+  }
+
+  /**
+   * Retire un repas d'un plan journalier sans le supprimer de la base de données
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas à retirer
+   * @returns Résultat de l'opération
+   */
+  public async removeMealFromDailyPlanViaMCP(dailyPlanId: number, mealId: number) {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Removing meal ${mealId} from daily plan ${dailyPlanId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleRemoveMealFromDailyPlan(this.db, { dailyPlanId, mealId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for removing meal from plan: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error removing meal from plan via MCP: ${error}`);
+      return { success: false, error: `Error removing meal from plan: ${error instanceof Error ? error.message : String(error)}` };
     }
   }
 }

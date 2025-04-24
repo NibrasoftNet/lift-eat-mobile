@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from
 import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
 import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { markMealAsConsumed } from '@/utils/services/progress.service';
 import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
 interface MealWithProgressExtended extends MealWithProgress {
@@ -242,14 +244,25 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         throw new Error('Identifiant de repas quotidien manquant');
       }
       
-      // Appeler le service pour marquer le repas comme consommé ou non
-      await markMealAsConsumed(
-        drizzleDb,
+      // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
+      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
+        dailyProgressId: dailyProgress.id,
+        mealId: selectedItem.id,
+        dailyPlanMealId: selectedItem.dailyPlanMealId,
+        consumed: toConsumed
+      });
+      
+      const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
         dailyProgress.id,
         selectedItem.id,
         selectedItem.dailyPlanMealId,
         toConsumed
       );
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
+        throw new Error(result.error || 'Erreur lors du marquage du repas');
+      }
       
       // Mettre à jour les listes localement
       if (toConsumed) {
@@ -269,7 +282,6 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
-            mealType: toMealType,
             progress: {
               ...selectedItem.progress,
               consomme: true,
@@ -278,9 +290,15 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
               mealId: selectedItem.id,
               dailyPlanMealId: selectedItem.dailyPlanMealId,
             } as DailyMealProgressOrmProps,
+            mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
           };
           
-          newList[toMealType] = [...newList[toMealType], updatedItem];
+          // Nous devons convertir le type d'enum de repas en clé MealList
+          const mealKey = selectedItem.type.toLowerCase() as MealType;
+          if (mealTypes.includes(mealKey)) {
+            newList[mealKey] = [...newList[mealKey], updatedItem];
+          }
+          
           return newList;
         });
       } else {
@@ -300,7 +318,6 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
-            mealType: toMealType,
             progress: {
               ...selectedItem.progress,
               consomme: false,
@@ -309,9 +326,15 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
               mealId: selectedItem.id,
               dailyPlanMealId: selectedItem.dailyPlanMealId,
             } as DailyMealProgressOrmProps,
+            mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
           };
           
-          newList[toMealType] = [...newList[toMealType], updatedItem];
+          // Nous devons convertir le type d'enum de repas en clé MealList
+          const mealKey = selectedItem.type.toLowerCase() as MealType;
+          if (mealTypes.includes(mealKey)) {
+            newList[mealKey] = [...newList[mealKey], updatedItem];
+          }
+          
           return newList;
         });
       }
@@ -347,6 +370,154 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
       // Réinitialiser l'état de sélection
       setSelectedItem(null);
       setSelectionMode(false);
+    }
+  };
+
+  const handleMealAction = async (
+    selectedItem: MealWithProgressExtended,
+    toConsumed: boolean
+  ) => {
+    if (!dailyProgress) {
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
+            <Text style={styles.toastText}>
+              Erreur: Aucune progression journalière disponible
+            </Text>
+          </Box>
+        )
+      });
+      return;
+    }
+
+    try {
+      if (!selectedItem.dailyPlanMealId) {
+        throw new Error('Identifiant de repas quotidien manquant');
+      }
+      
+      // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
+      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
+        dailyProgressId: dailyProgress.id,
+        mealId: selectedItem.id,
+        dailyPlanMealId: selectedItem.dailyPlanMealId,
+        consumed: toConsumed
+      });
+      
+      const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
+        dailyProgress.id,
+        selectedItem.id,
+        selectedItem.dailyPlanMealId,
+        toConsumed
+      );
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
+        throw new Error(result.error || 'Erreur lors du marquage du repas');
+      }
+      
+      // Mettre à jour les listes localement
+      if (toConsumed) {
+        // Supprimer de la liste des repas à consommer
+        setLeftList(prev => {
+          const newList = { ...prev };
+          for (const mealType of mealTypes) {
+            newList[mealType] = newList[mealType].filter(
+              item => item.id !== selectedItem.id
+            );
+          }
+          return newList;
+        });
+        
+        // Ajouter à la liste des repas consommés
+        setRightList(prev => {
+          const newList = { ...prev };
+          const updatedItem = {
+            ...selectedItem,
+            progress: {
+              ...selectedItem.progress,
+              consomme: true,
+              pourcentageConsomme: 100,
+              dailyProgressId: dailyProgress.id,
+              mealId: selectedItem.id,
+              dailyPlanMealId: selectedItem.dailyPlanMealId,
+            } as DailyMealProgressOrmProps,
+            mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
+          };
+          
+          // Nous devons convertir le type d'enum de repas en clé MealList
+          const mealKey = selectedItem.type.toLowerCase() as MealType;
+          if (mealTypes.includes(mealKey)) {
+            newList[mealKey] = [...newList[mealKey], updatedItem];
+          }
+          
+          return newList;
+        });
+      } else {
+        // Supprimer de la liste des repas consommés
+        setRightList(prev => {
+          const newList = { ...prev };
+          for (const mealType of mealTypes) {
+            newList[mealType] = newList[mealType].filter(
+              item => item.id !== selectedItem.id
+            );
+          }
+          return newList;
+        });
+        
+        // Ajouter à la liste des repas à consommer
+        setLeftList(prev => {
+          const newList = { ...prev };
+          const updatedItem = {
+            ...selectedItem,
+            progress: {
+              ...selectedItem.progress,
+              consomme: false,
+              pourcentageConsomme: 0,
+              dailyProgressId: dailyProgress.id,
+              mealId: selectedItem.id,
+              dailyPlanMealId: selectedItem.dailyPlanMealId,
+            } as DailyMealProgressOrmProps,
+            mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
+          };
+          
+          // Nous devons convertir le type d'enum de repas en clé MealList
+          const mealKey = selectedItem.type.toLowerCase() as MealType;
+          if (mealTypes.includes(mealKey)) {
+            newList[mealKey] = [...newList[mealKey], updatedItem];
+          }
+          
+          return newList;
+        });
+      }
+      
+      // Afficher un message de succès
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
+            <Text style={styles.toastText}>
+              {toConsumed 
+                ? 'Repas marqué comme consommé !' 
+                : 'Repas remis dans la liste "à consommer"'}
+            </Text>
+          </Box>
+        )
+      });
+      
+      // Notifier le composant parent pour rafraîchir les données
+      onMealStatusChange();
+    } catch (error: any) {
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
+            <Text style={styles.toastText}>
+              Erreur: {error.message || 'Une erreur est survenue'}
+            </Text>
+          </Box>
+        )
+      });
     }
   };
 

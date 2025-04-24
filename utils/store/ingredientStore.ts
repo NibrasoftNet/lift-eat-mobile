@@ -141,29 +141,45 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
 
   toggleIngredient: (ingredient) =>
     set((state) => {
-      const isPresent = state.selectedIngredients.some(
-        (ing) => ing.ingredientStandardId === ingredient.id,
+      // Optimisation: trouver l'index en une seule passe du tableau
+      const existingIndex = state.selectedIngredients.findIndex(
+        (ing) => ing.ingredientStandardId === ingredient.id
       );
+      const isPresent = existingIndex !== -1;
 
-      const updatedIngredients = isPresent
-        ? state.selectedIngredients.filter(
-            (ing) => ing.ingredientStandardId !== ingredient.id,
-          )
-        : [
-            ...state.selectedIngredients,
-            mapToIngredientWithStandard(ingredient),
-          ];
+      let updatedIngredients;
+      if (isPresent) {
+        // Optimisation: Utilisation de slice pour éviter la reconstruction complète
+        updatedIngredients = [
+          ...state.selectedIngredients.slice(0, existingIndex),
+          ...state.selectedIngredients.slice(existingIndex + 1)
+        ];
+      } else {
+        updatedIngredients = [
+          ...state.selectedIngredients,
+          mapToIngredientWithStandard(ingredient),
+        ];
+      }
 
-      const totalWeight = calculateTotalWeight(updatedIngredients);
-      // If meal weight was previously 0, set it to match the total ingredients weight
+      // Optimisation: calcul rapide du nouveau poids total
+      let totalWeight;
+      if (isPresent) {
+        // Si on supprime un ingrédient, soustraire son poids du total
+        totalWeight = state.totalWeight - state.selectedIngredients[existingIndex].quantity;
+      } else {
+        // Si on ajoute un ingrédient, ajouter son poids au total
+        totalWeight = state.totalWeight + ingredient.quantity;
+      }
+      
+      // Si meal weight était 0, on le définit au poids total
       const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
       
       return {
         selectedIngredients: updatedIngredients,
-        totalWeight: totalWeight,
-        mealWeight: mealWeight,
+        totalWeight,
+        mealWeight,
         totalMacros: calculateTotalMacros(updatedIngredients, mealWeight),
-      } as Partial<IngredientStore>; // ✅ Ensure Zustand recognizes the update
+      } as Partial<IngredientStore>; // Ensure Zustand recognizes the update
     }),
 
   updateIngredient: (ingredientStandardId: number, newQuantity: number) =>

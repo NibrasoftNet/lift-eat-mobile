@@ -6,10 +6,11 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  runOnUI,
 } from 'react-native-reanimated';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 
-const GenderFormInput = ({
+const GenderFormInput = memo(({ 
   defaultGender,
   setValue,
 }: {
@@ -17,25 +18,37 @@ const GenderFormInput = ({
   setValue: any;
 }) => {
   const [genderUnit, setGenderUnit] = useState<GenderEnum>(defaultGender);
+  
+  // Initialiser les valeurs partagées sans condition dans le rendu
+  const maleBarWidth = useSharedValue(0); 
+  const femaleBarWidth = useSharedValue(0);
+  
+  // Mettre à jour les valeurs partagées en fonction du genre initial
+  useEffect(() => {
+    // Utiliser runOnUI pour s'assurer que les modifications sont faites sur le thread UI
+    runOnUI(() => {
+      maleBarWidth.value = defaultGender === GenderEnum.MALE ? 100 : 0;
+      femaleBarWidth.value = defaultGender === GenderEnum.FEMALE ? 100 : 0;
+    })();
+  }, []);
+  
   const handleGenderUnitChange = (unit: GenderEnum) => {
     setGenderUnit(unit);
     setValue('gender', unit);
   };
-  // Shared values for Male and Female bar widths
-  const maleBarWidth = useSharedValue(genderUnit === GenderEnum.MALE ? 100 : 0); // 100% = blue, 0% = gray
-  const femaleBarWidth = useSharedValue(
-    genderUnit === GenderEnum.FEMALE ? 100 : 0,
-  ); // 100% = orange, 0% = gray
 
-  // Animate bar width
+  // Animer la largeur de la barre lorsque le genre change
   useEffect(() => {
-    maleBarWidth.value = withTiming(genderUnit === GenderEnum.MALE ? 100 : 0, {
-      duration: 300,
-    });
-    femaleBarWidth.value = withTiming(
-      genderUnit === GenderEnum.FEMALE ? 100 : 0,
-      { duration: 300 },
-    );
+    // Utiliser runOnUI pour s'assurer que les modifications sont faites sur le thread UI
+    runOnUI(() => {
+      maleBarWidth.value = withTiming(genderUnit === GenderEnum.MALE ? 100 : 0, {
+        duration: 300,
+      });
+      femaleBarWidth.value = withTiming(
+        genderUnit === GenderEnum.FEMALE ? 100 : 0,
+        { duration: 300 },
+      );
+    })();
   }, [genderUnit]);
 
   // Animated style for Male bar
@@ -53,6 +66,7 @@ const GenderFormInput = ({
       backgroundColor: 'orange', // Orange color for Female bar
     };
   });
+  
   return (
     <Card className="rounded-lg flex flex-col gap-2">
       <Grid
@@ -100,6 +114,9 @@ const GenderFormInput = ({
       </Grid>
     </Card>
   );
-};
+});
+
+// Ajouter un displayName pour faciliter le débogage
+GenderFormInput.displayName = 'GenderFormInput';
 
 export default GenderFormInput;

@@ -12,6 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { Suspense, useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { configureReanimated } from '@/utils/config/reanimated-config';
 import { useOnlineManager } from '@/hooks/useOnlineManager';
 import { useAppState } from '@/hooks/useAppState';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -19,6 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { setupGlobalConsoleInterceptors } from '@/utils/helpers/logging-interceptor';
 import { ActivityIndicator, GestureResponderEvent, View } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
@@ -36,6 +38,11 @@ import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { CloudAlert } from 'lucide-react-native';
 import { tokenCache } from '@/cache';
+import { setQueryClient } from '@/utils/helpers/queryClient';
+import { prefetchEssentialData } from '@/utils/helpers/prefetchData';
+
+// Configurer Reanimated pour désactiver les avertissements du mode strict
+configureReanimated();
 
 // Empêcher la disparition automatique du SplashScreen
 try {
@@ -80,9 +87,17 @@ export default function ProjectLayout() {
     },
   });
 
+  setQueryClient(queryClient);
+
   // Use the custom hooks
   useOnlineManager();
   useAppState();
+
+  // Configurer l'intercepteur de logs pour capturer les messages "meal undefined"
+  useEffect(() => {
+    setupGlobalConsoleInterceptors();
+    logger.info(LogCategory.APP, 'Intercepteurs de console configurés');
+  }, []);
 
   useEffect(() => {
     const initDb = async () => {
@@ -110,6 +125,9 @@ export default function ProjectLayout() {
         logger.error(LogCategory.DATABASE, 'Erreur d\'initialisation de la base de données', err);
         setError(err instanceof Error ? err : new Error('Database initialization failed'));
       }
+      
+      // Le préchargement des données essentielles sera géré par le MCPProvider
+      // après confirmation que le MCP Server est complètement initialisé
     };
 
     initDb();

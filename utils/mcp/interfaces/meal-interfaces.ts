@@ -44,6 +44,7 @@ export interface UpdateMealParams {
   mealId: number;
   data: Partial<MealOrmProps>;
   ingredients?: any[]; // IngredientWithStandardProps[] optionnel
+  userId: number; // ID de l'utilisateur qui effectue la mise à jour, obligatoire pour la sécurité
 }
 
 export interface UpdateMealResult {
@@ -54,6 +55,7 @@ export interface UpdateMealResult {
 // Interface pour deleteMealViaMCP
 export interface DeleteMealParams {
   mealId: number;
+  userId: number; // ID de l'utilisateur qui effectue la suppression, obligatoire pour la sécurité
 }
 
 export interface DeleteMealResult {

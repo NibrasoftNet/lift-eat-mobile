@@ -7,7 +7,7 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, {
@@ -27,7 +27,6 @@ import {
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { updateUser } from '@/utils/services/users.service';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
@@ -35,6 +34,11 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export default function UserDetailsForm({
   defaultValues,
@@ -46,6 +50,31 @@ export default function UserDetailsForm({
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
+  
+  // Obtenir l'ID de l'utilisateur actuel de façon standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
+  
+  // Vérifier si l'utilisateur tente de modifier ses propres données
+  useMemo(() => {
+    if (userId && defaultValues.id !== userId) {
+      logger.warn(LogCategory.AUTH, `User ${userId} attempting to modify data for user ${defaultValues.id}`);
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Access Denied"
+              description="You can only modify your own profile data"
+            />
+          );
+        },
+      });
+      router.back();
+    }
+  }, [userId, defaultValues.id, toast, router]);
   const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(
     defaultValues.weightUnit,
   );
@@ -85,7 +114,6 @@ export default function UserDetailsForm({
   // Measure the width of the first GridItem
   const handleButtonLayout = (event: any) => {
     const { width } = event.nativeEvent.layout;
-    console.log(width);
     setButtonWidth(width);
   };
 
@@ -107,10 +135,42 @@ export default function UserDetailsForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserDetailsFormData) => {
-      return await updateUser(drizzleDb, defaultValues.id, data);
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when updating user details');
+        throw new Error('You must be logged in to update your profile');
+      }
+      
+      // Vérifier que l'ID est le même que celui de l'utilisateur connecté
+      if (defaultValues.id !== userId) {
+        logger.error(LogCategory.AUTH, `User ${userId} attempted to update details for user ${defaultValues.id}`);
+        throw new Error('You can only update your own profile data');
+      }
+      
+      logger.info(LogCategory.USER, `Updating user ${userId} details`, {
+        height: data.height,
+        weight: data.weight,
+        heightUnit: data.heightUnit,
+        weightUnit: data.weightUnit
+      });
+      
+      // Utiliser le MCP server pour mettre à jour les données de l'utilisateur
+      const result = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, {
+        height: data.height,
+        weight: data.weight,
+        heightUnit: data.heightUnit,
+        weightUnit: data.weightUnit
+      });
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update user details');
+      }
+      
+      return result;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+      // Utiliser l'utilitaire standardisé d'invalidation du cache
+      await invalidateCache(queryClient, DataType.USER, { invalidateRelated: true });
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -146,6 +206,13 @@ export default function UserDetailsForm({
   });
 
   const onSubmit = async (data: UserDetailsFormData) => {
+    logger.info(LogCategory.USER, 'Submitting user details form', {
+      userId,
+      height: data.height,
+      weight: data.weight,
+      heightUnit: data.heightUnit,
+      weightUnit: data.weightUnit
+    });
     await mutateAsync(data);
   };
 

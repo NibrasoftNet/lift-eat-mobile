@@ -1,5 +1,5 @@
 import { VStack } from '@/components/ui/vstack';
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
@@ -21,16 +21,20 @@ import {
   nutritionGoalSchema,
   NutritionGoalSchemaFormData,
 } from '@/utils/validation/plan/nutrition-goal.validation';
-import { createPlan } from '@/utils/services/plan.service';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { usePlanStore } from '@/utils/store/planStore';
 import WeightFormInput from '@/components/forms-input/WeightFormInput';
 import GoalTypeFormInput from '@/components/forms-input/GoalTypeFormInput';
 import DurationFormInput from '@/components/forms-input/DurationFormInput';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 
 export default function NutritionGoalForm({
   defaultValues,
   operation,
-  userId,
+  userId: propUserId,
 }: {
   defaultValues: NutritionGoalDefaultValueProps;
   operation: 'create' | 'update';
@@ -42,6 +46,51 @@ export default function NutritionGoalForm({
   
   // Utiliser le store Zustand pour les plans
   const resetPlanStore = usePlanStore((state) => state.resetPlanStore);
+  
+  // Obtenir l'ID de l'utilisateur actuel de façon standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
+  
+  // Vérifier la cohérence entre l'ID passé en prop et l'ID utilisateur authentifié
+  useEffect(() => {
+    if (!userId) {
+      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing NutritionGoalForm');
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Authentication Required"
+              description="Please log in to create a nutrition plan"
+            />
+          );
+        },
+      });
+      router.back();
+      return;
+    }
+    
+    if (userId !== propUserId) {
+      logger.warn(LogCategory.AUTH, `User ID mismatch: authenticated=${userId}, prop=${propUserId}`);
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Access Denied"
+              description="You can only create plans for your own account"
+            />
+          );
+        },
+      });
+      router.back();
+    }
+  }, [userId, propUserId, toast, router]);
 
   const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
 
@@ -66,24 +115,42 @@ export default function NutritionGoalForm({
   // Mutation pour créer un plan nutritionnel
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: NutritionGoalSchemaFormData) => {
-      return await createPlan(drizzleDb, data, userId);
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when creating nutrition plan');
+        throw new Error('You must be logged in to create a nutrition plan');
+      }
+      
+      logger.info(LogCategory.DATABASE, 'Creating plan via MCP Server', { userId });
+      
+      const result = await sqliteMCPServer.createPlanViaMCP(data, userId);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to create plan: ${result.error}`);
+        throw new Error(result.error || 'Failed to create plan');
+      }
+      
+      if (!result.planId) {
+        logger.error(LogCategory.DATABASE, 'No plan ID returned from server');
+        throw new Error('No plan ID returned from server');
+      }
+      
+      logger.debug(LogCategory.DATABASE, 'Plan created successfully', { planId: result.planId });
+      return result.planId;
     },
-    onSuccess: async (planId) => {
-      await queryClient.invalidateQueries({ queryKey: ['my-plans'] });
+    onSuccess: async (data) => {
+      // Utiliser l'utilitaire standardisé d'invalidation du cache
+      await invalidateCache(queryClient, DataType.PLAN, { 
+        id: data,
+        invalidateRelated: true 
+      });
       resetPlanStore(); // Réinitialiser le store après la création
 
       // Rediriger vers la page de détails du plan
       router.push({
         pathname: '/(root)/(tabs)/plans/my-plans/details/[id]',
-        params: { id: planId.toString() }
+        params: { id: data.toString() }
       });
-    },
-  });
-
-  const onSubmit = async (data: NutritionGoalSchemaFormData) => {
-    try {
-      const planId = await mutateAsync(data);
-      
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -98,6 +165,22 @@ export default function NutritionGoalForm({
           );
         },
       });
+    },
+  });
+
+  const onSubmit = async (data: NutritionGoalSchemaFormData) => {
+    try {
+      logger.info(LogCategory.USER, 'Submitting nutrition goal form', {
+        userId,
+        operation,
+        initialWeight: data.initialWeight,
+        targetWeight: data.targetWeight,
+        goalUnit: data.goalUnit,
+        durationWeeks: data.durationWeeks
+      });
+      
+      await mutateAsync(data);
+      // Note: Pas besoin d'afficher le toast ici car il est déjà affiché dans onSuccess
     } catch (error: any) {
       toast.show({
         placement: 'top',

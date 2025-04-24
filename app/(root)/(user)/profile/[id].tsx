@@ -1,30 +1,51 @@
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { eq } from 'drizzle-orm';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { UserOrmPros, users } from '@/db/schema';
+import { UserOrmPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { UserProfileDefaultValuesProps } from '@/utils/validation/user/user-profile.validation';
 import UserProfileForm from '@/components/froms/UserProfileForm';
+import { UserProfileDefaultValuesProps } from '@/utils/validation/user/user-profile.validation';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { DataType } from '@/utils/helpers/queryInvalidation';
+import { getCacheConfig } from '@/utils/helpers/cacheConfig';
+import useSessionStore from '@/utils/store/sessionStore';
 
 export default function EditUserProfile() {
   const { id } = useLocalSearchParams();
   const drizzleDb = useDrizzleDb();
+  const queryClient = useQueryClient();
 
   const {
     data: actualUser,
     isPending,
-    isFetching,
     isLoading,
     isRefetching,
   } = useQuery({
-    queryKey: ['me'],
+    queryKey: [DataType.USER, id],
     queryFn: async () => {
-      return drizzleDb.query.users.findFirst({
-        where: eq(users.id, Number(id)),
+      logger.info(LogCategory.DATABASE, 'Fetching user profile details via MCP Server', {
+        userId: Number(id)
       });
+      
+      // Utiliser directement le MCP Server pour récupérer les détails de l'utilisateur
+      const result = await sqliteMCPServer.getUserDetailsViaMCP(Number(id));
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to get user details: ${result.error}`);
+        throw new Error(result.error || `User with ID ${id} not found`);
+      }
+      
+      if (!result.user) {
+        logger.warn(LogCategory.DATABASE, `User with ID ${id} not found`);
+        throw new Error(`User with ID ${id} not found`);
+      }
+      
+      return result.user;
     },
+    ...getCacheConfig(DataType.USER),
   });
 
   const defaultUserDetailsValues: UserProfileDefaultValuesProps = {
@@ -38,7 +59,7 @@ export default function EditUserProfile() {
     <QueryStateHandler<UserOrmPros>
       data={actualUser}
       isLoading={isLoading}
-      isFetching={isFetching}
+      isFetching={isRefetching}
       isPending={isPending}
       isRefetching={isRefetching}
     >

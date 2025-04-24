@@ -20,6 +20,7 @@ import { WeightUnitEnum } from '../enum/user-details.enum';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import useSessionStore from '@/utils/store/sessionStore'; 
 
 /**
  * Ru00e9cupu00e8re une liste de plans nutritionnels
@@ -27,21 +28,33 @@ import sqliteMCPServer from '@/utils/mcp/sqlite-server';
  */
 export const getPlansList = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  userId?: number,
 ) => {
   const startTime = logger.startPerformanceLog('getPlansList');
   try {
     logger.info(LogCategory.DATABASE, 'Fetching plans list via MCP Server');
 
-    // Ru00e9cupu00e9rer l'ID utilisateur depuis le premier utilisateur dans la base de donnu00e9es
-    // Note: Ceci est une solution temporaire, iddu00e9alement l'ID utilisateur devrait u00eatre passu00e9 en paramutire
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
+    // Utiliser l'ID utilisateur fourni ou celui de la session
+    let authenticatedUserId = userId;
+    
+    // Si aucun ID n'est fourni, essayer de ru00e9cupu00e9rer l'ID de l'utilisateur authentifiu00e9
+    if (!authenticatedUserId) {
+      const { user } = useSessionStore.getState();
+      authenticatedUserId = user?.id;
+      
+      // Fallback u00e0 l'ancienne mu00e9thode si aucun utilisateur n'est trouvu00e9 dans la session
+      if (!authenticatedUserId) {
+        logger.warn(LogCategory.DATABASE, 'No user found in session, falling back to first user in DB');
+        const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
+        if (users.length === 0) {
+          throw new Error('No users found in the database');
+        }
+        authenticatedUserId = users[0].id;
+      }
     }
-    const userId = users[0].id;
 
     // Utiliser le serveur MCP au lieu d'accu00e9der directement u00e0 la base de donnu00e9es
-    const result = await sqliteMCPServer.getPlansListViaMCP(userId);
+    const result = await sqliteMCPServer.getPlansListViaMCP(authenticatedUserId);
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to fetch plans list via MCP Server');
@@ -72,21 +85,33 @@ export const getPlansList = async (
 export const getPlanDetails = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   planId: string,
+  userId?: number,
 ) => {
   const startTime = logger.startPerformanceLog('getPlanDetails');
   try {
     logger.info(LogCategory.DATABASE, `Fetching plan details for plan ${planId} via MCP Server`);
 
-    // Ru00e9cupu00e9rer l'ID utilisateur depuis le premier utilisateur dans la base de donnu00e9es
-    // Note: Ceci est une solution temporaire, iddu00e9alement l'ID utilisateur devrait u00eatre passu00e9 en paramutire
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
+    // Utiliser l'ID utilisateur fourni ou celui de la session
+    let authenticatedUserId = userId;
+    
+    // Si aucun ID n'est fourni, essayer de ru00e9cupu00e9rer l'ID de l'utilisateur authentifiu00e9
+    if (!authenticatedUserId) {
+      const { user } = useSessionStore.getState();
+      authenticatedUserId = user?.id;
+      
+      // Fallback u00e0 l'ancienne mu00e9thode si aucun utilisateur n'est trouvu00e9 dans la session
+      if (!authenticatedUserId) {
+        logger.warn(LogCategory.DATABASE, 'No user found in session, falling back to first user in DB');
+        const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
+        if (users.length === 0) {
+          throw new Error('No users found in the database');
+        }
+        authenticatedUserId = users[0].id;
+      }
     }
-    const userId = users[0].id;
 
     // Utiliser le serveur MCP au lieu d'accu00e9der directement u00e0 la base de donnu00e9es
-    const result = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
+    const result = await sqliteMCPServer.getPlanDetailsViaMCP(planId, authenticatedUserId);
 
     if (!result.success) {
       throw new Error(result.error || `Failed to fetch plan details for plan ${planId} via MCP Server`);
@@ -286,147 +311,75 @@ export const deletePlan = async (
 
 /**
  * Add a meal to a daily plan
+ * @deprecated Utilisez directement sqliteMCPServer.addMealToDailyPlanViaMCP pour une meilleure centralisation
+ * @returns Object with success flag and error message if applicable
  */
 export const addMealToDailyPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   dailyPlanId: number,
   mealId: number,
   quantity: number = 10, // Default to 10 grams
-): Promise<void> => {
+): Promise<{ success: boolean; error?: string }> => {
+  const startTime = logger.startPerformanceLog('addMealToDailyPlan');
   try {
-    // Get meal to calculate nutrition values
-    const meal = await drizzleDb.query.meals.findFirst({
-      where: eq(meals.id, mealId),
+    logger.info(LogCategory.DATABASE, 'Adding meal to daily plan via MCP Server', {
+      dailyPlanId, mealId, quantity
     });
 
-    if (!meal) {
-      throw new Error('Meal not found');
-    }
-
-    // Calculate nutritional values based on quantity
-    const ratio = quantity / meal.quantity;
-    const adjustedCalories = meal.calories * ratio;
-    const adjustedCarbs = meal.carbs * ratio;
-    const adjustedFat = meal.fat * ratio;
-    const adjustedProtein = meal.protein * ratio;
-
-    // Check if this meal is already in the daily plan
-    const existingRelation = await drizzleDb.query.dailyPlanMeals.findFirst({
-      where: and(
-        eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
-        eq(dailyPlanMeals.mealId, mealId)
-      )
-    });
-
-    if (existingRelation) {
-      throw new Error('This meal is already added to the daily plan');
-    }
-
-    // Insert the meal-plan relationship
-    await drizzleDb.insert(dailyPlanMeals).values({
-      dailyPlanId,
-      mealId,
-      quantity,
-      calories: adjustedCalories,
-      carbs: adjustedCarbs,
-      fat: adjustedFat,
-      protein: adjustedProtein,
-    });
-
-    // Get daily plan current values
-    const currentDailyPlan = await drizzleDb.query.dailyPlan.findFirst({
-      where: eq(dailyPlan.id, dailyPlanId),
-    });
-
-    if (!currentDailyPlan) {
-      throw new Error('Daily plan not found');
-    }
-
-    // Update daily plan nutrition values with the adjusted values
-    await drizzleDb
-      .update(dailyPlan)
-      .set({
-        calories: currentDailyPlan.calories + adjustedCalories,
-        carbs: currentDailyPlan.carbs + adjustedCarbs,
-        fat: currentDailyPlan.fat + adjustedFat,
-        protein: currentDailyPlan.protein + adjustedProtein,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(dailyPlan.id, dailyPlanId));
-
-    // Update total plan statistics as well
-    const planQuery = await drizzleDb.query.dailyPlan.findFirst({
-      where: eq(dailyPlan.id, dailyPlanId),
-      columns: {
-        planId: true,
-      },
-    });
-
-    if (planQuery) {
-      const allDailyPlans = await drizzleDb.query.dailyPlan.findMany({
-        where: eq(dailyPlan.planId, planQuery.planId),
-      });
-
-      // Calculate total nutrition values for the plan
-      const totalCalories = allDailyPlans.reduce(
-        (sum, dp) => sum + dp.calories,
-        0,
-      );
-      const totalCarbs = allDailyPlans.reduce((sum, dp) => sum + dp.carbs, 0);
-      const totalFat = allDailyPlans.reduce((sum, dp) => sum + dp.fat, 0);
-      const totalProtein = allDailyPlans.reduce(
-        (sum, dp) => sum + dp.protein,
-        0,
-      );
-
-      // Update plan with new totals
-      await drizzleDb
-        .update(plan)
-        .set({
-          calories: totalCalories,
-          carbs: totalCarbs,
-          fat: totalFat,
-          protein: totalProtein,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(plan.id, planQuery.planId));
-    }
+    // Utiliser le serveur MCP pour ajouter le repas au plan journalier
+    const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(dailyPlanId, mealId, quantity);
+    
+    logger.endPerformanceLog('addMealToDailyPlan', startTime);
+    return result; // Renvoyer directement le résultat du MCP server
+    
   } catch (error) {
-    console.error('Error adding meal to daily plan:', error);
-    throw new Error('Failed to add meal to daily plan');
+    logger.error(LogCategory.DATABASE, `Error in addMealToDailyPlan: ${error instanceof Error ? error.message : String(error)}`);
+    logger.endPerformanceLog('addMealToDailyPlan', startTime);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
   }
 };
 
 /**
  * Get the current quantity of a meal in a daily plan
+ * @deprecated Utilisez directement sqliteMCPServer.getMealQuantityInPlanViaMCP pour une meilleure centralisation
  */
 export const getMealQuantityInPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   dailyPlanId: number,
   mealId: number,
 ): Promise<number> => {
+  const startTime = logger.startPerformanceLog('getMealQuantityInPlan');
   try {
-    // Get the current meal-plan relationship
-    const relation = await drizzleDb.query.dailyPlanMeals.findFirst({
-      where: and(
-        eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
-        eq(dailyPlanMeals.mealId, mealId)
-      )
+    logger.info(LogCategory.DATABASE, 'Getting meal quantity in plan via MCP Server', {
+      dailyPlanId, mealId
     });
 
-    if (!relation) {
-      throw new Error('Meal not found in this plan');
+    // Utiliser le serveur MCP pour ru00e9cupu00e9rer la quantitu00e9 du repas dans le plan
+    const result = await sqliteMCPServer.getMealQuantityInPlanViaMCP(dailyPlanId, mealId);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to get meal quantity in plan');
     }
-
-    return relation.quantity;
+    
+    if (result.quantity === undefined) {
+      throw new Error('Meal is not in this daily plan');
+    }
+    
+    logger.endPerformanceLog('getMealQuantityInPlan', startTime);
+    return result.quantity;
   } catch (error) {
-    console.error('Error getting meal quantity in plan:', error);
-    throw new Error('Failed to get meal quantity in plan');
+    logger.error(LogCategory.DATABASE, `Error in getMealQuantityInPlan: ${error instanceof Error ? error.message : String(error)}`);
+    logger.endPerformanceLog('getMealQuantityInPlan', startTime);
+    throw error;
   }
 };
 
 /**
  * Update the quantity of a meal in a daily plan
+ * @deprecated Utilisez directement sqliteMCPServer.updateMealQuantityInPlanViaMCP pour une meilleure centralisation
  */
 export const updateMealQuantityInPlan = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
@@ -434,121 +387,24 @@ export const updateMealQuantityInPlan = async (
   mealId: number,
   newQuantity: number,
 ): Promise<void> => {
+  const startTime = logger.startPerformanceLog('updateMealQuantityInPlan');
   try {
-    // Get the original meal to calculate new nutrition values
-    const meal = await drizzleDb.query.meals.findFirst({
-      where: eq(meals.id, mealId),
+    logger.info(LogCategory.DATABASE, 'Updating meal quantity in plan via MCP Server', {
+      dailyPlanId, mealId, newQuantity
     });
 
-    if (!meal) {
-      throw new Error('Meal not found');
+    // Utiliser le serveur MCP pour mettre u00e0 jour la quantitu00e9 du repas dans le plan
+    const result = await sqliteMCPServer.updateMealQuantityInPlanViaMCP(dailyPlanId, mealId, newQuantity);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update meal quantity in plan');
     }
-
-    // Get the current meal-plan relationship
-    const currentRelation = await drizzleDb.query.dailyPlanMeals.findFirst({
-      where: and(
-        eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
-        eq(dailyPlanMeals.mealId, mealId)
-      )
-    });
-
-    if (!currentRelation) {
-      throw new Error('Meal not found in this plan');
-    }
-
-    // Calculate the ratio for the new quantity based on the original meal
-    const ratio = newQuantity / meal.quantity;
-
-    // Calculate new nutritional values
-    const adjustedCalories = meal.calories * ratio;
-    const adjustedCarbs = meal.carbs * ratio;
-    const adjustedFat = meal.fat * ratio;
-    const adjustedProtein = meal.protein * ratio;
-
-    // Calculate the difference in nutritional values
-    const caloriesDiff = adjustedCalories - (currentRelation.calories || 0);
-    const carbsDiff = adjustedCarbs - (currentRelation.carbs || 0);
-    const fatDiff = adjustedFat - (currentRelation.fat || 0);
-    const proteinDiff = adjustedProtein - (currentRelation.protein || 0);
-
-    // Update the meal-plan relationship with new values
-    await drizzleDb
-      .update(dailyPlanMeals)
-      .set({
-        quantity: newQuantity,
-        calories: adjustedCalories,
-        carbs: adjustedCarbs,
-        fat: adjustedFat,
-        protein: adjustedProtein,
-      })
-      .where(
-        and(
-          eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
-          eq(dailyPlanMeals.mealId, mealId)
-        )
-      );
-
-    // Get daily plan current values
-    const currentDailyPlan = await drizzleDb.query.dailyPlan.findFirst({
-      where: eq(dailyPlan.id, dailyPlanId),
-    });
-
-    if (!currentDailyPlan) {
-      throw new Error('Daily plan not found');
-    }
-
-    // Update daily plan nutrition values with the adjusted values
-    await drizzleDb
-      .update(dailyPlan)
-      .set({
-        calories: currentDailyPlan.calories + caloriesDiff,
-        carbs: currentDailyPlan.carbs + carbsDiff,
-        fat: currentDailyPlan.fat + fatDiff,
-        protein: currentDailyPlan.protein + proteinDiff,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(dailyPlan.id, dailyPlanId));
-
-    // Update total plan statistics as well
-    const planQuery = await drizzleDb.query.dailyPlan.findFirst({
-      where: eq(dailyPlan.id, dailyPlanId),
-      columns: {
-        planId: true,
-      },
-    });
-
-    if (planQuery) {
-      const allDailyPlans = await drizzleDb.query.dailyPlan.findMany({
-        where: eq(dailyPlan.planId, planQuery.planId),
-      });
-
-      // Calculate total nutrition values for the plan
-      const totalCalories = allDailyPlans.reduce(
-        (sum, dp) => sum + dp.calories,
-        0,
-      );
-      const totalCarbs = allDailyPlans.reduce((sum, dp) => sum + dp.carbs, 0);
-      const totalFat = allDailyPlans.reduce((sum, dp) => sum + dp.fat, 0);
-      const totalProtein = allDailyPlans.reduce(
-        (sum, dp) => sum + dp.protein,
-        0,
-      );
-
-      // Update plan with new totals
-      await drizzleDb
-        .update(plan)
-        .set({
-          calories: totalCalories,
-          carbs: totalCarbs,
-          fat: totalFat,
-          protein: totalProtein,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(plan.id, planQuery.planId));
-    }
+    
+    logger.endPerformanceLog('updateMealQuantityInPlan', startTime);
   } catch (error) {
-    console.error('Error updating meal quantity in plan:', error);
-    throw new Error('Failed to update meal quantity in plan');
+    logger.error(LogCategory.DATABASE, `Error in updateMealQuantityInPlan: ${error instanceof Error ? error.message : String(error)}`);
+    logger.endPerformanceLog('updateMealQuantityInPlan', startTime);
+    throw error;
   }
 };
 

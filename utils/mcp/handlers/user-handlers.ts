@@ -6,7 +6,9 @@ import {
   CreateUserParams,
   CreateUserResult,
   ValidateUserExistsParams,
-  ValidateUserExistsResult
+  ValidateUserExistsResult,
+  GetDefaultUserParams,
+  GetDefaultUserResult
 } from '../interfaces/user-interfaces';
 import {
   users,
@@ -17,10 +19,10 @@ import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
- * Handler pour la mu00e9thode updateUserPreferencesViaMCP
- * @param db Instance de la base de donnu00e9es
- * @param params Paramu00e8tres pour la mise u00e0 jour des pru00e9fu00e9rences utilisateur
- * @returns Ru00e9sultat de l'opu00e9ration
+ * Handler pour la méthode updateUserPreferencesViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la mise à jour des préférences utilisateur
+ * @returns Résultat de l'opération
  */
 export async function handleUpdateUserPreferences(db: any, params: UpdateUserPreferencesParams): Promise<UpdateUserPreferencesResult> {
   const { userId, preferences } = params;
@@ -30,7 +32,7 @@ export async function handleUpdateUserPreferences(db: any, params: UpdateUserPre
     
     logger.info(LogCategory.DATABASE, `Updating preferences for user ${userId} via MCP Server`);
     
-    // Vu00e9rifier si l'utilisateur existe
+    // Vérifier si l'utilisateur existe
     const userExists = await db
       .select({ id: users.id })
       .from(users)
@@ -42,12 +44,12 @@ export async function handleUpdateUserPreferences(db: any, params: UpdateUserPre
       return { success: false, error: `User with ID ${userId} not found` };
     }
     
-    // Calculer les besoins caloriques et objectifs si nu00e9cessaire
+    // Calculer les besoins caloriques et objectifs si nécessaire
     let calculatedPreferences = { ...preferences };
     
-    // Si les paramu00e8tres nu00e9cessaires sont fournis, calculer les besoins caloriques
+    // Si les paramètres nécessaires sont fournis, calculer les besoins caloriques
     if (preferences.age && preferences.gender && preferences.weight && preferences.height && preferences.physicalActivity) {
-      // Calculer le BMR (Basal Metabolic Rate) en utilisant l'u00e9quation Harris-Benedict
+      // Calculer le BMR (Basal Metabolic Rate) en utilisant l'équation Harris-Benedict
       let bmr = 0;
       if (preferences.gender === 'MALE') {
         bmr = 88.362 + (13.397 * preferences.weight) + (4.799 * preferences.height) - (5.677 * preferences.age);
@@ -55,22 +57,22 @@ export async function handleUpdateUserPreferences(db: any, params: UpdateUserPre
         bmr = 447.593 + (9.247 * preferences.weight) + (3.098 * preferences.height) - (4.330 * preferences.age);
       }
       
-      // Du00e9finir les multiplicateurs d'activitu00e9
+      // Définir les multiplicateurs d'activité
       const activityMultipliers: Record<string, number> = {
-        'SEDENTARY': 1.2,        // Activitu00e9 su00e9dentaire (peu ou pas d'exercice)
-        'LIGHTLY_ACTIVE': 1.375,  // Lu00e9gu00e8rement actif (exercice lu00e9ger 1-3 jours/semaine)
-        'MODERATELY_ACTIVE': 1.55, // Modu00e9ru00e9ment actif (exercice modu00e9ru00e9 3-5 jours/semaine)
-        'VERY_ACTIVE': 1.725,     // Tru00e8s actif (exercice intense 6-7 jours/semaine)
-        'EXTRA_ACTIVE': 1.9       // Extru00eamement actif (exercice tru00e8s intense et travail physique)
+        'SEDENTARY': 1.2,        // Activité sédentaire (peu ou pas d'exercice)
+        'LIGHTLY_ACTIVE': 1.375,  // Légèrement actif (exercice léger 1-3 jours/semaine)
+        'MODERATELY_ACTIVE': 1.55, // Modérément actif (exercice modéré 3-5 jours/semaine)
+        'VERY_ACTIVE': 1.725,     // Très actif (exercice intense 6-7 jours/semaine)
+        'EXTRA_ACTIVE': 1.9       // Extrêmement actif (exercice très intense et travail physique)
       };
       
       // Calculer les besoins caloriques totaux
-      const activityMultiplier = activityMultipliers[preferences.physicalActivity] || 1.55; // Valeur par du00e9faut si non trouvu00e9e
+      const activityMultiplier = activityMultipliers[preferences.physicalActivity] || 1.55; // Valeur par défaut si non trouvée
       const totalCalories = Math.round(bmr * activityMultiplier);
       console.log(`Calculated calories for user ${userId}: ${totalCalories} (not saved as no field exists)`);
     }
     
-    // Mettre u00e0 jour les pru00e9fu00e9rences de l'utilisateur
+    // Mettre à jour les préférences de l'utilisateur
     await db
       .update(users)
       .set({
@@ -91,33 +93,39 @@ export async function handleUpdateUserPreferences(db: any, params: UpdateUserPre
 }
 
 /**
- * Handler pour la mu00e9thode getUserDetailsViaMCP
- * @param db Instance de la base de donnu00e9es
- * @param params Paramu00e8tres pour la ru00e9cupu00e9ration des du00e9tails utilisateur
- * @returns Ru00e9sultat de l'opu00e9ration avec les du00e9tails utilisateur
+ * Handler pour la méthode getUserDetailsViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la récupération des détails utilisateur
+ * @returns Résultat de l'opération avec les détails utilisateur
  */
 export async function handleGetUserDetails(db: any, params: GetUserDetailsParams): Promise<GetUserDetailsResult> {
-  const { userId } = params;
+  const { userId, requestingUserId } = params;
   
   try {
     if (!db) throw new Error("Database not initialized");
     
-    logger.info(LogCategory.DATABASE, `Getting details for user ${userId} via MCP Server`);
+    logger.info(LogCategory.DATABASE, `Getting user details for user ${userId} (requested by ${requestingUserId || 'unknown'}) via MCP Server`);
     
-    // Ru00e9cupu00e9rer les du00e9tails de l'utilisateur
-    const userResults = await db
+    // Vérifier l'autorisation - seul l'utilisateur lui-même peut accéder à ses données
+    if (requestingUserId && userId !== requestingUserId) {
+      logger.warn(LogCategory.DATABASE, `Unauthorized attempt to access user ${userId} details by user ${requestingUserId}`);
+      return { success: false, error: 'Not authorized to access this user\'s details' };
+    }
+    
+    // Récupérer les détails de l'utilisateur
+    const userDetails = await db
       .select()
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
     
-    if (userResults.length === 0) {
+    if (userDetails.length === 0) {
       logger.warn(LogCategory.DATABASE, `User with ID ${userId} not found`);
       return { success: false, error: `User with ID ${userId} not found` };
     }
     
-    logger.info(LogCategory.DATABASE, `Successfully retrieved details for user ${userId} via MCP Server`);
-    return { success: true, user: userResults[0] };
+    logger.info(LogCategory.DATABASE, `Retrieved details for user ${userId} via MCP Server`);
+    return { success: true, user: userDetails[0] };
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleGetUserDetails: ${error instanceof Error ? error.message : String(error)}`);
     return { 
@@ -128,10 +136,10 @@ export async function handleGetUserDetails(db: any, params: GetUserDetailsParams
 }
 
 /**
- * Handler pour la mu00e9thode createUserViaMCP
- * @param db Instance de la base de donnu00e9es
- * @param params Paramu00e8tres pour la cru00e9ation de l'utilisateur
- * @returns Ru00e9sultat de l'opu00e9ration avec l'ID de l'utilisateur cru00e9u00e9
+ * Handler pour la méthode createUserViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la création de l'utilisateur
+ * @returns Résultat de l'opération avec l'ID de l'utilisateur créé
  */
 export async function handleCreateUser(db: any, params: CreateUserParams): Promise<CreateUserResult> {
   const { data } = params;
@@ -141,7 +149,7 @@ export async function handleCreateUser(db: any, params: CreateUserParams): Promi
     
     logger.info(LogCategory.DATABASE, `Creating new user via MCP Server`);
     
-    // Cru00e9er un nouvel utilisateur avec les donnu00e9es fournies
+    // Créer un nouvel utilisateur avec les données fournies
     const [insertedUser] = await db
       .insert(users)
       .values({
@@ -168,10 +176,10 @@ export async function handleCreateUser(db: any, params: CreateUserParams): Promi
 }
 
 /**
- * Handler pour la mu00e9thode validateUserExistsViaMCP
- * @param db Instance de la base de donnu00e9es
- * @param params Paramu00e8tres pour la validation de l'existence de l'utilisateur
- * @returns Ru00e9sultat de l'opu00e9ration indiquant si l'utilisateur existe
+ * Handler pour la méthode validateUserExistsViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la validation de l'existence de l'utilisateur
+ * @returns Résultat de l'opération indiquant si l'utilisateur existe
  */
 export async function handleValidateUserExists(db: any, params: ValidateUserExistsParams): Promise<ValidateUserExistsResult> {
   const { userId } = params;
@@ -181,7 +189,7 @@ export async function handleValidateUserExists(db: any, params: ValidateUserExis
     
     logger.info(LogCategory.DATABASE, `Validating existence of user ${userId} via MCP Server`);
     
-    // Vu00e9rifier si l'utilisateur existe
+    // Vérifier si l'utilisateur existe
     const userResults = await db
       .select()
       .from(users)
@@ -201,6 +209,68 @@ export async function handleValidateUserExists(db: any, params: ValidateUserExis
     return { 
       success: false, 
       exists: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}
+
+/**
+ * Handler pour la méthode getDefaultUserViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres optionnels incluant potentiellement un ID d'utilisateur à essayer d'abord
+ * @returns Résultat de l'opération avec l'utilisateur par défaut
+ */
+export async function handleGetDefaultUser(db: any, params: GetDefaultUserParams): Promise<GetDefaultUserResult> {
+  try {
+    if (!db) throw new Error("Database not initialized");
+    
+    logger.info(LogCategory.DATABASE, 'Getting default user via MCP Server', params);
+    
+    // Si un ID utilisateur est fourni, essayer de récupérer cet utilisateur spécifique d'abord
+    if (params.userId) {
+      logger.info(LogCategory.DATABASE, `Trying to get user with ID: ${params.userId}`);
+      
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, params.userId))
+        .limit(1);
+      
+      if (userResult.length > 0) {
+        logger.info(LogCategory.DATABASE, `Found user with ID: ${params.userId}`);
+        return { 
+          success: true, 
+          user: userResult[0]
+        };
+      }
+      
+      logger.warn(LogCategory.DATABASE, `User with ID ${params.userId} not found, trying to get default user`);
+    }
+    
+    // Récupérer le premier utilisateur dans la base de données
+    const defaultUserResult = await db
+      .select()
+      .from(users)
+      .limit(1);
+    
+    if (defaultUserResult.length > 0) {
+      logger.info(LogCategory.DATABASE, `Found default user with ID: ${defaultUserResult[0].id}`);
+      return { 
+        success: true, 
+        user: defaultUserResult[0]
+      };
+    }
+    
+    // Aucun utilisateur trouvé
+    logger.warn(LogCategory.DATABASE, 'No users found in database');
+    return { 
+      success: false, 
+      error: 'No users found in database'
+    };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleGetDefaultUser: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
       error: error instanceof Error ? error.message : String(error) 
     };
   }

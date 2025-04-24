@@ -74,3 +74,20 @@ export interface GetMealProgressByDailyProgressResult {
   mealProgresses?: DailyMealProgressOrmProps[];
   error?: string;
 }
+
+/**
+ * Paramètres pour la récupération des progressions quotidiennes d'un plan
+ */
+export interface GetDailyProgressByPlanParams {
+  userId: number;
+  planId: number;
+}
+
+/**
+ * Résultat de la récupération des progressions quotidiennes d'un plan
+ */
+export interface GetDailyProgressByPlanResult {
+  success: boolean;
+  dailyProgressions?: DailyProgressOrmProps[];
+  error?: string;
+}

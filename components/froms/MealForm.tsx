@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, Link } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Box } from '../ui/box';
@@ -77,6 +77,13 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { createNewMeal, updateMeal } from '@/utils/services/meal.service';
 import { Colors } from '@/utils/constants/Colors';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { meals } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 export default function MealForm({
   defaultValues,
@@ -88,7 +95,8 @@ export default function MealForm({
   const drizzleDb = useDrizzleDb();
   const router = useRouter();
   const toast = useToast();
-  const { user } = useSessionStore();
+  // Utiliser le contexte utilisateur de façon standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
   const { selectedIngredients, totalMacros, totalWeight, mealWeight, setMealWeight } = useIngredientStore();
   const [image, setImage] = useState<
     Buffer<ArrayBufferLike> | string | undefined
@@ -138,17 +146,102 @@ export default function MealForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: MealFormData) => {
-      return operation === 'create'
-        ? await createNewMeal(
-            drizzleDb,
-            data,
-            selectedIngredients,
-            totalMacros,
-            user?.id!,
-          )
-        : updateMeal(drizzleDb, data, selectedIngredients, totalMacros);
+      if (operation === 'create') {
+        // Vérifier que l'ID utilisateur est disponible
+        if (!userId) {
+          logger.warn(LogCategory.USER, 'User not authenticated, cannot create meal');
+          throw new Error('User ID not found');
+        }
+        
+        logger.info(LogCategory.DATABASE, 'Creating new meal via MCP Server', { mealName: data.name });
+        
+        const result = await sqliteMCPServer.createNewMealViaMCP(
+          data,
+          selectedIngredients,
+          {
+            totalCalories: totalMacros.totalCalories,
+            totalCarbs: totalMacros.totalCarbs,
+            totalFats: totalMacros.totalFats,
+            totalProtein: totalMacros.totalProtein
+          },
+          userId
+        );
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create meal via MCP Server');
+        }
+        
+        // SIMPLIFICATION : Une seule invalidation de cache est nécessaire
+        invalidateCache(queryClient, DataType.MEALS_LIST, { 
+          invalidateRelated: true
+        });
+        
+        return { id: result.mealId };
+      } else {
+        // Vérifier que l'ID utilisateur est disponible pour les mises à jour aussi
+        if (!userId) {
+          logger.warn(LogCategory.USER, 'User not authenticated, cannot update meal');
+          throw new Error('User ID not found');
+        }
+        
+        logger.info(LogCategory.DATABASE, 'Updating meal via MCP Server', {
+          mealId: data.id,
+          mealName: data.name,
+          userId: userId
+        });
+        
+        // Extrait l'ID pour s'assurer qu'il est du bon type
+        const { id, ...dataWithoutId } = data;
+        const dataWithMacros = {
+          ...dataWithoutId,
+          id: typeof id === 'number' ? id : Number(id),
+          calories: totalMacros.totalCalories,
+          carbs: totalMacros.totalCarbs,
+          fat: totalMacros.totalFats,
+          protein: totalMacros.totalProtein
+        };
+        
+        // Vérifier que l'utilisateur est propriétaire du repas avant de le modifier
+        // Récupérer tous les repas de cet utilisateur
+        const mealsResult = await sqliteMCPServer.getMealsListViaMCP(userId);
+        if (!mealsResult.success || !mealsResult.meals) {
+          throw new Error('Failed to verify meal ownership');
+        }
+        
+        // Vérifier si le repas à mettre à jour est dans la liste des repas de l'utilisateur
+        const mealId = typeof data.id === 'number' ? data.id : Number(data.id);
+        const mealDetails = mealsResult.meals.filter((meal: { id: number }) => meal.id === mealId);
+          
+        if (!mealDetails || mealDetails.length === 0) {
+          logger.error(LogCategory.USER, `User ${userId} attempted to update meal ${data.id} but does not own it`);
+          throw new Error('You do not have permission to update this meal');
+        }
+        
+        const result = await sqliteMCPServer.updateMealViaMCP(
+          data.id as number,
+          dataWithMacros,
+          selectedIngredients
+        );
+        
+        if (!result.success) {
+          throw new Error(result.error || `Failed to update meal ${data.id} via MCP Server`);
+        }
+        
+        // SIMPLIFICATION : Une seule invalidation de cache est nécessaire pour la mise à jour également
+        if (data.id !== null) {
+          invalidateCache(queryClient, DataType.MEAL, { 
+            id: data.id,
+            invalidateRelated: true
+          });
+        } else {
+          // Fallback à l'invalidation globale si l'ID n'est pas disponible
+          invalidateCache(queryClient, DataType.MEAL, { invalidateRelated: true });
+        }
+        
+        return { id: data.id };
+      }
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -163,7 +256,33 @@ export default function MealForm({
           );
         },
       });
-      await queryClient.invalidateQueries({ queryKey: ['my-meals'] });
+      // Remplacer l'approche personnalisée par notre utilitaire standardisé
+      // En cas de création ou de mise à jour, result contient l'ID du repas dans result.id
+      // Extraire l'ID du repas créé ou mis à jour, en s'assurant qu'il est du bon type
+      let mealId: string | number | undefined = undefined;
+      
+      if (result && typeof result === 'object' && 'id' in result) {
+        const resultId = result.id;
+        if (typeof resultId === 'string' || typeof resultId === 'number') {
+          mealId = resultId;
+        }
+      }
+      
+      logger.info(LogCategory.CACHE, `Invalidating cache after ${operation} meal`, {
+        mealId,
+        operation
+      });
+      
+      // Invalider le cache du repas spécifique seulement si nous avons un ID valide
+      if (mealId !== undefined) {
+        await invalidateCache(queryClient, DataType.MEAL, { 
+          id: mealId,
+          invalidateRelated: true 
+        });
+      }
+      
+      // Invalider également directement la liste des repas pour s'assurer que les nouveaux repas sont affichés
+      await invalidateCache(queryClient, DataType.MEALS_LIST);
       router.push('/meals/my-meals');
     },
     onError: (error: any) => {
@@ -177,7 +296,7 @@ export default function MealForm({
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title={`Failure ${operation} Meal`}
-              description={error.toString()}
+              description={error && typeof error.toString === 'function' ? error.toString() : 'Une erreur inconnue est survenue'}
             />
           );
         },

@@ -7,6 +7,7 @@ import {
   IaPlanType, 
   IaIngredientType 
 } from '@/utils/validation/ia/ia.schemas';
+import { getQueryClient } from '@/utils/helpers/queryClient';
 
 /**
  * Exécute les actions détectées dans la réponse de l'IA
@@ -16,11 +17,21 @@ import {
  */
 export async function processDatabaseAction(action: DetectedAction, userId: number): Promise<void> {
   try {
+    // Vérifier si l'ID utilisateur est valide
+    if (!userId) {
+      logger.error(LogCategory.IA, `ID utilisateur invalide ou manquant: ${userId}`);
+      return;
+    }
+    
     // Vérifier si l'action est valide avant de l'exécuter
     if (!action.isValid) {
       logger.error(LogCategory.IA, `Action non valide: ${action.validationMessage}`);
       return;
     }
+    
+    // Tracer les détails de l'action pour aider au débogage
+    logger.info(LogCategory.IA, `Traitement de l'action: ${action.type} pour l'utilisateur ${userId}`);
+    logger.debug(LogCategory.IA, `Données de l'action: ${action.data.substring(0, 200)}...`);
     
     // Traiter l'action en fonction de son type
     switch (action.type) {
@@ -75,15 +86,29 @@ export async function processDatabaseAction(action: DetectedAction, userId: numb
 async function processMealAction(mealData: IaMealType, userId: number): Promise<void> {
   try {
     logger.info(LogCategory.IA, `Processing meal action: ${mealData.name}`);
-    
+
     // MODIFICATION: Utiliser le MCP Server au lieu de nutritionDatabaseService
     const result = await sqliteMCPServer.addMealViaMCP(mealData, userId);
-    
+
     if (!result.success) {
       throw new Error(result.error);
     }
     
     logger.info(LogCategory.IA, `Meal added to database via MCP: ${mealData.name} (ID: ${result.mealId})`);
+    
+    // Invalider le cache pour actualiser la liste des repas
+    const queryClient = getQueryClient();
+    if (queryClient) {
+      logger.info(LogCategory.IA, `Invalidating meal cache for user ${userId}`);
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+          return typeof queryKey === 'string' && queryKey.startsWith('my-meals');
+        }
+      });
+    } else {
+      logger.warn(LogCategory.IA, `QueryClient not available, could not invalidate cache`);
+    }
   } catch (error) {
     logger.error(LogCategory.IA, `Error processing meal action: ${error instanceof Error ? error.message : String(error)}`);
     throw error;

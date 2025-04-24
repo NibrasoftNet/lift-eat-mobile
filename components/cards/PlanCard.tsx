@@ -27,8 +27,11 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import DeletionModal from '@/components/modals/DeletionModal';
 import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { deletePlan, setCurrentPlan } from '@/utils/services/plan.service';
-import useSessionStore from '@/utils/store/sessionStore';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   item,
@@ -37,18 +40,43 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   const router = useRouter();
   const toast = useToast();
   const drizzleDb = useDrizzleDb();
-  const { user } = useSessionStore();
+  // Obtenir l'ID utilisateur de manière standardisée
+  const userId = React.useMemo(() => getCurrentUserIdSync(), []);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
   const handlePlanCardPress = (plan: PlanOrmProps) => {
+    logger.info(LogCategory.USER, `User viewing plan details: ${plan.name}`, { planId: plan.id });
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
   // Mutation pour supprimer un plan
   const { mutateAsync: deleteAsync, isPending: isDeletePending } = useMutation({
-    mutationFn: async () => await deletePlan(drizzleDb, item.id),
+    mutationFn: async () => {
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when attempting to delete plan');
+        throw new Error('You must be logged in to delete a plan');
+      }
+      
+      // Vérifier que l'utilisateur est propriétaire du plan
+      if (item.userId !== userId) {
+        logger.warn(LogCategory.AUTH, `User ${userId} attempted to delete plan ${item.id} owned by user ${item.userId}`);
+        throw new Error('You can only delete your own plans');
+      }
+      
+      logger.info(LogCategory.DATABASE, `Deleting plan ${item.id} via MCP Server for user ${userId}`);
+      
+      const result = await sqliteMCPServer.deletePlanViaMCP(item.id);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to delete plan ${item.id}: ${result.error}`);
+        throw new Error(result.error || `Failed to delete plan ${item.id}`);
+      }
+      
+      return result;
+    },
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -64,9 +92,10 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
           );
         },
       });
-      await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some((key) => key?.toString().startsWith('my-plans')),
+      // Utiliser notre nouvel utilitaire d'invalidation du cache
+      await invalidateCache(queryClient, DataType.PLAN, { 
+        id: item.id, 
+        invalidateRelated: true 
       });
       setShowModal(false);
     },
@@ -79,8 +108,8 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title={`Failed to delete plan`}
-              description={error.toString()}
+              title={`Cannot Delete Plan`}
+              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
             />
           );
         },
@@ -91,8 +120,28 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   // Mutation pour définir un plan comme courant
   const { mutateAsync: setCurrentAsync, isPending: isCurrentPending } = useMutation({
     mutationFn: async () => {
-      if (!user?.id) throw new Error('User not authenticated');
-      return await setCurrentPlan(drizzleDb, item.id, user.id);
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when attempting to set current plan');
+        throw new Error('You must be logged in to set a current plan');
+      }
+      
+      // Vérifier que l'utilisateur est propriétaire du plan
+      if (item.userId !== userId) {
+        logger.warn(LogCategory.AUTH, `User ${userId} attempted to modify plan ${item.id} owned by user ${item.userId}`);
+        throw new Error('You can only modify your own plans');
+      }
+      
+      logger.info(LogCategory.DATABASE, `Setting plan ${item.id} as current via MCP Server for user ${userId}`);
+      // L'utilisateur a déjà été identifié et vérifié ci-dessus
+      const result = await sqliteMCPServer.setCurrentPlanViaMCP(item.id, userId);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to set plan ${item.id} as current: ${result.error}`);
+        throw new Error(result.error || `Failed to set plan ${item.id} as current`);
+      }
+      
+      return result;
     },
     onSuccess: async () => {
       toast.show({
@@ -110,12 +159,13 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
         },
       });
       // Invalider à la fois les plans et les données de progression
-      await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some((key) => 
-            key?.toString().startsWith('my-plans') || 
-            key?.toString().startsWith('progress')
-          ),
+      await invalidateCache(queryClient, DataType.PLAN, { 
+        id: item.id, 
+        invalidateRelated: true 
+      });
+      await invalidateCache(queryClient, DataType.PROGRESS, { 
+        id: item.id, 
+        invalidateRelated: true 
       });
     },
     onError: (error: any) => {
@@ -137,11 +187,21 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   });
 
   const handlePlanDelete = async () => {
-    await deleteAsync();
+    try {
+      await deleteAsync();
+    } catch (error) {
+      // Erreur déjà gérée par onError
+      logger.error(LogCategory.USER, `Error in plan deletion handler: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   const handleSetCurrentPlan = async () => {
-    await setCurrentAsync();
+    try {
+      await setCurrentAsync();
+    } catch (error) {
+      // Erreur déjà gérée par onError
+      logger.error(LogCategory.USER, `Error in set current plan handler: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   return (
@@ -159,7 +219,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             onPress={() => handlePlanCardPress(item)}
             onLongPress={() => setShowOptionsDrawer(true)}
           >
-            {({ pressed }) => (
+            {({ pressed }: { pressed: boolean }) => (
               <VStack
                 space="md"
                 className={`p-4 shadow-lg ${pressed && 'bg-secondary-500'}`}

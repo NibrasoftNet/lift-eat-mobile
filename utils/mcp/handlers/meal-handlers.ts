@@ -395,25 +395,35 @@ export async function handleCreateNewMeal(db: any, params: CreateNewMealParams):
  * @returns Résultat de l'opération
  */
 export async function handleUpdateMeal(db: any, params: UpdateMealParams): Promise<UpdateMealResult> {
-  const { mealId, data, ingredients } = params;
-  
   try {
     if (!db) throw new Error("Database not initialized");
     
-    logger.info(LogCategory.DATABASE, `Updating meal ${mealId} via MCP Server`);
+    const { mealId, data, ingredients, userId } = params;
     
-    // Vérifier que le repas existe
+    if (!userId) {
+      logger.error(LogCategory.DATABASE, `Attempted to update meal ${mealId} without providing userId`);
+      return { success: false, error: 'User ID is required for updating meals' };
+    }
+    
+    logger.info(LogCategory.DATABASE, `Updating meal ${mealId} for user ${userId} via MCP Server`);
+    
+    // Vérifier si le repas existe et appartient à l'utilisateur
     const mealExists = await db
       .select({ id: meals.id, creatorId: meals.creatorId })
       .from(meals)
-      .where(eq(meals.id, mealId))
-      .get();
+      .where(
+        and(
+          eq(meals.id, mealId),
+          eq(meals.creatorId, userId) // Vérification de sécurité: l'utilisateur doit être créateur du repas
+        )
+      )
+      .limit(1);
     
-    if (!mealExists) {
-      logger.warn(LogCategory.DATABASE, `Meal ${mealId} not found for update`);
+    if (!mealExists.length) {
+      logger.warn(LogCategory.DATABASE, `Meal with ID ${mealId} not found or does not belong to user ${userId}`);
       return { 
         success: false, 
-        error: `Meal with ID ${mealId} not found` 
+        error: `Meal with ID ${mealId} not found or does not belong to you` 
       };
     }
     
@@ -470,18 +480,28 @@ export async function handleUpdateMeal(db: any, params: UpdateMealParams): Promi
  * @returns Résultat de l'opération
  */
 export async function handleDeleteMeal(db: any, params: DeleteMealParams): Promise<DeleteMealResult> {
-  const { mealId } = params;
+  const { mealId, userId } = params;
   
   try {
     if (!db) throw new Error("Database not initialized");
     
-    logger.info(LogCategory.DATABASE, `Deleting meal ${mealId} via MCP Server`);
+    if (!userId) {
+      logger.error(LogCategory.DATABASE, `Attempted to delete meal ${mealId} without providing userId`);
+      return { success: false, error: 'User ID is required for deleting meals' };
+    }
     
-    // Vérifier que le repas existe
+    logger.info(LogCategory.DATABASE, `Deleting meal ${mealId} for user ${userId} via MCP Server`);
+    
+    // Vérifier que le repas existe et appartient à l'utilisateur
     const mealExists = await db
       .select({ id: meals.id, creatorId: meals.creatorId })
       .from(meals)
-      .where(eq(meals.id, mealId))
+      .where(
+        and(
+          eq(meals.id, mealId),
+          eq(meals.creatorId, userId) // Vérification de sécurité: l'utilisateur doit être créateur du repas
+        )
+      )
       .get();
     
     if (!mealExists) {

@@ -22,6 +22,7 @@ export interface UpdateUserPreferencesResult {
 // Interface pour getUserDetailsViaMCP
 export interface GetUserDetailsParams {
   userId: number;
+  requestingUserId?: number; // ID de l'utilisateur qui fait la requête, pour les vérifications de sécurité
 }
 
 export interface GetUserDetailsResult {
@@ -49,6 +50,17 @@ export interface ValidateUserExistsParams {
 export interface ValidateUserExistsResult {
   success: boolean;
   exists: boolean;
+  user?: UserOrmPros;
+  error?: string;
+}
+
+// Interface pour getDefaultUserViaMCP
+export interface GetDefaultUserParams {
+  userId?: number; // Optionnel : ID d'utilisateur à essayer d'abord
+}
+
+export interface GetDefaultUserResult {
+  success: boolean;
   user?: UserOrmPros;
   error?: string;
 }

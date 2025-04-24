@@ -10,7 +10,9 @@ import {
   MarkMealAsConsumedParams,
   MarkMealAsConsumedResult,
   GetMealProgressByDailyProgressParams,
-  GetMealProgressByDailyProgressResult
+  GetMealProgressByDailyProgressResult,
+  GetDailyProgressByPlanParams,
+  GetDailyProgressByPlanResult
 } from '../interfaces/progress-interfaces';
 import {
   dailyProgress,
@@ -447,6 +449,65 @@ export async function handleGetMealProgressByDailyProgress(db: any, params: GetM
     return { success: true, mealProgresses };
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleGetMealProgressByDailyProgress: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}
+
+/**
+ * Handler pour la méthode getDailyProgressByPlanViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la récupération des progressions quotidiennes d'un plan
+ * @returns Résultat de l'opération avec les progressions quotidiennes
+ */
+export async function handleGetDailyProgressByPlan(db: any, params: GetDailyProgressByPlanParams): Promise<GetDailyProgressByPlanResult> {
+  const { userId, planId } = params;
+  
+  try {
+    if (!db) throw new Error("Database not initialized");
+    
+    logger.info(LogCategory.DATABASE, `Getting daily progress for plan ${planId} and user ${userId} via MCP Server`);
+    
+    // Vérifier si le plan existe et appartient à l'utilisateur
+    const planExists = await db.select({ id: plan.id })
+      .from(plan)
+      .where(
+        and(
+          eq(plan.id, planId),
+          eq(plan.userId, userId)
+        )
+      )
+      .limit(1);
+      
+    if (planExists.length === 0) {
+      logger.warn(LogCategory.DATABASE, `Plan with ID ${planId} not found or does not belong to user ${userId}`);
+      return { 
+        success: false, 
+        error: `Plan with ID ${planId} not found or does not belong to user ${userId}` 
+      };
+    }
+    
+    // Récupérer toutes les progressions quotidiennes associées au plan
+    const dailyProgressions = await db
+      .select()
+      .from(dailyProgress)
+      .where(
+        and(
+          eq(dailyProgress.userId, userId),
+          eq(dailyProgress.planId, planId)
+        )
+      );
+    
+    logger.debug(LogCategory.DATABASE, `Found ${dailyProgressions.length} daily progressions for plan ${planId}`);
+    
+    return {
+      success: true,
+      dailyProgressions
+    };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleGetDailyProgressByPlan: ${error instanceof Error ? error.message : String(error)}`);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : String(error) 

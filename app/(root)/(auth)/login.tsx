@@ -30,8 +30,10 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import useSessionStore from '@/utils/store/sessionStore';
-import { findOrCreateUser } from '@/utils/services/users.service';
 import { Colors } from '@/utils/constants/Colors';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export default function Login() {
   const router = useRouter();
@@ -53,7 +55,24 @@ export default function Login() {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      return await findOrCreateUser(drizzleDb, data.email);
+      logger.info(LogCategory.DATABASE, 'Finding or creating user via MCP Server', {
+        email: data.email
+      });
+      
+      // Utiliser directement le MCP Server pour trouver ou créer un utilisateur
+      const result = await sqliteMCPServer.findOrCreateUserViaMCP(data.email);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to find or create user: ${result.error}`);
+        throw new Error(result.error || 'Failed to login');
+      }
+      
+      if (!result.user) {
+        logger.warn(LogCategory.DATABASE, `User with email ${data.email} could not be created`);
+        throw new Error('Failed to create user account');
+      }
+      
+      return result.user;
     },
     onSuccess: async (data) => {
       toast.show({

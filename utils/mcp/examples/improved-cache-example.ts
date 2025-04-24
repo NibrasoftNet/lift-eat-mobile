@@ -1,45 +1,32 @@
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import mcpCache, { CacheGroup } from '../cache/mcp-cache';
-import { buildCacheKey, getCacheDuration } from '../cache/cache-config';
+import { QueryClient } from '@tanstack/react-query';
+import { buildQueryKey, invalidateQueries } from '@/utils/cache/react-query-config';
+import { DataType } from '@/utils/enum/cache.enum';
 
 /**
- * Exemple d'amu00e9lioration de la mu00e9thode getMealsListViaMCP avec le nouveau systu00e8me de cache
+ * Exemple d'utilisation de React Query pour la gestion du cache
  * 
- * Cette fonction montre comment implanter le nouveau cache dans les mu00e9thodes du SQLite Server
+ * Cette fonction montre comment utiliser React Query pour la mise en cache des données
  */
 async function improvedGetMealsListViaMCP(userId?: number, cuisine?: string, mealType?: string, mealName?: string) {
   try {
-    // 1. Construction d'une clu00e9 de cache consistante et du00e9tailu00e9e
-    const filters = JSON.stringify({ cuisine, mealType, mealName });
-    const cacheKey = buildCacheKey(
-      CacheGroup.MEAL,   // Groupe de cache
-      'list',            // Type de donnu00e9e
-      filters,           // Identifiant unique basu00e9 sur les filtres
-      userId             // ID utilisateur (optionnel)
+    // 1. Construction d'une clé de requête standardisée
+    const queryKey = buildQueryKey(
+      DataType.MEALS_LIST,  // Type de donnée
+      userId,               // ID utilisateur (optionnel)
+      { cuisine, mealType, mealName } // Filtres
     );
     
-    // 2. Tentative de ru00e9cupu00e9ration depuis le cache
-    const cachedData = mcpCache.get(cacheKey);
-    if (cachedData) {
-      logger.debug(LogCategory.CACHE, `Using cached meals list for filters: ${filters}`);
-      return cachedData;
-    }
+    logger.info(LogCategory.DATABASE, `Fetching meals list from database with filters`);
     
-    // 3. Si non trouvable dans le cache, effectuer la requ00eate
-    logger.info(LogCategory.DATABASE, `Fetching meals list from database with filters: ${filters}`);
-    
-    // Simulation de la requ00eate u00e0 la base de donnu00e9es (u00e0 remplacer par le code ru00e9el)
+    // Simulation de la requête à la base de données (à remplacer par le code réel)
     // const result = await handleGetMealsList(this.db, { userId, cuisine, mealType, mealName });
-    const result = { success: true, meals: [/* donnu00e9es de la requ00eate */] };
+    const result = { success: true, meals: [/* données de la requête */] };
     
-    // 4. Mise en cache avec la duru00e9e appropriu00e9e
-    if (result.success) {
-      const cacheDuration = getCacheDuration(CacheGroup.MEAL, 'list');
-      mcpCache.set(cacheKey, result, CacheGroup.MEAL, cacheDuration);
-      
-      logger.debug(LogCategory.CACHE, `Stored meals list in cache for ${cacheDuration/1000} seconds`);
-    }
+    // React Query s'occupe de la mise en cache avec les bons paramètres
+    // Voir cacheConfig dans react-query-config.ts
+    logger.debug(LogCategory.CACHE, `React Query will handle caching automatically`);
     
     return result;
   } catch (error) {
@@ -52,33 +39,23 @@ async function improvedGetMealsListViaMCP(userId?: number, cuisine?: string, mea
 }
 
 /**
- * Exemple de mu00e9thode pour invalider le cache de maniu00e8re ciblu00e9e lors de la modification d'un repas
+ * Exemple de méthode pour invalider le cache React Query lors de la modification d'un repas
  */
-async function improvedUpdateMealViaMCP(mealId: number, data: any, userId: number) {
+async function improvedUpdateMealViaMCP(queryClient: QueryClient, mealId: number, data: any, userId: number) {
   try {
-    // Effectuer la mise u00e0 jour en base de donnu00e9es
+    // Effectuer la mise à jour en base de données
     // const result = await handleUpdateMeal(this.db, { mealId, ...data });
     const result = { success: true };
     
-    // Si la mise u00e0 jour a ru00e9ussi, invalider le cache de maniu00e8re ciblu00e9e
+    // Si la mise à jour a réussi, invalider le cache React Query
     if (result.success) {
-      // 1. Invalider le cache du repas spu00e9cifique
-      mcpCache.invalidateEntity(CacheGroup.MEAL, mealId);
+      // 1. Invalider le cache du repas spécifique et des données liées
+      invalidateQueries(queryClient, DataType.MEAL, {
+        invalidateRelated: true,
+        notifyId: `update-meal-${mealId}`
+      });
       
-      // 2. Invalider les listes qui pourraient contenir ce repas
-      // Uniquement pour cet utilisateur si spu00e9cifiu00e9
-      if (userId) {
-        const userListPrefix = buildCacheKey(CacheGroup.MEAL, 'list', undefined, userId);
-        mcpCache.invalidateByPrefix(userListPrefix);
-      }
-      
-      // 3. Invalider le contexte IA de l'utilisateur qui pourrait mentionner ce repas
-      if (userId) {
-        const userContextKey = buildCacheKey(CacheGroup.IA_CONTEXT, 'userContext', undefined, userId);
-        mcpCache.delete(userContextKey);
-      }
-      
-      logger.info(LogCategory.CACHE, `Cache updated after meal modification: ${mealId}`);
+      logger.info(LogCategory.CACHE, `React Query cache updated after meal modification: ${mealId}`);
     }
     
     return result;
@@ -92,31 +69,38 @@ async function improvedUpdateMealViaMCP(mealId: number, data: any, userId: numbe
 }
 
 /**
- * Comment utiliser les statistiques de cache pour le monitoring
+ * Comment utiliser les statistiques de React Query pour le monitoring
  */
-function displayCacheStats() {
-  const stats = mcpCache.getStats();
+function displayReactQueryStats(queryClient: QueryClient) {
+  const queryCache = queryClient.getQueryCache();
+  const queries = queryCache.getAll();
   
-  logger.info(LogCategory.CACHE, 'Cache Performance Statistics', {
-    hits: stats.hits,
-    misses: stats.misses,
-    hitRate: stats.hitRate,
-    totalEntries: stats.totalEntries,
-    invalidations: stats.invalidations
+  // Statistiques de base sur les requêtes en cache
+  const stats = {
+    totalQueries: queries.length,
+    activeQueries: queries.filter(q => q.isActive()).length,
+    staleQueries: queries.filter(q => q.isStale()).length,
+    fetchingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length
+  };
+  
+  logger.info(LogCategory.CACHE, 'React Query Cache Statistics', stats);
+  
+  // Afficher des informations détaillées sur les requêtes en cache
+  queries.forEach(query => {
+    logger.debug(LogCategory.CACHE, `Query: ${JSON.stringify(query.queryKey)}`, {
+      state: query.state.status,
+      lastUpdated: new Date(query.state.dataUpdatedAt).toISOString(),
+      stale: query.isStale()
+    });
   });
-  
-  // Ces statistiques pourraient u00eatre envoytu00e9es u00e0 un service de monitoring
-  // ou affichtu00e9es dans l'interface de du00e9veloppement
 }
 
 // Exemple d'utilisation dans un endpoint de monitoring
-async function handleMonitoringRequest() {
-  displayCacheStats();
-  // Rutau00e9initialiser les statistiques apru00e8s les avoir affichtu00e9es
-  mcpCache.resetStats();
+async function handleMonitoringRequest(queryClient: QueryClient) {
+  displayReactQueryStats(queryClient);
   
   return {
     success: true,
-    message: 'Cache statistics logged'
+    message: 'React Query statistics logged'
   };
 }

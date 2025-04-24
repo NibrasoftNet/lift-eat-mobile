@@ -16,6 +16,7 @@ import { TotalMacrosProps } from '@/types/meal.type';
 import { logger } from './logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import useSessionStore from '@/utils/store/sessionStore';
 
 /**
  * Crée un nouveau repas avec ses ingrédients associés
@@ -68,6 +69,7 @@ export const getMealsList = async (
   cuisine?: CuisineTypeEnum,
   mealType?: MealTypeEnum,
   mealName?: string,
+  userId?: number,
 ) => {
   const startTime = logger.startPerformanceLog('getMealsList');
   try {
@@ -75,19 +77,45 @@ export const getMealsList = async (
       filters: { cuisine, mealType, mealName },
     });
 
-    // Récupérer l'ID utilisateur depuis le premier utilisateur dans la base de données
-    // Note: Ceci est une solution temporaire, idéalement l'ID utilisateur devrait être passé en paramètre
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
+    // Utiliser l'ID utilisateur fourni ou celui de la session
+    let authenticatedUserId = userId;
+    
+    // Si aucun ID n'est fourni, essayer de récupérer l'ID de l'utilisateur authentifié
+    if (!authenticatedUserId) {
+      const { user } = useSessionStore.getState();
+      authenticatedUserId = user?.id;
+      
+      // Si aucun utilisateur n'est trouvé dans la session, utiliser le MCP Server pour trouver un utilisateur
+      if (!authenticatedUserId) {
+        logger.warn(LogCategory.DATABASE, 'No user found in session, querying for first user via MCP Server');
+        
+        // Trouver l'email de l'utilisateur par défaut (première partie de l'implémentation)
+        // Chercher des utilisateurs par email
+        try {
+          // On utilise directement sqliteMCPServer.findOrCreateUserViaMCP avec un email par défaut
+          // Cela permet de récupérer ou créer un utilisateur sans accès direct à la BDD
+          const defaultEmail = 'default@lifteating.com';
+          
+          const userResult = await sqliteMCPServer.findOrCreateUserViaMCP(defaultEmail);
+          
+          if (!userResult.success || !userResult.user) {
+            throw new Error('Failed to find or create default user via MCP Server');
+          }
+          
+          authenticatedUserId = userResult.user.id;
+          logger.debug(LogCategory.DATABASE, `Found default user with ID ${authenticatedUserId} via MCP Server`);
+        } catch (userError) {
+          logger.error(LogCategory.DATABASE, 'Failed to find or create default user', { error: userError });
+          throw new Error('No authenticated user found and unable to create default user');
+        }
+      }
     }
-    const userId = users[0].id;
 
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
     // Conversion des énumérations en strings pour correspondre à la signature de la méthode MCP
     const cuisineStr = cuisine ? String(cuisine) : undefined;
     const mealTypeStr = mealType ? String(mealType) : undefined;
-    const result = await sqliteMCPServer.getMealsListViaMCP(userId, cuisineStr, mealTypeStr, mealName);
+    const result = await sqliteMCPServer.getMealsListViaMCP(authenticatedUserId, cuisineStr, mealTypeStr, mealName);
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to fetch meals list via MCP Server');
@@ -113,21 +141,33 @@ export const getMealsList = async (
 export const getMealByIdWithIngredients = async (
   drizzleDb: ExpoSQLiteDatabase<typeof schema>,
   mealId: number,
+  userId?: number,
 ) => {
   const startTime = logger.startPerformanceLog('getMealByIdWithIngredients');
   try {
     logger.info(LogCategory.DATABASE, 'Fetching meal with ingredients via MCP Server', { mealId });
 
-    // Récupérer l'ID utilisateur depuis le premier utilisateur dans la base de données
-    // Note: Ceci est une solution temporaire, idéalement l'ID utilisateur devrait être passé en paramètre
-    const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
-    if (users.length === 0) {
-      throw new Error('No users found in the database');
+    // Utiliser l'ID utilisateur fourni ou celui de la session
+    let authenticatedUserId = userId;
+    
+    // Si aucun ID n'est fourni, essayer de récupérer l'ID de l'utilisateur authentifié
+    if (!authenticatedUserId) {
+      const { user } = useSessionStore.getState();
+      authenticatedUserId = user?.id;
+      
+      // Fallback à l'ancienne méthode si aucun utilisateur n'est trouvé dans la session
+      if (!authenticatedUserId) {
+        logger.warn(LogCategory.DATABASE, 'No user found in session, falling back to first user in DB');
+        const users = await drizzleDb.select({ id: schema.users.id }).from(schema.users).limit(1);
+        if (users.length === 0) {
+          throw new Error('No users found in the database');
+        }
+        authenticatedUserId = users[0].id;
+      }
     }
-    const userId = users[0].id;
 
     // Utiliser le serveur MCP au lieu d'accéder directement à la base de données
-    const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(mealId, userId);
+    const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(mealId, authenticatedUserId);
 
     if (!result.success) {
       throw new Error(result.error || `Failed to fetch meal with ID ${mealId} via MCP Server`);
