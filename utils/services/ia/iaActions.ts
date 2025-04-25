@@ -125,7 +125,8 @@ async function processPlanAction(planData: IaPlanType, userId: number): Promise<
     logger.info(LogCategory.IA, `Processing plan action: ${planData.name}`);
     
     // MODIFICATION: Utiliser le MCP Server au lieu de nutritionDatabaseService
-    const result = await sqliteMCPServer.addPlanViaMCP(planData, userId);
+    const planToSave = { ...planData, generatedByAI: true, type: 'IA' };
+    const result = await sqliteMCPServer.addPlanViaMCP(planToSave, userId);
     
     if (!result.success) {
       throw new Error(result.error);

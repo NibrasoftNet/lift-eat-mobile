@@ -57,20 +57,24 @@ export async function handleCreatePlan(db: any, params: CreatePlanParams): Promi
     // Vérifier que l'utilisateur existe
     // Note: cette vérification devrait être faite dans une couche supérieure
     
+    // Utiliser une assertion de type pour accéder aux propriétés
+    // puisque data peut contenir plus de propriétés que celles définies dans NutritionGoalSchemaFormData
+    const anyData = data as any;
+    
     // Créer un objet typé pour les valeurs du plan
     const planData: Partial<PlanOrmProps> = {
       userId,
-      name: 'Plan nutritionnel', // Valeur par défaut si non fournie par l'utilisateur
+      name: anyData.name || 'Plan nutritionnel', // Valeur par défaut si non fournie par l'utilisateur
       durationWeeks: data.durationWeeks,
-      goal: GoalEnum.MAINTAIN, // Valeur par défaut
-      unit: WeightUnitEnum.KG, // Valeur par défaut
+      goal: anyData.goal || data.goalUnit || GoalEnum.MAINTAIN, // Utiliser goalUnit si fourni ou valeur par défaut
+      unit: anyData.unit || WeightUnitEnum.KG, // Valeur par défaut
       initialWeight: data.initialWeight || 70,
       targetWeight: data.targetWeight || 70,
-      calories: 2000, // Valeur par défaut pour les calories journalières
-      carbs: 45,     // Pourcentage par défaut
-      protein: 30,   // Pourcentage par défaut
-      fat: 25,       // Pourcentage par défaut
-      type: PlanGeneratedWithEnum.MANUAL // Le type de génération du plan
+      calories: anyData.calories || 2000, // Valeur par défaut pour les calories journalières
+      carbs: anyData.carbs || 45,     // Pourcentage par défaut
+      protein: anyData.protein || 30,   // Pourcentage par défaut
+      fat: anyData.fat || 25,       // Pourcentage par défaut
+      type: anyData.type || PlanGeneratedWithEnum.MANUAL // Le type de génération du plan
     };
     
     // Ajouter les propriétés spécifiques si elles existent dans les données fournies
@@ -506,28 +510,6 @@ export async function handleAddMealToDailyPlan(db: any, params: AddMealToDailyPl
     if (meal.length === 0) {
       logger.warn(LogCategory.DATABASE, `Meal with ID ${mealId} not found`);
       return { success: false, error: `Meal with ID ${mealId} not found` };
-    }
-    
-    // Vérifier si une relation existe déjà entre ce repas et ce plan journalier
-    try {
-      const existingRelation = await db
-        .select()
-        .from(dailyPlanMeals)
-        .where(
-          and(
-            eq(dailyPlanMeals.dailyPlanId, dailyPlanId),
-            eq(dailyPlanMeals.mealId, mealId)
-          )
-        )
-        .limit(1);
-        
-      if (existingRelation && existingRelation.length > 0) {
-        logger.warn(LogCategory.DATABASE, `Meal ${mealId} is already in daily plan ${dailyPlanId}`);
-        return { success: false, error: `Meal is already in this daily plan` };
-      }
-    } catch (err) {
-      logger.error(LogCategory.DATABASE, `Error checking meal existence in plan: ${err instanceof Error ? err.message : String(err)}`);
-      // Continuer l'exécution même en cas d'erreur lors de la vérification
     }
     
     // Vérifier si le plan journalier existe
