@@ -26,57 +26,38 @@ import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import DeletionModal from '@/components/modals/DeletionModal';
 import { useToast } from '@/components/ui/toast';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
-import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { planService } from '@/utils/services/plan.service';
 
+/**
+ * Composant qui affiche un plan nutritionnel dans une carte interactive
+ * Permet de voir les détails, éditer ou supprimer un plan, et le définir comme plan actuel
+ */
 const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   item,
   index,
 }) => {
   const router = useRouter();
   const toast = useToast();
-  const drizzleDb = useDrizzleDb();
-  // Obtenir l'ID utilisateur de manière standardisée
-  const userId = React.useMemo(() => getCurrentUserIdSync(), []);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
+  /**
+   * Navigue vers la page de détails du plan
+   * @param plan - Plan à consulter
+   */
   const handlePlanCardPress = (plan: PlanOrmProps) => {
     logger.info(LogCategory.USER, `User viewing plan details: ${plan.name}`, { planId: plan.id });
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
-  // Mutation pour supprimer un plan
+  /**
+   * Mutation pour supprimer un plan
+   */
   const { mutateAsync: deleteAsync, isPending: isDeletePending } = useMutation({
-    mutationFn: async () => {
-      // Vérifier que l'utilisateur est authentifié
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when attempting to delete plan');
-        throw new Error('You must be logged in to delete a plan');
-      }
-      
-      // Vérifier que l'utilisateur est propriétaire du plan
-      if (item.userId !== userId) {
-        logger.warn(LogCategory.AUTH, `User ${userId} attempted to delete plan ${item.id} owned by user ${item.userId}`);
-        throw new Error('You can only delete your own plans');
-      }
-      
-      logger.info(LogCategory.DATABASE, `Deleting plan ${item.id} via MCP Server for user ${userId}`);
-      
-      const result = await sqliteMCPServer.deletePlanViaMCP(item.id);
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to delete plan ${item.id}: ${result.error}`);
-        throw new Error(result.error || `Failed to delete plan ${item.id}`);
-      }
-      
-      return result;
-    },
+    mutationFn: () => planService.deletePlan(item.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -92,11 +73,8 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
           );
         },
       });
-      // Utiliser notre nouvel utilitaire d'invalidation du cache
-      await invalidateCache(queryClient, DataType.PLAN, { 
-        id: item.id, 
-        invalidateRelated: true 
-      });
+      // Utiliser la fonction d'invalidation du cache du service plan
+      await planService.invalidatePlanCache(queryClient, item.id);
       setShowModal(false);
     },
     onError: (error: any) => {
@@ -117,32 +95,11 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
     },
   });
 
-  // Mutation pour définir un plan comme courant
-  const { mutateAsync: setCurrentAsync, isPending: isCurrentPending } = useMutation({
-    mutationFn: async () => {
-      // Vérifier que l'utilisateur est authentifié
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when attempting to set current plan');
-        throw new Error('You must be logged in to set a current plan');
-      }
-      
-      // Vérifier que l'utilisateur est propriétaire du plan
-      if (item.userId !== userId) {
-        logger.warn(LogCategory.AUTH, `User ${userId} attempted to modify plan ${item.id} owned by user ${item.userId}`);
-        throw new Error('You can only modify your own plans');
-      }
-      
-      logger.info(LogCategory.DATABASE, `Setting plan ${item.id} as current via MCP Server for user ${userId}`);
-      // L'utilisateur a déjà été identifié et vérifié ci-dessus
-      const result = await sqliteMCPServer.setCurrentPlanViaMCP(item.id, userId);
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to set plan ${item.id} as current: ${result.error}`);
-        throw new Error(result.error || `Failed to set plan ${item.id} as current`);
-      }
-      
-      return result;
-    },
+  /**
+   * Mutation pour définir le plan actuel
+   */
+  const { mutateAsync: setCurrentAsync, isPending: isSetCurrentPending } = useMutation({
+    mutationFn: () => planService.setCurrentPlan(item.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -159,14 +116,12 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
         },
       });
       // Invalider à la fois les plans et les données de progression
-      await invalidateCache(queryClient, DataType.PLAN, { 
-        id: item.id, 
-        invalidateRelated: true 
-      });
-      await invalidateCache(queryClient, DataType.PROGRESS, { 
-        id: item.id, 
-        invalidateRelated: true 
-      });
+      // Invalider tous les plans car l'état 'actuel' a changé pour plusieurs plans
+      await planService.invalidatePlanCache(queryClient, item.id);
+      // Invalider aussi les autres plans (tous)
+      await queryClient.invalidateQueries({ queryKey: ['plans'] });
+      // Invalider les données de progression associées au plan
+      await queryClient.invalidateQueries({ queryKey: ['progress', item.id] });
     },
     onError: (error: any) => {
       toast.show({
@@ -186,22 +141,52 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
     },
   });
 
-  const handlePlanDelete = async () => {
-    try {
-      await deleteAsync();
-    } catch (error) {
-      // Erreur déjà gérée par onError
-      logger.error(LogCategory.USER, `Error in plan deletion handler: ${error instanceof Error ? error.message : String(error)}`);
-    }
+  /**
+   * Gestion de la suppression du plan
+   */
+  const handlePlanDelete = () => {
+    deleteAsync().catch((error) => {
+      logger.error(LogCategory.DATABASE, `Error deleting plan: ${error.message}`);
+      // Afficher un toast d'erreur
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title='Erreur de suppression'
+              description={(error as Error).message}
+            />
+          );
+        }
+      });
+    });
   };
 
-  const handleSetCurrentPlan = async () => {
-    try {
-      await setCurrentAsync();
-    } catch (error) {
-      // Erreur déjà gérée par onError
-      logger.error(LogCategory.USER, `Error in set current plan handler: ${error instanceof Error ? error.message : String(error)}`);
-    }
+  /**
+   * Gestion de la définition du plan comme plan actuel
+   */
+  const handleSetCurrentPlan = () => {
+    setCurrentAsync().catch((error) => {
+      logger.error(LogCategory.DATABASE, `Error setting current plan: ${error.message}`);
+      // Afficher un toast d'erreur
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title='Erreur de configuration'
+              description={(error as Error).message}
+            />
+          );
+        }
+      });
+    });
   };
 
   return (

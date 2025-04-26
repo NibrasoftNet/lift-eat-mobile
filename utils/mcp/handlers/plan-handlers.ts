@@ -194,27 +194,61 @@ export async function handleUpdatePlan(db: any, params: UpdatePlanParams): Promi
     
     logger.info(LogCategory.DATABASE, `Updating plan ${planId} for user ${userId} via MCP Server`);
     
-    // Vérifier si le plan existe et appartient à l'utilisateur
-    const planExists = await db
-      .select({ id: plan.id })
-      .from(plan)
-      .where(
-        and(
-          eq(plan.id, planId),
-          eq(plan.userId, userId) // Vérification de sécurité: l'utilisateur doit être propriétaire du plan
+    // Exécuter toutes les opérations dans une transaction pour garantir la cohérence
+    return await db.transaction(async (tx: typeof db) => {
+      // Vérifier si le plan existe et appartient à l'utilisateur
+      const planExists = await tx
+        .select({ id: plan.id })
+        .from(plan)
+        .where(
+          and(
+            eq(plan.id, planId),
+            eq(plan.userId, userId) // Vérification de sécurité: l'utilisateur doit être propriétaire du plan
+          )
         )
-      )
-      .limit(1);
-    
-    if (!planExists.length) {
-      throw new Error(`Plan with id ${planId} not found or does not belong to user ${userId}`);
-    }
-    
-    // Mettre à jour le plan
-    await db.update(plan).set(data).where(eq(plan.id, planId));
-    
-    logger.info(LogCategory.DATABASE, `Successfully updated plan ${planId} for user ${userId} via MCP Server`);
-    return { success: true };
+        .limit(1);
+      
+      if (!planExists.length) {
+        throw new Error(`Plan with id ${planId} not found or does not belong to user ${userId}`);
+      }
+      
+      // Mettre à jour le plan principal
+      await tx.update(plan).set(data).where(eq(plan.id, planId));
+      
+      // Propager les changements nutritionnels aux plans journaliers si ces données ont été modifiées
+      const nutritionUpdates: Partial<DailyPlanOrmProps> = {};
+      
+      // Vérifier quelles données nutritionnelles ont été modifiées et doivent être propagées
+      if (data.calories !== undefined) nutritionUpdates.calories = data.calories;
+      if (data.carbs !== undefined) nutritionUpdates.carbs = data.carbs;
+      if (data.protein !== undefined) nutritionUpdates.protein = data.protein;
+      if (data.fat !== undefined) nutritionUpdates.fat = data.fat;
+      
+      // Ne propager les changements que s'il y a des mises à jour nutritionnelles
+      if (Object.keys(nutritionUpdates).length > 0) {
+        logger.info(LogCategory.DATABASE, `Propagating nutrition changes to daily plans for plan ${planId}`, nutritionUpdates);
+        
+        // Trouver tous les plans journaliers associés à ce plan
+        const dailyPlansResult = await tx
+          .select({ id: dailyPlan.id })
+          .from(dailyPlan)
+          .where(eq(dailyPlan.planId, planId));
+        
+        if (dailyPlansResult.length > 0) {
+          // Mettre à jour tous les plans journaliers avec les nouvelles valeurs nutritionnelles
+          await tx.update(dailyPlan)
+            .set(nutritionUpdates)
+            .where(eq(dailyPlan.planId, planId));
+          
+          logger.info(LogCategory.DATABASE, `Successfully updated ${dailyPlansResult.length} daily plans for plan ${planId}`);
+        } else {
+          logger.info(LogCategory.DATABASE, `No daily plans found to update for plan ${planId}`);
+        }
+      }
+      
+      logger.info(LogCategory.DATABASE, `Successfully updated plan ${planId} for user ${userId} via MCP Server`);
+      return { success: true };
+    });
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleUpdatePlan: ${error instanceof Error ? error.message : String(error)}`);
     return { 

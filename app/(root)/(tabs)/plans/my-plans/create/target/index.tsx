@@ -2,21 +2,18 @@ import React from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
 import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
-import useSessionStore from '@/utils/store/sessionStore';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { useQuery } from '@tanstack/react-query';
 import { UserOrmPros } from '@/db/schema';
-import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { logger } from '@/utils/services/logging.service';
-import { LogCategory } from '@/utils/enum/logging.enum';
-import { getCurrentUserId } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { DataType } from '@/utils/helpers/queryInvalidation';
-import { getCacheConfig } from '@/utils/helpers/cacheConfig';
+import { withQueryState } from '@/utils/hoc';
+import { useUserQuery } from '@/utils/hooks';
+import { userPagesService } from '@/utils/services/pages/user-pages.service';
+import { getCurrentUserId } from '@/utils/helpers/userContext';
+import { UseQueryResult } from '@tanstack/react-query';
+import { VStack } from '@/components/ui/vstack';
+import { Text } from '@/components/ui/text';
 
-export default function CreateNutritionTarget() {
-  const { user } = useSessionStore();
-  const drizzleDb = useDrizzleDb();
+// Exporter le composant principal
+export default function CreateNutritionTargetScreen() {
   const [userId, setUserId] = React.useState<number | null>(null);
 
   // Récupérer l'ID utilisateur au chargement du composant
@@ -29,61 +26,52 @@ export default function CreateNutritionTarget() {
     fetchUserId();
   }, []);
 
-  const {
-    data: userData,
-    isPending,
-    isLoading,
-    isFetching,
-    isRefetching,
-  } = useQuery({
-    queryKey: [DataType.USER, userId],
-    queryFn: async () => {
+  // Utiliser le hook personnalisé pour récupérer les détails de l'utilisateur
+  const userQuery = useUserQuery<{ details: UserOrmPros }>(
+    [DataType.USER, 'details', userId],
+    async () => {
       if (!userId) {
         throw new Error('No user ID found in session');
       }
       
-      logger.info(LogCategory.DATABASE, 'Fetching user data for nutrition target creation via MCP Server', {
-        userId: userId
-      });
-      
-      // Utiliser directement le MCP Server pour récupérer les détails de l'utilisateur
-      const result = await sqliteMCPServer.getUserDetailsViaMCP(Number(userId));
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to get user details: ${result.error}`);
-        throw new Error(result.error || `User with ID ${userId} not found`);
-      }
-      
-      if (!result.user) {
-        logger.warn(LogCategory.DATABASE, `User with ID ${userId} not found`);
-        throw new Error(`User with ID ${userId} not found`);
-      }
-      
-      return result.user;
+      // Utiliser le service utilisateur pour récupérer les détails
+      return userPagesService.getUserProfile(Number(userId));
     },
-    enabled: !!userId, // Requête activée uniquement si l'ID utilisateur est disponible
-    ...getCacheConfig(DataType.USER),
-  });
+    {
+      enabled: !!userId, // Requête activée uniquement si l'ID utilisateur est disponible
+    }
+  );
 
+  // Gérer les états de chargement et d'erreur manuellement
+  if (userQuery.isLoading || userQuery.isPending) {
+    return (
+      <VStack className="flex-1 justify-center items-center p-4">
+        <Text className="text-center mb-4">Chargement des données utilisateur...</Text>
+      </VStack>
+    );
+  }
+
+  if (userQuery.error) {
+    return (
+      <VStack className="flex-1 justify-center items-center p-4">
+        <Text className="text-center mb-4">Impossible de charger les données utilisateur.</Text>
+      </VStack>
+    );
+  }
+
+  // Préparer les valeurs par défaut pour le formulaire
   const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps = {
-    initialWeight: userData?.weight!,
-    targetWeight: userData?.weight!,
+    initialWeight: userQuery.data?.details?.weight || 70,
+    targetWeight: userQuery.data?.details?.weight || 70,
     durationWeeks: 1,
     goalUnit: GoalEnum.MAINTAIN,
   };
+  
   return (
-    <QueryStateHandler<UserOrmPros>
-      data={userData}
-      isLoading={isLoading}
-      isFetching={isFetching}
-      isPending={isPending}
-      isRefetching={isRefetching}
-    >
-      <NutritionGoalForm
-        defaultValues={nutritionGoalDefaultValueProps}
-        operation="create"
-        userId={userData?.id || 0}
-      />
-    </QueryStateHandler>
+    <NutritionGoalForm
+      defaultValues={nutritionGoalDefaultValueProps}
+      operation="create"
+      userId={userQuery.data?.details?.id || 0}
+    />
   );
 }

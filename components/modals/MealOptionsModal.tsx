@@ -15,6 +15,9 @@ import { MealOrmProps } from '@/db/schema';
 import MealQuantityModal from './MealQuantityModal';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
+import { mealOptionsModalService } from '@/utils/services/meal-options-modal.service';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface MealOptionsModalProps {
   isOpen: boolean;
@@ -41,31 +44,38 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
   const router = useRouter();
 
   const handleViewDetails = () => {
-    router.push({
-      pathname: "/(root)/(tabs)/meals/my-meals/details/[id]",
-      params: { id: meal.id }
-    });
-    onClose();
+    // Utiliser le service pour gérer la navigation vers les détails
+    logger.info(LogCategory.NAVIGATION, 'View meal details button clicked', { mealId: meal.id });
+    mealOptionsModalService.handleViewDetails(meal, router, onClose);
   };
 
   const handleUpdate = () => {
-    router.push({
-      pathname: "/(root)/(tabs)/meals/my-meals/edit/[id]",
-      params: { id: meal.id }
-    });
-    onClose();
+    // Utiliser le service pour gérer la navigation vers la page de mise à jour
+    logger.info(LogCategory.NAVIGATION, 'Update meal button clicked', { mealId: meal.id });
+    mealOptionsModalService.handleUpdate(meal, router, onClose);
   };
 
   const handleDelete = async () => {
-    if (onDelete) {
-      await onDelete();
+    // Utiliser le service pour gérer la suppression
+    try {
+      logger.info(LogCategory.USER, 'Delete meal button clicked', { mealId: meal.id });
+      await mealOptionsModalService.handleDelete(onDelete, onClose);
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, 'Error in meal deletion', {
+        error: error instanceof Error ? error.message : String(error),
+        mealId: meal.id
+      });
+      // L'erreur a été journalisée, mais nous fermions quand même le modal
+      onClose();
     }
-    onClose();
   };
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+    >
         <ModalBackdrop />
         <ModalContent className="max-w-[305px]">
           <ModalHeader>
@@ -91,10 +101,7 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
             {dailyPlanId && drizzleDb && (
               <Button
                 className="bg-amber-500 w-full"
-                onPress={() => {
-                  setShowQuantityModal(true);
-                  onClose();
-                }}
+                onPress={() => mealOptionsModalService.openQuantityModal(setShowQuantityModal, onClose)}
               >
                 <ButtonText>Modifier la quantité</ButtonText>
               </Button>

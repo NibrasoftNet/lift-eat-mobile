@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
@@ -16,23 +16,46 @@ import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import { Button, ButtonIcon } from '../ui/button';
 import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
-import { useIngredientStore } from '../../utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '../../types/ingredient.type';
+import { ingredientService } from '@/utils/services/ingredient.service';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
+/**
+ * Composant qui affiche un ingru00e9dient dans une carte interactive
+ * Permet de modu00e9rer la quantitu00e9 de l'ingru00e9dient
+ */
 const IngredientCard: React.FC<{
   item: IngredientWithStandardProps;
   index: number;
 }> = ({ item, index }) => {
+  // u00c9tat local pour la quantitu00e9 d'ingru00e9dient
   const [newQuantity, setNewQuantity] = useState<number>(item.quantity);
-  // Zustand store hooks
-  const { updateIngredient } = useIngredientStore();
+
+  // Synchroniser l'u00e9tat local avec la quantitu00e9 du service
+  useEffect(() => {
+    // Mettre u00e0 jour l'u00e9tat local si la quantitu00e9 change dans le service/store
+    const quantity = ingredientService.getIngredientQuantity(item.ingredientStandardId);
+    if (quantity !== newQuantity) {
+      setNewQuantity(quantity);
+    }
+  }, [item.ingredientStandardId, newQuantity]);
+
+  /**
+   * Gu00e8re le changement de quantitu00e9 de l'ingru00e9dient
+   * @param operation - 'increase' pour augmenter, 'decrease' pour diminuer
+   */
   const handleQuantityChange = (operation: 'increase' | 'decrease') => {
+    logger.info(LogCategory.USER, `Changing ingredient ${item.ingredientStandardId} quantity: ${operation}`);
+    
     if (operation === 'increase') {
-      updateIngredient(item.ingredientStandardId, newQuantity + 10);
+      // Utiliser le service pour incu00e9menter la quantitu00e9
+      ingredientService.incrementIngredientQuantity(item.ingredientStandardId, 10);
       setNewQuantity((prev) => prev + 10);
     } else {
-      updateIngredient(item.ingredientStandardId, newQuantity - 10);
-      setNewQuantity((prev) => prev - 10);
+      // Utiliser le service pour du00e9cu00e9menter la quantitu00e9
+      ingredientService.decrementIngredientQuantity(item.ingredientStandardId, 10);
+      setNewQuantity((prev) => Math.max(0, prev - 10));
     }
   };
 
@@ -47,9 +70,9 @@ const IngredientCard: React.FC<{
             <Box className="flex-col items-center justify-center w-16 h-16">
               <Avatar>
                 <AvatarFallbackText>
-                  {item.ingredientsStandard.name?.slice(0, 2).toUpperCase()}
+                  {(item.ingredientsStandard?.name || 'IG')?.slice(0, 2).toUpperCase()}
                 </AvatarFallbackText>
-                {item.ingredientsStandard.image ? (
+                {item.ingredientsStandard?.image ? (
                   <AvatarImage
                     className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
                     source={{ uri: `${item.ingredientsStandard.image}` }}
@@ -61,10 +84,10 @@ const IngredientCard: React.FC<{
             </Box>
             <VStack className="flex-1">
               <Text className="text-xl font-bold">
-                {item.ingredientsStandard.name}
+                {item.ingredientsStandard?.name || 'Ingrédient'}
               </Text>
               <Text className="text-sm">
-                {item.quantity} • {item.ingredientsStandard.unit}
+                {item.quantity} • {item.ingredientsStandard?.unit || 'g'}
               </Text>
             </VStack>
           </HStack>

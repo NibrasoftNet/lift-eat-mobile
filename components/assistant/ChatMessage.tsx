@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Box } from '@/components/ui/box';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/utils/constants/Colors';
 
@@ -19,69 +19,25 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, type, timesta
   };
 
   return (
-    <View style={[
-      styles.container,
-      isUser ? styles.userContainer : styles.assistantContainer
-    ]}>
-      <View style={[
-        styles.bubble,
-        isUser ? styles.userBubble : styles.assistantBubble
-      ]}>
-        <ThemedText style={[
-          styles.messageText,
-          isUser ? styles.userText : styles.assistantText
-        ]}>
+    <Box className={`my-1.5 max-w-[80%] ${
+      isUser ? 'self-end' : 'self-start'
+    }`}>
+      <Box className={`rounded-2xl px-4 py-2.5 mb-0.5 ${
+        isUser ? 'bg-primary-background' : 'bg-gray-100'
+      }`}>
+        <ThemedText className={`text-base leading-snug ${
+          isUser ? 'text-white' : 'text-black'
+        }`}>
           {message}
         </ThemedText>
-      </View>
-      <ThemedText style={styles.timestamp}>
+      </Box>
+      <ThemedText className="text-xs text-gray-500 mx-1.5 self-end">
         {formatTime(timestamp)}
       </ThemedText>
-    </View>
+    </Box>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 5,
-    maxWidth: '80%',
-    alignSelf: 'flex-start',
-  },
-  userContainer: {
-    alignSelf: 'flex-end',
-  },
-  assistantContainer: {
-    alignSelf: 'flex-start',
-  },
-  bubble: {
-    borderRadius: 18,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 2,
-  },
-  userBubble: {
-    backgroundColor: Colors.primary.background,
-  },
-  assistantBubble: {
-    backgroundColor: '#f0f0f0',
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  userText: {
-    color: '#fff',
-  },
-  assistantText: {
-    color: '#000',
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#888',
-    marginLeft: 5,
-    marginRight: 5,
-    alignSelf: 'flex-end',
-  },
-});
+
 
 export default ChatMessage;

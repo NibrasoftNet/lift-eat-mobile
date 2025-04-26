@@ -1,4 +1,5 @@
 import { UserOrmPros } from '@/db/schema';
+import { NutritionAdviceType, NutritionAdviceProps, NutritionAdviceCreateProps, NutritionAdviceFeedbackProps } from '@/types/nutrition-advice.type';
 
 /**
  * Interface pour les paramètres de requête de contexte utilisateur
@@ -108,5 +109,53 @@ export interface GetUserActivityHistoryResult {
     totalCalories: number;
     calorieTarget: number;
   }>;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de sauvegarde d'un conseil nutritionnel
+ * Utilise NutritionAdviceCreateProps défini dans le type global
+ */
+export interface SaveNutritionAdviceParams extends NutritionAdviceCreateProps {}
+
+/**
+ * Interface pour les résultats de sauvegarde d'un conseil nutritionnel
+ */
+export interface SaveNutritionAdviceResult {
+  success: boolean;
+  adviceId?: number;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de mise à jour du feedback sur un conseil
+ * Utilise NutritionAdviceFeedbackProps défini dans le type global
+ */
+export interface UpdateAdviceFeedbackParams extends NutritionAdviceFeedbackProps {}
+
+/**
+ * Interface pour les résultats de mise à jour du feedback
+ */
+export interface UpdateAdviceFeedbackResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de récupération des conseils nutritionnels
+ * Basé sur NutritionAdviceFilterProps défini dans le type global
+ */
+export interface GetNutritionAdviceParams {
+  userId: number;
+  limit?: number;
+  type?: NutritionAdviceType | string;
+}
+
+/**
+ * Interface pour les résultats de récupération des conseils nutritionnels
+ */
+export interface GetNutritionAdviceResult {
+  success: boolean;
+  adviceList?: NutritionAdviceProps[];
   error?: string;
 }

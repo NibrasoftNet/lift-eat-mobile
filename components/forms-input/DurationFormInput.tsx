@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
+import { durationFormService } from '@/utils/services/duration-form.service';
 
 interface DurationFormInputProps {
   control: Control<any>;
@@ -36,8 +37,13 @@ const DurationFormInput: React.FC<DurationFormInputProps> = ({
               keyboardType="numeric"
               placeholder="Enter duration in weeks"
               onBlur={onBlur}
-              onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-              value={value?.toString()}
+              onChangeText={(val) => {
+                // Utiliser le service pour convertir et valider la valeur de durée
+                const parsedValue = durationFormService.parseDuration(val);
+                onChange(parsedValue);
+              }}
+              // Utiliser le service pour formater la valeur pour l'affichage
+              value={value !== undefined ? durationFormService.formatDurationValue(value).split(' ')[0] : ''}
               className="bg-gray-50"
             />
           </Input>

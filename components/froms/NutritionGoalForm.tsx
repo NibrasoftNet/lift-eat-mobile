@@ -30,6 +30,7 @@ import GoalTypeFormInput from '@/components/forms-input/GoalTypeFormInput';
 import DurationFormInput from '@/components/forms-input/DurationFormInput';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import { nutritionGoalFormService } from '@/utils/services/nutrition-goal-form.service';
 
 export default function NutritionGoalForm({
   defaultValues,
@@ -50,49 +51,27 @@ export default function NutritionGoalForm({
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   
-  // Vérifier la cohérence entre l'ID passé en prop et l'ID utilisateur authentifié
+  // Utiliser le service pour la validation d'accès
   useEffect(() => {
-    if (!userId) {
-      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing NutritionGoalForm');
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Authentication Required"
-              description="Please log in to create a nutrition plan"
-            />
-          );
-        },
-      });
-      router.back();
-      return;
-    }
+    const isValid = nutritionGoalFormService.validateUserAccess(
+      userId?.toString() || null, 
+      propUserId?.toString() || "", 
+      toast
+    );
     
-    if (userId !== propUserId) {
-      logger.warn(LogCategory.AUTH, `User ID mismatch: authenticated=${userId}, prop=${propUserId}`);
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Access Denied"
-              description="You can only create plans for your own account"
-            />
-          );
-        },
-      });
+    if (!isValid) {
       router.back();
     }
   }, [userId, propUserId, toast, router]);
 
-  const [goalUnit, setGoalUnit] = useState<GoalEnum>(defaultValues.goalUnit);
+  // Préparer les valeurs par défaut en utilisant le service
+  const processedDefaultValues = useMemo(
+    () => nutritionGoalFormService.prepareDefaultValues(defaultValues),
+    [defaultValues]
+  );
+
+  // État local pour suivre le type d'objectif sélectionné
+  const [goalUnit, setGoalUnit] = useState<GoalEnum>(processedDefaultValues.goalUnit);
 
   // Init Tanstack Query client
   const queryClient = useQueryClient();
@@ -104,26 +83,40 @@ export default function NutritionGoalForm({
     formState: { errors },
   } = useForm<NutritionGoalSchemaFormData>({
     resolver: zodResolver(nutritionGoalSchema),
-    defaultValues,
+    defaultValues: processedDefaultValues,
   });
 
   const handleGoalUnitChange = (unit: GoalEnum) => {
     setGoalUnit(unit);
-    setValue('goalUnit', unit);
+    // Utiliser le service pour gérer le changement d'objectif
+    nutritionGoalFormService.handleGoalUnitChange(unit, setValue);
+    
+    // Si l'objectif est de maintenir le poids, synchroniser le poids cible avec le poids initial
+    if (unit === GoalEnum.MAINTAIN) {
+      setValue('targetWeight', control._formValues.initialWeight);
+    }
   };
 
   // Mutation pour créer un plan nutritionnel
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: NutritionGoalSchemaFormData) => {
-      // Vérifier que l'utilisateur est authentifié
+      // Utiliser le service pour préparer et soumettre les données du formulaire
+      // S'assurer que userId n'est pas null pour la soumission du formulaire
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when creating nutrition plan');
-        throw new Error('You must be logged in to create a nutrition plan');
+        throw new Error('User ID is required');
       }
       
+      const formResult = await nutritionGoalFormService.submitForm(data, userId.toString());
+      
+      if (!formResult.success || !formResult.data) {
+        logger.error(LogCategory.FORM, `Form validation failed: ${formResult.message}`);
+        throw new Error(formResult.message || 'Form validation failed');
+      }
+      
+      // Soumettre les données préparées au serveur MCP
       logger.info(LogCategory.DATABASE, 'Creating plan via MCP Server', { userId });
       
-      const result = await sqliteMCPServer.createPlanViaMCP(data, userId);
+      const result = await sqliteMCPServer.createPlanViaMCP(formResult.data, userId);
       
       if (!result.success) {
         logger.error(LogCategory.DATABASE, `Failed to create plan: ${result.error}`);
@@ -146,11 +139,7 @@ export default function NutritionGoalForm({
       });
       resetPlanStore(); // Réinitialiser le store après la création
 
-      // Rediriger vers la page de détails du plan
-      router.push({
-        pathname: '/(root)/(tabs)/plans/my-plans/details/[id]',
-        params: { id: data.toString() }
-      });
+      // Afficher d'abord le toast de succès
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -159,12 +148,20 @@ export default function NutritionGoalForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title="Plan Created"
-              description="Your nutrition plan has been created successfully!"
+              title="Plan Créé"
+              description="Votre plan nutritionnel a été créé avec succès !"
             />
           );
         },
       });
+      
+      // Puis rediriger vers la page de détails du plan
+      setTimeout(() => {
+        router.push({
+          pathname: '/(root)/(tabs)/plans/my-plans/details/[id]',
+          params: { id: data.toString() }
+        });
+      }, 100);
     },
   });
 
@@ -182,6 +179,8 @@ export default function NutritionGoalForm({
       await mutateAsync(data);
       // Note: Pas besoin d'afficher le toast ici car il est déjà affiché dans onSuccess
     } catch (error: any) {
+      const errorMessage = error && error.toString ? error.toString() : 'Une erreur est survenue';
+      
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -190,8 +189,8 @@ export default function NutritionGoalForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
+              title="Erreur"
+              description={errorMessage}
             />
           );
         },
@@ -261,7 +260,7 @@ export default function NutritionGoalForm({
           className="w-[45%] bg-gray-200"
           size="lg"
           variant="outline"
-          onPress={() => router.back()}
+          onPress={() => nutritionGoalFormService.handleCancel(router)}
         >
           <ButtonText className="text-gray-700">Cancel</ButtonText>
         </Button>

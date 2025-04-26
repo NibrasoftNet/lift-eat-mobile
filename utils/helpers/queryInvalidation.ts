@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
-import { logger } from '../services/logging.service';
-import { LogCategory } from '../enum/logging.enum';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Types de données pour lesquels on peut invalider le cache

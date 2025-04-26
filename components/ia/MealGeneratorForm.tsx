@@ -4,13 +4,13 @@ import { ChevronDown, Plus, Delete } from 'lucide-react-native';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { MealTypeEnum, MealTypeArray } from '@/utils/enum/meal.enum';
+import { MealTypeEnum, MealTypeArray, MealUnitEnum } from '@/utils/enum/meal.enum';
 import { CuisineTypeEnum, CuisineTypeArray } from '@/utils/enum/meal.enum';
-import { IaMealType } from '@/utils/validation/ia/ia.schemas';
-import iaService from '@/utils/services/ia/ia.service';
+import { IaMealType, IaIngredientType } from '@/utils/validation/ia/ia.schemas';
 import MealPreview from './MealPreview';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { assistantPagesService } from '@/utils/services/pages/assistant-pages.service';
 
 interface MealGeneratorFormProps {
   onMealGenerated?: (meal: IaMealType) => void;
@@ -55,7 +55,7 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
     setIngredients(newIngredients);
   };
 
-  // Générer un repas avec l'IA
+  // Générer un repas avec l'IA en utilisant le service assistant-pages
   const generateMeal = async () => {
     try {
       setLoading(true);
@@ -79,24 +79,40 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
         return;
       }
 
-      // Construire un prompt spécifique pour la génération de repas
-      let promptAdditions = '';
-      if (cuisineType !== CuisineTypeEnum.GENERAL) {
-        promptAdditions += ` de style ${cuisineType}`;
-      }
-      if (specificRequirements.trim()) {
-        promptAdditions += ` avec ces exigences: ${specificRequirements}`;
-      }
-
-      const result = await iaService.generateMeal(validIngredients, mealType);
+      // Préparer les données pour la génération du repas selon le schéma requis
+      const mealCriteria: IaMealType = {
+        name: "",  // Généré automatiquement par le service
+        ingredients: validIngredients.map(ingredient => ({
+          name: ingredient,
+          quantity: 0,
+          unit: MealUnitEnum.GRAMMES,
+          calories: 0,   // Ces valeurs seront calculées par le service
+          protein: 0,
+          carbs: 0,
+          fat: 0
+        })),
+        type: mealType as MealTypeEnum,
+        cuisine: cuisineType as CuisineTypeEnum,
+        description: specificRequirements.trim(),
+        calories: 0,  // Calculé par le service
+        protein: 0,   // Calculé par le service
+        carbs: 0,     // Calculé par le service
+        fat: 0,       // Calculé par le service
+        unit: MealUnitEnum.GRAMMES
+      };
       
-      setAiResponse(result.text);
+      // Utiliser le service assistant-pages pour générer un repas
+      const result = await assistantPagesService.generateMeal(mealCriteria);
       
-      if (result.success && result.meal) {
-        setGeneratedMeal(result.meal);
+      // Définir une réponse IA basée sur le résultat
+      setAiResponse(result.message || "");
+      
+      if (result.success && result.data) {
+        // Utiliser les données retournées pour mettre à jour l'UI
+        setGeneratedMeal(result.data.meal);
         
         if (onMealGenerated) {
-          onMealGenerated(result.meal);
+          onMealGenerated(result.data.meal);
         }
         
         toast.show({
@@ -104,8 +120,8 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
             <MultiPurposeToast
               id={id}
               color={ToastTypeEnum.SUCCESS}
-              title="Repas généré"
-              description="Votre repas a été généré avec succès et ajouté à votre collection."
+              title="Repas généré avec succès"
+              description={`Nous avons créé un ${mealType.toLowerCase()} pour vous!`}
             />
           ),
         });
@@ -115,8 +131,8 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
             <MultiPurposeToast
               id={id}
               color={ToastTypeEnum.ERROR}
-              title="Repas généré partiellement"
-              description="L'IA a généré une réponse mais n'a pas pu créer un repas structuré. Vérifiez la réponse pour plus de détails."
+              title="Échec de la génération"
+              description={result.error || "Une erreur s'est produite lors de la génération du repas."}
             />
           ),
         });

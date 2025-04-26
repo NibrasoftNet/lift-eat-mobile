@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Pressable } from '../ui/pressable';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
@@ -22,64 +22,40 @@ import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import MultiPurposeToast from '../MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '../ui/toast';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import DeletionModal from '@/components/modals/DeletionModal';
 import OptionsDrawer from '@/components/drawers/OptionsDrawer';
+import { mealService } from '@/utils/services/meal.service';
 
+/**
+ * Composant qui affiche un repas dans une carte interactive
+ * Permet de voir les détails, éditer ou supprimer un repas
+ */
 const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   item,
   index,
 }) => {
   const router = useRouter();
   const toast = useToast();
-  const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
+  /**
+   * Navigue vers la page de détails du repas
+   * @param meal - Repas à consulter
+   */
   const handleMealCardPress = (meal: MealOrmProps) => {
-    // Remplacer le console.log par un log approprié
     logger.info(LogCategory.USER, `User viewing meal details: ${meal.name}`, { mealId: meal.id });
     router.push(`/meals/my-meals/details/${meal.id}`);
   };
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async () => {
-      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} via MCP Server`);
-      
-      // Récupérer l'ID utilisateur de manière centralisée
-      const userId = getCurrentUserIdSync();
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'Authentication required to delete a meal');
-        throw new Error('You must be logged in to delete a meal');
-      }
-      
-      // Le handler deleteMealViaMCP vérifie déjà si le repas existe et si l'utilisateur est son créateur
-      // en comparant l'ID utilisateur passé en paramètre avec l'ID du créateur du repas
-      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} for user ${userId}`);
-      
-      // Vérifier que l'item a bien été créé par l'utilisateur connecté
-      if (item.creatorId !== userId) {
-        logger.warn(LogCategory.AUTH, `User ${userId} attempted to delete meal ${item.id} owned by user ${item.creatorId}`);
-        throw new Error('You can only delete your own meals');
-      }
-      const result = await sqliteMCPServer.deleteMealViaMCP(item.id, userId);
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to delete meal: ${result.error}`);
-        throw new Error(result.error || `Failed to delete meal ${item.id} via MCP Server`);
-      }
-      
-      return result;
-    },
+    mutationFn: () => mealService.deleteMeal(item.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -96,11 +72,8 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
         },
       });
       
-      // Utiliser la méthode standardisée pour invalider le cache
-      invalidateCache(queryClient, DataType.MEAL, {
-        id: item.id,
-        invalidateRelated: true
-      });
+      // Utiliser la fonction d'invalidation du cache du service meal
+      await mealService.invalidateMealCache(queryClient, item.id);
       
       setShowModal(false);
     },

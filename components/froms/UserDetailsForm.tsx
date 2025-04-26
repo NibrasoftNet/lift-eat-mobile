@@ -7,7 +7,7 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
 import Animated, {
@@ -36,9 +36,9 @@ import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { userDetailsFormService } from '@/utils/services/user-details-form.service';
 
 export default function UserDetailsForm({
   defaultValues,
@@ -54,24 +54,20 @@ export default function UserDetailsForm({
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   
-  // Vérifier si l'utilisateur tente de modifier ses propres données
-  useMemo(() => {
-    if (userId && defaultValues.id !== userId) {
-      logger.warn(LogCategory.AUTH, `User ${userId} attempting to modify data for user ${defaultValues.id}`);
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Access Denied"
-              description="You can only modify your own profile data"
-            />
-          );
-        },
-      });
+  // Préparer les valeurs par défaut normalisées via le service
+  const normalizedDefaultValues = useMemo(() => 
+    userDetailsFormService.prepareDefaultValues(defaultValues), 
+  [defaultValues]);
+  
+  // Vérifier l'accès de l'utilisateur via le service
+  useEffect(() => {
+    if (userId && !userDetailsFormService.validateUserAccess(
+      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+      String(userId), 
+      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+      String(defaultValues.id), 
+      toast
+    )) {
       router.back();
     }
   }, [userId, defaultValues.id, toast, router]);
@@ -108,7 +104,8 @@ export default function UserDetailsForm({
     formState: { errors },
   } = useForm<UserDetailsFormData>({
     resolver: zodResolver(userDetailsSchema),
-    defaultValues,
+    // Utiliser les valeurs par défaut normalisées par le service
+    defaultValues: normalizedDefaultValues,
   });
 
   // Measure the width of the first GridItem
@@ -119,7 +116,10 @@ export default function UserDetailsForm({
 
   const handleWidthUnitChange = (unit: WeightUnitEnum, index: number) => {
     setWeightUnit(unit);
-    setValue('weightUnit', unit);
+    
+    // Déléguer au service la gestion du changement d'unité
+    userDetailsFormService.handleWeightUnitChange(unit, setValue, index);
+    
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
     slidePosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
@@ -127,7 +127,10 @@ export default function UserDetailsForm({
 
   const handleHeightUnitChange = (unit: HeightUnitEnum, index: number) => {
     setHeightUnit(unit);
-    setValue('heightUnit', unit);
+    
+    // Déléguer au service la gestion du changement d'unité
+    userDetailsFormService.handleHeightUnitChange(unit, setValue, index);
+    
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
     slideHeightPosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
@@ -135,38 +138,10 @@ export default function UserDetailsForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserDetailsFormData) => {
-      // Vérifier que l'utilisateur est authentifié
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when updating user details');
-        throw new Error('You must be logged in to update your profile');
-      }
-      
-      // Vérifier que l'ID est le même que celui de l'utilisateur connecté
-      if (defaultValues.id !== userId) {
-        logger.error(LogCategory.AUTH, `User ${userId} attempted to update details for user ${defaultValues.id}`);
-        throw new Error('You can only update your own profile data');
-      }
-      
-      logger.info(LogCategory.USER, `Updating user ${userId} details`, {
-        height: data.height,
-        weight: data.weight,
-        heightUnit: data.heightUnit,
-        weightUnit: data.weightUnit
-      });
-      
-      // Utiliser le MCP server pour mettre à jour les données de l'utilisateur
-      const result = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, {
-        height: data.height,
-        weight: data.weight,
-        heightUnit: data.heightUnit,
-        weightUnit: data.weightUnit
-      });
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update user details');
-      }
-      
-      return result;
+      // Déléguer entièrement au service la soumission du formulaire
+      // S'assurer que userId est toujours une chaîne pour respecter l'interface du service
+      const userIdString = userId ? String(userId) : '';
+      return userDetailsFormService.submitForm(data, userIdString, operation);
     },
     onSuccess: async () => {
       // Utiliser l'utilitaire standardisé d'invalidation du cache
@@ -205,23 +180,20 @@ export default function UserDetailsForm({
     },
   });
 
+  // Simplifier la fonction onSubmit en déléguant le logging au service
   const onSubmit = async (data: UserDetailsFormData) => {
-    logger.info(LogCategory.USER, 'Submitting user details form', {
-      userId,
-      height: data.height,
-      weight: data.weight,
-      heightUnit: data.heightUnit,
-      weightUnit: data.weightUnit
-    });
-    await mutateAsync(data);
+    try {
+      logger.debug(LogCategory.FORM, 'Component initiating user details form submission');
+      await mutateAsync(data);
+    } catch (error) {
+      // Géré par onError du useMutation
+      logger.error(LogCategory.FORM, `Unhandled error in user details form submission: ${error}`);
+    }
   };
 
   const handleCancel = () => {
-    if (operation === 'update') {
-      router.back();
-    } else {
-      router.push('/preference');
-    }
+    // Déléguer au service la gestion de l'annulation
+    userDetailsFormService.handleCancel(operation, router);
   };
 
   return (

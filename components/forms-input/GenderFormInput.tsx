@@ -6,9 +6,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  runOnUI,
 } from 'react-native-reanimated';
 import React, { useEffect, useState, memo } from 'react';
+import { genderFormService } from '@/utils/services/gender-form.service';
 
 const GenderFormInput = memo(({ 
   defaultGender,
@@ -25,11 +25,8 @@ const GenderFormInput = memo(({
   
   // Mettre à jour les valeurs partagées en fonction du genre initial
   useEffect(() => {
-    // Utiliser runOnUI pour s'assurer que les modifications sont faites sur le thread UI
-    runOnUI(() => {
-      maleBarWidth.value = defaultGender === GenderEnum.MALE ? 100 : 0;
-      femaleBarWidth.value = defaultGender === GenderEnum.FEMALE ? 100 : 0;
-    })();
+    // Utiliser le service pour initialiser les animations
+    genderFormService.initializeGenderAnimations(defaultGender, maleBarWidth, femaleBarWidth);
   }, []);
   
   const handleGenderUnitChange = (unit: GenderEnum) => {
@@ -39,31 +36,29 @@ const GenderFormInput = memo(({
 
   // Animer la largeur de la barre lorsque le genre change
   useEffect(() => {
-    // Utiliser runOnUI pour s'assurer que les modifications sont faites sur le thread UI
-    runOnUI(() => {
-      maleBarWidth.value = withTiming(genderUnit === GenderEnum.MALE ? 100 : 0, {
-        duration: 300,
-      });
-      femaleBarWidth.value = withTiming(
-        genderUnit === GenderEnum.FEMALE ? 100 : 0,
-        { duration: 300 },
-      );
-    })();
+    // Utiliser le service pour animer le changement de genre
+    genderFormService.animateGenderChange(genderUnit, maleBarWidth, femaleBarWidth, 300);
   }, [genderUnit]);
 
+  // Définir les couleurs à l'extérieur du style animé
+  const maleBarColor = "blue";
+  const femaleBarColor = "orange";
+  
   // Animated style for Male bar
   const maleBarStyles = useAnimatedStyle(() => {
+    'worklet';
     return {
       width: `${maleBarWidth.value}%`, // Animate width from 0% to 100% or vice versa
-      backgroundColor: 'blue', // Blue color for Male bar
+      backgroundColor: maleBarColor,
     };
   });
 
   // Animated style for Female bar
   const femaleBarStyles = useAnimatedStyle(() => {
+    'worklet';
     return {
       width: `${femaleBarWidth.value}%`, // Animate width from 0% to 100% or vice versa
-      backgroundColor: 'orange', // Orange color for Female bar
+      backgroundColor: femaleBarColor,
     };
   });
   
@@ -81,9 +76,11 @@ const GenderFormInput = memo(({
         >
           <Button
             onPress={() => handleGenderUnitChange(GenderEnum.MALE)}
-            className="w-full h-full bg-transparent"
+            className={genderFormService.getGenderButtonStyles(genderUnit, GenderEnum.MALE).buttonClass}
           >
-            <ButtonText className="text-gray-500">{GenderEnum.MALE}</ButtonText>
+            <ButtonText className={genderFormService.getGenderButtonStyles(genderUnit, GenderEnum.MALE).textClass}>
+              {GenderEnum.MALE}
+            </ButtonText>
           </Button>
           {/* Blue animated bar for Male Button */}
           <Animated.View
@@ -99,9 +96,9 @@ const GenderFormInput = memo(({
         >
           <Button
             onPress={() => handleGenderUnitChange(GenderEnum.FEMALE)}
-            className="w-full h-full bg-transparent"
+            className={genderFormService.getGenderButtonStyles(genderUnit, GenderEnum.FEMALE).buttonClass}
           >
-            <ButtonText className="text-gray-500">
+            <ButtonText className={genderFormService.getGenderButtonStyles(genderUnit, GenderEnum.FEMALE).textClass}>
               {GenderEnum.FEMALE}
             </ButtonText>
           </Button>

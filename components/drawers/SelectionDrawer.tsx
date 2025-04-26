@@ -20,6 +20,8 @@ import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { CircleChevronDown, SearchIcon } from 'lucide-react-native';
+/* Services */
+import { drawerService } from '@/utils/services/drawer.service';
 
 // Interface générique pour les items avec ID
 interface SelectionItem {
@@ -88,24 +90,29 @@ function SelectionDrawer<T extends SelectionItem>({
     }
   }, [userId, setShowDrawer]);
 
-  // Effectuer la recherche après un délai pour éviter trop de requêtes
+  // Utiliser le service pour le debounce du terme de recherche
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearchTerm(debouncedSearchTerm);
-    }, 300); // 300ms de délai
-
-    return () => clearTimeout(handler);
+    // Ne rien faire si le terme de recherche est undefined
+    if (typeof debouncedSearchTerm === 'undefined') return;
+    
+    // Fonction de rappel qui appelle setSearchTerm
+    const updateSearchTerm = (term: string) => {
+      setSearchTerm(term);
+    };
+    
+    // Utiliser le service pour débouncer le terme de recherche
+    drawerService.debounceSearchTerm(debouncedSearchTerm, updateSearchTerm, 300);
   }, [debouncedSearchTerm, setSearchTerm]);
 
-  // Gestionnaire de recherche
+  // Gestionnaire de recherche optimisé
   const handleSearch = (term: string | undefined) => {
-    setDebouncedSearchTerm(term);
+    setDebouncedSearchTerm(term || '');
   };
 
-  // Gestionnaire de fin de liste atteinte
+  // Utiliser le service pour cru00e9er un gestionnaire optimisu00e9 de fin de liste
   const handleEndReached = useCallback(() => {
-    logger.debug(LogCategory.UI, `End of list reached, hasNextPage: ${hasNextPage}`);
-    if (hasNextPage) fetchNextPage();
+    // Utiliser le service pour gu00e9rer la fin de liste atteinte
+    drawerService.createEndReachedHandler(hasNextPage, fetchNextPage)();
   }, [hasNextPage, fetchNextPage]);
 
   return (
@@ -157,13 +164,14 @@ function SelectionDrawer<T extends SelectionItem>({
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.uniqueId || `${item.id}`}
-                estimatedItemSize={estimatedItemSize}
+                // Paramètres spécifiques fournis ou valeurs par défaut optimisées
+                estimatedItemSize={estimatedItemSize || drawerService.getFlashListConfig().estimatedItemSize}
                 // Ajouter un padding suffisant en bas pour éviter que le footer ne cache des éléments
                 contentContainerStyle={{ padding: 8, paddingBottom: 120 }}
                 onEndReached={handleEndReached}
-                onEndReachedThreshold={onEndReachedThreshold}
+                onEndReachedThreshold={onEndReachedThreshold || drawerService.getFlashListConfig().onEndReachedThreshold}
                 // Optimisations pour FlashList compatibles avec les types existants
-                estimatedListSize={{height: 500, width: 400}} // Estimation de la taille totale de la liste
+                estimatedListSize={drawerService.getFlashListConfig().estimatedListSize}
                 ListFooterComponent={() =>
                   isFetchingNextPage ? (
                     <ActivityIndicator size="large" color="#000" />

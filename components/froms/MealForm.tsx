@@ -39,7 +39,6 @@ import {
 } from '@/utils/validation/meal/meal.validation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getImageFromPicker } from '@/utils/utils';
 import { Pressable } from '../ui/pressable';
 import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import {
@@ -76,9 +75,9 @@ import { useToast } from '../ui/toast';
 import { Colors } from '@/utils/constants/Colors';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { mealFormService } from '@/utils/services/meal-form.service';
 
 
 export default function MealForm({
@@ -92,10 +91,25 @@ export default function MealForm({
   const toast = useToast();
   // Utiliser le contexte utilisateur de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
+  // Valider l'accès de l'utilisateur
+  useEffect(() => {
+    const isValid = mealFormService.validateUserAccess(userId?.toString() || null, toast);
+    if (!isValid) {
+      router.back();
+    }
+  }, [userId, toast, router]);
+  
   const { selectedIngredients, totalMacros, totalWeight, mealWeight, setMealWeight } = useIngredientStore();
+  
+  // Préparer les valeurs par défaut en utilisant le service
+  const processedDefaultValues = useMemo(
+    () => mealFormService.prepareDefaultValues(defaultValues),
+    [defaultValues]
+  );
+  
   const [image, setImage] = useState<
     Buffer<ArrayBufferLike> | string | undefined
-  >(`${defaultValues.image}`);
+  >(`${processedDefaultValues.image}`);
   const [isImageActionSheetOpen, setIsImageActionSheetOpen] =
     useState<boolean>(false);
   const [showIngredientsDrawer, setShowIngredientsDrawer] =
@@ -110,7 +124,7 @@ export default function MealForm({
     formState: { errors },
   } = useForm<MealFormData>({
     resolver: zodResolver(mealSchema),
-    defaultValues,
+    defaultValues: processedDefaultValues,
   });
   
   // Synchronize the meal weight with the total ingredients weight
@@ -129,112 +143,40 @@ export default function MealForm({
 
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setIsImageActionSheetOpen(false); // Close the action sheet
-
-    const result = await getImageFromPicker(source);
-
-    if (!result?.canceled) {
-      const base64Image = `data:image/jpeg;base64,${result?.assets[0].base64}`;
-      setValue('image', base64Image);
-      setImage(base64Image);
-    }
+    await mealFormService.handleImageSelection(source, setValue, setImage);
   };
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: MealFormData) => {
+      // Utiliser le service pour soumettre le formulaire
+      const formResult = await mealFormService.submitForm(
+        data, 
+        userId?.toString() || '', 
+        operation,
+        selectedIngredients,
+        {
+          totalCalories: totalMacros.totalCalories,
+          totalCarbs: totalMacros.totalCarbs,
+          totalFats: totalMacros.totalFats,
+          totalProtein: totalMacros.totalProtein
+        }
+      );
+      
+      if (!formResult.success) {
+        throw new Error(formResult.message || 'Failed to process meal data');
+      }
+      
+      // Invalider le cache approprié selon l'opération
       if (operation === 'create') {
-        // Vérifier que l'ID utilisateur est disponible
-        if (!userId) {
-          logger.warn(LogCategory.USER, 'User not authenticated, cannot create meal');
-          throw new Error('User ID not found');
-        }
-        
-        logger.info(LogCategory.DATABASE, 'Creating new meal via MCP Server', { mealName: data.name });
-        
-        const result = await sqliteMCPServer.createNewMealViaMCP(
-          data,
-          selectedIngredients,
-          {
-            totalCalories: totalMacros.totalCalories,
-            totalCarbs: totalMacros.totalCarbs,
-            totalFats: totalMacros.totalFats,
-            totalProtein: totalMacros.totalProtein
-          },
-          userId
-        );
-        
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to create meal via MCP Server');
-        }
-        
-        // SIMPLIFICATION : Une seule invalidation de cache est nécessaire
-        invalidateCache(queryClient, DataType.MEALS_LIST, { 
+        invalidateCache(queryClient, DataType.MEALS_LIST, { invalidateRelated: true });
+      } else if (formResult.data?.id) {
+        invalidateCache(queryClient, DataType.MEAL, { 
+          id: formResult.data.id,
           invalidateRelated: true
         });
-        
-        return { id: result.mealId };
-      } else {
-        // Vérifier que l'ID utilisateur est disponible pour les mises à jour aussi
-        if (!userId) {
-          logger.warn(LogCategory.USER, 'User not authenticated, cannot update meal');
-          throw new Error('User ID not found');
-        }
-        
-        logger.info(LogCategory.DATABASE, 'Updating meal via MCP Server', {
-          mealId: data.id,
-          mealName: data.name,
-          userId: userId
-        });
-        
-        // Extrait l'ID pour s'assurer qu'il est du bon type
-        const { id, ...dataWithoutId } = data;
-        const dataWithMacros = {
-          ...dataWithoutId,
-          id: typeof id === 'number' ? id : Number(id),
-          calories: totalMacros.totalCalories,
-          carbs: totalMacros.totalCarbs,
-          fat: totalMacros.totalFats,
-          protein: totalMacros.totalProtein
-        };
-        
-        // Vérifier que l'utilisateur est propriétaire du repas avant de le modifier
-        // Récupérer tous les repas de cet utilisateur
-        const mealsResult = await sqliteMCPServer.getMealsListViaMCP(userId);
-        if (!mealsResult.success || !mealsResult.meals) {
-          throw new Error('Failed to verify meal ownership');
-        }
-        
-        // Vérifier si le repas à mettre à jour est dans la liste des repas de l'utilisateur
-        const mealId = typeof data.id === 'number' ? data.id : Number(data.id);
-        const mealDetails = mealsResult.meals.filter((meal: { id: number }) => meal.id === mealId);
-          
-        if (!mealDetails || mealDetails.length === 0) {
-          logger.error(LogCategory.USER, `User ${userId} attempted to update meal ${data.id} but does not own it`);
-          throw new Error('You do not have permission to update this meal');
-        }
-        
-        const result = await sqliteMCPServer.updateMealViaMCP(
-          data.id as number,
-          dataWithMacros,
-          selectedIngredients
-        );
-        
-        if (!result.success) {
-          throw new Error(result.error || `Failed to update meal ${data.id} via MCP Server`);
-        }
-        
-        // SIMPLIFICATION : Une seule invalidation de cache est nécessaire pour la mise à jour également
-        if (data.id !== null) {
-          invalidateCache(queryClient, DataType.MEAL, { 
-            id: data.id,
-            invalidateRelated: true
-          });
-        } else {
-          // Fallback à l'invalidation globale si l'ID n'est pas disponible
-          invalidateCache(queryClient, DataType.MEAL, { invalidateRelated: true });
-        }
-        
-        return { id: data.id };
       }
+      
+      return formResult.data;
     },
     onSuccess: async (result) => {
       toast.show({
@@ -300,35 +242,26 @@ export default function MealForm({
   });
 
   const onSubmit = async (data: MealFormData) => {
-    if (selectedIngredients.length <= 0) {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Ingrdients not selected"
-              description="Please select ingredients"
-            />
-          );
-        },
-      });
+    // Utiliser le service pour valider les ingrédients
+    if (!mealFormService.validateIngredients(selectedIngredients, toast)) {
       return;
     }
-    await mutateAsync(data);
+    
+    try {
+      await mutateAsync(data);
+    } catch (error) {
+      // Les erreurs seront gérées dans onError de useMutation
+      logger.error(LogCategory.FORM, `Error submitting meal form: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   return (
     <>
       <VStack className="flex-1 w-full p-4">
         <HStack className="w-full h-8 justify-between">
-          <Link href="/meals/my-meals" asChild>
-            <Pressable>
-              <Icon as={CircleChevronLeft} className="w-10 h-10" />
-            </Pressable>
-          </Link>
+          <Pressable onPress={() => mealFormService.handleCancel(router)}>
+            <Icon as={CircleChevronLeft} className="w-10 h-10" />
+          </Pressable>
           <Button
             action="secondary"
             className="w-12 h-12 bg-transparent"

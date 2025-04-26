@@ -47,6 +47,7 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 import { useRouter } from 'expo-router';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { userProfileFormService } from '@/utils/services/user-profile-form.service';
 
 export default function UserProfileForm({
   defaultValues,
@@ -61,50 +62,26 @@ export default function UserProfileForm({
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   
-  // Vérifier que l'utilisateur ne modifie que ses propres données
+  // Préparer les valeurs par défaut normalisées via le service
+  const normalizedDefaultValues = useMemo(() => 
+    userProfileFormService.prepareDefaultValues(defaultValues), 
+  [defaultValues]);
+  
+  // Vérifier l'accès de l'utilisateur via le service
   useEffect(() => {
-    if (!userId) {
-      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing profile form');
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Authentication Required"
-              description="Please log in to edit your profile"
-            />
-          );
-        },
-      });
-      router.back();
-      return;
-    }
-    
-    if (userId !== defaultValues.id) {
-      logger.warn(LogCategory.AUTH, `User ${userId} attempting to modify profile for user ${defaultValues.id}`);
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Access Denied"
-              description="You can only edit your own profile"
-            />
-          );
-        },
-      });
+    if (!userProfileFormService.validateUserAccess(
+      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+      userId ? String(userId) : null, 
+      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+      String(defaultValues.id), 
+      toast
+    )) {
       router.back();
     }
   }, [userId, defaultValues.id, toast, router]);
   const [isActionSheetOpen, setActionSheetOpen] = useState(false);
   const [photo, setPhoto] = useState<Buffer<ArrayBufferLike> | string>(
-    `${defaultValues.profileImage}`,
+    `${normalizedDefaultValues.profileImage || ''}`,
   );
   const {
     setValue,
@@ -113,7 +90,7 @@ export default function UserProfileForm({
     formState: { errors },
   } = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
-    defaultValues,
+    defaultValues: normalizedDefaultValues,
   });
 
   // Handle the image picker logic
@@ -123,46 +100,68 @@ export default function UserProfileForm({
 
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setActionSheetOpen(false); // Close the action sheet
-
-    const result = await getImageFromPicker(source);
-
-    if (!result?.canceled) {
-      const base64Image = `data:image/jpeg;base64,${result?.assets[0].base64}`;
-      setValue('profileImage', base64Image);
-      setPhoto(base64Image);
+    
+    try {
+      // Déléguer au service la sélection d'image
+      const result = await userProfileFormService.handleImageSelection(source);
+      
+      if (!result?.canceled) {
+        const base64Image = `data:image/jpeg;base64,${result?.assets[0].base64}`;
+        setValue('profileImage', base64Image);
+        setPhoto(base64Image);
+      }
+    } catch (error) {
+      logger.error(LogCategory.USER, `Error selecting image: ${error instanceof Error ? error.message : String(error)}`);
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Image Selection Failed"
+              description="Could not select image. Please try again."
+            />
+          );
+        },
+      });
     }
   };
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserProfileFormData) => {
-      // Vérifier que l'utilisateur est authentifié
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when updating profile');
-        throw new Error('You must be logged in to update your profile');
+      logger.debug(LogCategory.FORM, 'Initiating profile form submission via service');
+      
+      // Déléguer au service la validation et préparation des données
+      const serviceResult = await userProfileFormService.submitForm(
+        data, 
+        // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+        userId ? String(userId) : ''
+      );
+      
+      if (!serviceResult.success) {
+        throw serviceResult.error || new Error(serviceResult.message);
       }
       
-      // Vérifier que l'utilisateur ne modifie que ses propres données
-      if (userId !== defaultValues.id) {
-        logger.error(LogCategory.AUTH, `User ${userId} attempting to update profile for user ${defaultValues.id}`);
-        throw new Error('You can only update your own profile');
-      }
-      
-      logger.info(LogCategory.USER, `Updating user profile for user ${userId}`);
-      
-      // Mise à jour directe du profil utilisateur en utilisant drizzle
+      // La mise à jour en base de données est faite ici car le service ne peut pas accéder à drizzleDb (hook React)
       logger.info(LogCategory.DATABASE, `Updating user profile directly for user ${userId}`);
       
       try {
+        const updateData = serviceResult.data;
+        
         // Mettre à jour les informations utilisateur
         await drizzleDb
           .update(users)
           .set({
-            name: data.name,
-            email: data.email,
-            profileImage: data.profileImage,
-            updatedAt: new Date().toISOString()
+            name: updateData.name,
+            email: updateData.email,
+            profileImage: updateData.profileImage,
+            updatedAt: updateData.updatedAt
           })
-          .where(eq(users.id, userId));
+          // Utiliser une assertion de type non-null pour userId car nous avons déjà vérifié
+          // qu'il n'est pas null dans le service de validation
+          .where(eq(users.id, userId as number));
           
         logger.info(LogCategory.DATABASE, `Successfully updated profile for user ${userId}`);
       } catch (dbError) {
@@ -215,11 +214,11 @@ export default function UserProfileForm({
 
   const onSubmit = async (data: UserProfileFormData) => {
     try {
-      logger.info(LogCategory.USER, 'Submitting profile update', { userId });
+      logger.debug(LogCategory.FORM, 'Component initiating profile update submission');
       await mutateAsync(data);
     } catch (error) {
-      // L'erreur est déjà gérée par onError
-      logger.error(LogCategory.USER, `Error in profile update handler: ${error instanceof Error ? error.message : String(error)}`);
+      // L'erreur est déjà gérée par onError du useMutation
+      logger.error(LogCategory.FORM, `Unhandled error in profile form submission: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 

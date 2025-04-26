@@ -188,9 +188,9 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
 - [x] **Modification de plan**
   - [x] Vérifier les appels à `updatePlanViaMCP`
     - ✅ Handler `handleUpdatePlan` complètement implémenté dans `plan-handlers.ts`
-    - ⚠️ L'interface d'édition de plan (`/plans/my-plans/edit/[id]`) existe mais n'est pas implémentée
-    - ⚠️ Le routage vers la page d'édition existe dans `PlanCard` mais la fonctionnalité est incomplète
-    - ✅ Handler MCP correctement implémenté avec validation et transaction
+    - ✅ Interface d'édition de plan implémentée dans `(root)/(tabs)/plans/my-plans/edit/[id].tsx`
+    - ✅ Formulaire complet avec validation des champs via Zod et react-hook-form
+    - ✅ Handler MCP correctement utilisé avec validation et transaction
   - [x] Confirmer que seul le propriétaire peut modifier le plan
     - ✅ Vérification de propriété dans `handleUpdatePlan` via `eq(plan.userId, userId)`
     - ✅ Message d'erreur explicite si le plan n'appartient pas à l'utilisateur
@@ -200,8 +200,9 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
     - ✅ Vérifications de sécurité cohérentes à travers le code
     - ✅ Logging de sécurité pour les tentatives non autorisées
   - [x] Valider la mise à jour des plans journaliers associés
-    - ⚠️ Pas de mise à jour automatique des plans journaliers quand le plan principal est modifié
-    - ⚠️ Nécessiterait une implémentation additionnelle pour propager les changements
+    - ✅ Mise à jour automatique des plans journaliers lorsque le plan principal est modifié
+    - ✅ Propagation des valeurs nutritionnelles (calories, carbs, protein, fat) aux plans journaliers
+    - ✅ Implémentation dans une transaction pour assurer la cohérence des données
     - ✅ Fonctionnalité `updateMealQuantityInPlanViaMCP` disponible pour modifier des repas spécifiques
     - ✅ Architecture en place pour supporter ces modifications
   - [x] Vérifier l'invalidation des caches après modification
@@ -273,11 +274,12 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
 
 ## 4. 🍣 Flux de Gestion des Ingrédients
 
-- [~] **Création d'ingrédients**
-  - [~] Vérifier les appels à `createIngredientViaMCP`
-    - ⚠️ Handler `handleAddIngredient` implémenté dans `ingredient-handlers.ts`
-    - ⚠️ Interface `AddIngredientParams` et `AddIngredientResult` définies
-    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
+- [x] **Création d'ingrédients**
+  - [x] Vérifier les appels à `addIngredientViaMCP`
+    - ✅ Handler `handleAddIngredient` implémenté dans `ingredient-handlers.ts`
+    - ✅ Interface `AddIngredientParams` et `AddIngredientResult` définies
+    - ✅ Méthode correctement exposée dans `SQLiteMCPServer`
+    - ✅ Logging détaillé et mesure de performance implémentés
   - [x] Confirmer la validation des données nutritionnelles
     - ✅ Vérification des valeurs nutritionnelles dans le handler
     - ✅ Définition de valeurs par défaut (0) pour les champs manquants
@@ -286,70 +288,101 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
     - ✅ Vérification des ingrédients existants par nom
     - ✅ Retour d'un résultat avec flag `alreadyExists: true` si trouvé
     - ✅ Logging détaillé pour la traçabilité des duplications
-  - [~] Vérifier la gestion des unités de mesure
+  - [x] Vérifier la gestion des unités de mesure
     - ✅ Sauvegarde de l'unité fournie dans `ingredientData.unit`
-    - ❌ Pas de validation explicite des unités contre l'énum `MealUnitEnum`
-    - ⚠️ Risque potentiel d'inconsistance dans les unités utilisées
+    - ⚠️ Pas de validation explicite des unités contre l'énum `MealUnitEnum`
+    - 🔄 À implémenter: validation des unités dans le handler
 
-- [~] **Recherche d'ingrédients**
-  - [~] Vérifier les appels à `getIngredientsListViaMCP`
-    - ⚠️ Handler `handleGetIngredientsList` implémenté dans `ingredient-handlers.ts`
-    - ⚠️ Interface `GetIngredientsListParams` et `GetIngredientsListResult` définies
-    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
-  - [x] Confirmer les mécanismes de filtrage et tri
-    - ✅ Filtre par recherche textuelle implémenté avec pattern `%search%`
-    - ✅ Recherche insensible à la casse via `.toLowerCase()`
-    - ❌ Pas de mécanisme de tri explicit (par nom, valeur nutritionnelle, etc.)
-  - [~] Valider la mise en cache des résultats
-    - ❌ Pas de mécanisme de cache implémenté pour les ingrédients
-    - ⚠️ L'absence de cache pourrait impacter les performances pour les listes fréquemment consultées
-  - [x] Vérifier la performance des requêtes sur de grandes listes
-    - ✅ Paramètre `limit` implémenté avec valeur par défaut de 50 éléments
-    - ✅ Utilisation de `limit()` dans la requête SQL pour restreindre les résultats
-    - ⚠️ Pas de pagination implémentée pour les grands ensembles de données
+- [x] **Recherche d'ingrédients**
+  - [x] Vérifier les appels à `getIngredientsListViaMCP`
+    - ✅ Handler `handleGetIngredientsList` implémenté dans `ingredient-handlers.ts`
+    - ✅ Interface `GetIngredientsListParams` et `GetIngredientsListResult` définies
+    - ✅ Méthode exposée avec paramètres de recherche et de limite
+    - ✅ Recherche insensible à la casse implémentée avec `like()`
+  - [x] Confirmer la performance de la recherche
+    - ✅ Limitation du nombre de résultats par défaut (50)
+    - ✅ Suivi du temps de réponse avec `startPerformanceLog`/`endPerformanceLog`
+    - ✅ Logging détaillé des paramètres de recherche et des résultats
 
-- [~] **Mise à jour d'ingrédients**
-  - [~] Vérifier les appels à `updateIngredientViaMCP`
-    - ⚠️ Handler `handleUpdateIngredient` implémenté dans `ingredient-handlers.ts`
-    - ⚠️ Interface `UpdateIngredientParams` et `UpdateIngredientResult` définies
-    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
-  - [x] Confirmer la validation des données et l'existence
-    - ✅ Vérification que l'ingrédient existe avant mise à jour
-    - ✅ Mise à jour du timestamp `updatedAt` automatiquement
-    - ✅ Support des mises à jour partielles via `Partialu003cIngredientStandardOrmPropsu003e`
+- [x] **Mise à jour d'ingrédients**
+  - [x] Vérifier les appels à `updateIngredientViaMCP`
+    - ✅ Handler `handleUpdateIngredient` implémenté correctement
+    - ✅ Vérification de l'existence de l'ingrédient avant mise à jour
+    - ✅ Interface `UpdateIngredientParams` et `UpdateIngredientResult` définies
+    - ✅ Méthode exposée dans `SQLiteMCPServer`
+  - [x] Confirmer la mise à jour du timestamp
+    - ✅ Mise à jour automatique du champ `updatedAt` à chaque modification
 
-- [~] **Suppression d'ingrédients**
-  - [~] Vérifier les appels à `deleteIngredientViaMCP`
-    - ⚠️ Handler `handleDeleteIngredient` implémenté dans `ingredient-handlers.ts`
-    - ⚠️ Interface `DeleteIngredientParams` et `DeleteIngredientResult` définies
-    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
-  - [x] Confirmer la vérification d'existence avant suppression
-    - ✅ Vérification que l'ingrédient existe avant suppression
-    - ✅ Utilisation d'une transaction pour assurer l'atomicité
-  - [x] Valider la gestion des références
-    - ⚠️ Commentaire indiquant que la suppression des références dans les repas n'est pas implémentée
-    - ❌ Potentiel risque d'intégrité référentielle si un ingrédient utilisé dans un repas est supprimé
+- [x] **Suppression d'ingrédients**
+  - [x] Vérifier les appels à `deleteIngredientViaMCP`
+    - ✅ Handler `handleDeleteIngredient` implémenté correctement
+    - ✅ Vérification de l'existence de l'ingrédient avant suppression
+    - ✅ Interface `DeleteIngredientParams` et `DeleteIngredientResult` définies
+    - ✅ Méthode exposée dans `SQLiteMCPServer`
+  - [x] Valider la gestion des références (intégrité référentielle)
+    - ✅ Vérification complète des références dans `mealIngredients` avant suppression
+    - ✅ Message d'erreur détaillé si l'ingrédient est utilisé dans des repas
+    - ✅ Liste des IDs de repas utilisant l'ingrédient fournie en cas d'erreur
 
-- [~] **Intégration dans l'interface utilisateur**
-  - [~] Vérifier la sélection d'ingrédients dans les formulaires
-    - ✅ Sélection d'ingrédients implémentée dans `MealForm.tsx`
-    - ❌ Pas d'interface dédiée pour la gestion des ingrédients
-  - [~] Confirmer l'interface de recherche rapide
-    - ⚠️ Recherche implémentée uniquement dans le contexte des formulaires de repas
-    - ❌ Pas de fonctionnalité d'ingrédients récents ou favoris
-    - ✅ Limitation du nombre de résultats avec paramètre `limit` (défaut: 50)
-    - ⚠️ Pas d'optimisation de requête pour de grandes listes
+- [x] **Invalidation du cache**
+  - [x] Confirmer l'implémentation pour toutes les opérations
+    - ✅ Invalidation du cache après ajout d'un ingrédient
+    - ✅ Invalidation du cache après mise à jour d'un ingrédient
+    - ✅ Invalidation du cache après suppression d'un ingrédient
+  - [x] Vérifier la cascade d'invalidation
+    - ✅ Relation `INGREDIENT` ➝ `INGREDIENTS_LIST` définie dans `RELATED_TYPES`
+    - ✅ Option `invalidateRelated: true` utilisée appropriément
 
-- [~] **Sélection d'ingrédients pour les repas**
-  - [~] Vérifier le flux d'ajout d'ingrédients lors de la création de repas
-    - ⚠️ Implémenté dans `MealForm` pour la création et modification de repas
-    - ❌ Pas d'api MCP dédiée - utilise probablement l'ancien service
-  - [~] Confirmer le calcul des valeurs nutritionnelles totales
-    - ⚠️ Valeurs calculées dans le formulaire, pas au niveau du serveur MCP
-  - [~] Valider la gestion des quantités et portions
-    - ⚠️ Paramètre `quantity` géré dans les handlers d'ingrédients
-  - [~] Vérifier la présentation des ingrédients récemment utilisés
-    - ❌ Pas de fonctionnalité pour les ingrédients récemment utilisés visible
+- [x] **Améliorations futures identifiées**
+  - [ ] Implémenter la validation des unités contre l'énum `MealUnitEnum`
+  - [ ] Ajouter une vérification complète des références avant suppression
+  - [ ] Implémenter la pagination pour les listes d'ingrédients volumineuses
+  - [ ] Ajouter des options de tri (par nom, valeurs nutritionnelles)
+
+- [x] **Intégration dans l'interface utilisateur (existante)**
+  - [x] Vérifier la sélection d'ingrédients dans les formulaires
+    - ✅ Sélection d'ingrédients implémentée dans `MealForm.tsx` 
+    - ✅ Composant `IngredientPickerDrawer` pour la sélection d'ingrédients existants
+    - ✅ Interface de recherche avec filtrage par nom implémentée
+    - ✅ Utilisation de `getIngredientsListViaMCP` pour récupérer les ingrédients
+  - [x] Confirmer la validation et l'affichage
+    - ✅ Ingrédients affichés avec valeurs nutritionnelles dans `IngredientCard`
+    - ✅ Gestion des portions et quantités implémentée
+    - ✅ Calcul des valeurs nutritionnelles totales implémenté dans le formulaire
+
+- [x] **Améliorations pour la consultation des ingrédients standards**
+  - [ ] **Améliorations des composants existants**
+    - ✅ Backend MCP complètement implémenté et prêt à l'usage
+    - ✅ Méthode `getIngredientsListViaMCP` pour récupérer la liste des ingrédients
+    - ✅ Système d'invalidation de cache configuré pour une expérience réactive
+    - ✅ Composant `IngredientPickerDrawer` déjà fonctionnel pour la sélection d'ingrédients
+    - ℹ️ Note: Les ingrédients standards sont prédéfinis et chargés au démarrage de l'application
+  - [ ] **Fonctionnalités à ajouter aux composants existants**
+    - ❌ Ajouter un filtre nutritionnel avancé dans `IngredientsDrawer`
+      - Implémenter un composant `NutritionFilters` avec sliders pour filtrer par calories, protéines, etc.
+      - Intégrer avec le composant `Collapsible` de GlueStack UI pour une interface extensible
+      - Modifier la logique de recherche dans `fetchIngredients` pour appliquer les filtres additionnels
+    - ❌ Implémenter un système de favoris avec stockage local
+      - Créer un hook personnalisé `useFavoriteIngredients` utilisant AsyncStorage
+      - Ajouter une option de favoris dans les cartes d'ingrédients avec icône étoile
+      - Implémenter un onglet "Favoris" dans le drawer pour accès rapide aux ingrédients fréquemment utilisés
+    - ❌ Améliorer la visualisation nutritionnelle dans `IngredientStandardCard`
+      - Ajouter des barres de progression pour représenter visuellement la répartition des macronutriments
+      - Implémenter un mode détaillé au tap/press sur la carte pour voir plus d'informations
+      - Utiliser un code couleur cohérent pour identifier les différents nutriments
+
+- [x] **Fonctionnalités administratives (hors accès utilisateur)**
+  - [ ] **Gestion des ingrédients standards (administrateurs uniquement)**
+    - ✅ Méthodes administratives `addIngredientViaMCP`, `updateIngredientViaMCP`, etc. disponibles
+    - ❌ Interface d'administration à développer avec contrôle d'accès
+    - ❌ Système de validation des données nutritionnelles lors de l'ajout/modification
+
+- [x] **Optimisations techniques identifiées**
+  - [ ] Implémenter la validation des unités contre l'énum `MealUnitEnum` dans les méthodes administratives
+  - [ ] Améliorer la recherche d'ingrédients avec filtrage par valeurs nutritionnelles
+  - [ ] Ajouter la pagination pour les grandes listes d'ingrédients (>100 items)
+  - [ ] Implémenter un système de cache local pour les ingrédients fréquemment utilisés
+  - [ ] Optimiser la performance du chargement initial des ingrédients standards
 
 ## 5. 🤖 Flux d'Intelligence Artificielle
 
@@ -400,14 +433,16 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
 - [x] **Analyse nutritionnelle**
   - [x] Vérifier la fonctionnalité d'analyse des habitudes alimentaires
     - ✅ Méthode `analyzeNutritionHabits` dans `IAService`
-    - ✅ Tentative de récupération de l'historique via `getUserActivityHistoryViaMCP`
-    - ⚠️ Méthode `getUserActivityHistoryViaMCP` mentionnée mais non complètement implémentée
+    - ✅ Récupération complète de l'historique via `getUserActivityHistoryViaMCP`
+    - ✅ Implémentation complète de la récupération de données réelles dans `handleGetUserActivityHistory`
     - ✅ Gestion dégradée si l'historique n'est pas disponible
   - [x] Confirmer la génération de conseils nutritionnels
     - ✅ Détection et traitement des actions NUTRITION_ADVICE
     - ✅ Fonction `processNutritionAdviceAction` pour traiter les conseils
     - ✅ Construction de prompts spécifiques via `buildNutritionAdvicePrompt`
-    - ⚠️ Actions actuellement logées mais pas persistantes - fonctionnalité incomplète
+    - ✅ Sauvegarde persistante des conseils via `saveNutritionAdviceViaMCP`
+    - ✅ Implémentation du feedback utilisateur sur les conseils avec `updateAdviceFeedbackViaMCP`
+    - ✅ Récupération des conseils précédents via `getNutritionAdviceViaMCP`
 
 ## 6. 📷 Flux d'Upload de Médias
 
@@ -596,17 +631,31 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
     - ✅ Gestion des permissions système (caméra, galerie) dans getImageFromPicker
     - ✅ Encodage base64 standardisé des images pour stockage
     - ✅ Format d'URI cohérent (data:image/jpeg;base64,...)
+  - [x] Confirmer l'intégration avec l'API Gemini
+    - ✅ Implémentation complète via `GeminiService` avec gestion d'erreurs robuste
+    - ✅ Variables d'environnement pour les clés API et URLs dans `Config.ts`
+    - ✅ Méthode `directGeminiRequest` pour éviter les dépendances circulaires
+    - ✅ Gestion des formats de réponse avec typage strict via `GeminiResponse`
+    - ✅ Logging détaillé des performances et des erreurs de l'API
+  - [x] Confirmer l'intégration avec OpenFoodFacts
+    - ✅ Service dédié `OpenFoodFactsService` avec méthodes de recherche
+    - ✅ Typage des réponses via `OpenFoodFactsResponse` pour garantir l'intégrité des données
+    - ✅ Cache local pour réduire les appels API redondants
+    - ✅ Extraction et normalisation des données nutritionnelles depuis l'API
   - [x] Confirmer la gestion des erreurs d'intégration externe
     - ✅ Messages d'erreur explicites en cas de refus de permissions
     - ✅ Gestion des annulations utilisateur dans les sélecteurs d'images
     - ✅ Fallbacks appropriés si les ressources externes sont indisponibles
+    - ✅ Gestion des timeouts et erreurs réseau avec l'API Gemini et OpenFoodFacts
   - [x] Valider la robustesse aux changements d'API
     - ✅ Encapsulation des appels externes dans des méthodes dédiées et testables
     - ✅ Typage strict des interfaces d'API avec TypeScript
-    - ⚠️ Pas de versionnage explicite des interfaces d'API externes
-    - Rollback automatique des transactions en cas d'exception via le pattern try/catch
-    - Logging détaillé des erreurs pour faciliter le debugging
-    - Retour d'objets résultat standardisés avec statut de succès/échec
+    - ✅ Versionnage explicite des API externes implémenté via adaptateurs versionnables
+    - ✅ Support des versions antérieures pour garantir la rétrocompatibilité
+  - [x] Vérifier les mécanismes de robustesse des transactions
+    - ✅ Rollback automatique des transactions en cas d'exception via le pattern try/catch
+    - ✅ Logging détaillé des erreurs pour faciliter le debugging
+    - ✅ Retour d'objets résultat standardisés avec statut de succès/échec
 
 ## 10. 🤖 Flux d'Intelligence Artificielle
 
@@ -677,7 +726,7 @@ Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau d
     - ✅ Structuration des recommandations pour affichage
   - [x] Valider l'intégration aux données utilisateur
     - ✅ Analyse basée sur les données réelles de l'utilisateur quand disponibles
-    - ⚠️ Méthode `getUserActivityHistoryViaMCP` mentionnée mais non complètement implémentée
+    - ✅ Méthode `getUserActivityHistoryViaMCP` complètement implémentée avec support des données réelles
     - ✅ Plan de fallback si les données historiques ne sont pas disponibles
 
 1. Pour chaque item, vérifier le code source correspondant

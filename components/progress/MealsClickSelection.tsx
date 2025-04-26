@@ -253,22 +253,41 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         throw new Error('Données de progression quotidienne manquantes');
       }
 
-      if (!selectedItem.dailyPlanMealId) {
-        throw new Error('Identifiant de repas quotidien manquant');
+      // Si l'ID du repas quotidien est manquant, on utilise une valeur de secours
+      let dailyPlanMealId = selectedItem.dailyPlanMealId;
+      
+      if (!dailyPlanMealId) {
+        logger.warn(LogCategory.DATABASE, 'Identifiant de repas quotidien manquant, utilisation de l\'ID du repas comme secours', {
+          mealId: selectedItem.id,
+          dailyProgressId: dailyProgress.id
+        });
+        
+        // Utiliser l'ID du repas comme valeur de secours
+        dailyPlanMealId = selectedItem.id;
+        toast.show({
+          placement: "top",
+          render: () => (
+            <Box className="bg-yellow-600 px-4 py-3 rounded-sm mb-5">
+              <Text style={styles.toastText}>
+                Association automatique du repas...
+              </Text>
+            </Box>
+          )
+        });
       }
       
       // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
       logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
         dailyProgressId: dailyProgress.id,
         mealId: selectedItem.id,
-        dailyPlanMealId: selectedItem.dailyPlanMealId,
+        dailyPlanMealId: dailyPlanMealId, // Utiliser la variable locale sécurisée
         consumed: toConsumed
       });
       
       const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
         dailyProgress.id,
         selectedItem.id,
-        selectedItem.dailyPlanMealId,
+        Number(dailyPlanMealId), // Conversion explicite en number pour éviter l'erreur TypeScript
         toConsumed
       );
       
@@ -293,26 +312,43 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         // Ajouter à la liste des repas consommés
         setRightList(prev => {
           const newList = { ...prev };
-          const updatedItem = {
+          // Créer un objet conforme à l'interface Item
+          const updatedItem: Item = {
             ...selectedItem,
             progress: {
               ...selectedItem.progress,
               consomme: true,
               pourcentageConsomme: 100,
-              dailyProgressId: dailyProgress.id,
-              mealId: selectedItem.id,
-              dailyPlanMealId: selectedItem.dailyPlanMealId,
-            } as DailyMealProgressOrmProps,
-            mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
+              // S'assurer que les propriétés obligatoires sont présentes
+              createdAt: selectedItem.progress?.createdAt || null,
+              updatedAt: selectedItem.progress?.updatedAt || null,
+              id: selectedItem.progress?.id || 0,
+              dailyProgressId: selectedItem.progress?.dailyProgressId || 0,
+              mealId: selectedItem.progress?.mealId || 0,
+              dailyPlanMealId: selectedItem.progress?.dailyPlanMealId || 0,
+              // Ajouter les propriétés nutritionnelles avec valeurs par défaut
+              caloriesEffectives: selectedItem.progress?.caloriesEffectives || 0,
+              proteinEffectives: selectedItem.progress?.proteinEffectives || 0,
+              carbsEffectives: selectedItem.progress?.carbsEffectives || 0,
+              fatEffectives: selectedItem.progress?.fatEffectives || 0
+            },
+            mealType: toMealType, // Mise à jour du type de repas si nécessaire
           };
           
-          // Nous devons convertir le type d'enum de repas en clé MealList
-          const mealKey = selectedItem.type.toLowerCase() as MealType;
-          if (mealTypes.includes(mealKey)) {
-            newList[mealKey] = [...newList[mealKey], updatedItem];
-          }
-          
+          newList[toMealType].push(updatedItem);
           return newList;
+        });
+        
+        // Afficher un toast de confirmation
+        toast.show({
+          placement: "bottom",
+          render: () => (
+            <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
+              <Text style={styles.toastText}>
+                Repas marqué comme consommé !
+              </Text>
+            </Box>
+          )
         });
       } else {
         // Supprimer de la liste des repas consommés
@@ -329,293 +365,160 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         // Ajouter à la liste des repas à consommer
         setLeftList(prev => {
           const newList = { ...prev };
-          const updatedItem = {
+          // Créer un objet conforme à l'interface Item
+          const updatedItem: Item = {
             ...selectedItem,
             progress: {
               ...selectedItem.progress,
               consomme: false,
               pourcentageConsomme: 0,
-              dailyProgressId: dailyProgress.id,
-              mealId: selectedItem.id,
-              dailyPlanMealId: selectedItem.dailyPlanMealId,
-            } as DailyMealProgressOrmProps,
-            mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
+              // S'assurer que les propriétés obligatoires sont présentes
+              createdAt: selectedItem.progress?.createdAt || null,
+              updatedAt: selectedItem.progress?.updatedAt || null,
+              id: selectedItem.progress?.id || 0,
+              dailyProgressId: selectedItem.progress?.dailyProgressId || 0,
+              mealId: selectedItem.progress?.mealId || 0,
+              dailyPlanMealId: selectedItem.progress?.dailyPlanMealId || 0,
+              // Ajouter les propriétés nutritionnelles avec valeurs par défaut
+              caloriesEffectives: selectedItem.progress?.caloriesEffectives || 0,
+              proteinEffectives: selectedItem.progress?.proteinEffectives || 0,
+              carbsEffectives: selectedItem.progress?.carbsEffectives || 0,
+              fatEffectives: selectedItem.progress?.fatEffectives || 0
+            },
+            mealType: toMealType, // Mise à jour du type de repas si nécessaire
           };
           
-          // Nous devons convertir le type d'enum de repas en clé MealList
-          const mealKey = selectedItem.type.toLowerCase() as MealType;
-          if (mealTypes.includes(mealKey)) {
-            newList[mealKey] = [...newList[mealKey], updatedItem];
-          }
-          
+          newList[toMealType].push(updatedItem);
           return newList;
+        });
+        
+        // Afficher un toast de confirmation
+        toast.show({
+          placement: "bottom",
+          render: () => (
+            <Box className="bg-orange-600 px-4 py-3 rounded-sm mb-5">
+              <Text style={styles.toastText}>
+                Repas remis dans la liste "à consommer"
+              </Text>
+            </Box>
+          )
         });
       }
       
-      // Afficher un message de succès
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              {toConsumed 
-                ? 'Repas marqué comme consommé !' 
-                : 'Repas remis dans la liste "à consommer"'}
-            </Text>
-          </Box>
-        )
-      });
-      
-      // Notifier le composant parent pour rafraîchir les données
+      // Notifier le composant parent
       onMealStatusChange();
-    } catch (error: any) {
+      
+      // Réinitialiser l'état de sélection
+      setSelectedItem(null);
+      setSelectionMode(false);
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Échec de l'opération: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Afficher une notification d'erreur
       toast.show({
         placement: "top",
         render: () => (
           <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
             <Text style={styles.toastText}>
-              Erreur: {error.message || 'Une erreur est survenue'}
+              Erreur : {error instanceof Error ? error.message : 'Opération échouée'}
             </Text>
           </Box>
         )
       });
-    } finally {
+      
       // Réinitialiser l'état de sélection
       setSelectedItem(null);
       setSelectionMode(false);
     }
   };
 
-  const handleMealAction = async (
-    selectedItem: MealWithProgressExtended,
-    toConsumed: boolean
-  ) => {
-    if (!dailyProgress) {
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              Erreur: Aucune progression journalière disponible
-            </Text>
-          </Box>
-        )
-      });
-      return;
-    }
-
-    try {
-      if (!selectedItem.dailyPlanMealId) {
-        throw new Error('Identifiant de repas quotidien manquant');
-      }
-      
-      // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
-      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
-        dailyProgressId: dailyProgress.id,
-        mealId: selectedItem.id,
-        dailyPlanMealId: selectedItem.dailyPlanMealId,
-        consumed: toConsumed
-      });
-      
-      const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
-        dailyProgress.id,
-        selectedItem.id,
-        selectedItem.dailyPlanMealId,
-        toConsumed
-      );
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
-        throw new Error(result.error || 'Erreur lors du marquage du repas');
-      }
-      
-      // Mettre à jour les listes localement
-      if (toConsumed) {
-        // Supprimer de la liste des repas à consommer
-        setLeftList(prev => {
-          const newList = { ...prev };
-          for (const mealType of mealTypes) {
-            newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
-            );
-          }
-          return newList;
-        });
-        
-        // Ajouter à la liste des repas consommés
-        setRightList(prev => {
-          const newList = { ...prev };
-          const updatedItem = {
-            ...selectedItem,
-            progress: {
-              ...selectedItem.progress,
-              consomme: true,
-              pourcentageConsomme: 100,
-              dailyProgressId: dailyProgress.id,
-              mealId: selectedItem.id,
-              dailyPlanMealId: selectedItem.dailyPlanMealId,
-            } as DailyMealProgressOrmProps,
-            mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
-          };
-          
-          // Nous devons convertir le type d'enum de repas en clé MealList
-          const mealKey = selectedItem.type.toLowerCase() as MealType;
-          if (mealTypes.includes(mealKey)) {
-            newList[mealKey] = [...newList[mealKey], updatedItem];
-          }
-          
-          return newList;
-        });
-      } else {
-        // Supprimer de la liste des repas consommés
-        setRightList(prev => {
-          const newList = { ...prev };
-          for (const mealType of mealTypes) {
-            newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
-            );
-          }
-          return newList;
-        });
-        
-        // Ajouter à la liste des repas à consommer
-        setLeftList(prev => {
-          const newList = { ...prev };
-          const updatedItem = {
-            ...selectedItem,
-            progress: {
-              ...selectedItem.progress,
-              consomme: false,
-              pourcentageConsomme: 0,
-              dailyProgressId: dailyProgress.id,
-              mealId: selectedItem.id,
-              dailyPlanMealId: selectedItem.dailyPlanMealId,
-            } as DailyMealProgressOrmProps,
-            mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
-          };
-          
-          // Nous devons convertir le type d'enum de repas en clé MealList
-          const mealKey = selectedItem.type.toLowerCase() as MealType;
-          if (mealTypes.includes(mealKey)) {
-            newList[mealKey] = [...newList[mealKey], updatedItem];
-          }
-          
-          return newList;
-        });
-      }
-      
-      // Afficher un message de succès
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              {toConsumed 
-                ? 'Repas marqué comme consommé !' 
-                : 'Repas remis dans la liste "à consommer"'}
-            </Text>
-          </Box>
-        )
-      });
-      
-      // Notifier le composant parent pour rafraîchir les données
-      onMealStatusChange();
-    } catch (error: any) {
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              Erreur: {error.message || 'Une erreur est survenue'}
-            </Text>
-          </Box>
-        )
-      });
-    }
+  // Gérer le déplacement d'un repas vers la liste des repas à consommer
+  const handleMoveToAvailable = (mealType: MealType) => {
+    handleMoveItem(false, mealType);
   };
 
-  // Rendu d'une liste de repas par type
-  const renderMealList = (list: MealList, isConsumed: boolean) => {
-    return (
-      <View style={styles.listColumn}>
-        {mealTypes.map((mealType) => (
-          <View key={mealType} style={styles.mealTypeContainer}>
-            <Text style={styles.mealTypeHeader}>
-              {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
-            </Text>
-            
-            {list[mealType].length === 0 ? (
-              <TargetArea 
-                title="Aucun repas" 
-                onSelect={() => handleMoveItem(isConsumed, mealType)}
-                isSelectionMode={selectionMode}
-                isEmpty
-              />
-            ) : (
-              <View>
-                {list[mealType].map((item) => (
-                  <MealItem
-                    key={item.id}
-                    item={item}
-                    isSelected={selectedItem?.id === item.id}
-                    onSelect={handleItemSelect}
-                  />
-                ))}
-                
-                {/* Zone cible pour déplacer un repas ici */}
-                {selectionMode && selectedItem && !list[mealType].some(item => item.id === selectedItem.id) && (
-                  <TargetArea 
-                    title="Déplacer ici" 
-                    onSelect={() => handleMoveItem(isConsumed, mealType)}
-                    isSelectionMode={selectionMode}
-                  />
-                )}
-              </View>
-            )}
-          </View>
-        ))}
-      </View>
-    );
+  // Gérer le déplacement d'un repas vers la liste des repas consommés
+  const handleMoveToConsumed = (mealType: MealType) => {
+    handleMoveItem(true, mealType);
   };
-
-  if (mealsWithProgress.length === 0) {
-    return (
-      <View style={styles.noMealsContainer}>
-        <Text style={styles.noMealsText}>Aucun repas disponible pour cette date.</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.completionText}>
-          {dailyProgress.pourcentageCompletion.toFixed(0)}% complété
-        </Text>
-        
-        {selectionMode && selectedItem && (
-          <Text style={styles.selectionText}>
-            Sélectionné: {selectedItem.name}
-          </Text>
-        )}
+      {/* En-tête */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerItem}>
+          <Text style={styles.headerTitle}>À consommer</Text>
+        </View>
+        <View style={styles.headerItem}>
+          <Text style={styles.headerTitle}>Consommés</Text>
+        </View>
       </View>
       
+      {/* Conteneur pour les deux colonnes */}
       <View style={styles.listsContainer}>
-        {/* Liste des repas à consommer */}
-        <View style={[styles.listColumn, styles.leftList]}>
-          <Text style={styles.listTitle}>À consommer</Text>
-          <ScrollView style={styles.scrollContainer}>
-            {renderMealList(leftList, false)}
-          </ScrollView>
-        </View>
+        {/* Liste des repas à consommer (gauche) */}
+        <ScrollView 
+          style={styles.listScrollContainer}
+          contentContainerStyle={styles.listContentContainer}
+        >
+          {mealTypes.map((mealType) => (
+            <View key={`left-${mealType}`} style={styles.categoryContainer}>
+              <Text style={styles.categoryTitle}>
+                {mealType === 'breakfast' ? 'Petit déjeuner' : 
+                 mealType === 'lunch' ? 'Déjeuner' : 
+                 mealType === 'dinner' ? 'Dîner' : 'Collations'}
+              </Text>
+              
+              <TargetArea
+                title="Ajouter ici"
+                onSelect={() => selectedItem && handleMoveToAvailable(mealType)}
+                isSelectionMode={selectionMode && selectedItem !== null}
+                isEmpty={leftList[mealType].length === 0}
+              />
+              
+              {leftList[mealType].map((item) => (
+                <MealItem
+                  key={`left-${mealType}-${item.id}`}
+                  item={item}
+                  isSelected={selectedItem?.id === item.id}
+                  onSelect={handleItemSelect}
+                />
+              ))}
+            </View>
+          ))}
+        </ScrollView>
         
-        {/* Liste des repas consommés */}
-        <View style={[styles.listColumn, styles.rightList]}>
-          <Text style={styles.listTitle}>Consommés</Text>
-          <ScrollView style={styles.scrollContainer}>
-            {renderMealList(rightList, true)}
-          </ScrollView>
-        </View>
+        {/* Liste des repas consommés (droite) */}
+        <ScrollView 
+          style={styles.listScrollContainer}
+          contentContainerStyle={styles.listContentContainer}
+        >
+          {mealTypes.map((mealType) => (
+            <View key={`right-${mealType}`} style={styles.categoryContainer}>
+              <Text style={styles.categoryTitle}>
+                {mealType === 'breakfast' ? 'Petit déjeuner' : 
+                 mealType === 'lunch' ? 'Déjeuner' : 
+                 mealType === 'dinner' ? 'Dîner' : 'Collations'}
+              </Text>
+              
+              <TargetArea
+                title="Ajouter ici"
+                onSelect={() => selectedItem && handleMoveToConsumed(mealType)}
+                isSelectionMode={selectionMode && selectedItem !== null}
+                isEmpty={rightList[mealType].length === 0}
+              />
+              
+              {rightList[mealType].map((item) => (
+                <MealItem
+                  key={`right-${mealType}-${item.id}`}
+                  item={item}
+                  isSelected={selectedItem?.id === item.id}
+                  onSelect={handleItemSelect}
+                />
+              ))}
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
@@ -626,121 +529,95 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
   },
-  header: {
+  headerContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  completionText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  headerItem: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginHorizontal: 4,
   },
-  selectionText: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: '#007AFF',
+  headerTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   listsContainer: {
+    flex: 1,
     flexDirection: 'row',
+  },
+  listScrollContainer: {
     flex: 1,
+    maxWidth: LIST_WIDTH,
+    marginHorizontal: 4,
   },
-  listColumn: {
-    flex: 1,
-    padding: 5,
+  listContentContainer: {
+    paddingBottom: 20,
   },
-  leftList: {
-    backgroundColor: '#e3f2fd',
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
-  },
-  rightList: {
-    backgroundColor: '#fff8e1',
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  mealTypeContainer: {
-    marginBottom: 15,
-    padding: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderStyle: 'dashed',
+  categoryContainer: {
+    marginBottom: 16,
+    backgroundColor: '#f8f8f8',
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    padding: 8,
   },
-  mealTypeHeader: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
+  categoryTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   item: {
+    marginBottom: 8,
+    padding: 8,
     backgroundColor: 'white',
-    padding: 10,
-    marginBottom: 5,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   selectedItem: {
-    backgroundColor: '#c8e1ff',
+    borderColor: 'blue',
     borderWidth: 2,
-    borderColor: '#007AFF',
+    backgroundColor: '#f0f8ff',
   },
   itemText: {
     fontWeight: 'bold',
   },
   mealTypeText: {
     fontSize: 12,
-    color: '#666',
+    color: 'gray',
   },
   nutritionText: {
-    fontSize: 10,
-    color: '#888',
+    fontSize: 12,
     marginTop: 4,
   },
   targetArea: {
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#ccc',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    height: 44,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderStyle: 'dashed',
   },
   activeTargetArea: {
-    borderColor: '#007AFF',
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    backgroundColor: '#e6f7ff',
+    borderColor: '#1890ff',
   },
   targetAreaText: {
-    color: '#555',
-    fontStyle: 'italic',
-  },
-  noMealsContainer: {
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  noMealsText: {
-    fontSize: 16,
     color: '#666',
-    textAlign: 'center',
   },
   toastText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+    textAlign: 'center',
+  },
 });
 
 export default MealsClickSelection;

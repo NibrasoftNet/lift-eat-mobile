@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import {
   Drawer,
   DrawerBackdrop,
@@ -32,6 +32,43 @@ import {
   SelectPortal,
   SelectTrigger,
 } from '../ui/select';
+import { generalSettingsDrawerService } from '@/utils/services/general-settings-drawer.service';
+import { GeneralSettingsMenuItem } from '@/utils/interfaces/drawer.interface';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+
+// Mappage des noms d'icu00f4nes aux composants d'icu00f4nes
+const iconMapping: Record<string, any> = {
+  'CircleHelp': CircleHelp,
+  'ShieldAlert': ShieldAlert,
+  'Newspaper': Newspaper,
+  'Earth': Earth,
+  'Settings': Settings,
+};
+
+// Composant pour afficher un u00e9lu00e9ment du menu des paramètres
+const GeneralMenuItem = ({ item }: { item: GeneralSettingsMenuItem }) => {
+  // Utiliser le callback pour gu00e9rer l'action de l'u00e9lu00e9ment
+  const handlePress = useCallback(() => {
+    // Utiliser le service pour gu00e9rer l'action du menu
+    generalSettingsDrawerService.handleMenuAction(item.action, () => {
+      logger.info(LogCategory.UI, `Menu action '${item.action}' completed`);
+    });
+  }, [item.action]);
+  
+  // Obtenir le composant d'icu00f4ne correspondant au nom d'icu00f4ne
+  const IconComponent = iconMapping[item.icon] || Settings; // Fallback sur Settings si l'icu00f4ne n'est pas trouvge
+  
+  return (
+    <Pressable
+      onPress={handlePress}
+      className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-2 mb-2"
+    >
+      <Text className="text-xl">{item.title}</Text>
+      <Icon as={IconComponent} size="xl" />
+    </Pressable>
+  );
+};
 
 function GeneralSettingsDrawer({
   showGeneralSettingsDrawer,
@@ -40,6 +77,14 @@ function GeneralSettingsDrawer({
   showGeneralSettingsDrawer: boolean;
   setShowGeneralSettingsDrawer: Dispatch<SetStateAction<boolean>>;
 }) {
+  // u00c9tat pour la langue su00e9lectionnu00e9e
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('ux');
+  
+  // Gestionnaire de changement de langue
+  const handleLanguageChange = useCallback((value: string) => {
+    setSelectedLanguage(value);
+    generalSettingsDrawerService.changeLanguage(value);
+  }, []);
   return (
     <Drawer
       isOpen={showGeneralSettingsDrawer}
@@ -58,8 +103,12 @@ function GeneralSettingsDrawer({
           </HStack>
         </DrawerHeader>
         <DrawerBody>
-          <Pressable onPress={() => console.log('General')}>
-            <Select>
+          {/* Sélecteur de langue utilisant le service pour obtenir les langues disponibles */}
+          <Pressable>
+            <Select
+              selectedValue={selectedLanguage}
+              onValueChange={handleLanguageChange}
+            >
               <SelectTrigger
                 variant="underlined"
                 size="md"
@@ -74,41 +123,19 @@ function GeneralSettingsDrawer({
                   <SelectDragIndicatorWrapper>
                     <SelectDragIndicator />
                   </SelectDragIndicatorWrapper>
-                  <SelectItem label="Francais" value="ux" />
-                  <SelectItem label="English" value="web" />
-                  <SelectItem label="Arabic" value="arabic" />
+                  {/* Utiliser le service pour générer les options de langues */}
+                  {generalSettingsDrawerService.getAvailableLanguages().map((lang) => (
+                    <SelectItem key={lang.value} label={lang.label} value={lang.value} />
+                  ))}
                 </SelectContent>
               </SelectPortal>
             </Select>
           </Pressable>
-          <Pressable
-            onPress={() => console.log('General')}
-            className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-2 mb-2"
-          >
-            <Text className="text-xl">Help</Text>
-            <Icon as={CircleHelp} size="xl" />
-          </Pressable>
-          <Pressable
-            onPress={() => console.log('General')}
-            className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-2 mb-2"
-          >
-            <Text className="text-xl">Privacy & Policy</Text>
-            <Icon as={ShieldAlert} size="xl" />
-          </Pressable>
-          <Pressable
-            onPress={() => console.log('General')}
-            className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-2 mb-2"
-          >
-            <Text className="text-xl">Blog</Text>
-            <Icon as={Newspaper} size="xl" />
-          </Pressable>
-          <Pressable
-            onPress={() => console.log('General')}
-            className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-2 mb-2"
-          >
-            <Text className="text-xl">Website</Text>
-            <Icon as={Earth} size="xl" />
-          </Pressable>
+          
+          {/* Utiliser le service pour générer les éléments du menu */}
+          {generalSettingsDrawerService.getGeneralMenuItems().map((item) => (
+            <GeneralMenuItem key={item.action} item={item} />
+          ))}
         </DrawerBody>
         <DrawerFooter>
           <Button

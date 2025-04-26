@@ -34,12 +34,12 @@ import { Colors } from '@/utils/constants/Colors';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { authPagesService } from '@/utils/services/pages/auth-pages.service';
 
 export default function Login() {
   const router = useRouter();
   const { setUser } = useSessionStore();
   const toast = useToast();
-  const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = React.useState<boolean>(false);
   const {
     control,
@@ -55,24 +55,24 @@ export default function Login() {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      logger.info(LogCategory.DATABASE, 'Finding or creating user via MCP Server', {
+      logger.info(LogCategory.AUTH, 'Finding or creating user via auth service', {
         email: data.email
       });
       
-      // Utiliser directement le MCP Server pour trouver ou créer un utilisateur
-      const result = await sqliteMCPServer.findOrCreateUserViaMCP(data.email);
+      // Utiliser le service d'authentification pour trouver ou créer un utilisateur
+      const result = await authPagesService.findOrCreateUser(data.email);
       
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to find or create user: ${result.error}`);
+        logger.error(LogCategory.AUTH, `Failed to find or create user: ${result.error}`);
         throw new Error(result.error || 'Failed to login');
       }
       
-      if (!result.user) {
-        logger.warn(LogCategory.DATABASE, `User with email ${data.email} could not be created`);
+      if (!result.data) {
+        logger.warn(LogCategory.AUTH, `User with email ${data.email} could not be created`);
         throw new Error('Failed to create user account');
       }
       
-      return result.user;
+      return result.data;
     },
     onSuccess: async (data) => {
       toast.show({

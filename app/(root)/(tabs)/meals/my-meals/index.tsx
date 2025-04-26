@@ -21,12 +21,11 @@ import { Colors } from '@/utils/constants/Colors';
 import { Card } from '@/components/ui/card';
 import MealTypeBox from '@/components/boxes/MealTypeBox';
 import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
-import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
+import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 
 export default function MyMealsScreen() {
   const router = useRouter();
@@ -42,50 +41,37 @@ export default function MyMealsScreen() {
     CuisineTypeEnum | undefined
   >(undefined);
 
-  // Fonction de requête optimisée et avec une meilleure gestion des erreurs
+  // Fonction de requête optimisée utilisant le service mealPagesService
   const queryFn = useCallback(async () => {
-    logger.info(LogCategory.DATABASE, `Getting meals list via MCP Server`, {
+    logger.info(LogCategory.DATABASE, `Getting meals list via meal pages service`, {
       cuisine: selectedCuisine,
       mealType: selectedMealType,
       search: searchMealName
     });
     
-    // Convertir les énumérations en chaînes de caractères si nécessaire
-    const cuisineStr = selectedCuisine ? String(selectedCuisine) : undefined;
-    const mealTypeStr = selectedMealType ? String(selectedMealType) : undefined;
-    
-    // Récupérer l'ID utilisateur de manière standardisée
-    const userId = getCurrentUserIdSync();
-    if (!userId) {
-      logger.error(LogCategory.AUTH, "No user ID available for meals list query");
-      return [];
-    }
-    
     try {
-      const result = await sqliteMCPServer.getMealsListViaMCP(
-        userId, 
-        cuisineStr, 
-        mealTypeStr, 
-        searchMealName || undefined
-      );
+      // Utiliser le service de pages pour récupérer les repas avec filtrage
+      const result = await mealPagesService.getMealsList({
+        cuisine: selectedCuisine,
+        mealType: selectedMealType,
+        search: searchMealName,
+        // La pagination peut être ajoutée ici si nécessaire
+        // page: 1,
+        // limit: 50
+      });
       
-      if (!result || !result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to get meals list via MCP Server: ${result?.error || 'Unknown error'}`);
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to get meals list: ${result.error || 'Unknown error'}`);
         return [];
       }
       
-      if (!result.meals) {
-        logger.warn(LogCategory.DATABASE, `No meals returned from MCP server`);
-        return [];
-      }
-      
-      if (!Array.isArray(result.meals)) {
-        logger.error(LogCategory.DATABASE, `Invalid meals data returned: meals is not an array`);
+      if (!result.data?.meals) {
+        logger.warn(LogCategory.DATABASE, `No meals returned from service`);
         return [];
       }
       
       // Valider chaque repas pour éviter les "meal undefined"
-      const validMeals = result.meals.filter(meal => {
+      const validMeals = result.data.meals.filter(meal => {
         if (!meal || typeof meal !== 'object' || meal === null) {
           logger.error(LogCategory.DATABASE, `Invalid meal object found in meals list`);
           monitorObjectExistence('meal', meal, 'MyMealsScreen.queryFn');
@@ -94,13 +80,13 @@ export default function MyMealsScreen() {
         return true;
       });
       
-      logger.info(LogCategory.DATABASE, `Retrieved ${validMeals.length} valid meals for user ${userId}`);
+      logger.info(LogCategory.DATABASE, `Retrieved ${validMeals.length} valid meals`);
       return validMeals;
     } catch (error) {
       logger.error(LogCategory.DATABASE, `Error fetching meals list: ${error}`);
       return [];
     }
-  }, [selectedCuisine, selectedMealType, searchMealName]);
+  }, [searchMealName, selectedMealType, selectedCuisine]);
 
   const {
     data: meals,

@@ -13,12 +13,20 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
+import { DailyProgressOrmProps } from '@/db/schema';
 import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { markMealAsConsumed } from '@/utils/services/progress.service';
 import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
+import { 
+  mealsCompanyStyleService, 
+  MealItem, 
+  MealList, 
+  MealType, 
+  MealListsState 
+} from '@/utils/services/meals-company-style.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { logger } from '@/utils/services/logging.service';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
 interface MealWithProgressExtended extends MealWithProgress {
@@ -32,34 +40,6 @@ interface MealsCompanyStyleV2Props {
   onMealStatusChange: () => void;
 }
 
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
-
-type Item = {
-  id: number;
-  name: string;
-  type: string;
-  mealType: MealType;
-  carbs: number;
-  protein: number;
-  fat: number;
-  progress?: DailyMealProgressOrmProps | null;
-  dailyPlanMealId?: number;
-};
-
-type MealList = {
-  breakfast: Item[];
-  lunch: Item[];
-  dinner: Item[];
-  snacks: Item[];
-};
-
-const mealTypes: (keyof MealList)[] = [
-  'breakfast',
-  'lunch',
-  'dinner',
-  'snacks',
-];
-
 const { width, height } = Dimensions.get('window');
 const LIST_WIDTH = width / 2 - 10;
 const SUBLIST_HEIGHT = height / 4 - 30;
@@ -72,7 +52,7 @@ const DraggableItem = ({
   isSelected,
   onSelect,
 }: {
-  item: Item;
+  item: MealItem;
   onDragStart: () => void;
   onDragEnd: (droppedOnRight: boolean, droppedOnMealType: MealType) => void;
   isActive: boolean;
@@ -181,189 +161,95 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
 
-  // Initialize empty lists
-  const initialLeftList: MealList = {
-    breakfast: [],
-    lunch: [],
-    dinner: [],
-    snacks: [],
+  // Initialiser les états locaux
+  const initialState: MealListsState = {
+    leftList: {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    },
+    rightList: {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    }
   };
 
-  const initialRightList: MealList = {
-    breakfast: [],
-    lunch: [],
-    dinner: [],
-    snacks: [],
-  };
-
-  const [leftList, setLeftList] = useState<MealList>(initialLeftList);
-  const [rightList, setRightList] = useState<MealList>(initialRightList);
+  const [mealListsState, setMealListsState] = useState<MealListsState>(initialState);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
 
-  // Déterminer le type de repas
-  const determineMealType = (type: string | null): MealType => {
-    if (!type) return 'snacks';
-    
-    const lowerType = type.toLowerCase();
-    
-    if (lowerType.includes('breakfast')) return 'breakfast';
-    if (lowerType.includes('lunch')) return 'lunch';
-    if (lowerType.includes('dinner')) return 'dinner';
-    
-    return 'snacks';
-  };
-
-  // Populate lists on component mount
+  // Initialiser les listes de repas lors du chargement du composant
   useEffect(() => {
-    console.log("MealsCompanyStyleV2 - Initialisation avec", mealsWithProgress.length, "repas");
+    logger.info(LogCategory.PERFORMANCE, 'MealsCompanyStyleV2 - Initialisation', { count: mealsWithProgress.length });
     
-    const available: MealList = {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    };
-    
-    const consumed: MealList = {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: [],
-    };
-    
-    mealsWithProgress.forEach((meal) => {
-      const mealType = determineMealType(meal.type);
-      const mealItem: Item = {
-        id: meal.id,
-        name: meal.name,
-        type: meal.type || '',
-        mealType: mealType,
-        carbs: meal.carbs || 0,
-        protein: meal.protein || 0,
-        fat: meal.fat || 0,
-        progress: meal.progress,
-        dailyPlanMealId: (meal as MealWithProgressExtended).dailyPlanMealId,
-      };
-      
-      if (meal.progress && meal.progress.consomme) {
-        consumed[mealType].push(mealItem);
-      } else {
-        available[mealType].push(mealItem);
-      }
-    });
-    
-    setLeftList(available);
-    setRightList(consumed);
+    // Utiliser le service pour initialiser les listes
+    const newState = mealsCompanyStyleService.initializeMealLists(mealsWithProgress);
+    setMealListsState(newState);
     setMealsWithProgress(mealsWithProgress);
   }, [mealsWithProgress, setMealsWithProgress]);
 
   const handleDragStart = (id: number) => {
     setActiveId(id);
-    // If the dragged item isn't selected, clear the selection
+    // Si l'élément déplacé n'est pas sélectionné, effacer la sélection actuelle
     if (!selectedItems.has(id)) {
       setSelectedItems(new Set([id]));
     }
   };
 
-  // Handler for when a drag operation ends
+  // Gestionnaire pour la fin d'une opération de glisser-déposer
   const handleDragEnd = async (
     id: number,
     droppedOnRight: boolean,
     droppedOnMealType: MealType,
   ) => {
+    logger.debug(LogCategory.UI, 'Fin du drag and drop', { id, droppedOnRight, mealType: droppedOnMealType });
     setActiveId(null);
 
-    // Detect source (where the selected item(s) currently are)
-    let sourceList: MealList;
-    let setSourceList: React.Dispatch<React.SetStateAction<MealList>>;
-    let targetList: MealList;
-    let setTargetList: React.Dispatch<React.SetStateAction<MealList>>;
-
-    const itemInLeftList = Object.values(leftList).some((items) =>
-      items.some((i) => selectedItems.has(i.id)),
+    // Utiliser le service pour mettre à jour les listes
+    const { updatedState, movedItems } = mealsCompanyStyleService.updateMealLists(
+      mealListsState,
+      selectedItems,
+      droppedOnRight,
+      droppedOnMealType
     );
 
-    if (itemInLeftList) {
-      sourceList = leftList;
-      setSourceList = setLeftList;
-      targetList = droppedOnRight ? rightList : leftList;
-      setTargetList = droppedOnRight ? setRightList : setLeftList;
-    } else {
-      sourceList = rightList;
-      setSourceList = setRightList;
-      targetList = droppedOnRight ? rightList : leftList;
-      setTargetList = droppedOnRight ? setRightList : setLeftList;
-    }
+    if (movedItems.length > 0) {
+      // Mettre à jour l'état local immédiatement
+      setMealListsState(updatedState);
 
-    // Gather selected items
-    let foundItems: Item[] = [];
-    for (const mealType of mealTypes) {
-      foundItems.push(
-        ...sourceList[mealType].filter((i) => selectedItems.has(i.id)),
-      );
-    }
-
-    if (foundItems.length > 0) {
-      const updatedItems = foundItems.map((item) => ({
-        ...item,
-        mealType: droppedOnMealType,
-      }));
-
-      // Remove from source
-      setSourceList((prev) => {
-        const newList = { ...prev };
-        for (const mealType of mealTypes) {
-          newList[mealType] = newList[mealType].filter(
-            (i) => !selectedItems.has(i.id),
-          );
-        }
-        return newList;
-      });
-
-      // Add to target
-      setTargetList((prev) => ({
-        ...prev,
-        [droppedOnMealType]: [...prev[droppedOnMealType], ...updatedItems],
-      }));
-
-      // Update meal status in the database for each moved item
+      // Mettre à jour le statut de consommation dans la base de données
       try {
-        for (const item of foundItems) {
-          if (!dailyProgress) {
-            throw new Error('Données de progression quotidienne manquantes');
-          }
-
-          if (!item.dailyPlanMealId) {
-            throw new Error('Identifiant de repas quotidien manquant');
-          }
-
-          // Call service to mark meal as consumed or not consumed
-          await markMealAsConsumed(
-            drizzleDb,
-            dailyProgress.id,
-            item.id,
-            item.dailyPlanMealId,
-            droppedOnRight // true if consumed, false if not consumed
-          );
+        if (!dailyProgress) {
+          throw new Error('Données de progression quotidienne manquantes');
         }
 
-        // Show success notification
-        toast.show({
-          placement: "top",
-          render: () => (
-            <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-              <Text style={styles.toastText}>
-                {droppedOnRight 
-                  ? 'Repas marqué comme consommé !' 
-                  : 'Repas remis dans la liste "à consommer"'}
-              </Text>
-            </Box>
-          )
-        });
+        // Utiliser le service pour mettre à jour les statuts dans la BD
+        const result = await mealsCompanyStyleService.updateMealsStatus(
+          drizzleDb,
+          dailyProgress.id,
+          movedItems,
+          droppedOnRight
+        );
 
-        // Notify parent component to refresh data
-        onMealStatusChange();
+        // Afficher la notification de succès
+        if (result.success) {
+          toast.show({
+            placement: "top",
+            render: () => (
+              <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
+                <Text style={styles.toastText}>{result.message}</Text>
+              </Box>
+            )
+          });
+
+          // Notifier le composant parent pour rafraîchir les données
+          onMealStatusChange();
+        } else {
+          throw new Error(result.message);
+        }
       } catch (error: any) {
         toast.show({
           placement: "top",
@@ -377,24 +263,21 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
         });
       }
 
+      // Réinitialiser la sélection
       setSelectedItems(new Set());
     }
   };
 
   const toggleItemSelection = (id: number) => {
-    const newSelectedItems = new Set(selectedItems);
-    if (newSelectedItems.has(id)) {
-      newSelectedItems.delete(id);
-    } else {
-      newSelectedItems.add(id);
-    }
-    setSelectedItems(newSelectedItems);
+    // Utiliser le service pour basculer la sélection d'un élément
+    const newSelection = mealsCompanyStyleService.toggleItemSelection(selectedItems, id);
+    setSelectedItems(newSelection);
   };
 
   const renderSublist = (list: MealList, isLeftList: boolean) => {
     return (
       <ScrollView style={styles.scrollContainer}>
-        {mealTypes.map((mealType) => (
+        {mealsCompanyStyleService.mealTypes.map((mealType) => (
           <View key={mealType} style={[styles.sublist, styles.dottedBorder]}>
             <Text style={styles.sublistTitle}>
               {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
@@ -436,13 +319,13 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
         {/* Left List */}
         <View style={[styles.list, styles.leftList]}>
           <Text style={styles.listTitle}>À consommer</Text>
-          {renderSublist(leftList, true)}
+          {renderSublist(mealListsState.leftList, true)}
         </View>
 
         {/* Right List */}
         <View style={[styles.list, styles.rightList]}>
           <Text style={styles.listTitle}>Consommés</Text>
-          {renderSublist(rightList, false)}
+          {renderSublist(mealListsState.rightList, false)}
         </View>
       </View>
     </GestureHandlerRootView>

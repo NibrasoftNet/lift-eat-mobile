@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useMemo, useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useMemo, useEffect, useCallback } from 'react';
 import {
   Drawer,
   DrawerBackdrop,
@@ -34,56 +34,62 @@ import { useRouter } from 'expo-router';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { userSettingsDrawerService } from '@/utils/services/user-settings-drawer.service';
+import { MenuItem } from '@/utils/interfaces/drawer.interface';
+import { drawerService } from '@/utils/services/drawer.service';
 
-const menuItems = [
-  { title: 'Analytics', icon: Compass, tag: 'analytics' },
-  {
-    title: 'Edit profile',
-    icon: PencilRuler,
-    tag: 'profile',
-  },
-  { title: 'BMI data', icon: Weight, tag: 'details' },
-  { title: 'Preference', icon: Drum, tag: 'preference' },
-  { title: 'Change Password', icon: SquareAsterisk, tag: 'newPassword' },
-];
+// Utiliser le service pour obtenir les u00e9lu00e9ments du menu
+// Cette variable sert de mappage pour convertir les noms d'icu00f4nes en composants
+const iconMapping: Record<string, any> = {
+  'Compass': Compass,
+  'PencilRuler': PencilRuler,
+  'Weight': Weight,
+  'Drum': Drum,
+  'SquareAsterisk': SquareAsterisk,
+};
 
-const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
+const MenuItemComponent = ({ item }: { item: MenuItem }) => {
   const router = useRouter();
   const userId = useMemo(() => getCurrentUserIdSync(), []);
 
-  // Gestion de la navigation vers les différentes pages de paramètres
-  const renderItem = ({ item }: { item: any }) => {
+  // Utilisation du service pour gérer la navigation vers les différentes pages de paramètres
+  const handleNavigation = useCallback(() => {
     // Vérifier l'authentification
     if (!userId) {
       logger.warn(LogCategory.AUTH, 'Attempting to navigate to settings while not authenticated');
       // Utiliser un chemin valide pour Expo Router au lieu de la racine simple
       router.push('/(root)/(auth)/login');
-      return null;
+      return;
     }
     
-    return (
-      <Pressable
-        onPress={() =>
-          item.tag === 'newPassword'
-            ? router.push(`/new-password`)
-            : item.tag === 'profile'
-              ? router.push(`/profile/${userId}`)
-              : item.tag === 'details'
-                ? router.push(`/details/edit/${userId}`)
-                : item.tag === 'preference'
-                  ? router.push(`/preference/edit/${userId}`)
-                  : router.push(`/analytics`)
-        }
-        className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
-      >
-        <Text className="text-xl">{item.title}</Text>
-        <Icon as={item.icon} size="xl" />
-      </Pressable>
-    );
-  };
-
-  return renderItem({ item });
+    // Utiliser le service pour obtenir l'URL de navigation
+    const navigationUrl = userSettingsDrawerService.getNavigationUrl(item.tag, userId);
+    // Utiliser la navigation type-safe de Expo Router
+    if (item.tag === 'analytics') {
+      router.push('/analytics' as any);
+    } else if (item.tag === 'profile') {
+      router.push(`/profile/${userId}` as any);
+    } else if (item.tag === 'details') {
+      router.push(`/details/edit/${userId}` as any);
+    } else if (item.tag === 'preference') {
+      router.push(`/preference/edit/${userId}` as any);
+    } else if (item.tag === 'newPassword') {
+      router.push('/new-password' as any);
+    }
+  }, [item.tag, userId, router]);
+  
+  // Utiliser le mapping d'icônes pour obtenir le composant correspondant au nom d'icône
+  const IconComponent = iconMapping[item.icon] || User; // Fallback sur User si l'icône n'est pas trouvée
+  
+  return (
+    <Pressable
+      onPress={handleNavigation}
+      className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
+    >
+      <Text className="text-xl">{item.title}</Text>
+      <Icon as={IconComponent} size="xl" />
+    </Pressable>
+  );
 };
 
 const UserSettingsDrawer = ({
@@ -109,11 +115,12 @@ const UserSettingsDrawer = ({
       }
       
       try {
-        const result = await sqliteMCPServer.getUserDetailsViaMCP(userId);
-        if (result.success && result.user) {
-          setUser(result.user);
+        // Utiliser le service pour récupérer les données utilisateur
+        const userData = await userSettingsDrawerService.fetchUserData(userId);
+        if (userData) {
+          setUser(userData);
         } else {
-          logger.error(LogCategory.USER, `Failed to get user details: ${result.error}`);
+          logger.error(LogCategory.USER, 'Failed to get user details');
           setShowUserSettingsDrawer(false);
         }
       } catch (error) {
@@ -170,8 +177,8 @@ const UserSettingsDrawer = ({
         <DrawerBody>
           <DrawerBody>
             <FlashList
-              data={menuItems}
-              renderItem={({ item }) => <MenuItem item={item} />}
+              data={userSettingsDrawerService.getMenuItems()}
+              renderItem={({ item }) => <MenuItemComponent item={item} />}
               estimatedItemSize={5} // Optimize for performance
             />
           </DrawerBody>

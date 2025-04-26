@@ -8,9 +8,9 @@ import { UserOrmPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
+import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function EditUserPreference() {
   const { id } = useLocalSearchParams();
@@ -25,24 +25,25 @@ export default function EditUserPreference() {
   } = useQuery({
     queryKey: [DataType.USER, id],
     queryFn: async () => {
-      logger.info(LogCategory.DATABASE, 'Fetching user preferences for editing via MCP Server', {
+      logger.info(LogCategory.DATABASE, 'Fetching user preferences for editing via user-pages service', {
         userId: Number(id)
       });
       
-      // Utiliser directement le MCP Server pour récupérer les détails de l'utilisateur
-      const result = await sqliteMCPServer.getUserDetailsViaMCP(Number(id));
+      // Utiliser userPagesService pour récupérer le profil utilisateur complet
+      const result = await userPagesService.getUserProfile(Number(id));
       
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to get user details: ${result.error}`);
+      if (!result.success || !result.data) {
+        logger.error(LogCategory.DATABASE, `Failed to get user profile: ${result.error}`);
         throw new Error(result.error || `User with ID ${id} not found`);
       }
       
-      if (!result.user) {
-        logger.warn(LogCategory.DATABASE, `User with ID ${id} not found`);
-        throw new Error(`User with ID ${id} not found`);
+      // On a besoin des détails pour les préférences
+      if (!result.data.details) {
+        logger.warn(LogCategory.DATABASE, `Details for user with ID ${id} not found`);
+        throw new Error(`Details for user with ID ${id} not found`);
       }
       
-      return result.user;
+      return result.data.details;
     },
     ...getCacheConfig(DataType.USER),
   });

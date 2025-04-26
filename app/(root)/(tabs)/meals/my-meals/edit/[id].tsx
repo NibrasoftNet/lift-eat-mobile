@@ -3,107 +3,77 @@ import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation'
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MealForm from '@/components/froms/MealForm';
 import { useLocalSearchParams, Link } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { MealWithIngredientAndStandardOrmProps, IngredientWithStandardOrmProps } from '@/db/schema';
+import { useMealQuery } from '@/utils/hooks';
+import { MealWithIngredientAndStandardOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { DataType } from '@/utils/helpers/queryInvalidation';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
+import { withQueryState } from '@/utils/hoc';
 
-export default function EditMealScreen() {
+// Composant de base pour l'édition de repas
+function EditMealComponent(props: { data: { meal: MealWithIngredientAndStandardOrmProps; ingredients: any[] } }) {
+  const { data: mealData } = props;
   const { id } = useLocalSearchParams();
   const drizzleDb = useDrizzleDb();
   const { setTotalMacros, setSelectedIngredients } = useIngredientStore();
 
-  const {
-    data: mealToEdit,
-    isLoading,
-    isFetching,
-    isRefetching,
-    isPending,
-    isFetchedAfterMount,
-  } = useQuery({
-    queryKey: [DataType.MEAL, id],
-    queryFn: async () => {
-      logger.info(LogCategory.DATABASE, `Getting meal ${id} details for editing via MCP Server`);
+  // Traitement des données du repas pour le formulaire
+  React.useEffect(() => {
+    if (mealData && mealData.meal) {
+      const meal = mealData.meal;
       
-      const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(Number(id));
+      // Définir les macros totales pour le store
+      setTotalMacros({
+        totalCalories: meal.calories || 0,
+        totalCarbs: meal.carbs || 0,
+        totalFats: meal.fat || 0,
+        totalProtein: meal.protein || 0,
+      });
       
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to get meal ${id} details: ${result.error}`);
-        throw new Error(result.error || `Failed to get meal ${id} details via MCP Server`);
-      }
+      // Convertir les ingrédients pour le store
+      const adaptedIngredients = mealData.ingredients?.map((ing: any) => ({
+        id: ing.id,
+        ingredientStandardId: ing.ingredientStandardId,
+        mealId: ing.mealId,
+        quantity: ing.quantity,
+        unit: ing.unit || 'g',
+        ingredientStandard: ing.ingredient,
+        calories: ing.ingredient?.calories || 0,
+        carbs: ing.ingredient?.carbs || 0,
+        fat: ing.ingredient?.fat || 0,
+        protein: ing.ingredient?.protein || 0,
+      })) as unknown as IngredientWithStandardProps[] || [];
       
-      // Adaptation des données pour l'éditeur
-      if (result.meal) {
-        setTotalMacros({
-          totalCalories: result.meal.calories!,
-          totalCarbs: result.meal.carbs!,
-          totalFats: result.meal.fat!,
-          totalProtein: result.meal.protein!,
-        });
-        
-        // Conversion des ingrédients pour le store
-        const adaptedIngredients = result.ingredients?.map((ing: any) => ({
-          id: ing.id,
-          ingredientStandardId: ing.ingredientStandardId,
-          mealId: ing.mealId,
-          quantity: ing.quantity,
-          unit: ing.unit || 'g',
-          ingredientStandard: ing.ingredient,
-          calories: ing.ingredient?.calories || 0,
-          carbs: ing.ingredient?.carbs || 0,
-          fat: ing.ingredient?.fat || 0,
-          protein: ing.ingredient?.protein || 0,
-        })) as unknown as IngredientWithStandardProps[] || [];
-        
-        setSelectedIngredients(adaptedIngredients);
-      }
-      
-      return result.meal;
-    },
-  });
+      setSelectedIngredients(adaptedIngredients);
+    }
+  }, [mealData, setTotalMacros, setSelectedIngredients]);
 
-  // Vérifier si les données du repas sont complètes avant de générer les valeurs par défaut
-  // Cela évite les erreurs lors de l'initialisation du formulaire
-  const isDataComplete = mealToEdit && 
-    typeof mealToEdit.name === 'string' && 
-    typeof mealToEdit.type === 'string' && 
-    typeof mealToEdit.cuisine === 'string';
+  // Vérifier si les données du repas sont complètes
+  const meal = mealData?.meal;
+  const isDataComplete = !!meal && 
+    typeof meal.name === 'string' && 
+    typeof meal.type === 'string' && 
+    typeof meal.cuisine === 'string';
   
-  const defaultMealValues: MealDefaultValuesProps = {
-    id: Number(id),
-    name: mealToEdit?.name || '',
-    description: mealToEdit?.description || '',
-    type: mealToEdit?.type || 'BREAKFAST', // Valeur par défaut sécurisée
-    cuisine: mealToEdit?.cuisine || 'FRENCH', // Valeur par défaut sécurisée
-    unit: mealToEdit?.unit || 'g',
-    quantity: mealToEdit?.quantity || 0,
-    calories: mealToEdit?.calories || 0,
-    carbs: mealToEdit?.carbs || 0,
-    fat: mealToEdit?.fat || 0,
-    protein: mealToEdit?.protein || 0,
-    creatorId: mealToEdit?.creatorId || 0,
-    image: mealToEdit?.image || null,
-    ingredients: null,
-  };
-  
-  // Log pour débogage
+  // Log pour débogage avec plus de détails
   logger.debug(LogCategory.UI, `Meal data ready for editing: ${isDataComplete}`, {
     mealId: id,
-    hasIngredients: mealToEdit ? 'loaded' : 'not loaded',
+    hasData: !!meal,
+    name: meal?.name,
+    type: meal?.type,
+    cuisine: meal?.cuisine
   });
 
-  // Ajout d'un traitement spécial pour le cas où les données sont vides
-  if (!isDataComplete && !isLoading && !isPending) {
+  // Si les données sont incomplètes, montrer un message d'erreur
+  if (!isDataComplete) {
     logger.warn(LogCategory.UI, `Meal data incomplete or missing: ${id}`);
     return (
       <Box className="flex-1 justify-center items-center p-4 bg-white">
@@ -124,17 +94,73 @@ export default function EditMealScreen() {
     );
   }
   
+  // Préparer les valeurs par défaut pour le formulaire
+  const defaultMealValues: MealDefaultValuesProps = {
+    id: Number(id),
+    name: meal.name || '',
+    description: meal.description || '',
+    type: meal.type || 'BREAKFAST',
+    cuisine: meal.cuisine || 'FRENCH',
+    unit: meal.unit || 'g',
+    quantity: meal.quantity || 0,
+    calories: meal.calories || 0,
+    carbs: meal.carbs || 0,
+    fat: meal.fat || 0,
+    protein: meal.protein || 0,
+    creatorId: meal.creatorId || 0,
+    image: meal.image || undefined,
+    ingredients: null,
+  };
+  
+  // Rendu du formulaire avec les valeurs par défaut
+  return <MealForm defaultValues={defaultMealValues} operation="update" />;
+}
+
+// Application du HOC withQueryState
+const EditMealWithQueryState = withQueryState<
+  { data: { meal: MealWithIngredientAndStandardOrmProps; ingredients: any[] } },
+  { meal: MealWithIngredientAndStandardOrmProps; ingredients: any[] }
+>(EditMealComponent);
+
+// Composant d'export qui utilise le hook personnalisé
+export default function EditMealScreen() {
+  const { id } = useLocalSearchParams();
+  const mealId = Number(id);
+  
+  // Utilisation du hook personnalisé pour les requêtes aux repas
+  const queryResult = useMealQuery(
+    [`meal-${mealId}-details`],
+    async () => {
+      logger.info(LogCategory.DATABASE, `Getting meal ${mealId} details for editing via service`);
+      
+      if (isNaN(mealId)) {
+        logger.error(LogCategory.DATABASE, 'ID de repas invalide', { id });
+        throw new Error('ID de repas invalide');
+      }
+      
+      return mealPagesService.getMealDetails(mealId);
+    },
+    {
+      retry: 1,
+      retryDelay: 1000
+    }
+  );
+  
+  // Utilisation du composant enveloppé par le HOC
   return (
-    <QueryStateHandler<MealWithIngredientAndStandardOrmProps>
-      data={mealToEdit}
-      isLoading={isLoading}
-      isFetching={isFetching}
-      isRefetching={isRefetching}
-      isPending={isPending}
-      isFetchedAfterMount={isFetchedAfterMount}
-      // Le délai d'attente est géré par le composant lui-même
-    >
-      <MealForm defaultValues={defaultMealValues} operation="update" />
-    </QueryStateHandler>
+    <EditMealWithQueryState
+      queryResult={queryResult}
+      loadingMessage="Chargement des détails du repas..."
+      errorFallback={
+        <Box className="flex-1 items-center justify-center p-4">
+          <Text className="text-center mb-4">Une erreur est survenue lors du chargement du repas.</Text>
+          <Link href="/meals/my-meals" asChild>
+            <Button action="primary">
+              <ButtonText>Retourner aux repas</ButtonText>
+            </Button>
+          </Link>
+        </Box>
+      }
+    />
   );
 }

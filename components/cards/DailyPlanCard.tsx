@@ -8,18 +8,32 @@ import { Text } from '../ui/text';
 import { DailyPlanOrmProps, MealOrmProps } from '@/db/schema';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Box } from '../ui/box';
-import { DayEnum } from '@/utils/enum/general.enum';
 import { useRouter } from 'expo-router';
 import NutritionBox from '@/components/boxes/NutritionBox';
 import MacrosDetailsBox from '@/components/boxes/MacrosDetailsBox';
+import { getDayFullName } from '@/utils/helpers/date-utils';
 
+/**
+ * Props pour le composant DailyPlanCard 
+ */
 interface DailyPlanCardProps {
+  /** Plan quotidien à afficher avec ses repas associés */
   dailyPlan: DailyPlanOrmProps & { meals?: MealOrmProps[] };
+  /** Index pour l'animation d'entrée */
   index: number;
+  /** Fonction appelée au clic sur la carte, override le comportement par défaut */
   onPress?: (dailyPlan: DailyPlanOrmProps & { meals?: MealOrmProps[] }) => void;
+  /** ID du plan parent */
   planId: number;
 }
 
+/**
+ * Composant qui affiche un plan quotidien dans une carte interactive
+ * Affiche les informations nutritionnelles et permet la navigation vers les détails
+ * 
+ * @param {DailyPlanCardProps} props - Props du composant
+ * @returns {JSX.Element} Composant DailyPlanCard
+ */
 const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
   dailyPlan,
   index,
@@ -100,19 +114,6 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
   );
 };
 
-// Fonction utilitaire pour obtenir le nom complet du jour
-const getDayFullName = (day: DayEnum): string => {
-  const dayNames: Record<DayEnum, string> = {
-    [DayEnum.MONDAY]: 'Lundi',
-    [DayEnum.TUESDAY]: 'Mardi',
-    [DayEnum.WEDNESDAY]: 'Mercredi',
-    [DayEnum.THURSDAY]: 'Jeudi',
-    [DayEnum.FRIDAY]: 'Vendredi',
-    [DayEnum.SATURDAY]: 'Samedi',
-    [DayEnum.SUNDAY]: 'Dimanche',
-  };
-  
-  return dayNames[day] || day;
-};
+
 
 export default DailyPlanCard;

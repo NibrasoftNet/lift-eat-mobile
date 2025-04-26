@@ -308,6 +308,27 @@ export const dailyMealProgress = sqliteTable('daily_meal_progress', {
     .notNull(),
 });
 
+// Table pour stocker les conseils nutritionnels générés par l'IA
+export const nutritionAdvice = sqliteTable('nutrition_advice', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  type: text('type').notNull().default('GENERAL'),  // GENERAL, MEAL_SPECIFIC, PLAN_SPECIFIC
+  context: text('context'),  // Contexte associé (ex: macros ciblées, repas référencé)
+  liked: integer({ mode: 'boolean' }),  // Notation utilisateur (null si pas de feedback)
+  applied: integer({ mode: 'boolean' }).default(false),  // Si l'utilisateur a appliqué le conseil
+  // Références (optionnelles)
+  planId: integer('plan_id').references(() => plan.id),
+  mealId: integer('meal_id').references(() => meals.id),
+  // Foreign key to users table
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+});
+
 // Types pour les nouvelles tables
 export type DailyProgressOrmProps = typeof dailyProgress.$inferSelect;
 export type DailyMealProgressOrmProps = typeof dailyMealProgress.$inferSelect;
+export type NutritionAdviceOrmProps = typeof nutritionAdvice.$inferSelect;

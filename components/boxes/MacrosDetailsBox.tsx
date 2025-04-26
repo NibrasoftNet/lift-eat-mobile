@@ -34,7 +34,7 @@ const MacrosDetailsBox = ({
       {/* Fats */}
       <NutritionBox
         title="Fats"
-        value={Number(fats.toFixed(1))}
+        value={fats !== undefined && fats !== null ? Number(fats.toFixed(1)) : 0}
         unit="Gr"
         className="w-24"
         titleClassName="bg-green-500"

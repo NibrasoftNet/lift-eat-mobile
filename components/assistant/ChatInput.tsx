@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { TextInput } from 'react-native';
+import { Box } from '@/components/ui/box';
+import { HStack } from '@/components/ui/hstack';
 import { Icon } from '@/components/ui/icon';
+import { Pressable } from '@/components/ui/pressable';
 import { Send } from 'lucide-react-native';
 import { Colors } from '@/utils/constants/Colors';
 
@@ -20,9 +23,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }
   };
 
   return (
-    <View style={styles.container}>
+    <HStack className="flex-row items-center px-4 py-2.5 border-t border-gray-200 bg-white">
       <TextInput
-        style={styles.input}
+        className="flex-1 min-h-10 max-h-24 bg-gray-100 rounded-full px-4 py-2.5 mr-2.5 text-base"
         value={message}
         onChangeText={setMessage}
         placeholder="Comment puis-je vous aider aujourd'hui ?"
@@ -31,49 +34,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }
         maxLength={500}
         editable={!isLoading}
       />
-      <TouchableOpacity 
-        style={[
-          styles.sendButton, 
-          { opacity: message.trim() && !isLoading ? 1 : 0.5 }
-        ]} 
+      <Pressable 
+        className={`w-11 h-11 rounded-full bg-primary-background items-center justify-center ${
+          !message.trim() || isLoading ? 'opacity-50' : 'opacity-100'
+        }`}
         onPress={handleSend}
         disabled={!message.trim() || isLoading}
       >
         <Icon as={Send} className="w-6 h-6 text-white" />
-      </TouchableOpacity>
-    </View>
+      </Pressable>
+    </HStack>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginRight: 10,
-    fontSize: 16,
-  },
-  sendButton: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    backgroundColor: Colors.primary.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+
 
 export default ChatInput;

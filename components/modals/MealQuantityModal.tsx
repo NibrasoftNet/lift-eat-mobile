@@ -17,11 +17,10 @@ import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
 import { MinusCircle, PlusCircle } from 'lucide-react-native';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { useQueryClient } from '@tanstack/react-query';
+import { mealQuantityModalService } from '@/utils/services/meal-quantity-modal.service';
 
 interface MealQuantityModalProps {
   isOpen: boolean;
@@ -48,71 +47,47 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
   const queryClient = useQueryClient();
 
   const handleQuantityChange = (value: string) => {
-    const newValue = parseInt(value) || 0;
-    if (newValue > 0) {
-      setQuantity(newValue);
-    }
+    // Utiliser le service pour gérer le changement de quantité
+    const newQuantity = mealQuantityModalService.handleQuantityChange(value);
+    setQuantity(newQuantity);
   };
 
   const adjustQuantity = (increment: boolean) => {
-    const step = 10;
-    const newQuantity = increment ? quantity + step : Math.max(1, quantity - step);
+    // Utiliser le service pour ajuster la quantité
+    const newQuantity = mealQuantityModalService.adjustQuantity(quantity, increment);
     setQuantity(newQuantity);
   };
 
   const handleUpdateQuantity = async () => {
     try {
       setIsUpdating(true);
-      logger.info(LogCategory.DATABASE, 'Updating meal quantity in plan via MCP Server', {
+      logger.info(LogCategory.DATABASE, 'Updating meal quantity via service', {
         dailyPlanId, mealId: meal.id, newQuantity: quantity
       });
       
-      const result = await sqliteMCPServer.updateMealQuantityInPlanViaMCP(dailyPlanId, meal.id, quantity);
+      // Utiliser le service pour mettre à jour la quantité
+      const result = await mealQuantityModalService.updateMealQuantity(
+        dailyPlanId, 
+        meal.id, 
+        quantity, 
+        onQuantityUpdated,
+        queryClient,
+        toast
+      );
       
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to update meal quantity: ${result.error}`);
-        throw new Error(result.error || 'Failed to update meal quantity in plan');
+      if (result.success) {
+        logger.debug(LogCategory.DATABASE, 'Meal quantity updated successfully via service');
+        mealQuantityModalService.closeModal(onClose);
+      } else {
+        throw new Error(result.message);
       }
-      
-      logger.debug(LogCategory.DATABASE, 'Meal quantity updated successfully');
-      
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={id} action="success" variant="solid">
-              <ToastTitle>Quantité mise à jour avec succès</ToastTitle>
-            </Toast>
-          );
-        },
-      });
-      
-      // Invalider le cache pour les repas et les plans
-      invalidateCache(queryClient, DataType.DAILY_PLAN, { id: dailyPlanId });
-      invalidateCache(queryClient, DataType.MEAL, { id: meal.id });
-      
-      if (onQuantityUpdated) {
-        await onQuantityUpdated();
-      }
-      
-      onClose();
     } catch (error) {
-      logger.error(LogCategory.DATABASE, 'Error updating meal quantity:', { 
+      logger.error(LogCategory.DATABASE, 'Error in handling update quantity:', { 
         error: error instanceof Error ? error.message : String(error),
         dailyPlanId,
         mealId: meal.id
       });
-      
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={id} action="error" variant="solid">
-              <ToastTitle>Erreur lors de la mise à jour</ToastTitle>
-            </Toast>
-          );
-        },
-      });
+      // Le service gère déjà l'affichage des erreurs via toast
     } finally {
       setIsUpdating(false);
     }
@@ -168,7 +143,7 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
               <Button
                 className="flex-1"
                 variant="outline"
-                onPress={onClose}
+                onPress={() => mealQuantityModalService.closeModal(onClose)}
               >
                 <ButtonText>Annuler</ButtonText>
               </Button>

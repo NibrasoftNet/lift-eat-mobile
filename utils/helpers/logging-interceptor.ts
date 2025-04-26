@@ -3,8 +3,9 @@
  * Particuliu00e8rement utile pour du00e9boguer les messages 'meal undefined' qui apparaissent dans les logs
  */
 
-import { logger } from '../services/logging.service';
-import { LogCategory, LogLevel } from '../enum/logging.enum';
+import { v4 as uuidv4 } from 'uuid';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory, LogLevel } from '@/utils/enum/logging.enum';
 
 // Compteur pour identifier uniqement chaque occurrence du message
 let mealUndefinedCounter = 0;

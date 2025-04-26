@@ -1,5 +1,5 @@
 import { VStack } from '@/components/ui/vstack';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
@@ -25,7 +25,6 @@ import { AlertCircleIcon } from '@/components/ui/icon';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
@@ -33,11 +32,11 @@ import { Colors } from '@/utils/constants/Colors';
 import { GetGoalImages } from '@/utils/utils';
 import GenderFormInput from '@/components/forms-input/GenderFormInput';
 import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
-import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { userGenderActivityFormService } from '@/utils/services/user-gender-activity-form.service';
 
 export default function UserGenderActivityForm({
   defaultValues,
@@ -46,33 +45,27 @@ export default function UserGenderActivityForm({
   defaultValues: UserGenderActivityDefaultValueProps;
   operation: 'create' | 'update';
 }) {
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
-
-  // Init Tanstack Query client
   const queryClient = useQueryClient();
   
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   
-  // Vérifier si l'utilisateur tente de modifier ses propres données
-  useMemo(() => {
-    if (userId && defaultValues.id !== userId) {
-      logger.warn(LogCategory.AUTH, `User ${userId} attempting to modify data for user ${defaultValues.id}`);
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          return (
-            <MultiPurposeToast
-              id={`toast-${id}`}
-              color={ToastTypeEnum.ERROR}
-              title="Access Denied"
-              description="You can only modify your own profile data"
-            />
-          );
-        }
-      });
+  // Préparer les valeurs par défaut normalisées via le service
+  const normalizedDefaultValues = useMemo(() => 
+    userGenderActivityFormService.prepareDefaultValues(defaultValues), 
+  [defaultValues]);
+  
+  // Vérifier l'accès de l'utilisateur via le service
+  useEffect(() => {
+    if (userId && !userGenderActivityFormService.validateUserAccess(
+      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+      String(userId), 
+      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+      String(defaultValues.id), 
+      toast
+    )) {
       router.back();
     }
   }, [userId, defaultValues.id, toast, router]);
@@ -84,41 +77,22 @@ export default function UserGenderActivityForm({
     formState: { errors },
   } = useForm<UserGenderActivityFormData>({
     resolver: zodResolver(userGenderActivitySchema),
-    defaultValues,
+    defaultValues: normalizedDefaultValues,
   });
 
+  // Utiliser le service pour gérer les mutations
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserGenderActivityFormData) => {
-      // Vérifier que l'utilisateur est authentifié
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when updating gender/activity data');
-        throw new Error('You must be logged in to update your profile');
-      }
-      
-      // Vérifier que l'ID est le même que celui de l'utilisateur connecté
-      if (defaultValues.id !== userId) {
-        logger.error(LogCategory.AUTH, `User ${userId} attempted to update data for user ${defaultValues.id}`);
-        throw new Error('You can only update your own profile data');
-      }
-      
-      logger.info(LogCategory.USER, `Updating user ${userId} gender/activity data`);
-      
-      // Utiliser le MCP server pour mettre à jour les données de l'utilisateur
-      const result = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, {
-        age: data.age,
-        gender: data.gender,
-        physicalActivity: data.physicalActivity
-      });
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update user data');
-      }
-      
-      return result;
+      // Déléguer entièrement au service la soumission du formulaire
+      // S'assurer que userId est toujours une chaîne pour respecter l'interface du service
+      const userIdString = userId ? String(userId) : '';
+      return userGenderActivityFormService.submitForm(data, userIdString, operation);
     },
-    onSuccess: async () => {
-      // Utiliser l'utilitaire standardisé d'invalidation du cache
-      await invalidateCache(queryClient, DataType.USER, { invalidateRelated: true });
+    onSuccess: async (result) => {
+      // Invalidation du cache pour que les données soient rafraîchies
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      
+      // Affichage d'un toast succès
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -127,15 +101,25 @@ export default function UserGenderActivityForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success update preference"
+              title="Mise à jour réussie"
+              description={result.message || 'Préférences mises à jour avec succès'}
             />
           );
         },
       });
+      
+      // Si l'opération est terminée, naviguer vers la page appropriée
+      if (operation === 'create') {
+        // Naviguer vers le profil après la création en passant l'ID utilisateur
+        // La route profile est une route dynamique avec [id].tsx
+        router.replace(`/(root)/(user)/profile/${userId}`);
+      }
     },
     onError: (error: any) => {
-      // Show error toast
+      // Journalisation de l'erreur
+      logger.error(LogCategory.FORM, `Error submitting gender/activity form: ${error}`);
+      
+      // Affichage d'un toast d'erreur
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -144,8 +128,8 @@ export default function UserGenderActivityForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
+              title="Erreur"
+              description={error.message || error.toString()}
             />
           );
         },
@@ -153,22 +137,20 @@ export default function UserGenderActivityForm({
     },
   });
 
+  // Simplifier la fonction onSubmit en déléguant le logging au service
   const onSubmit = async (data: UserGenderActivityFormData) => {
-    logger.info(LogCategory.USER, 'Submitting user gender/activity form', {
-      userId,
-      age: data.age,
-      gender: data.gender,
-      physicalActivity: data.physicalActivity
-    });
-    await mutateAsync(data);
+    try {
+      logger.debug(LogCategory.FORM, 'Component initiating form submission');
+      await mutateAsync(data);
+    } catch (error) {
+      // Géré par onError du useMutation
+      logger.error(LogCategory.FORM, `Unhandled error in form submission: ${error}`);
+    }
   };
 
   const handleCancel = () => {
-    if (operation === 'update') {
-      router.back();
-    } else {
-      router.push('/analytics');
-    }
+    // Utiliser le service pour gérer l'annulation
+    userGenderActivityFormService.handleCancel(operation, router);
   };
 
   return (

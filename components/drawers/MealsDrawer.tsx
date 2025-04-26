@@ -16,27 +16,9 @@ import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { createStableId, ItemType } from '@/utils/helpers/uniqueId';
 import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { mealDrawerService } from '@/utils/services/meal-drawer.service';
+import { MealWithQuantity } from '@/utils/interfaces/drawer.interface';
 
-// Fonctions utilitaires pour l'affichage des types de repas
-const getMealTypeName = (type: MealTypeEnum): string => {
-  switch (type) {
-    case MealTypeEnum.BREAKFAST: return 'Petit-déjeuner';
-    case MealTypeEnum.LUNCH: return 'Déjeuner';
-    case MealTypeEnum.DINNER: return 'Dîner';
-    case MealTypeEnum.SNACK: return 'Snack';
-    default: return 'Repas';
-  }
-};
-
-const getMealTypeColor = (type: MealTypeEnum): { bgColor: string; textColor: string } => {
-  switch (type) {
-    case MealTypeEnum.BREAKFAST: return { bgColor: 'bg-blue-100', textColor: 'text-blue-700' };
-    case MealTypeEnum.LUNCH: return { bgColor: 'bg-green-100', textColor: 'text-green-700' };
-    case MealTypeEnum.DINNER: return { bgColor: 'bg-purple-100', textColor: 'text-purple-700' };
-    case MealTypeEnum.SNACK: return { bgColor: 'bg-orange-100', textColor: 'text-orange-700' };
-    default: return { bgColor: 'bg-gray-100', textColor: 'text-gray-700' };
-  }
-};
 /* Custom components */
 import SelectionDrawer from './SelectionDrawer';
 /* Gluestack ui components */
@@ -150,21 +132,33 @@ const SimpleMealCard = React.memo(({
                       <SelectDragIndicatorWrapper>
                         <SelectDragIndicator />
                       </SelectDragIndicatorWrapper>
-                      <SelectItem label="Petit-déjeuner" value={MealTypeEnum.BREAKFAST} />
-                      <SelectItem label="Déjeuner" value={MealTypeEnum.LUNCH} />
-                      <SelectItem label="Dîner" value={MealTypeEnum.DINNER} />
-                      <SelectItem label="Snack" value={MealTypeEnum.SNACK} />
+                      <SelectItem
+                        label={mealDrawerService.getMealTypeName(MealTypeEnum.BREAKFAST)}
+                        value={MealTypeEnum.BREAKFAST}
+                      />
+                      <SelectItem
+                        label={mealDrawerService.getMealTypeName(MealTypeEnum.LUNCH)}
+                        value={MealTypeEnum.LUNCH}
+                      />
+                      <SelectItem
+                        label={mealDrawerService.getMealTypeName(MealTypeEnum.DINNER)}
+                        value={MealTypeEnum.DINNER}
+                      />
+                      <SelectItem
+                        label={mealDrawerService.getMealTypeName(MealTypeEnum.SNACK)}
+                        value={MealTypeEnum.SNACK}
+                      />
                     </SelectContent>
                   </SelectPortal>
                 </Select>
               ) : (
                 <View
-                  className={`rounded-full px-2 py-1 ${getMealTypeColor(mealType || item.type).bgColor}`}
+                  className={`rounded-full px-2 py-1 ${mealDrawerService.getMealTypeColor(mealType || item.type).bgColor}`}
                 >
                   <Text
-                    className={`text-xs font-light ${getMealTypeColor(mealType || item.type).textColor}`}
+                    className={`text-xs font-light ${mealDrawerService.getMealTypeColor(mealType || item.type).textColor}`}
                   >
-                    {getMealTypeName(mealType || item.type)}
+                    {mealDrawerService.getMealTypeName(mealType || item.type)}
                   </Text>
                 </View>
               )}
@@ -321,13 +315,13 @@ function MealsDrawer({
     setSearchMealName(mealName);
   }, []);
 
-  // Fonction pour gérer la sélection d'un type de cuisine
-  const handleCuisineSelect = useCallback((cuisine: CuisineTypeEnum | undefined) => {
+  // Fonction pour filtrer les repas par type de cuisine
+  const handleCuisineSelect = useCallback((cuisine?: CuisineTypeEnum) => {
     setSelectedCuisine(cuisine);
   }, []);
 
-  // Fonction pour gérer la sélection d'un type de repas
-  const handleMealTypeSelect = useCallback((mealType: MealTypeEnum | undefined) => {
+  // Fonction pour filtrer les repas par type de repas
+  const handleMealTypeSelect = useCallback((mealType?: MealTypeEnum) => {
     setSelectedMealType(mealType);
   }, []);
 
@@ -395,7 +389,7 @@ function MealsDrawer({
     }));
   }, []);
 
-  // Fonction pour ajouter les repas sélectionnés au plan
+  // Fonction pour ajouter les repas sélectionnés au plan en utilisant le service
   const handleAddMealsToPlan = useCallback(async () => {
     try {
       if (selectedMeals.length === 0) {
@@ -412,62 +406,32 @@ function MealsDrawer({
       setIsSubmitting(true);
       logger.debug(LogCategory.APP, `MealsDrawer - Adding ${selectedMeals.length} meals to plan ${dailyPlanId}`);
 
-      // Traiter chaque repas séquentiellement pour éviter les problèmes de concurrence
-      let hasErrors = false;
-      let hasSuccess = false;
+      // Préparer les repas avec leurs quantités et types pour le service
+      const mealsToAdd: MealWithQuantity[] = selectedMeals.map(meal => ({
+        id: meal.id,
+        quantity: mealQuantities[meal.id] || 100,
+        mealType: mealTypes[meal.id]
+      }));
       
-      for (const meal of selectedMeals) {
-        // Vérifier si le repas est valide
-        monitorObjectExistence('meal', meal, 'MealsDrawer.handleAddMealsToPlan - loop');
-        
-        if (!meal || typeof meal.id !== 'number') {
-          logger.error(LogCategory.APP, 'MealsDrawer - Invalid meal in handleAddMealsToPlan loop', { meal });
-          hasErrors = true;
-          continue;
-        }
-        
-        const quantity = mealQuantities[meal.id] || 100;
-        // Récupérer le type spécifique choisi pour ce repas, ou utiliser son type par défaut
-        const mealType = mealTypes[meal.id] || meal.type;
-        
-        logger.debug(LogCategory.APP, `MealsDrawer - Adding meal ${meal.id} with quantity ${quantity}g to daily plan ${dailyPlanId} as ${mealType}`);
-        
-        const result = await onAddMealToPlan(dailyPlanId, meal.id, quantity, mealType);
-        
-        if (!result.success) {
-          // Si le repas existe déjà dans ce jour spécifique de plan, on considère que c'est normal
-          // et on ne compte pas ça comme une erreur pour permettre l'ajout d'autres repas
-          if (result.alreadyExists) {
-            logger.info(LogCategory.APP, `MealsDrawer - Meal ${meal.id} (${meal.name}) already exists in daily plan ${dailyPlanId}, skipping`);
-            // On affiche une info mais on ne bloque pas l'ajout des autres repas
-            toast.show({
-              render: ({ id }) => (
-                <Toast nativeID={id} action="info" variant="solid">
-                  <ToastTitle>Le repas {meal.name} est déjà dans ce jour</ToastTitle>
-                </Toast>
-              ),
-            });
-          } else {
-            // Pour les autres erreurs, on les compte comme de vraies erreurs
-            hasErrors = true;
-            toast.show({
-              render: ({ id }) => (
-                <Toast nativeID={id} action="error" variant="solid">
-                  <ToastTitle>Erreur lors de l'ajout de {meal.name}</ToastTitle>
-                </Toast>
-              ),
-            });
-          }
-        } else {
-          hasSuccess = true;
-        }
-      }
+      // Utiliser le service pour ajouter les repas au plan
+      const result = await mealDrawerService.addMealsToPlan(dailyPlanId, planId, mealsToAdd);
 
-      // Invalider le cache des plans et des repas
-      if (hasSuccess) {
-        logger.debug(LogCategory.CACHE, 'MealsDrawer - Invalidating cache after adding meals to plan');
-        await invalidateCache(queryClient, DataType.PLAN, { id: planId, invalidateRelated: true });
-        
+      // Traiter les résultats
+      if (!result.success && result.errors && result.errors.length > 0) {
+        // Afficher un toast d'erreur
+        toast.show({
+          render: ({ id }) => (
+            <Toast nativeID={id} action="error" variant="solid">
+              <ToastTitle>Erreurs lors de l'ajout</ToastTitle>
+              <VStack>
+                {result.errors!.map((error, index) => (
+                  <Text key={index} className="text-white">{error}</Text>
+                ))}
+              </VStack>
+            </Toast>
+          ),
+        });
+      } else {
         // Notification de succès
         toast.show({
           render: ({ id }) => (
@@ -481,28 +445,25 @@ function MealsDrawer({
           ),
         });
 
+        // Fermer le drawer et réinitialiser les sélections
+        setSelectedMeals([]);
+        setShowMealsDrawer(false);
+        
         // Callback après ajout
         if (onMealsAdded) {
           await onMealsAdded();
         }
-
-        // Fermer le drawer
-        setShowMealsDrawer(false);
-      } else if (!hasErrors) {
-        toast.show({
-          render: ({ id }) => (
-            <Toast nativeID={id} action="warning" variant="solid">
-              <ToastTitle>Aucun repas n'a pu être ajouté</ToastTitle>
-            </Toast>
-          ),
-        });
       }
     } catch (error) {
-      logger.error(LogCategory.APP, `MealsDrawer - Error in handleAddMealsToPlan: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.APP, `Error adding meals to plan: ${errorMessage}`);
+      
+      // Afficher un toast d'erreur
       toast.show({
         render: ({ id }) => (
           <Toast nativeID={id} action="error" variant="solid">
-            <ToastTitle>Erreur lors de l'ajout des repas</ToastTitle>
+            <ToastTitle>Erreur</ToastTitle>
+            <Text className="text-white">{errorMessage}</Text>
           </Toast>
         ),
       });

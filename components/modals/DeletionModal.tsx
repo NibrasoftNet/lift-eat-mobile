@@ -16,6 +16,9 @@ import {
 } from '../ui/modal';
 import { Heading } from '../ui/heading';
 import { Colors } from '@/utils/constants/Colors';
+import { deletionModalService } from '@/utils/services/deletion-modal.service';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface DeletionModalProps {
   title: string;
@@ -37,9 +40,7 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
   return (
     <Modal
       isOpen={showModal}
-      onClose={() => {
-        setShowModal(false);
-      }}
+      onClose={() => deletionModalService.handleCancelDelete(setShowModal)}
     >
       <ModalBackdrop />
       <ModalContent className="max-w-[305px] items-center">
@@ -61,14 +62,19 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
             variant="outline"
             action="secondary"
             size="sm"
-            onPress={() => {
-              setShowModal(false);
-            }}
+            onPress={() => deletionModalService.handleCancelDelete(setShowModal)}
             className="flex-grow"
           >
             <ButtonText>Cancel</ButtonText>
           </Button>
-          <Button onPress={handleDelete} size="sm" className="flex-grow">
+          <Button 
+            onPress={() => {
+              logger.info(LogCategory.USER, 'Delete confirmation button clicked');
+              deletionModalService.handleConfirmDelete(handleDelete, setShowModal);
+            }} 
+            size="sm" 
+            className="flex-grow"
+          >
             {isPending ? (
               <ButtonSpinner color={Colors.light.icon} />
             ) : (

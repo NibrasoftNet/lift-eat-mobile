@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import {
   Drawer,
   DrawerBackdrop,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react-native';
 import { Text } from '../ui/text';
 import { Pressable } from '../ui/pressable';
+import { optionsDrawerService } from '@/utils/services/options-drawer.service';
 
 function OptionsDrawer({
   showOptionDrawer,
@@ -26,6 +27,8 @@ function OptionsDrawer({
   onDetail,
   onEdit,
   onDelete,
+  itemId = 0,
+  itemType = 'generic'
 }: {
   showOptionDrawer: boolean;
   setShowOptionsDrawer: Dispatch<SetStateAction<boolean>>;
@@ -34,7 +37,28 @@ function OptionsDrawer({
   onDetail: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  itemId?: number;
+  itemType?: string;
 }) {
+  // Utiliser le service pour gérer les actions du drawer
+  const handleDetailClick = useCallback(() => {
+    optionsDrawerService.handleDetailAction(itemId, onDetail);
+    setShowOptionsDrawer(false);
+  }, [itemId, onDetail, setShowOptionsDrawer]);
+  
+  const handleEditClick = useCallback(() => {
+    optionsDrawerService.handleEditAction(itemId, onEdit);
+    setShowOptionsDrawer(false);
+  }, [itemId, onEdit, setShowOptionsDrawer]);
+  
+  const handleDeleteClick = useCallback(() => {
+    optionsDrawerService.handleDeleteAction(itemId, onDelete);
+    setShowOptionsDrawer(false);
+  }, [itemId, onDelete, setShowOptionsDrawer]);
+  
+  // Vérifier la disponibilité des actions si non spécifiée en props
+  const isEditDisabled = disableEdit || !optionsDrawerService.isEditAvailable(itemType, itemId);
+  const isDeleteDisabled = disableDelete || !optionsDrawerService.isDeleteAvailable(itemType, itemId);
   return (
     <Drawer
       isOpen={showOptionDrawer}
@@ -60,23 +84,23 @@ function OptionsDrawer({
         <DrawerBody>
           <HStack className="items-center justify-around w-full">
             <Pressable
-              onPress={onDetail}
+              onPress={handleDetailClick}
               className="flex flex-col items-center justify-center"
             >
               <Icon as={Info} size="xl" />
               <Text className="text-md">Details</Text>
             </Pressable>
             <Pressable
-              disabled={disableEdit}
-              onPress={onEdit}
+              disabled={isEditDisabled}
+              onPress={handleEditClick}
               className="flex flex-col items-center justify-center"
             >
               <Icon as={PencilRuler} size="xl" />
               <Text className="text-md">Edit</Text>
             </Pressable>
             <Pressable
-              disabled={disableDelete}
-              onPress={onDelete}
+              disabled={isDeleteDisabled}
+              onPress={handleDeleteClick}
               className="flex flex-col items-center justify-center"
             >
               <Icon as={Trash2} size="xl" />

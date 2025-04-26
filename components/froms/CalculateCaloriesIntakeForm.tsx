@@ -1,5 +1,5 @@
 import { VStack } from '@/components/ui/vstack';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Button, ButtonText } from '@/components/ui/button';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
@@ -36,6 +36,7 @@ import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { caloriesIntakeFormService } from '@/utils/services/calories-intake-form.service';
 
 export default function CalculateCaloriesIntakeForm({
   defaultValues,
@@ -51,6 +52,11 @@ export default function CalculateCaloriesIntakeForm({
   
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
+  
+  // Préparer les valeurs par défaut normalisées via le service
+  const normalizedDefaultValues = useMemo(() => 
+    caloriesIntakeFormService.prepareDefaultValues(defaultValues),
+  [defaultValues]);
 
   const {
     setValue,
@@ -59,45 +65,42 @@ export default function CalculateCaloriesIntakeForm({
     formState: { errors },
   } = useForm<CalculateCaloriesIntakeFormData>({
     resolver: zodResolver(calculateCaloriesIntakeSchema),
-    defaultValues,
+    defaultValues: normalizedDefaultValues,
   });
 
+  // Vérifier l'accès de l'utilisateur via le service
+  useEffect(() => {
+    if (!caloriesIntakeFormService.validateUserAccess(
+      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+      userId ? String(userId) : null,
+      toast
+    )) {
+      // La gestion de la redirection est faite dans le service
+      router.back();
+    }
+  }, [userId, toast, router]);
+  
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
     try {
-      // Vérifier que l'utilisateur est authentifié
+      logger.debug(LogCategory.FORM, 'Component initiating calorie intake form submission');
+      
       if (!userId) {
-        logger.warn(LogCategory.AUTH, 'User not authenticated when submitting calorie intake form');
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.ERROR}
-                title="Authentication Required"
-                description="Please log in to save your calorie intake data"
-              />
-            );
-          },
-        });
-        return;
+        return; // Déjà géré par validateUserAccess
       }
       
-      logger.info(LogCategory.USER, `Saving calorie intake data for user ${userId}`, {
-        age: data.age,
-        gender: data.gender,
-        physicalActivity: data.physicalActivity
-      });
+      // Déléguer au service pour préparer les données à soumettre
+      const serviceResult = await caloriesIntakeFormService.submitForm(
+        data,
+        // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+        userId ? String(userId) : ''
+      );
       
-      // Sauvegarder les données via le MCP server
-      // Note: Nous supposons ici que vous avez une méthode pour mettre à jour les préférences utilisateur
-      // Si cette méthode n'existe pas, il faudrait la créer dans le MCP server
-      const updateResult = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, {
-        age: data.age,
-        gender: data.gender,
-        physicalActivity: data.physicalActivity
-      });
+      if (!serviceResult.success) {
+        throw serviceResult.error || new Error(serviceResult.message);
+      }
+      
+      // Utiliser les données préparées par le service pour les soumettre au MCP server
+      const updateResult = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, serviceResult.data);
       
       if (!updateResult.success) {
         throw new Error(updateResult.error || 'Failed to save calorie intake data');
@@ -125,7 +128,7 @@ export default function CalculateCaloriesIntakeForm({
         },
       });
     } catch (error) {
-      logger.error(LogCategory.USER, `Error saving calorie intake data: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(LogCategory.FORM, `Error in calorie intake form submission: ${error instanceof Error ? error.message : String(error)}`);
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -224,7 +227,7 @@ export default function CalculateCaloriesIntakeForm({
           className="w-[45%] bg-gray-200"
           size="lg"
           variant="outline"
-          onPress={() => router.back()}
+          onPress={() => caloriesIntakeFormService.handleCancel(router)}
         >
           <ButtonText className="text-gray-700">Cancel</ButtonText>
         </Button>

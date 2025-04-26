@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
+import { weightInputService } from '@/utils/services/weight-input.service';
 
 interface WeightFormInputProps {
   control: Control<any>;
@@ -44,8 +45,13 @@ const WeightFormInput: React.FC<WeightFormInputProps> = ({
               keyboardType="numeric"
               placeholder={placeholder}
               onBlur={onBlur}
-              onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
-              value={value?.toString()}
+              onChangeText={(val) => {
+                // Utiliser le service pour convertir et valider la valeur de poids
+                const parsedValue = weightInputService.parseWeight(val);
+                onChange(parsedValue);
+              }}
+              // Utiliser le service pour formater la valeur pour l'affichage
+              value={value !== undefined ? weightInputService.formatWeightValue(value) : ''}
               className="bg-gray-50"
             />
           </Input>

@@ -10,6 +10,7 @@ import {
 } from '../interfaces/ingredient-interfaces';
 import {
   ingredientsStandard,
+  mealIngredients,
   IngredientStandardOrmProps
 } from '@/db/schema';
 import { eq, like } from 'drizzle-orm';
@@ -189,11 +190,28 @@ export async function handleDeleteIngredient(db: any, params: DeleteIngredientPa
       return { success: false, error: `Ingredient with ID ${ingredientId} not found` };
     }
     
-    // Utiliser une transaction pour supprimer l'ingrédient et ses références
+    // Vérifier si l'ingrédient est référencé dans des repas
+    const mealReferences = await db
+      .select({ id: mealIngredients.id, mealId: mealIngredients.mealId })
+      .from(mealIngredients)
+      .where(eq(mealIngredients.ingredientStandardId, ingredientId));
+    
+    if (mealReferences.length > 0) {
+      const mealIds = mealReferences.map((ref: { mealId: number }) => ref.mealId).join(', ');
+      logger.warn(
+        LogCategory.DATABASE, 
+        `Cannot delete ingredient: Ingredient with ID ${ingredientId} is used in ${mealReferences.length} meal(s) (IDs: ${mealIds})`
+      );
+      return { 
+        success: false, 
+        error: `Cannot delete ingredient: it is used in ${mealReferences.length} meal(s). Please remove it from these meals first.`,
+        usedInMeals: true,
+        mealIds: mealReferences.map((ref: { mealId: number }) => ref.mealId)
+      };
+    }
+    
+    // Utiliser une transaction pour supprimer l'ingrédient 
     return await db.transaction(async (tx: typeof db) => {
-      // Supprimer les références dans les repas (liaison mealIngredients)
-      // Note: Cette partie pourrait nécessiter une implémentation selon la structure de la base de données
-      
       // Supprimer l'ingrédient
       await tx
         .delete(ingredientsStandard)

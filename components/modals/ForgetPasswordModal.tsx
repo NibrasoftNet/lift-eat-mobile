@@ -31,6 +31,9 @@ import { useMutation } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '@/components/ui/toast';
+import { forgetPasswordModalService } from '@/utils/services/forget-password-modal.service';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export default function ForgetPasswordModal({
   showModal,
@@ -42,56 +45,47 @@ export default function ForgetPasswordModal({
   const router = useRouter();
   const toast = useToast();
 
+  // Utiliser le service pour obtenir les valeurs par défaut
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgetPasswordFormData>({
     resolver: zodResolver(forgetPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: forgetPasswordModalService.getDefaultValues(),
   });
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: ForgetPasswordFormData) => {
-      return Promise.resolve({
-        status: 200,
-        result: data,
-      });
+      // Utiliser le service pour soumettre le formulaire
+      logger.info(LogCategory.AUTH, 'Submitting forget password form', { email: data.email });
+      const result = await forgetPasswordModalService.submitForm(data);
+      
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      
+      return result.data;
     },
   });
 
   const onSubmit = async (data: ForgetPasswordFormData) => {
     try {
       const res = await mutateAsync(data);
-      console.log('Reset result', res);
-      setShowModal(false);
-      router.push('/reset-password');
+      logger.debug(LogCategory.AUTH, 'Password reset request successful', res);
+      
+      // Utiliser le service pour gérer la navigation après succès
+      forgetPasswordModalService.handleSuccessNavigation(router, setShowModal);
     } catch (error: any) {
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
-            />
-          );
-        },
-      });
+      // Utiliser le service pour gérer les erreurs
+      forgetPasswordModalService.handleError(error, toast);
     }
   };
 
   return (
     <Modal
       isOpen={showModal}
-      onClose={() => {
-        setShowModal(false);
-      }}
+      onClose={() => forgetPasswordModalService.closeModal(setShowModal)}
     >
       <ModalBackdrop />
       <ModalContent className="w-[90%]">
@@ -137,12 +131,11 @@ export default function ForgetPasswordModal({
             <ButtonText>Send</ButtonText>
           </Button>
           <Button
-            variant="link"
             size="sm"
-            onPress={() => {
-              setShowModal(false);
-            }}
-            className="gap-1"
+            variant="outline"
+            action="secondary"
+            onPress={() => forgetPasswordModalService.closeModal(setShowModal)}
+            className="flex-grow"
           >
             <ButtonIcon as={ArrowLeftIcon} />
             <ButtonText>Back to login</ButtonText>

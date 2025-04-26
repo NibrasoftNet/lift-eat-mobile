@@ -12,18 +12,20 @@ import ChatInput from '@/components/assistant/ChatInput';
 import ChatMessage, { MessageType } from '@/components/assistant/ChatMessage';
 import { useGemini } from '@/hooks/useGemini';
 import { Colors } from '@/utils/constants/Colors';
-import geminiService from '@/utils/services/gemini-service';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useUserContext } from '@/utils/providers/UserContextProvider';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+// Import des services refactorisés
+import { assistantPagesService } from '@/utils/services/pages/assistant-pages.service';
+import geminiService from '@/utils/services/gemini-service';
 import nutritionDatabaseService from '@/utils/services/nutrition-database.service';
 
 // Import des composants IA
 import MealGeneratorForm from '@/components/ia/MealGeneratorForm';
 import PlanGeneratorForm from '@/components/ia/PlanGeneratorForm';
 import { IaMealType, IaPlanType } from '@/utils/validation/ia/ia.schemas';
-import iaService from '@/utils/services/ia/ia.service';
 
 interface Message {
   id: string;
@@ -235,17 +237,48 @@ export default function AssistantScreen() {
                 <ThemedText style={styles.iaFeatureTitle}>Générateur de Plan Nutritionnel</ThemedText>
                 <PlanGeneratorForm 
                   onPlanGenerated={(plan: IaPlanType) => {
-                    toast.show({
-                      render: ({ id }) => (
-                        <MultiPurposeToast 
-                          id={id}
-                          color={ToastTypeEnum.SUCCESS}
-                          title="Plan généré"
-                          description="Le plan nutritionnel a été généré avec succès!"
-                        />
-                      ),
-                      placement: "bottom"
-                    });
+                    // Utiliser assistantPagesService pour générer un plan nutritionnel
+                    assistantPagesService.generatePlan(plan)
+                      .then(result => {
+                        if (result.success) {
+                          toast.show({
+                            render: ({ id }) => (
+                              <MultiPurposeToast 
+                                id={id}
+                                color={ToastTypeEnum.SUCCESS}
+                                title="Plan généré"
+                                description="Le plan nutritionnel a été généré avec succès!"
+                              />
+                            ),
+                            placement: "bottom"
+                          });
+                        } else {
+                          toast.show({
+                            render: ({ id }) => (
+                              <MultiPurposeToast 
+                                id={id}
+                                color={ToastTypeEnum.ERROR}
+                                title="Échec de génération"
+                                description={result.error || "Une erreur est survenue lors de la génération du plan"}
+                              />
+                            ),
+                            placement: "bottom"
+                          });
+                        }
+                      })
+                      .catch(error => {
+                        toast.show({
+                          render: ({ id }) => (
+                            <MultiPurposeToast 
+                              id={id}
+                              color={ToastTypeEnum.ERROR}
+                              title="Erreur"
+                              description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
+                            />
+                          ),
+                          placement: "bottom"
+                        });
+                      });
                     // Retourner à l'assistant après génération
                     setActiveIAFeature(null);
                   }}
@@ -275,10 +308,58 @@ export default function AssistantScreen() {
                       ),
                       placement: "bottom"
                     });
-                    // Simulation d'analyse
-                    setTimeout(() => {
-                      setActiveIAFeature(null);
-                    }, 2000);
+                    // Utiliser assistantPagesService pour l'analyse nutritionnelle
+                    // Analyser les 30 derniers jours
+                    const today = new Date();
+                    const thirtyDaysAgo = new Date(today);
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+                    
+                    const startDate = thirtyDaysAgo.toISOString().split('T')[0]; // Format YYYY-MM-DD
+                    const endDate = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+                    
+                    assistantPagesService.analyzeProgress(startDate, endDate)
+                      .then(result => {
+                        if (result.success) {
+                          toast.show({
+                            render: ({ id }) => (
+                              <MultiPurposeToast 
+                                id={id}
+                                color={ToastTypeEnum.SUCCESS}
+                                title="Analyse terminée"
+                                description="L'analyse de vos habitudes nutritionnelles est terminée."
+                              />
+                            ),
+                            placement: "bottom"
+                          });
+                        } else {
+                          toast.show({
+                            render: ({ id }) => (
+                              <MultiPurposeToast 
+                                id={id}
+                                color={ToastTypeEnum.ERROR}
+                                title="Échec de l'analyse"
+                                description={result.error || "Une erreur est survenue lors de l'analyse"}
+                              />
+                            ),
+                            placement: "bottom"
+                          });
+                        }
+                      })
+                      .catch(error => {
+                        toast.show({
+                          render: ({ id }) => (
+                            <MultiPurposeToast 
+                              id={id}
+                              color={ToastTypeEnum.ERROR}
+                              title="Erreur"
+                              description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
+                            />
+                          ),
+                          placement: "bottom"
+                        });
+                      });
+                      
+                    setActiveIAFeature(null);
                   }}
                 >
                   <ThemedText style={styles.iaButtonText}>Démarrer l'analyse</ThemedText>
