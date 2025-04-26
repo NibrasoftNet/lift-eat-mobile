@@ -136,7 +136,19 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   const [selectionMode, setSelectionMode] = useState<boolean>(false);
 
   // Déterminer le type de repas
-  const determineMealType = (type: string | null): MealType => {
+  // Prend en compte le champ mealType de la relation si disponible, sinon utilise le type par défaut
+  const determineMealType = (type: string | null, mealType?: string | null): MealType => {
+    // Si un type spécifique au plan est fourni, l'utiliser en priorité
+    if (mealType) {
+      const lowerMealType = mealType.toLowerCase();
+      
+      if (lowerMealType.includes('breakfast')) return 'breakfast';
+      if (lowerMealType.includes('lunch')) return 'lunch';
+      if (lowerMealType.includes('dinner')) return 'dinner';
+      if (lowerMealType.includes('snack')) return 'snacks';
+    }
+    
+    // Sinon utiliser le type par défaut
     if (!type) return 'snacks';
     
     const lowerType = type.toLowerCase();
@@ -151,6 +163,7 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   // Populate lists on component mount
   useEffect(() => {
     console.log("MealsClickSelection - Initialisation avec", mealsWithProgress.length, "repas");
+    console.log("MealsClickSelection - Vérification du champ mealType:", mealsWithProgress.map(m => ({ id: m.id, name: m.name, type: m.type, mealType: m.mealType })));
     
     const available: MealList = {
       breakfast: [],

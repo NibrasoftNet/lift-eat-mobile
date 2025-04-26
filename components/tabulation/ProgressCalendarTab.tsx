@@ -1,10 +1,11 @@
+import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { VStack } from '../ui/vstack';
 import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { UserOrmPros, DailyProgressOrmProps, PlanOrmProps, MealOrmProps } from '@/db/schema';
+import { UserOrmPros, DailyProgressOrmProps, PlanOrmProps, MealOrmProps, DailyPlanOrmProps } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 import { HStack } from '../ui/hstack';
 import { Box } from '../ui/box';
@@ -13,7 +14,7 @@ import { Center } from '../ui/center';
 import { Spinner } from '../ui/spinner';
 import { Button } from '../ui/button';
 import { useToast } from '../ui/toast';
-import { getDailyProgressByDate, getDailyProgressByPlan } from '@/utils/services/progress.service';
+// Ces fonctions ont été remplacées par des appels directs au serveur MCP
 import useProgressStore, { MealWithProgress, MealsByType } from '@/utils/store/progressStore';
 import { View, ScrollView } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
@@ -24,6 +25,12 @@ import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { getCurrentUserId, getCurrentUserIdSync, hasUserInSession } from '@/utils/helpers/userContext';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
 import { DataType } from '@/utils/helpers/queryInvalidation';
+import { DayEnum } from '@/utils/enum/general.enum';
+
+// Interface pour le type de plan journalier avec repas
+interface DailyPlanWithMeals extends DailyPlanOrmProps {
+  meals: MealOrmProps[];
+}
 
 const ProgressCalendarTab = () => {
   const drizzleDb = useDrizzleDb();
@@ -145,9 +152,10 @@ const ProgressCalendarTab = () => {
         planId: currentPlan.id
       });
       
-      const result = await getDailyProgressByPlan(drizzleDb, userId, currentPlan.id);
+      // Utiliser directement le serveur MCP pour récupérer les progressions quotidiennes
+      const result = await sqliteMCPServer.getDailyProgressByPlanViaMCP(userId, currentPlan.id);
       
-      if (!result) {
+      if (!result || !result.success) {
         logger.warn(LogCategory.DATABASE, 'No progress days found for current plan', {
           userId,
           planId: currentPlan.id
@@ -155,49 +163,220 @@ const ProgressCalendarTab = () => {
         return [];
       }
       
-      return result;
+      // L'API MCP renvoie un objet avec 'dailyProgressions' qui contient les données réelles
+      return result.dailyProgressions || [];
     },
     enabled: !!currentPlan?.id && hasUserInSession(),
   });
 
-  // Préparer les dates marquées pour le calendrier
-  const markedDates: Record<string, any> = {};
-  
-  if (progressDays && progressDays.length > 0) {
-    // Créer les marqueurs pour chaque date avec progression
-    progressDays.forEach((progress) => {
-      const isSelected = selectedDate === progress.date;
+  // Récupérer les détails du plan pour obtenir les jours planifiés
+  const {
+    data: planResult,
+    isLoading: isPlanDetailsLoading,
+  } = useQuery({
+    queryKey: ['planDetails', currentPlan?.id],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      if (!currentPlan?.id || !userId) return null;
       
-      // Déterminer la couleur directement basée sur le pourcentage
-      let progressColor = '#F44336'; // Rouge par défaut
-      if (progress.pourcentageCompletion >= 80) {
-        progressColor = '#4CAF50'; // Vert si >= 80%
-      } else if (progress.pourcentageCompletion >= 50) {
-        progressColor = '#FFC107'; // Jaune si >= 50%
+      // Récupérer les détails du plan via MCP Server
+      logger.info(LogCategory.DATABASE, 'Fetching plan details to display calendar markers', {
+        userId,
+        planId: currentPlan.id
+      });
+      
+      const result = await sqliteMCPServer.getPlanDetailsViaMCP(currentPlan.id, userId);
+      logger.debug(LogCategory.DATABASE, 'Plan details fetched', {
+        success: result.success,
+        hasPlan: !!result.plan,
+        hasDailyPlans: result.dailyPlans && result.dailyPlans.length > 0,
+        dailyPlansType: result.dailyPlans ? typeof result.dailyPlans : 'undefined',
+        dailyPlansLength: result.dailyPlans?.length,
+        firstPlanDetails: result.dailyPlans?.[0] ? Object.keys(result.dailyPlans[0]) : [],
+      });
+      return result.success ? result : null;
+    },
+    enabled: !!currentPlan?.id && hasUserInSession(),
+  });
+
+  // Fonction pour convertir un jour de la semaine en date ISO pour la semaine courante
+  const getDayOfCurrentWeek = (day: DayEnum): string => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 pour dimanche, 1 pour lundi, etc.
+    const daysMap: Record<DayEnum, number> = {
+      [DayEnum.SUNDAY]: 0,
+      [DayEnum.MONDAY]: 1,
+      [DayEnum.TUESDAY]: 2,
+      [DayEnum.WEDNESDAY]: 3,
+      [DayEnum.THURSDAY]: 4,
+      [DayEnum.FRIDAY]: 5,
+      [DayEnum.SATURDAY]: 6,
+    };
+    
+    const targetDay = daysMap[day];
+    const diff = targetDay - currentDay;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff + (diff < 0 ? 7 : 0)); // Ajouter 7 si le jour est déjà passé
+    
+    return targetDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
+  };
+
+  // Fonction pour convertir une date en jour de la semaine (DayEnum)
+  const getWeekDayFromDate = (dateStr: string): DayEnum => {
+    const date = new Date(dateStr);
+    const dayOfWeek = date.getDay(); // 0 = dimanche, 1 = lundi, etc.
+    
+    const dayMap: Record<number, DayEnum> = {
+      0: DayEnum.SUNDAY,
+      1: DayEnum.MONDAY,
+      2: DayEnum.TUESDAY,
+      3: DayEnum.WEDNESDAY,
+      4: DayEnum.THURSDAY,
+      5: DayEnum.FRIDAY,
+      6: DayEnum.SATURDAY,
+    };
+    
+    return dayMap[dayOfWeek];
+  };
+
+  // Préparer les dates marquées pour le calendrier en utilisant useMemo pour éviter les recalculs
+  const markedDates = React.useMemo(() => {
+    // Log détaillé au début du calcul des marqueurs de calendrier
+    logger.info(LogCategory.UI, 'Calculating calendar markers', {
+      planId: currentPlan?.id,
+      hasProgressDays: !!progressDays && progressDays.length > 0,
+      progressDaysCount: progressDays?.length || 0
+    });
+    
+    // Ajouter des logs détaillés pour comprendre la structure des données du plan
+    logger.debug(LogCategory.UI, 'Calendar plan data debug', {
+      hasPlanResult: !!planResult,
+      planResultStructure: planResult ? Object.keys(planResult) : [],
+      hasDailyPlans: planResult?.dailyPlans !== undefined,
+      dailyPlansType: planResult?.dailyPlans ? typeof planResult.dailyPlans : 'undefined',
+      dailyPlansLength: planResult?.dailyPlans?.length,
+      firstPlanDetails: planResult?.dailyPlans?.[0] ? Object.keys(planResult.dailyPlans[0]) : [],
+    });
+    
+    const dates: Record<string, any> = {};
+    
+    // D'abord, si les détails du plan sont disponibles, marquer tous les jours du plan
+    if (planResult?.dailyPlans && Array.isArray(planResult.dailyPlans) && planResult.dailyPlans.length > 0) {
+      logger.info(LogCategory.UI, `Processing ${planResult.dailyPlans.length} daily plans for calendar markers`);
+      
+      // Parcourir tous les plans journaliers
+      planResult.dailyPlans.forEach((dailyPlan: DailyPlanOrmProps, index: number) => {
+        // Ajouter un log pour chaque plan journalier
+        logger.debug(LogCategory.UI, `Daily plan ${index}:`, {
+          day: dailyPlan.day,
+          week: dailyPlan.week,
+          id: dailyPlan.id
+        });
+        
+        // Convertir le jour enum en date ISO (format YYYY-MM-DD)
+        const planDate = getDayOfCurrentWeek(dailyPlan.day as DayEnum);
+        logger.debug(LogCategory.UI, `Converted ${dailyPlan.day} to date: ${planDate}`);
+        
+        const isSelected = selectedDate === planDate;
+        
+        // Ajouter un marqueur par défaut pour tous les jours du plan
+        const planDot = { 
+          key: 'planned', 
+          color: '#808080', // Gris pour indiquer qu'il y a des repas planifiés
+          selectedDotColor: '#FFFFFF'
+        };
+        
+        dates[planDate] = {
+          dots: [planDot],
+          selected: isSelected,
+          selectedColor: '#007AFF',
+        };
+        
+        logger.debug(LogCategory.UI, `Added marker for date: ${planDate}`, {
+          dots: 1,
+          isSelected,
+          dailyPlanId: dailyPlan.id
+        });
+      });
+      
+      logger.info(LogCategory.UI, `Added markers for ${Object.keys(dates).length} days`);
+    }
+    
+    // Ensuite, superposer les marqueurs pour les jours avec progression (pour avoir la couleur correcte)
+    if (progressDays && progressDays.length > 0) {
+    // Créer les marqueurs pour chaque date avec progression
+    progressDays.forEach((progress: DailyProgressOrmProps) => {
+      // Convertir la date au format YYYY-MM-DD
+      const progressDate = progress.date.split('T')[0];
+      
+      // Les points colorés correspondent au % de complétion
+      const percentComplete = progress.pourcentageCompletion || 0;
+      let dotColor;
+      
+      if (percentComplete < 30) {
+        dotColor = '#ff4d4d'; // Rouge pour moins de 30%
+      } else if (percentComplete < 70) {
+        dotColor = '#ffcc00'; // Jaune pour moins de 70%
+      } else {
+        dotColor = '#00cc66'; // Vert pour 70% et plus
       }
       
-      // Créer un marqueur de progression basé sur le pourcentage de complétion
-      const progressDot = { 
-        key: 'progress', 
-        color: progressColor,
-        selectedDotColor: '#FFFFFF'
-      };
-      
-      markedDates[progress.date] = {
-        dots: [progressDot],
-        selected: isSelected,
+      // Vérifier si la date est déjà marquée (pour un plan), sinon créer un nouveau marqueur
+      if (dates[progressDate]) {
+        // Ajouter le point de progression aux points existants
+        dates[progressDate].dots = [
+          ...dates[progressDate].dots,
+          {
+            key: 'progress',
+            color: dotColor,
+            selectedDotColor: '#FFFFFF'
+          }
+        ];
+      } else {
+        // Créer un nouveau marqueur pour cette date
+        dates[progressDate] = {
+          dots: [{
+            key: 'progress',
+            color: dotColor,
+            selectedDotColor: '#FFFFFF'
+          }],
+          selected: selectedDate === progressDate,
+          selectedColor: '#007AFF',
+        };
+      }
+    });
+    }
+    
+    return dates;
+  }, [planResult, progressDays, selectedDate]);
+  
+  // Pour garantir que markedDates est toujours défini et que les dates sélectionnées sont marquées
+  const finalMarkedDates = React.useMemo(() => {
+    // Créer une copie pour éviter de modifier l'original
+    const markedDatesWithSelection = {...markedDates};
+    
+    // Ajouter un log pour voir toutes les dates marquées
+    logger.info(LogCategory.UI, 'Final calendar markers before selection', {
+      datesCount: Object.keys(markedDatesWithSelection).length,
+      dates: Object.keys(markedDatesWithSelection),
+      selectedDate
+    });
+    
+    // Si une date est sélectionnée mais qu'elle n'a pas de progression, l'ajouter comme sélectionnée
+    if (selectedDate && !markedDatesWithSelection[selectedDate]) {
+      markedDatesWithSelection[selectedDate] = {
+        selected: true,
         selectedColor: '#007AFF',
       };
+      logger.debug(LogCategory.UI, `Added selection marker for date: ${selectedDate}`);
+    }
+    
+    logger.info(LogCategory.UI, 'Final calendar markers after selection', {
+      datesCount: Object.keys(markedDatesWithSelection).length
     });
-  }
-  
-  // Si une date est sélectionnée mais qu'elle n'a pas de progression, l'ajouter quand même comme sélectionnée
-  if (selectedDate && !markedDates[selectedDate]) {
-    markedDates[selectedDate] = {
-      selected: true,
-      selectedColor: '#007AFF',
-    };
-  }
+    
+    return markedDatesWithSelection;
+  }, [markedDates, selectedDate]);
 
   // Gérer la sélection d'une date
   const handleDateSelect = async (day: any) => {
@@ -217,19 +396,102 @@ const ProgressCalendarTab = () => {
         date: day.dateString
       });
       
-      const result = await sqliteMCPServer.getMealProgressByDateViaMCP(userId, day.dateString);
+      // Convertir la date sélectionnée en jour de la semaine
+      const selectedDayOfWeek = getWeekDayFromDate(day.dateString);
+      logger.info(LogCategory.UI, `Date sélectionnée ${day.dateString} correspond au jour: ${selectedDayOfWeek}`);
       
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Échec de récupération des données de progression: ${result.error}`);
-        throw new Error(result.error || 'Erreur lors de la récupération des données de progression');
+      // Chercher tous les plans journaliers correspondant au jour de la semaine dans les données du plan
+      if (currentPlan && currentPlan.id) {
+        const dailyPlanDetails = await sqliteMCPServer.getPlanDetailsViaMCP(currentPlan.id, userId);
+        
+        logger.info(LogCategory.UI, `Détails du plan récupérés pour le plan ${currentPlan.id}`, {
+          planSuccess: dailyPlanDetails.success,
+          dailyPlansCount: dailyPlanDetails.dailyPlans?.length || 0,
+          dailyPlanIds: dailyPlanDetails.dailyPlans?.map(dp => dp.id) || [],
+        });
+        
+        if (dailyPlanDetails.success && dailyPlanDetails.dailyPlans) {
+          // Trouver tous les plans journaliers correspondant au jour sélectionné
+          const matchingDailyPlans = dailyPlanDetails.dailyPlans.filter(
+            dp => dp.day === selectedDayOfWeek
+          ) as DailyPlanWithMeals[];
+          
+          logger.info(LogCategory.UI, `Plans journaliers trouvés pour ${selectedDayOfWeek}`, {
+            count: matchingDailyPlans.length,
+            ids: matchingDailyPlans.map(dp => dp.id)
+          });
+          
+          // Chercher le premier plan journalier qui contient des repas
+          const dailyPlanWithMeals = matchingDailyPlans.find(dp => dp.meals && dp.meals.length > 0);
+          
+          if (dailyPlanWithMeals) {
+            logger.info(LogCategory.UI, `Trouvé un plan journalier avec repas: ${dailyPlanWithMeals.id}`, {
+              mealsCount: dailyPlanWithMeals.meals.length,
+              mealsData: JSON.stringify(dailyPlanWithMeals.meals.map(m => ({id: m.id, name: m.name})))
+            });
+            
+            // Créer un DailyProgress temporaire si nécessaire
+            // Cela permettra de créer les relations nécessaires lorsque l'utilisateur déplace un repas
+            if (!dailyProgress && currentPlan && selectedDate) {
+              // Créer une entrée temporaire dans la base de données
+              try {
+                logger.info(LogCategory.DATABASE, `Création d'une progression quotidienne pour la date ${selectedDate}`);
+                const createResult = await sqliteMCPServer.createDailyProgressViaMCP(userId, selectedDate);
+                
+                if (createResult.success && createResult.progress) {
+                  logger.info(LogCategory.DATABASE, `Progression quotidienne créée avec succès: ${createResult.progress.id}`);
+                  
+                  // Rafraîchir les données pour que les autres composants soient au courant
+                  setDailyProgress(createResult.progress);
+                } else {
+                  logger.error(LogCategory.DATABASE, `Échec de création de la progression: ${createResult.error}`);
+                }
+              } catch (error) {
+                logger.error(LogCategory.DATABASE, `Erreur lors de la création de la progression quotidienne`, { error });
+              }
+            }
+            
+            // Transformer les MealOrmProps en MealWithProgress
+            // TypeScript ne connaît pas le type exact retourné par l'API, donc on type explicitement
+            const mealsWithProgressFormat = dailyPlanWithMeals.meals.map(meal => {
+              // Création d'un objet compatible MealWithProgress
+              return {
+                ...meal, // Toutes les propriétés du repas
+                progress: null, // Pas de progression pour l'instant
+                mealType: meal.type, // Conserver le type de repas original
+                // On utilise un cast pour éviter les erreurs TypeScript
+                // Normalement, ces IDs seraient créés lors du déplacement du repas
+                dailyPlanMealId: null
+              };
+            });
+            
+            setMealsWithProgress(mealsWithProgressFormat);
+          } else {
+            // Aucun plan journalier avec repas trouvé
+            setMealsWithProgress([]);
+            logger.warn(LogCategory.UI, `Aucun plan journalier pour ${selectedDayOfWeek} ne contient de repas`);
+          }
+        } else {
+          // Erreur lors de la récupération des détails
+          setMealsWithProgress([]);
+          logger.warn(LogCategory.UI, `Erreur lors de la récupération des détails du plan: ${dailyPlanDetails.error || 'unknown error'}`);
+        }
+      } else {
+        setMealsWithProgress([]);
+        logger.warn(LogCategory.UI, `Plan courant non trouvé ou sans ID valide`);
       }
       
-      // Conversion explicite des types pour satisfaire TypeScript
-      const dailyProgressData = result.progress || null;
-      const mealsProgressData = result.meals || [];
+      // Récupérer aussi les progrès pour cette date
+      const result = await sqliteMCPServer.getMealProgressByDateViaMCP(userId, day.dateString);
       
-      setDailyProgress(dailyProgressData);
-      setMealsWithProgress(mealsProgressData);
+      if (result.success) {
+        // Conversion explicite des types pour satisfaire TypeScript
+        const dailyProgressData = result.progress || null;
+        setDailyProgress(dailyProgressData);
+      } else {
+        // Pas de données de progression - c'est OK, on pourrait quand même avoir des repas
+        setDailyProgress(null);
+      }
 
       // Réinitialiser les erreurs si tout va bien
       setError(null);
@@ -311,7 +573,7 @@ const ProgressCalendarTab = () => {
 
           <Calendar
             markingType={'multi-dot'}
-            markedDates={markedDates}
+            markedDates={finalMarkedDates}
             onDayPress={handleDateSelect}
             theme={{
               todayTextColor: '#007AFF',
@@ -354,19 +616,29 @@ const ProgressCalendarTab = () => {
                 ) : (
                   <Box className="mt-3" style={{ minHeight: 300 }}>
                     <Text className="text-blue-800 mb-2">Nombre de repas trouvés: {mealsWithProgress.length}</Text>
-                    {dailyProgress && (
-                      <MealsClickSelection 
-                        selectedDate={selectedDate}
-                        dailyProgress={dailyProgress}
-                        mealsWithProgress={mealsWithProgress}
-                        onMealStatusChange={() => {
-                          // Rafraîchir les données de progression après un changement
-                          if (hasUserInSession()) {
-                            queryClient.invalidateQueries({ queryKey: ['progressDays', currentPlan?.id] });
-                          }
-                        }}
-                      />
-                    )}
+                    <MealsClickSelection 
+                      selectedDate={selectedDate}
+                      dailyProgress={dailyProgress || {
+                        id: 0, // ID temporaire
+                        pourcentageCompletion: 0,
+                        calories: 0,
+                        carbs: 0,
+                        protein: 0,
+                        fat: 0,
+                        date: selectedDate,
+                        userId: user?.id || 0,
+                        planId: currentPlan?.id || 0,
+                        createdAt: null,
+                        updatedAt: null
+                      }}
+                      mealsWithProgress={mealsWithProgress}
+                      onMealStatusChange={() => {
+                        // Rafraîchir les données de progression après un changement
+                        if (hasUserInSession()) {
+                          queryClient.invalidateQueries({ queryKey: ['progressDays', currentPlan?.id] });
+                        }
+                      }}
+                    />
                   </Box>
                 )}
               </Box>

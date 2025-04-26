@@ -496,9 +496,9 @@ export async function handleAddMealToDailyPlan(db: any, params: AddMealToDailyPl
   try {
     if (!db) throw new Error("Database not initialized");
     
-    const { dailyPlanId, mealId, quantity = 10 } = params; // Valeur par défaut de 10g
+    const { dailyPlanId, mealId, quantity = 10, mealType } = params; // Valeur par défaut de 10g
     
-    logger.info(LogCategory.DATABASE, `Adding meal ${mealId} to daily plan ${dailyPlanId} via MCP Server`);
+    logger.info(LogCategory.DATABASE, `Adding meal ${mealId} to daily plan ${dailyPlanId} via MCP Server${mealType ? ` as ${mealType}` : ''}`);
     
     // Vérifier si le repas existe
     const meal = await db
@@ -541,6 +541,8 @@ export async function handleAddMealToDailyPlan(db: any, params: AddMealToDailyPl
         dailyPlanId,
         mealId,
         quantity,
+        // Utiliser le type spécifique s'il est fourni, sinon utiliser le type par défaut du repas
+        mealType: mealType || mealInfo.type,
         calories: caloriesForQuantity,
         carbs: carbsForQuantity,
         fat: fatForQuantity,

@@ -6,19 +6,17 @@ import { Text } from '@/components/ui/text';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
 import { AddIcon, Icon } from '@/components/ui/icon';
 import { SoupIcon } from 'lucide-react-native';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
 import { PlanOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import PlanCard from '@/components/cards/PlanCard';
-import { getPlansList } from '@/utils/services/plan.service';
 import { VStack } from '@/components/ui/vstack';
 import { RefreshControl } from 'react-native';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 
 export default function MyPlansScreen() {
   const router = useRouter();
-  const drizzleDb = useDrizzleDb();
   const { user } = useSessionStore();
   const {
     data: plansList,
@@ -30,8 +28,13 @@ export default function MyPlansScreen() {
   } = useQuery<PlanOrmProps[]>({
     queryKey: ['plans-list'], // Utiliser une clé standard pour le système d'invalidation
     queryFn: async () => {
-      const plans = await getPlansList(drizzleDb);
-      return plans ?? [];
+      const userId = user?.id;
+      if (!userId) {
+        console.warn('User ID not found, cannot fetch plans');
+        return [];
+      }
+      const result = await sqliteMCPServer.getPlansListViaMCP(userId);
+      return result.success && result.plans ? result.plans : [];
     },
   });
   

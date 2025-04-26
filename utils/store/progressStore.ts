@@ -10,6 +10,7 @@ import {
 // Type pour un repas avec son état de progression
 export type MealWithProgress = MealOrmProps & { 
   progress: DailyMealProgressOrmProps | null;
+  mealType?: string | null; // Type flexible spécifique au plan journalier
 };
 
 // Type pour la structure des repas organisés par type
@@ -48,16 +49,36 @@ interface ProgressState {
 const categorizeMealsByType = (meals: MealWithProgress[]): MealsByType => {
   return meals.reduce<MealsByType>(
     (acc, meal) => {
-      if (!meal.type) return acc;
+      // Si ni type ni mealType n'est défini, on ne peut pas catégoriser
+      if (!meal.type && !meal.mealType) return acc;
       
-      // On détermine le type de repas d'après le champ 'type' dans la table meals
-      const mealType = meal.type.toLowerCase();
+      // Priorité au type spécifique du plan journalier s'il existe
+      if (meal.mealType) {
+        const flexibleMealType = meal.mealType.toLowerCase();
+        
+        if (flexibleMealType.includes('breakfast')) {
+          acc.breakfast.push(meal);
+          return acc;
+        } else if (flexibleMealType.includes('lunch')) {
+          acc.lunch.push(meal);
+          return acc;
+        } else if (flexibleMealType.includes('dinner')) {
+          acc.dinner.push(meal);
+          return acc;
+        } else if (flexibleMealType.includes('snack')) {
+          acc.snacks.push(meal);
+          return acc;
+        }
+      }
       
-      if (mealType.includes('breakfast')) {
+      // Sinon on utilise le type par défaut du repas
+      const defaultMealType = meal.type?.toLowerCase() || '';
+      
+      if (defaultMealType.includes('breakfast')) {
         acc.breakfast.push(meal);
-      } else if (mealType.includes('lunch')) {
+      } else if (defaultMealType.includes('lunch')) {
         acc.lunch.push(meal);
-      } else if (mealType.includes('dinner')) {
+      } else if (defaultMealType.includes('dinner')) {
         acc.dinner.push(meal);
       } else {
         acc.snacks.push(meal);

@@ -1,8 +1,8 @@
-import { generateUserContext } from '../user-context.service';
-
 /**
  * Types de prompts que l'IA peut générer
  */
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+
 export enum PromptTypeEnum {
   ADD_MEAL_PLAN_INGREDIENT = 'ADD_MEAL_PLAN_INGREDIENT',
   GENERAL_QUESTION = 'GENERAL_QUESTION',
@@ -25,8 +25,8 @@ export async function buildEnrichedPrompt(
   promptType: PromptTypeEnum
 ): Promise<string> {
   try {
-    // Récupérer le contexte utilisateur
-    const userContext = await generateUserContext(userId);
+    // Récupérer le contexte utilisateur avec la méthode MCP
+    const userContext = await sqliteMCPServer.generateUserContextViaMCP(userId);
     
     // Construire le prompt en fonction du type
     switch (promptType) {

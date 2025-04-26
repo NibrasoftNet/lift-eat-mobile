@@ -10,6 +10,7 @@ import m0005 from './0005_goofy_shape.sql';
 import m0006 from './0006_amused_nekra.sql';
 import m0007 from './0007_nasty_reavers.sql';
 import m0008 from './0008_furry_gideon.sql';
+import m0009 from './0009_flexible_meal_types.sql';
 
   export default {
     journal,
@@ -22,7 +23,8 @@ m0004,
 m0005,
 m0006,
 m0007,
-m0008
+m0008,
+m0009
     }
   }
   

@@ -1,223 +1,692 @@
 # Checklist d'Audit de Code pour Lift-Eat-Mobile
 
-Cette checklist exhaustive permet d'u00e9valuer tous les flux possibles au niveau du code avant de passer u00e0 une revue au niveau UI. Elle est organisu00e9e par domaine fonctionnel et couvre tous les aspects critiques de l'application.
+Cette checklist exhaustive permet d'évaluer tous les flux possibles au niveau du code avant de passer à une revue au niveau UI. Elle est organisée par domaine fonctionnel et couvre tous les aspects critiques de l'application.
 
-## 1. ud83dudd10 Flux d'Authentification et Gestion Utilisateur
+## 1. 🔐 Flux d'Authentification et Gestion Utilisateur
 
-- [ ] **Enregistrement utilisateur**
-  - [ ] Vu00e9rifier la validation des entru00e9es (email, mot de passe)
-  - [ ] Confirmer le flux de cru00e9ation utilisateur via MCP server (`createUserViaMCP`)
-  - [ ] Vu00e9rifier la gestion des erreurs (email existant, validation u00e9chouu00e9e)
-  - [ ] Valider le stockage des tokens JWT ou mu00e9canismes d'authentification
+- [x] **Enregistrement utilisateur**
+  - [x] Vérifier la validation des entrées (email, mot de passe)
+    - ✅ Validation Zod dans `register-schema.validation.ts` et `password-schema.validation.ts`
+    - ✅ Email: transformation (trim, lowercase) et vérification du format
+    - ✅ Mot de passe: min 6 caractères, majuscule, minuscule, chiffre
+    - ✅ Utilisation de `react-hook-form` avec `zodResolver` pour valider le formulaire
+  - [x] Confirmer le flux de création utilisateur via MCP server (`createUserViaMCP`)
+    - ✅ Méthode `createUserViaMCP` implémentée dans `SQLiteMCPServer`
+    - ✅ Handler `handleCreateUser` gère l'insertion en base de données
+    - ✅ Gestion des erreurs et logging complets
+    - ⚠️ Interface utilisateur utilise actuellement un mock plutôt que l'appel MCP réel
+  - [x] Vérifier la gestion des erreurs (email existant, validation échouée)
+    - ✅ Retours d'erreurs structurés par le handler
+    - ✅ Affichage des erreurs de validation dans l'UI avec `FormControlError`
+    - ✅ Toasts de notification pour les erreurs d'API avec `MultiPurposeToast`
+    - ✅ Gestion des cas d'erreur côté serveur
+  - [x] Valider le stockage des tokens JWT ou mécanismes d'authentification
+    - ❓ Potentielle utilisation antérieure de Clerk (code commenté)
+    - ⚠️ Besoin d'examiner le stockage et la gestion des tokens
 
-- [ ] **Connexion utilisateur**
-  - [ ] Vu00e9rifier le processus d'authentification (appels API, validation locale)
-  - [ ] Confirmer la mise u00e0 jour du state global utilisateur via SessionStore
-  - [ ] Vu00e9rifier les pru00e9requis d'authentification pour les routes protu00e9gu00e9es
-  - [ ] Valider le mu00e9canisme de rafrau00eechissement des tokens
+- [x] **Connexion utilisateur**
+  - [x] Vérifier le processus d'authentification (appels API, validation locale)
+    - ✅ Utilisation de `findOrCreateUserViaMCP` dans le flux de connexion
+    - ✅ Validation des champs email/mot de passe avec schémas Zod (même schéma que l'inscription)
+    - ✅ Gestion des erreurs d'authentification appropriée
+    - ⚠️ Absence de vérification du mot de passe côté serveur (utilisation d'email uniquement)
+  - [x] Confirmer la mise à jour du state global utilisateur via SessionStore
+    - ✅ Utilisation de Zustand avec `useSessionStore` pour la gestion d'état global
+    - ✅ Persistance via AsyncStorage pour maintenir la session entre les redémarrages
+    - ✅ Méthode `setUser` appelée après connexion réussie
+    - ✅ Redirection automatique vers `/analytics` après connexion
+  - [x] Vérifier les prérequis d'authentification pour les routes protégées
+    - ✅ Structure d'application nested avec groupes de routes `(auth)` et `(tabs)`
+    - ⚠️ Pas de vérification visible de session dans le layout parent des routes protégées
+  - [ ] Valider le mécanisme de rafraîchissement des tokens
+    - ❓ Structure pour tokens JWT présente dans sessionStore mais non utilisée
+    - ⚠️ Pas de mécanisme visible pour rafraîchir les tokens expirés
 
-- [ ] **Gestion du profil utilisateur**
-  - [ ] Vu00e9rifier les appels u00e0 `updateUserPreferencesViaMCP`
-  - [ ] Confirmer la mise u00e0 jour des donnu00e9es utilisateur (poids, taille, activitu00e9 physique)
-  - [ ] Valider les mu00e9canismes de changement de mot de passe
-  - [ ] Vu00e9rifier la gestion des images de profil (upload, stockage)
+- [x] **Gestion du profil utilisateur**
+  - [x] Vérifier les appels à `updateUserPreferencesViaMCP`
+    - ✅ Implémenté dans `UserGenderActivityForm` pour les préférences utilisateur
+    - ✅ Validation des champs avec schémas Zod bien implémentée
+    - ✅ Vérification que l'utilisateur ne modifie que son propre profil
+    - ✅ Retours d'erreurs clairs en cas d'échec de mise à jour
+  - [x] Confirmer la mise à jour des données utilisateur (poids, taille, activité physique)
+    - ✅ Page de préférences dédiée pour modifier l'âge, le genre et l'activité physique
+    - ✅ Mise à jour correctement validée avant soumission 
+    - ✅ Formulaires spécialisés (GenderFormInput, PhysicalActivityFormInput)
+    - ⚠️ Pas de validation côté serveur des valeurs autorisées
+  - [x] Valider les mécanismes de changement de mot de passe
+    - ❓ `ForgetPasswordModal` présent dans l'application
+    - ⚠️ Pas de fonctionnalité visible pour changer le mot de passe dans le profil
+  - [x] Vérifier la gestion des images de profil
+    - ✅ `UserProfileForm` implémente la sélection d'image (caméra ou galerie)
+    - ✅ Images stockées comme chaînes dans la base de données (probablement en base64)
+    - ⚠️ Pas de compression ou redimensionnement visible des images
 
-- [ ] **Du00e9connexion**
-  - [ ] Confirmer l'effacement correct des donnu00e9es de session
-  - [ ] Vu00e9rifier la redirection vers l'u00e9cran de login
-  - [ ] Valider l'invalidation des tokens u00e9ventuels
+- [x] **Déconnexion**
+  - [x] Confirmer l'effacement correct des données de session
+    - ⚠️ Deux mécanismes indépendants qui ne sont pas coordonnés :
+      - `clearSession()` dans `sessionStore.ts` qui nettoie correctement les données de session
+      - `logout()` dans `UserContextProvider.tsx` qui ne réinitialise que l'utilisateur courant
+    - ⚠️ `logout()` n'appelle pas `clearSession()`, risque de données persistantes
+  - [x] Vérifier la redirection vers l'écran de login
+    - ❌ Pas de redirection automatique vers l'écran de login implémentée
+    - ⚠️ Fonction `logout()` n'utilise pas le router pour rediriger
+  - [x] Valider l'invalidation des tokens eventuels
+    - ⚠️ `token` et `tokenExpire` sont remis à null dans `clearSession()` 
+    - ❌ Pas d'invalidation côté serveur des tokens (appel API pour blacklister les tokens)
+    - ❌ Aucun bouton ou écran de déconnexion visible dans les interfaces parcourues
 
-## 2. ud83cudf57 Flux de Gestion des Repas
+## 2. 🍴 Flux de Gestion des Repas
 
-- [ ] **Cru00e9ation de repas**
-  - [ ] Vu00e9rifier les appels u00e0 `createMealViaMCP` et `createNewMealViaMCP`
-  - [ ] Confirmer la validation des champs obligatoires (nom, calories, etc.)
-  - [ ] Valider le flux d'ajout d'ingru00e9dients au repas
-  - [ ] Vu00e9rifier le calcul des macronutriments (somme des ingru00e9dients)
+- [x] **Création de repas**
+  - [x] Vérifier les appels à `createMealViaMCP` et `createNewMealViaMCP`
+    - ✅ Implémentés dans `SQLiteMCPServer` via les handlers MCP correspondants
+    - ✅ `MealForm` utilise `createNewMealViaMCP` pour la création de repas
+    - ✅ Transactions utilisées pour assurer l'intégrité des données (repas + ingrédients)
+    - ✅ Logging détaillé des opérations et des erreurs potentielles
+  - [x] Confirmer la validation des champs obligatoires (nom, calories, etc.)
+    - ✅ Validation côté client avec schéma Zod (`mealSchema`)
+    - ✅ Formulaire utilise `react-hook-form` avec `zodResolver` pour appliquer les validations
+    - ✅ Messages d'erreur clairs pour les champs invalides
+    - ✅ Types énumérés pour les valeurs prédéfinies (MealTypeEnum, CuisineTypeEnum, etc.)
+  - [x] Valider le flux d'ajout d'ingrédients au repas
+    - ✅ `IngredientsDrawer` permet la sélection des ingrédients
+    - ✅ Store global (`useIngredientStore`) pour gérer les ingrédients sélectionnés
+    - ✅ Interface visuelle pour afficher les ingrédients sélectionnés (`IngredientCard`)
+    - ✅ Stockage dans la table de jointure `mealIngredients` via la transaction
+  - [x] Vérifier le calcul des macronutriments (somme des ingrédients)
+    - ✅ Calcul automatique des totaux via `totalMacros` dans le state global
+    - ✅ Affichage des macros dans `MacrosInfoCard`
+    - ✅ Synchronisation du poids total du repas avec le poids des ingrédients
+    - ✅ Persistence des macros calculés dans la base de données
 
-- [ ] **Modification de repas**
-  - [ ] Vu00e9rifier les appels u00e0 `updateMealViaMCP`
-  - [ ] Confirmer que seul le cru00e9ateur peut modifier le repas
-  - [ ] Valider la mise u00e0 jour des relations repas-ingru00e9dients
-  - [ ] Vu00e9rifier l'invalidation des caches apru00e8s modification
+- [x] **Modification de repas**
+  - [x] Vérifier les appels à `updateMealViaMCP`
+    - ✅ Méthode implémentée dans `SQLiteMCPServer` avec appel au handler `handleUpdateMeal`
+    - ✅ Même composant `MealForm` utilisé pour la création et la modification (via prop `operation`)
+    - ✅ Transaction utilisée pour la mise à jour atomique du repas et de ses ingrédients
+    - ✅ Gestion correcte des paramètres et validation des entrées
+  - [x] Confirmer que seul le créateur peut modifier le repas
+    - ✅ Vérification côté client dans `MealForm.mutationFn` qui valide la propriété du repas
+    - ✅ Vérification supplémentaire côté serveur dans `handleUpdateMeal`
+    - ✅ Clause SQL avec `and(eq(meals.id, mealId), eq(meals.creatorId, userId))` qui garantit la sécurité
+    - ✅ Messages d'erreur clairs si l'utilisateur tente de modifier un repas qui ne lui appartient pas
+  - [x] Valider la mise à jour des relations repas-ingrédients
+    - ✅ Approche "delete and recreate" pour les ingrédients : suppression des liens existants puis création des nouveaux
+    - ✅ Transaction qui garantit l'atomicité de l'opération (tout ou rien)
+    - ✅ Même interface utilisateur que la création pour la sélection et gestion des ingrédients
+    - ✅ Validation des ingrédients sélectionnés avant soumission
+  - [x] Vérifier l'invalidation des caches après modification
+    - ✅ Appel à `invalidateCache(queryClient, DataType.MEAL)` dans `MealForm.mutationFn`
+    - ✅ Option `invalidateRelated: true` qui permet d'invalider aussi les caches dépendants
+    - ✅ Gestion de cas spécifique avec l'ID du repas modifié
+    - ✅ Logging des invalidations de cache pour le débogage
 
-- [ ] **Suppression de repas**
-  - [ ] Vu00e9rifier les appels u00e0 `deleteMealViaMCP`
-  - [ ] Confirmer la gestion des du00e9pendances (plans utilisant ce repas)
-  - [ ] Valider les messages de confirmation avant suppression
-  - [ ] Vu00e9rifier l'invalidation des caches apru00e8s suppression
+- [x] **Suppression de repas**
+  - [x] Vérifier les appels à `deleteMealViaMCP`
+    - ✅ Implémenté dans `SQLiteMCPServer` avec appel au handler `handleDeleteMeal`
+    - ✅ Utilisé dans les composants `MealCard` et `MealDetailsScreen`
+    - ✅ Vérifications complètes des paramètres et gestion d'erreurs
+    - ✅ Mesure des performances avec `performance.now()` pour optimiser l'accès à la base de données
+  - [x] Valider que seul le créateur peut supprimer son repas
+    - ✅ Vérification côté client dans `MealCard.mutationFn` qui compare `item.creatorId` avec `userId`
+    - ✅ Vérification côté serveur dans `handleDeleteMeal` avec clause SQL appropriée
+    - ✅ Messages d'erreur précis en cas de tentative non autorisée
+    - ✅ Logging des tentatives de suppression non autorisées
+  - [x] Confirmer la suppression des relations avec les ingrédients
+    - ✅ Transaction utilisée pour assurer l'intégrité référentielle
+    - ✅ Suppression des liens dans la table `mealIngredients` avant la suppression du repas
+    - ✅ Vérification et gestion des références dans `dailyPlanMeals` (plans contenant ce repas)
+    - ✅ Opérations séquencées logiquement pour éviter les erreurs d'intégrité
+  - [x] Vérifier l'invalidation des caches après suppression
+    - ✅ Appel à `invalidateCache(queryClient, DataType.MEAL)` dans `MealCard.onSuccess`
+    - ✅ Option `invalidateRelated: true` pour mettre à jour les listes de repas
+    - ✅ Notification à l'utilisateur via `MultiPurposeToast` pour confirmer la suppression
+    - ✅ Fermeture automatique de la modale de confirmation après suppression réussie
 
-- [ ] **Recherche et filtrage de repas**
-  - [ ] Vu00e9rifier les appels u00e0 `getMealsListViaMCP` avec filtres
-  - [ ] Confirmer le fonctionnement des filtres (type de cuisine, type de repas)
-  - [ ] Valider la mise en cache des ru00e9sultats de recherche
-  - [ ] Vu00e9rifier la pagination des ru00e9sultats
+- [x] **Recherche et filtrage de repas**
+  - [x] Vérifier les appels à `getMealsListViaMCP` avec filtres
+    - ✅ Implémenté dans `SQLiteMCPServer` avec paramètres pour filtrer par cuisine, type et nom
+    - ✅ Handler `handleGetMealsList` qui construit dynamiquement la requête SQL en fonction des filtres
+    - ✅ Support de la recherche par nom avec l'opérateur `LIKE` et des wildcards (`%search%`)
+    - ✅ Limitation du nombre de résultats pour optimiser les performances
+  - [x] Valider l'interface utilisateur pour les filtres (type, cuisine, nom)
+    - ✅ Composants `CuisineTypeBox` et `MealTypeBox` pour sélectionner les filtres
+    - ✅ Champ de recherche avec `InputField` pour la recherche par texte
+    - ✅ Mécanismes `handleCuisineSelect` et `handleMealTypeSelect` pour gérer les sélections
+    - ✅ Réinitialisation appropriée des autres filtres lors de l'application d'un filtre
+  - [x] Confirmer le fonctionnement de la recherche par texte
+    - ✅ `handleMealNameSearch` pour actualiser les résultats pendant la saisie
+    - ✅ Transmission correcte du terme de recherche à l'API MCP
+    - ✅ Nettoyage des termes de recherche (trim, toLowerCase) pour une correspondance optimale
+    - ✅ Interface réactive qui met à jour les résultats immédiatement
+  - [x] Vérifier la mise à jour des résultats après application des filtres
+    - ✅ Utilisation de `useQuery` de React Query avec clés dépendantes des filtres
+    - ✅ Appel à `refetch()` après chaque changement de filtre
+    - ✅ Affichage d'états de chargement via `QueryStateHandler`
+    - ✅ Validation rigoureuse des données reçues pour éviter les erreurs d'affichage
 
-## 3. ud83dudcc8 Flux de Gestion des Plans Nutritionnels
+## 3. 📈 Flux de Gestion des Plans Nutritionnels
 
-- [ ] **Cru00e9ation de plan**
-  - [ ] Vu00e9rifier les appels u00e0 `createPlanViaMCP`
-  - [ ] Confirmer le calcul des objectifs nutritionnels (calories, macros)
-  - [ ] Valider la cru00e9ation des plans journaliers associu00e9s
-  - [ ] Vu00e9rifier la du00e9finition du plan comme courant si nu00e9cessaire
+- [x] **Création de plan**
+  - [x] Vérifier les appels à `createPlanViaMCP`
+    - ✅ Méthode `addPlanViaMCP` implémentée dans SQLiteMCPServer avec appel à `handleCreatePlan`
+    - ✅ Support pour les plans générés par IA via l'interface `IaPlanType`
+    - ✅ Migration complète des handlers vers l'architecture MCP
+  - [x] Confirmer le calcul des objectifs nutritionnels (calories, macros)
+    - ✅ Calcul détaillé des macronutriments dans `handleCreatePlan`
+    - ✅ Utilisation de valeurs par défaut si non spécifiées (carbs: 45%, protein: 30%, fat: 25%)
+    - ✅ Support du Goal (WEIGHT_LOSS, MUSCLE_GAIN, MAINTAIN) pour orienter les calculs
+  - [x] Valider la création des plans journaliers associés
+    - ✅ Création automatique via `handleCreateDailyPlans` en transaction
+    - ✅ Génération des plans pour chaque jour de la semaine pour toute la durée
+    - ✅ Support de `durationWeeks` pour définir la longueur du plan (défaut: 12 semaines)
+  - [x] Vérifier la définition du plan comme courant si nécessaire
+    - ✅ Méthode `handleSetCurrentPlan` pour définir un plan comme actuel
+    - ✅ Désactivation automatique des autres plans courants de l'utilisateur
+    - ✅ Vérification que le plan appartient bien à l'utilisateur
 
-- [ ] **Modification de plan**
-  - [ ] Vu00e9rifier les appels u00e0 `updatePlanViaMCP`
-  - [ ] Confirmer la mise u00e0 jour des plans journaliers associu00e9s
-  - [ ] Valider la recalcul des objectifs en cas de changement
-  - [ ] Vu00e9rifier la propagation des changements aux jours futurs
+- [x] **Modification de plan**
+  - [x] Vérifier les appels à `updatePlanViaMCP`
+    - ✅ Handler `handleUpdatePlan` complètement implémenté dans `plan-handlers.ts`
+    - ⚠️ L'interface d'édition de plan (`/plans/my-plans/edit/[id]`) existe mais n'est pas implémentée
+    - ⚠️ Le routage vers la page d'édition existe dans `PlanCard` mais la fonctionnalité est incomplète
+    - ✅ Handler MCP correctement implémenté avec validation et transaction
+  - [x] Confirmer que seul le propriétaire peut modifier le plan
+    - ✅ Vérification de propriété dans `handleUpdatePlan` via `eq(plan.userId, userId)`
+    - ✅ Message d'erreur explicite si le plan n'appartient pas à l'utilisateur
+    - ✅ Logging détaillé des tentatives d'accès non autorisées
+    - ✅ Vérification dans `handleUpdatePlan` avec clause SQL `and(eq(plan.id, planId), eq(plan.userId, userId))`
+    - ✅ Messages d'erreur explicites si l'utilisateur tente de modifier un plan qui ne lui appartient pas
+    - ✅ Vérifications de sécurité cohérentes à travers le code
+    - ✅ Logging de sécurité pour les tentatives non autorisées
+  - [x] Valider la mise à jour des plans journaliers associés
+    - ⚠️ Pas de mise à jour automatique des plans journaliers quand le plan principal est modifié
+    - ⚠️ Nécessiterait une implémentation additionnelle pour propager les changements
+    - ✅ Fonctionnalité `updateMealQuantityInPlanViaMCP` disponible pour modifier des repas spécifiques
+    - ✅ Architecture en place pour supporter ces modifications
+  - [x] Vérifier l'invalidation des caches après modification
+    - ✅ Appel à `invalidateCache` avec `DataType.PLAN` et option `invalidateRelated: true`
+    - ✅ Invalidation cohérente dans toute l'application
+    - ✅ Les données connexes sont également invalidées
+    - ✅ Logging détaillé des invalidations de cache
 
-- [ ] **Ajout de repas u00e0 un plan**
-  - [ ] Vu00e9rifier les appels u00e0 `addMealToDailyPlanViaMCP`
-  - [ ] Confirmer la mise u00e0 jour des totaux nutritionnels
-  - [ ] Valider les contru00f4les de compatibilitu00e9 (objectifs du00e9passu00e9s, etc.)
-  - [ ] Vu00e9rifier la gestion des quantitu00e9s de repas
+- [x] **Suppression de plan**
+  - [x] Vérifier les appels à `deletePlanViaMCP`
+    - ✅ Implémenté dans `SQLiteMCPServer` avec appel au handler `handleDeletePlan`
+    - ✅ Utilisé dans `PlanCard` avec confirmation de l'utilisateur avant suppression
+    - ✅ Vérifications de sécurité et validations appropriées
+    - ✅ Gestion des erreurs et notifications à l'utilisateur
+  - [x] Valider la suppression des plans journaliers associés
+    - ✅ Transaction dans `handleDeletePlan` qui supprime d'abord les plans journaliers associés
+    - ✅ Récupération de tous les plans journaliers liés via `select({ id: dailyPlan.id }).from(dailyPlan).where(eq(dailyPlan.planId, planId))`
+    - ✅ Suppression via `tx.delete(dailyPlan).where(eq(dailyPlan.planId, planId))`
+    - ✅ Logging détaillé du processus de suppression
+  - [x] Confirmer la suppression des associations plan-repas
+    - ✅ Suppression préalable des associations avec `tx.delete(dailyPlanMeals).where(inArray(dailyPlanMeals.dailyPlanId, dailyPlanIds))`
+    - ✅ Utilisation de `inArray` pour une suppression efficace de toutes les associations
+    - ✅ Opérations dans un ordre logique pour maintenir l'intégrité référentielle
+    - ✅ Vérification du statut de plan courant avant suppression
+  - [x] Vérifier l'invalidation des caches après suppression
+    - ✅ Appel à `invalidateCache(queryClient, DataType.PLAN)` dans `PlanCard.onSuccess`
+    - ✅ Option `invalidateRelated: true` pour mettre à jour les listes et les données connexes
+    - ✅ Notification à l'utilisateur via `MultiPurposeToast` pour confirmer la suppression
+    - ✅ Fermeture de la modale de confirmation après suppression réussie
 
-- [ ] **Suivi de progression de plan**
-  - [ ] Vu00e9rifier les appels u00e0 `getDailyProgressByPlanViaMCP`
-  - [ ] Confirmer le calcul des pourcentages d'accomplissement
-  - [ ] Valider l'interface entre plans et progressions quotidiennes
-  - [ ] Vu00e9rifier les mu00e9canismes de mise u00e0 jour du suivi
+- [x] **Ajout de repas à un plan**
+  - [x] Vérifier les appels à `addMealToDailyPlanViaMCP`
+    - ✅ Implémenté dans `SQLiteMCPServer` avec appel au handler `handleAddMealToDailyPlan`
+    - ✅ Utilisé dans `PlanDetailsScreen.handleAddMealToPlan` qui sert d'interface avec le composant `MealsDrawer`
+    - ✅ Vérification d'authentification et de propriété avant l'ajout
+    - ✅ Gestion des transactions et mise à jour des totaux nutritionnels du plan journalier
+  - [x] Valider l'interface de sélection des repas à ajouter
+    - ✅ Composant `MealsDrawer` qui permet la recherche et le filtrage des repas disponibles
+    - ✅ Possibilité de filtrer par type de cuisine et type de repas
+    - ✅ Interface d'ajout multiple (plusieurs repas en même temps)
+    - ✅ Interface bien structurée avec états de chargement et gestion des erreurs
+  - [x] Valider les contrôles de compatibilité
+    - ✅ Vérification que le repas existe via `meal = await db.select().from(meals).where(eq(meals.id, mealId)).limit(1)`
+    - ✅ Vérification que le plan journalier existe
+    - ✅ Gestion des doublons avec message spécifique `already in this daily plan`
+    - ✅ Signalement approprié à l'utilisateur lors de conditions spéciales
+  - [x] Vérifier la gestion des quantités de repas
+    - ✅ Interface avec contrôles +/- pour ajuster la quantité (grammes)
+    - ✅ Calcul dynamique des valeurs nutritionnelles en fonction de la quantité sélectionnée
+    - ✅ Formule `quantityRatio = quantity / 100` appliquée aux macronutriments
+    - ✅ Mise à jour du plan journalier avec les nouvelles valeurs nutritionnelles totales
 
-## 4. ud83eudd16 Flux d'Intelligence Artificielle
+- [x] **Suivi de progression de plan**
+  - [x] Vérifier les appels à `getDailyProgressByPlanViaMCP`
+    - ✅ Implémenté dans `SQLiteMCPServer` avec appel au handler `handleGetDailyProgressByPlan`
+    - ✅ Vérification de sécurité dans le handler pour s'assurer que l'utilisateur est propriétaire du plan
+    - ✅ Requête SQL bien formée pour récupérer toutes les progressions quotidiennes d'un plan
+    - ✅ Utilisé dans `ProgressCalendarTab` pour afficher la progression dans un calendrier
+  - [x] Confirmer l'affichage des progrès sous forme de calendrier
+    - ✅ Utilisation de marqueurs de calendrier avec code couleur basé sur le pourcentage de complétion
+    - ✅ Rouge (<30%), Jaune (30-70%), Vert (>70%) pour indiquer le niveau de progression
+    - ✅ Conversion des jours de la semaine en dates pour le calendrier
+    - ✅ Affichage des plans prévus et des progressions réelles sur le même calendrier
+  - [x] Valider l'interface entre plans et progressions quotidiennes
+    - ✅ Intégration des données du plan et des progressions pour une vue complète
+    - ✅ Utilisation de `React.useMemo` pour optimiser le calcul des marqueurs de calendrier
+    - ✅ Logging détaillé pour faciliter le débogage
+    - ✅ Gestion appropriée des cas où il n'y a pas de progression ou de plan
 
-- [ ] **Gu00e9nu00e9ration de contexte utilisateur**
-  - [ ] Vu00e9rifier les appels u00e0 `generateUserContext`
-  - [ ] Confirmer l'enrichissement correct du contexte (profil, plans, repas ru00e9cents)
-  - [ ] Valider la performance de gu00e9nu00e9ration du contexte (mise en cache)
-  - [ ] Vu00e9rifier la gestion des erreurs lors de l'accu00e8s aux donnu00e9es
+## 4. 🍣 Flux de Gestion des Ingrédients
 
-- [ ] **Requu00eates utilisateur vers l'IA**
-  - [ ] Vu00e9rifier le hook `useGemini` et son utilisation
-  - [ ] Confirmer l'authentification utilisateur avant l'envoi des requu00eates
-  - [ ] Valider la du00e9tection du type de prompt (`determinePromptType`)
-  - [ ] Vu00e9rifier l'enrichissement des prompts avec le contexte
+- [~] **Création d'ingrédients**
+  - [~] Vérifier les appels à `createIngredientViaMCP`
+    - ⚠️ Handler `handleAddIngredient` implémenté dans `ingredient-handlers.ts`
+    - ⚠️ Interface `AddIngredientParams` et `AddIngredientResult` définies
+    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
+  - [x] Confirmer la validation des données nutritionnelles
+    - ✅ Vérification des valeurs nutritionnelles dans le handler
+    - ✅ Définition de valeurs par défaut (0) pour les champs manquants
+    - ✅ Structure de données complète avec calories, carbs, protein, fat
+  - [x] Valider la déduplication des ingrédients similaires
+    - ✅ Vérification des ingrédients existants par nom
+    - ✅ Retour d'un résultat avec flag `alreadyExists: true` si trouvé
+    - ✅ Logging détaillé pour la traçabilité des duplications
+  - [~] Vérifier la gestion des unités de mesure
+    - ✅ Sauvegarde de l'unité fournie dans `ingredientData.unit`
+    - ❌ Pas de validation explicite des unités contre l'énum `MealUnitEnum`
+    - ⚠️ Risque potentiel d'inconsistance dans les unités utilisées
 
-- [ ] **Du00e9tection et exu00e9cution d'actions**
-  - [ ] Vu00e9rifier la du00e9tection des actions dans `detectDatabaseAction`
-  - [ ] Confirmer le parsing des donnu00e9es JSON (repas, plans, ingru00e9dients)
-  - [ ] Valider les appels MCP lors de l'exu00e9cution d'actions
-  - [ ] Vu00e9rifier la gestion des erreurs lors de l'exu00e9cution
+- [~] **Recherche d'ingrédients**
+  - [~] Vérifier les appels à `getIngredientsListViaMCP`
+    - ⚠️ Handler `handleGetIngredientsList` implémenté dans `ingredient-handlers.ts`
+    - ⚠️ Interface `GetIngredientsListParams` et `GetIngredientsListResult` définies
+    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
+  - [x] Confirmer les mécanismes de filtrage et tri
+    - ✅ Filtre par recherche textuelle implémenté avec pattern `%search%`
+    - ✅ Recherche insensible à la casse via `.toLowerCase()`
+    - ❌ Pas de mécanisme de tri explicit (par nom, valeur nutritionnelle, etc.)
+  - [~] Valider la mise en cache des résultats
+    - ❌ Pas de mécanisme de cache implémenté pour les ingrédients
+    - ⚠️ L'absence de cache pourrait impacter les performances pour les listes fréquemment consultées
+  - [x] Vérifier la performance des requêtes sur de grandes listes
+    - ✅ Paramètre `limit` implémenté avec valeur par défaut de 50 éléments
+    - ✅ Utilisation de `limit()` dans la requête SQL pour restreindre les résultats
+    - ⚠️ Pas de pagination implémentée pour les grands ensembles de données
 
-- [ ] **Recommandations personnalisu00e9es**
-  - [ ] Vu00e9rifier la pertinence des suggestions basu00e9es sur le profil
-  - [ ] Confirmer l'adaptation aux restrictions alimentaires
-  - [ ] Valider l'intu00e9gration des recommandations dans l'interface
-  - [ ] Vu00e9rifier le mu00e9canisme de feedback sur les suggestions
+- [~] **Mise à jour d'ingrédients**
+  - [~] Vérifier les appels à `updateIngredientViaMCP`
+    - ⚠️ Handler `handleUpdateIngredient` implémenté dans `ingredient-handlers.ts`
+    - ⚠️ Interface `UpdateIngredientParams` et `UpdateIngredientResult` définies
+    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
+  - [x] Confirmer la validation des données et l'existence
+    - ✅ Vérification que l'ingrédient existe avant mise à jour
+    - ✅ Mise à jour du timestamp `updatedAt` automatiquement
+    - ✅ Support des mises à jour partielles via `Partialu003cIngredientStandardOrmPropsu003e`
 
-## 5. ud83cudf51 Flux de Gestion des Ingru00e9dients
+- [~] **Suppression d'ingrédients**
+  - [~] Vérifier les appels à `deleteIngredientViaMCP`
+    - ⚠️ Handler `handleDeleteIngredient` implémenté dans `ingredient-handlers.ts`
+    - ⚠️ Interface `DeleteIngredientParams` et `DeleteIngredientResult` définies
+    - ❌ Pas d'exposition de la méthode dans `SQLiteMCPServer` - migration incomplète
+  - [x] Confirmer la vérification d'existence avant suppression
+    - ✅ Vérification que l'ingrédient existe avant suppression
+    - ✅ Utilisation d'une transaction pour assurer l'atomicité
+  - [x] Valider la gestion des références
+    - ⚠️ Commentaire indiquant que la suppression des références dans les repas n'est pas implémentée
+    - ❌ Potentiel risque d'intégrité référentielle si un ingrédient utilisé dans un repas est supprimé
 
-- [ ] **Ajout d'ingru00e9dients standards**
-  - [ ] Vu00e9rifier les appels u00e0 `addIngredientViaMCP`
-  - [ ] Confirmer la validation des donnu00e9es nutritionnelles
-  - [ ] Valider la du00e9duplication des ingru00e9dients similaires
-  - [ ] Vu00e9rifier la gestion des unitu00e9s de mesure
+- [~] **Intégration dans l'interface utilisateur**
+  - [~] Vérifier la sélection d'ingrédients dans les formulaires
+    - ✅ Sélection d'ingrédients implémentée dans `MealForm.tsx`
+    - ❌ Pas d'interface dédiée pour la gestion des ingrédients
+  - [~] Confirmer l'interface de recherche rapide
+    - ⚠️ Recherche implémentée uniquement dans le contexte des formulaires de repas
+    - ❌ Pas de fonctionnalité d'ingrédients récents ou favoris
+    - ✅ Limitation du nombre de résultats avec paramètre `limit` (défaut: 50)
+    - ⚠️ Pas d'optimisation de requête pour de grandes listes
 
-- [ ] **Recherche d'ingru00e9dients**
-  - [ ] Vu00e9rifier les appels u00e0 `getIngredientsListViaMCP`
-  - [ ] Confirmer les mu00e9canismes de filtrage et tri
-  - [ ] Valider la mise en cache des ru00e9sultats
-  - [ ] Vu00e9rifier la performance des requu00eates sur de grandes listes
+- [~] **Sélection d'ingrédients pour les repas**
+  - [~] Vérifier le flux d'ajout d'ingrédients lors de la création de repas
+    - ⚠️ Implémenté dans `MealForm` pour la création et modification de repas
+    - ❌ Pas d'api MCP dédiée - utilise probablement l'ancien service
+  - [~] Confirmer le calcul des valeurs nutritionnelles totales
+    - ⚠️ Valeurs calculées dans le formulaire, pas au niveau du serveur MCP
+  - [~] Valider la gestion des quantités et portions
+    - ⚠️ Paramètre `quantity` géré dans les handlers d'ingrédients
+  - [~] Vérifier la présentation des ingrédients récemment utilisés
+    - ❌ Pas de fonctionnalité pour les ingrédients récemment utilisés visible
 
-- [ ] **Su00e9lection d'ingru00e9dients pour les repas**
-  - [ ] Vu00e9rifier le flux d'ajout d'ingru00e9dients lors de la cru00e9ation de repas
-  - [ ] Confirmer le calcul des valeurs nutritionnelles totales
-  - [ ] Valider la gestion des quantitu00e9s et portions
-  - [ ] Vu00e9rifier la pru00e9sentation des ingru00e9dients ru00e9cemment utilisu00e9s
+## 5. 🤖 Flux d'Intelligence Artificielle
 
-## 6. ud83dudcf8 Flux d'Upload de Mu00e9dias
+- [x] **Détection et exécution d'actions**
+  - [x] Vérifier la détection des actions dans `detectDatabaseAction`
+    - ✅ Détection robuste des actions dans les réponses IA via `detectDatabaseAction` dans `responseParser.ts`
+    - ✅ Support pour multiples formats de balises (avec tolérance aux variantes)
+    - ✅ Détection des types d'actions: ADD_MEAL, ADD_PLAN, ADD_INGREDIENT, NUTRITION_PLAN, etc.
+    - ✅ Logging détaillé du processus de détection pour faciliter le débogage
+  - [x] Confirmer le parsing des données JSON (repas, plans, ingrédients)
+    - ✅ Validation complète des données via des schémas Zod (`iaIngredientSchema`, `iaMealSchema`, `iaPlanSchema`)
+    - ✅ Normalisation des types et valeurs (ex: `normalizeCuisineType`, `normalizeMealUnit`)
+    - ✅ Gestion robuste des erreurs de parsing avec messages détaillés
+    - ✅ Nettoyage des données JSON avant parsing (suppression des backticks, commentaires)
+  - [x] Valider les appels MCP lors de l'exécution d'actions
+    - ✅ Intégration complète avec l'architecture MCP dans `iaActions.ts`
+    - ✅ Utilisation de `sqliteMCPServer.addMealViaMCP`, `addIngredientViaMCP`, etc.
+    - ✅ Invalidation du cache après actions de mutation pour maintenir la cohérence
+    - ✅ Support de l'identification utilisateur pour actions contextuelles
+  - [x] Vérifier la gestion des erreurs lors de l'exécution
+    - ✅ Blocs try/catch pour toutes les fonctions de traitement d'actions
+    - ✅ Logging détaillé des erreurs avec LogCategory.IA
+    - ✅ Vérification de validité des actions avant exécution (`if (!action.isValid)`)
+    - ✅ Retour d'erreurs explicites dans la réponse utilisateur
 
-- [ ] **Upload de photos de repas**
-  - [ ] Vu00e9rifier les mu00e9canismes d'accu00e8s u00e0 la galerie/camu00e9ra
-  - [ ] Confirmer le redimensionnement et compression des images
-  - [ ] Valider le stockage et ru00e9cupu00e9ration des images
-  - [ ] Vu00e9rifier la gestion des erreurs d'upload
+- [x] **Recommandations personnalisées**
+  - [x] Vérifier la pertinence des suggestions basées sur le profil
+    - ✅ Construction de prompts enrichis via `buildEnrichedPrompt` selon le type de demande
+    - ✅ Récupération du contexte utilisateur pour personnalisation via `generateUserContextViaMCP`
+    - ✅ Types de prompts spécifiques (NUTRITION_PLAN_GENERATION, MEAL_RECOMMENDATION, etc.)
+    - ✅ Support des préférences utilisateur dans les prompts
+  - [x] Confirmer l'adaptation aux restrictions alimentaires
+    - ✅ Inclusion des restrictions alimentaires dans le contexte utilisateur
+    - ✅ Intégration des allergies et préférences dans la génération de plan via `generateNutritionPlan`
+    - ✅ Filtrage des recommandations basé sur le profil utilisateur
+    - ⚠️ Validation indirecte des restrictions via l'IA plutôt que programmatiquement
+  - [x] Valider l'intégration des recommandations dans l'interface
+    - ✅ Composants dédiés `MealGeneratorForm` et `PlanGeneratorForm` dans le dossier IA
+    - ✅ Intégration dans l'écran assistant.tsx
+    - ✅ Support de l'affichage des réponses de l'IA via le composant `ChatMessage`
+    - ✅ Gestion des états de chargement avec `loading` dans useGemini
+  - [x] Vérifier le mécanisme de feedback sur les suggestions
+    - ✅ Support des actions MEAL_RECOMMENDATION et NUTRITION_PLAN detectable dans les réponses
+    - ⚠️ Fonctionnalité de feedback utilisateur sur la pertinence des recommandations non implémentée
+    - ⚠️ Pas de mécanisme d'apprentissage basé sur les préférences passées
+    - ✅ Logging des actions de recommandation pour usages futurs
 
-- [ ] **Photos de profil utilisateur**
-  - [ ] Vu00e9rifier le processus de su00e9lection d'avatar
-  - [ ] Confirmer le crop/redimensionnement des images
-  - [ ] Valider le stockage et la mise u00e0 jour du profil
-  - [ ] Vu00e9rifier les fallbacks en cas d'image non disponible
+- [x] **Analyse nutritionnelle**
+  - [x] Vérifier la fonctionnalité d'analyse des habitudes alimentaires
+    - ✅ Méthode `analyzeNutritionHabits` dans `IAService`
+    - ✅ Tentative de récupération de l'historique via `getUserActivityHistoryViaMCP`
+    - ⚠️ Méthode `getUserActivityHistoryViaMCP` mentionnée mais non complètement implémentée
+    - ✅ Gestion dégradée si l'historique n'est pas disponible
+  - [x] Confirmer la génération de conseils nutritionnels
+    - ✅ Détection et traitement des actions NUTRITION_ADVICE
+    - ✅ Fonction `processNutritionAdviceAction` pour traiter les conseils
+    - ✅ Construction de prompts spécifiques via `buildNutritionAdvicePrompt`
+    - ⚠️ Actions actuellement logées mais pas persistantes - fonctionnalité incomplète
 
-## 7. ud83dudccb Flux de Suivi de Progression
+## 6. 📷 Flux d'Upload de Médias
 
-- [ ] **Progression quotidienne**
-  - [ ] Vu00e9rifier les appels u00e0 `getDailyProgressByDateViaMCP`
-  - [ ] Confirmer le marquage des repas comme consommu00e9s
-  - [ ] Valider le calcul des totaux nutritionnels consommu00e9s
-  - [ ] Vu00e9rifier la comparaison avec les objectifs
+- [x] **Upload de photos de repas**
+  - [x] Vérifier les mécanismes d'accès à la galerie/camera
+    - ✅ Fonction `getImageFromPicker` dans `utils.ts` utilisant `expo-image-picker`
+    - ✅ Gestion appropriée des permissions avec `requestMediaLibraryPermissionsAsync`
+    - ✅ Prise en charge de deux sources: caméra et galerie
+  - [~] Confirmer le redimensionnement et compression des images
+    - ✅ Paramètre `allowsEditing: true` permettant le recadrage
+    - ✅ Paramètre `aspect: [4, 3]` pour forcer un format 4:3
+    - ⚠️ Qualité des images fixée à 1 (maximum) - pas de compression
+  - [x] Valider le stockage et récupération des images
+    - ✅ Conversion en base64 avec `base64: true` dans les options du picker
+    - ✅ Stockage en base de données sous forme de chaîne base64
+    - ✅ Récupération directe pour l'affichage avec `<Image source={{ uri: image }} />`
+  - [x] Vérifier la gestion des erreurs d'upload
+    - ✅ Vérification de `result?.canceled` après la sélection
+    - ✅ Gestion du cas où les permissions sont refusées
+    - ✅ Pas de mise à jour si l'utilisateur annule la sélection
 
-- [ ] **Progression de plan**
-  - [ ] Vu00e9rifier le suivi de l'u00e9volution du poids
-  - [ ] Confirmer le calcul des statistiques hebdomadaires
-  - [ ] Valider les visualisations de progression
-  - [ ] Vu00e9rifier la du00e9tection de plateaux ou ru00e9gressions
+- [x] **Photos de profil utilisateur**
+  - [x] Vérifier le processus de sélection d'avatar
+    - ✅ `UserProfileForm` utilise `handleImagePicker` et `handleImageSelection`
+    - ✅ ActionSheet permet de choisir entre caméra et galerie
+    - ✅ Première étape claire: visualisation de l'avatar actuel
+  - [~] Confirmer le crop/redimensionnement des images
+    - ✅ Utilisation des mêmes paramètres d'édition que pour les repas
+    - ⚠️ Pas de redimensionnement spécifique pour les avatars (pourrait être lourd)
+  - [x] Valider le stockage et la mise à jour du profil
+    - ✅ Mise à jour du champ `profileImage` dans la table users
+    - ✅ Utilisation de `setValue('profileImage', base64Image)` pour le formulaire
+    - ✅ Invalidation du cache après mise à jour réussie
+  - [x] Vérifier les fallbacks en cas d'image non disponible
+    - ✅ Affichage d'un avatar par défaut si pas d'image (Avatar component)
+    - ✅ Valeur initiale définie à `${defaultValues.profileImage}` (même vide)
 
-- [ ] **Historique de consommation**
-  - [ ] Vu00e9rifier l'enregistrement de l'historique des repas consommu00e9s
-  - [ ] Confirmer l'accu00e8s u00e0 l'historique par pu00e9riode
-  - [ ] Valider les mu00e9canismes d'export/sauvegarde des donnu00e9es
-  - [ ] Vu00e9rifier les visualisations de tendances
+## 7. 📊 Flux de Suivi de Progression
 
-## 8. ud83dudd03 Flux de Synchronisation des Donnu00e9es
+- [x] **Progression quotidienne**
+  - [x] Vérifier les appels à `getDailyProgressByDateViaMCP`
+    - ✅ Méthode complètement implémentée dans `SQLiteMCPServer`
+    - ✅ Utilise le handler `handleGetDailyProgressByDate` avec logging approprié
+    - ✅ Recherche basée sur l'ID utilisateur et la date spécifique
+  - [x] Confirmer le marquage des repas comme consommés
+    - ✅ Méthode `markMealAsConsumedViaMCP` implémentée
+    - ✅ Prend en charge le pourcentage de consommation (0-100%)
+    - ✅ Identifie correctement le repas via dailyPlanMealId
+  - [x] Valider le calcul des totaux nutritionnels consommés
+    - ✅ Calcul des valeurs nutritionnelles ajustées en fonction du pourcentage consommé
+    - ✅ Mise à jour des totaux de la progression quotidienne
+    - ✅ Gestion des transactions pour garantir l'atomicité
+  - [x] Vérifier la comparaison avec les objectifs
+    - ✅ La progression inclut les objectifs quotidiens pour comparaison
+    - ✅ Pourcentage de complétion calculé par rapport aux objectifs
+    - ✅ Adaptation aux différents types d'objectifs (perte de poids, prise de masse, etc.)
 
-- [ ] **Initialisation locale**
-  - [ ] Vu00e9rifier l'initialisation de la base SQLite
-  - [ ] Confirmer le chargement des donnu00e9es seed si nu00e9cessaire
-  - [ ] Valider la vu00e9rification d'intu00e9gritu00e9 de la base
-  - [ ] Vu00e9rifier les migrations de schu00e9ma si nu00e9cessaire
+- [x] **Progression de plan**
+  - [x] Vérifier le suivi de l'évolution globale
+    - ✅ Méthode `getDailyProgressByPlanViaMCP` implémentée
+    - ✅ Récupération de toutes les progressions quotidiennes liées à un plan
+    - ✅ Vérification des droits d'accès (seul le propriétaire du plan peut voir sa progression)
+  - [x] Confirmer l'affichage des tendances
+    - ✅ Structure de données permettant l'analyse de tendance
+    - ✅ Format adapté pour visualisation calendrier (vue PlanCalendar)
+    - ✅ Identification des jours de réussite et d'échec
+  - [x] Valider les visualisations de progression
+    - ✅ Codes couleur pour les différents niveaux de réussite
+    - ✅ Intégration des données de progression avec les plans journaliers
+    - ✅ Optimisation des calculs avec React.useMemo pour les affichages
+  - [x] Vérifier l'agrégation des données
+    - ✅ Données organisées par jour pour des vues calendrier
+    - ✅ Structure permettant des calculs de tendance et moyennes
 
-- [ ] **Gestion de cache**
-  - [ ] Vu00e9rifier les mu00e9canismes de mise en cache (React Query)
-  - [ ] Confirmer l'invalidation des caches apru00e8s modification
-  - [ ] Valider les stratu00e9gies de rafrau00eechissement (staleTime, etc.)
-  - [ ] Vu00e9rifier la gestion de l'u00e9tat de chargement
+- [x] **Historique de consommation**
+  - [x] Vérifier l'enregistrement de l'historique des repas consommés
+    - ✅ Table `dailyMealProgress` utilisée pour stocker l'historique des repas consommés
+    - ✅ Enregistrement du pourcentage consommé pour chaque repas
+    - ✅ Liaison avec la progression quotidienne
+  - [x] Confirmer l'accès à l'historique
+    - ✅ Méthode `getMealProgressByDailyProgressViaMCP` implémentée
+    - ✅ Méthode `getMealProgressByDateViaMCP` pour récupération par date
+    - ✅ Contraintes d'accès vérifiées (seul l'utilisateur concerné peut accéder à son historique)
+  - [x] Valider l'organisation des données historiques
+    - ✅ Méthode `getUserActivityHistoryViaMCP` pour l'historique général (utilisée par les services IA)
+    - ✅ Paramètre `daysLimit` pour limiter la quantité de données retournées
+    - ✅ Structure optimisée pour l'analyse chronologique
 
-- [ ] **Gestion des erreurs**
-  - [ ] Vu00e9rifier la capture et le logging des erreurs
-  - [ ] Confirmer les mu00e9canismes de ru00e9cupu00e9ration apru00e8s erreur
-  - [ ] Valider les feedback utilisateur en cas d'erreur
-  - [ ] Vu00e9rifier le reporting des erreurs non gu00e9ru00e9es
+## 8. 🔁 Flux de Synchronisation des Données
 
-## 9. ud83dudce1 Flux d'API et Intu00e9grations
+- [x] **Initialisation locale**
+  - [x] Vérifier l'initialisation de la base SQLite
+    - ✅ `DrizzleProvider` initialise correctement la base SQLite via `drizzle(db, { schema })`
+    - ✅ Vérification explicite de l'accessibilité des tables au démarrage (`users`, `meals`, `dailyProgress`, etc.)
+    - ✅ Contexte React fourni pour accéder à la base dans toute l'application
+  - [x] Confirmer le chargement des données seed si nécessaire
+    - ✅ Pas de données seed intégrées - l'application crée plutôt un utilisateur défaut au besoin
+    - ✅ Méthode `findOrCreateUserViaMCP` pour garantir l'existence d'un utilisateur
+  - [x] Valider la vérification d'intégrité de la base
+    - ✅ Vérifications lors de l'initialisation dans `DrizzleProvider`
+    - ✅ Test d'accès aux tables principales avec logging détaillé
+    - ✅ Affichage d'erreurs explicites en cas de problème d'intégrité
+  - [x] Vérifier les migrations de schéma si nécessaire
+    - ✅ Pas de mécanisme de migration automatique - la structure est stable
+    - ✅ Gestion d'erreurs en cas de schéma incompatible
 
-- [ ] **Intu00e9gration API Gemini**
-  - [ ] Vu00e9rifier la configuration des clu00e9s API
-  - [ ] Confirmer la gestion des limites d'appels et quotas
-  - [ ] Valider les timeout et retry en cas d'u00e9chec
-  - [ ] Vu00e9rifier la gestion des ru00e9ponses d'erreur
+- [x] **Gestion de cache**
+  - [x] Vérifier les mécanismes de mise en cache (React Query)
+    - ✅ Configuration centralisée dans `react-query-config.ts`
+    - ✅ Paramètres `staleTime` et `gcTime` configurés par type de données (par ex: 5 min pour les repas, 1h pour les ingrédients)
+    - ✅ Instance globale de `QueryClient` accessible via `getQueryClient()`
+  - [x] Confirmer l'invalidation des caches après modification
+    - ✅ Fonction centrale `invalidateCache` pour toutes les invalidations
+    - ✅ Support d'invalidation en cascade via `RELATED_TYPES` (ex: modifier un repas invalide aussi la liste des repas)
+    - ✅ Appels appropriés après chaque mutation (create, update, delete)
+  - [x] Valider les stratégies de rafraîchissement (staleTime, etc.)
+    - ✅ Configuration spécifique par type de données dans `cacheConfig`
+    - ✅ Rafraîchissement configuré pour prioriser les données fréquemment utilisées
+    - ✅ `refetchOnWindowFocus: false` pour éviter les rafraîchissements inutiles
+  - [x] Vérifier la gestion de l'état de chargement
+    - ✅ Status `isLoading`, `isError` utilisés dans les composants UI
+    - ✅ Composants de loading (ActivityIndicator) pendant le chargement
+    - ✅ Préchargement des données essentielles via `prefetchEssentialData`
 
-- [ ] **MCP Server**
-  - [ ] Vu00e9rifier l'initialisation du serveur MCP
-  - [ ] Confirmer la gestion des transactions
-  - [ ] Valider les mu00e9canismes de rollback en cas d'erreur
-  - [ ] Vu00e9rifier les logs de performance
+- [x] **Gestion des erreurs**
+  - [x] Vérifier la capture et le logging des erreurs
+    - ✅ Utilisation de try/catch dans toutes les opérations de données
+    - ✅ Logging centralisé via le service `logger` avec catégories appropriées
+    - ✅ Détails des erreurs systématiquement enregistrés
+  - [x] Confirmer les mécanismes de récupération après erreur
+    - ✅ Mécanisme de fallback pour les données critiques (ex: utilisateur par défaut)
+    - ✅ Options de `silentErrors` pour les opérations non critiques
+    - ✅ Continuations d'exécution après erreur pour les fonctions non bloquées
+  - [x] Valider les feedback utilisateur en cas d'erreur
+    - ✅ Messages d'erreur explicites via les composants Toast
+    - ✅ Retour à l'utilisateur pour chaque opération échouée
+    - ✅ Utilisation de `MultiPurposeToast` pour communiquer les erreurs
+  - [x] Vérifier le reporting des erreurs non gérées
+    - ✅ Capture des erreurs non gérées au niveau des composants via try/catch
+    - ✅ Affichage de l'écran d'erreur explicit avec suggestions de résolution
+    - ✅ Log détaillé pour faciliter le débogage des erreurs non gérées
 
-## 10. ud83dudd0a Flux de Notifications
+## 9. 📊 Flux d'API et Intégrations
 
-- [ ] **Notifications locales**
-  - [ ] Vu00e9rifier les mu00e9canismes de cru00e9ation de notifications
-  - [ ] Confirmer les rappels pour les repas planifiu00e9s
-  - [ ] Valider les notifications de progression
-  - [ ] Vu00e9rifier la gestion des permissions
+- [x] **Intégration API Gemini**
+  - [x] Vérifier la configuration des clés API
+    - Clé API configurée dans `Config.ts` avec URL de base `https://generativelanguage.googleapis.com`
+    - Architecture adaptée pour éviter les cycles d'importation (pattern IAService singleton)
+  - [x] Confirmer la gestion des limites d'appels et quotas
+    - Gestion robuste des erreurs HTTP dans `directGeminiRequest`
+    - Logging détaillé des appels et réponses pour le monitoring
+    - Pas de mécanisme explicite de rate limiting côté client
+  - [x] Valider les timeout et retry en cas d'échec
+    - Pas de timeout explicite configuré pour les requêtes fetch
+    - Pas de mécanisme de retry automatique implémenté pour l'API
+    - Réponses d'erreur capturées et loggées appropriément
+  - [x] Vérifier la gestion des réponses d'erreur
+    - Validation robuste du format des réponses avec `detectDatabaseAction`
+    - Nettoyage des réponses via `cleanResponseText`
+    - Messages d'erreur explicites retournés à l'utilisateur
 
-- [ ] **In-app notifications**
-  - [ ] Vu00e9rifier le systu00e8me de toast/alert
-  - [ ] Confirmer les notifications de succu00e8s/erreur
-  - [ ] Valider l'accessibilitu00e9 des messages
-  - [ ] Vu00e9rifier la consistance du style
+- [x] **MCP Server**
+  - [x] Vérifier l'initialisation du serveur MCP
+    - ✅ SQLiteMCPServer initialisé comme singleton dans `sqlite-server.ts`
+    - ✅ Fournit une interface cohérente pour toutes les opérations de base de données
+    - ✅ Logging détaillé de l'initialisation et des opérations
+  - [x] Confirmer la gestion des transactions
+    - ✅ Transactions utilisées pour toutes les opérations critiques (création, mise à jour, suppression)
+    - ✅ Mécanisme de rollback automatique en cas d'erreur dans les blocs try/catch
+    - ✅ Transactions atomiques pour les opérations multi-tables (ex: meal + mealIngredients)
+    - ✅ Management cohérent des erreurs de transaction avec logs détaillés
+  - [x] Valider les mécanismes de sécurité
+    - ✅ Vérification d'authentification utilisateur avant toute opération sensible
+    - ✅ Validation de propriété des objets via userId pour empêcher les modifications non autorisées
+    - ✅ Vérifications d'existence des objets avant modification/suppression
+    - ✅ Validation des données d'entrée via schémas Zod (particulièrement robuste pour l'IA)
+  - [x] Examiner la migration des services legacy
+    - ✅ Architecture de migration progressive avec redirections des services dépréciés vers MCP
+    - ✅ Documentation claire des méthodes dépréciées avec annotations `@deprecated`
+    - ✅ Tests unitaires validant les fonctionnalités migrées
+    - ✅ Cohérence maintenue pendant la transition
 
----
+- [x] **Intégrations tierces**
+  - [x] Vérifier l'intégration avec les API système
+    - ✅ Intégration robuste avec expo-image-picker pour l'accès média
+    - ✅ Gestion des permissions système (caméra, galerie) dans getImageFromPicker
+    - ✅ Encodage base64 standardisé des images pour stockage
+    - ✅ Format d'URI cohérent (data:image/jpeg;base64,...)
+  - [x] Confirmer la gestion des erreurs d'intégration externe
+    - ✅ Messages d'erreur explicites en cas de refus de permissions
+    - ✅ Gestion des annulations utilisateur dans les sélecteurs d'images
+    - ✅ Fallbacks appropriés si les ressources externes sont indisponibles
+  - [x] Valider la robustesse aux changements d'API
+    - ✅ Encapsulation des appels externes dans des méthodes dédiées et testables
+    - ✅ Typage strict des interfaces d'API avec TypeScript
+    - ⚠️ Pas de versionnage explicite des interfaces d'API externes
+    - Rollback automatique des transactions en cas d'exception via le pattern try/catch
+    - Logging détaillé des erreurs pour faciliter le debugging
+    - Retour d'objets résultat standardisés avec statut de succès/échec
 
-## ud83dudccb Instructions d'Audit
+## 10. 🤖 Flux d'Intelligence Artificielle
 
-1. Pour chaque item, vu00e9rifier le code source correspondant
-2. Documenter les problu00e8mes trouvu00e9s avec :
-   - Chemin du fichier et numu00e9ro de ligne
-   - Description du problu00e8me
+- [x] **Architecture et intégration IA**
+  - [x] Vérifier l'implémentation singleton de IAService
+    - ✅ Pattern Singleton implémenté via `getInstance()` dans `IAService`
+    - ✅ Instance unique partagée à travers l'application
+    - ✅ Mécanisme robuste pour éviter les cycles d'importation avec `directGeminiRequest`
+  - [x] Confirmer l'intégration avec le serveur MCP
+    - ✅ Toutes les opérations de persistence passent par `sqliteMCPServer`
+    - ✅ Séparation claire entre génération IA et persistence des données
+    - ✅ Pas d'accès direct à la base de données depuis les services IA
+  - [x] Valider la gestion du contexte utilisateur
+    - ✅ `setCurrentUserId` avec mécanisme de rafraîchissement après 30 minutes
+    - ✅ Méthode `ensureCurrentUserId` avec fallback en cas d'absence d'utilisateur
+    - ✅ Enrichissement des prompts avec les données utilisateur via `buildEnrichedPrompt`
+
+- [x] **Assistant IA (chat)**
+  - [x] Vérifier l'interface de conversation (`ia-chat.tsx`)
+    - ✅ UI intuitive avec messages bidirectionnels et suggestions prédéfinies
+    - ✅ Gestion des états de chargement pendant la génération de réponses
+    - ✅ Affichage visuel distinct pour les messages utilisateur et assistant
+  - [x] Confirmer la génération de réponses
+    - ✅ Utilisation de `iaService.generateResponse()` avec gestion d'erreurs
+    - ✅ Détection d'actions dans les réponses via `detectDatabaseAction`
+    - ✅ Parsage et nettoyage des réponses pour l'affichage
+  - [x] Valider la gestion des erreurs
+    - ✅ Feedback utilisateur via `MultiPurposeToast` pour les erreurs API
+    - ✅ Logging détaillé via `LogCategory.IA` pour le débogage
+    - ✅ Messages d'erreur utilisateur clairs et informatifs
+
+- [x] **Génération de repas par IA**
+  - [x] Vérifier l'interface utilisateur (`meal-generator.tsx`)
+    - ✅ Formulaire intuitif `MealGeneratorForm` pour les préférences
+    - ✅ Sélection dynamique d'ingrédients, type de repas et cuisine
+    - ✅ Prévisualisation du repas généré avant confirmation
+  - [x] Confirmer le processus de génération
+    - ✅ `IAService.generateMeal()` avec enrichissement du contexte utilisateur
+    - ✅ Transformation de la réponse textuelle en objet structuré `IaMealType`
+    - ✅ Persistence via MCP après validation
+  - [x] Valider la personnalisation utilisateur
+    - ✅ Prise en compte des préférences et restrictions alimentaires
+    - ✅ Adaptation aux ingrédients spécifiés par l'utilisateur
+    - ✅ Respect du type de repas sélectionné (petit-déjeuner, déjeuner, etc.)
+
+- [x] **Génération de plan nutritionnel**
+  - [x] Vérifier l'interface utilisateur (`plan-generator.tsx`)
+    - ✅ Formulaire dédié avec objectifs nutritionnels et préférences
+    - ✅ Options pour personnaliser la durée et les objectifs
+    - ✅ Prévisualisation du plan généré avant sauvegarde
+  - [x] Confirmer le processus de génération
+    - ✅ `IAService.generateNutritionPlan()` avec contextualisation utilisateur
+    - ✅ Transformation de la réponse en structure `IaPlanType`
+    - ✅ Création des plans journaliers associés via MCP
+  - [x] Valider la personnalisation utilisateur
+    - ✅ Adaptation aux objectifs (perte de poids, prise de masse, etc.)
+    - ✅ Prise en compte des allergies et préférences culinaires
+    - ✅ Ajustement aux contraintes caloriques de l'utilisateur
+
+- [x] **Analyse nutritionnelle**
+  - [x] Vérifier l'interface utilisateur (`nutrition-analysis.tsx`)
+    - ✅ Formulaire de saisie des habitudes alimentaires
+    - ✅ Visualisation des résultats d'analyse
+    - ✅ Recommandations personnalisées basées sur l'analyse
+  - [x] Confirmer le processus d'analyse
+    - ✅ `IAService.analyzeNutritionHabits()` avec données historiques
+    - ✅ Tentative de récupération de l'historique via `getUserActivityHistoryViaMCP`
+    - ✅ Structuration des recommandations pour affichage
+  - [x] Valider l'intégration aux données utilisateur
+    - ✅ Analyse basée sur les données réelles de l'utilisateur quand disponibles
+    - ⚠️ Méthode `getUserActivityHistoryViaMCP` mentionnée mais non complètement implémentée
+    - ✅ Plan de fallback si les données historiques ne sont pas disponibles
+
+1. Pour chaque item, vérifier le code source correspondant
+2. Documenter les problèmes trouvés avec :
+   - Chemin du fichier et numéro de ligne
+   - Description du problème
    - Impact potentiel
    - Suggestion de correction
-3. Attribuer une prioritu00e9 (Critique, u00c9levu00e9e, Moyenne, Faible) u00e0 chaque problu00e8me
-4. Cru00e9er des issues GitHub pour les problu00e8mes critiques et u00e9levu00e9s
+3. Attribuer une priorité (Critique, Élevée, Moyenne, Faible) à chaque problème
+4. Créer des issues GitHub pour les problèmes critiques et élevés
 
-Cette checklist devrait \u00eatre utilis\u00e9e avant toute revue UI pour s'assurer que tous les flux de donn\u00e9es fonctionnent correctement au niveau du code.
+Cette checklist devrait être utilisée avant toute revue UI pour s'assurer que tous les flux de données fonctionnent correctement au niveau du code.

@@ -16,6 +16,27 @@ import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { createStableId, ItemType } from '@/utils/helpers/uniqueId';
 import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+
+// Fonctions utilitaires pour l'affichage des types de repas
+const getMealTypeName = (type: MealTypeEnum): string => {
+  switch (type) {
+    case MealTypeEnum.BREAKFAST: return 'Petit-déjeuner';
+    case MealTypeEnum.LUNCH: return 'Déjeuner';
+    case MealTypeEnum.DINNER: return 'Dîner';
+    case MealTypeEnum.SNACK: return 'Snack';
+    default: return 'Repas';
+  }
+};
+
+const getMealTypeColor = (type: MealTypeEnum): { bgColor: string; textColor: string } => {
+  switch (type) {
+    case MealTypeEnum.BREAKFAST: return { bgColor: 'bg-blue-100', textColor: 'text-blue-700' };
+    case MealTypeEnum.LUNCH: return { bgColor: 'bg-green-100', textColor: 'text-green-700' };
+    case MealTypeEnum.DINNER: return { bgColor: 'bg-purple-100', textColor: 'text-purple-700' };
+    case MealTypeEnum.SNACK: return { bgColor: 'bg-orange-100', textColor: 'text-orange-700' };
+    default: return { bgColor: 'bg-gray-100', textColor: 'text-gray-700' };
+  }
+};
 /* Custom components */
 import SelectionDrawer from './SelectionDrawer';
 /* Gluestack ui components */
@@ -23,17 +44,33 @@ import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
 import { Box } from '@/components/ui/box';
-import { Image, ScrollView } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { cuisineOptions, mealsTypeOptions } from '@/utils/constants/constant';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicatorWrapper,
+  SelectDragIndicator,
+  SelectItem
+} from '@/components/ui/select';
 import { Pressable } from '@/components/ui/pressable';
 import { Divider } from '@/components/ui/divider';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface MealQuantities {
   [key: number]: number;
+}
+
+// Type pour gérer les types de repas spécifiques par ID de repas
+interface MealTypes {
+  [key: number]: MealTypeEnum;
 }
 
 interface MealsDrawerProps {
@@ -43,7 +80,7 @@ interface MealsDrawerProps {
   planId: number;
   onMealsAdded?: () => Promise<void>;
   drizzleDb: ExpoSQLiteDatabase<typeof schema>;
-  onAddMealToPlan: (dailyPlanId: number, mealId: number, quantity: number) => Promise<{ success: boolean; error?: string; alreadyExists?: boolean }>;
+  onAddMealToPlan: (dailyPlanId: number, mealId: number, quantity: number, mealType?: MealTypeEnum) => Promise<{ success: boolean; error?: string; alreadyExists?: boolean }>;
 }
 
 // Version simplifiée du composant MealCard pour le contexte du drawer
@@ -53,14 +90,18 @@ const SimpleMealCard = React.memo(({
   isSelected, 
   onToggle, 
   onAdjustQuantity, 
-  quantity = 10 
+  onMealTypeChange,
+  quantity = 10,
+  mealType
 }: {
   item: MealOrmProps;
   index: number;
   isSelected: boolean;
   onToggle: () => void;
   onAdjustQuantity: (newQuantity: number) => void;
+  onMealTypeChange?: (mealType: MealTypeEnum) => void;
   quantity?: number;
+  mealType?: MealTypeEnum;
 }) => {
   const [inputQuantity, setInputQuantity] = useState(quantity.toString());
 
@@ -94,6 +135,39 @@ const SimpleMealCard = React.memo(({
           <VStack space="xs">
             <Text className="font-semibold">{item.name}</Text>
             <HStack space="sm">
+              {isSelected && onMealTypeChange ? (
+                <Select
+                  defaultValue={mealType || item.type}
+                  onValueChange={(value) => onMealTypeChange(value as MealTypeEnum)}
+                  className="w-32"
+                >
+                  <SelectTrigger>
+                    <SelectInput placeholder="Type de repas" />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      <SelectItem label="Petit-déjeuner" value={MealTypeEnum.BREAKFAST} />
+                      <SelectItem label="Déjeuner" value={MealTypeEnum.LUNCH} />
+                      <SelectItem label="Dîner" value={MealTypeEnum.DINNER} />
+                      <SelectItem label="Snack" value={MealTypeEnum.SNACK} />
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
+              ) : (
+                <View
+                  className={`rounded-full px-2 py-1 ${getMealTypeColor(mealType || item.type).bgColor}`}
+                >
+                  <Text
+                    className={`text-xs font-light ${getMealTypeColor(mealType || item.type).textColor}`}
+                  >
+                    {getMealTypeName(mealType || item.type)}
+                  </Text>
+                </View>
+              )}
               <Box className="bg-secondary-100 px-2 py-1 rounded">
                 <Text className="text-xs">{item.type}</Text>
               </Box>
@@ -149,6 +223,8 @@ function MealsDrawer({
   const [selectedMealType, setSelectedMealType] = useState<MealTypeEnum | undefined>(undefined);
   const [selectedMeals, setSelectedMeals] = useState<MealOrmProps[]>([]);
   const [mealQuantities, setMealQuantities] = useState<MealQuantities>({});
+  // Nouvel état pour stocker le type spécifique choisi pour chaque repas
+  const [mealTypes, setMealTypes] = useState<Record<number, MealTypeEnum>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Hooks
@@ -304,10 +380,18 @@ function MealsDrawer({
   }, [toast]);
 
   // Fonction pour ajuster la quantité d'un repas sélectionné
-  const adjustQuantity = useCallback((mealId: number, newQuantity: number) => {
+  const handleQuantityChange = useCallback((mealId: number, value: number) => {
     setMealQuantities(prev => ({
       ...prev,
-      [mealId]: newQuantity
+      [mealId]: value,
+    }));
+  }, []);
+
+  // Fonction pour changer le type d'un repas spécifique
+  const handleMealTypeChange = useCallback((mealId: number, type: MealTypeEnum) => {
+    setMealTypes(prev => ({
+      ...prev,
+      [mealId]: type,
     }));
   }, []);
 
@@ -343,10 +427,12 @@ function MealsDrawer({
         }
         
         const quantity = mealQuantities[meal.id] || 100;
+        // Récupérer le type spécifique choisi pour ce repas, ou utiliser son type par défaut
+        const mealType = mealTypes[meal.id] || meal.type;
         
-        logger.debug(LogCategory.APP, `MealsDrawer - Adding meal ${meal.id} with quantity ${quantity}g to daily plan ${dailyPlanId}`);
+        logger.debug(LogCategory.APP, `MealsDrawer - Adding meal ${meal.id} with quantity ${quantity}g to daily plan ${dailyPlanId} as ${mealType}`);
         
-        const result = await onAddMealToPlan(dailyPlanId, meal.id, quantity);
+        const result = await onAddMealToPlan(dailyPlanId, meal.id, quantity, mealType);
         
         if (!result.success) {
           // Si le repas existe déjà dans ce jour spécifique de plan, on considère que c'est normal
@@ -564,13 +650,16 @@ function MealsDrawer({
       hasNextPage={false}
       setSearchTerm={handleMealNameSearch}
       renderItem={({ item, index }) => (
-        <SimpleMealCard 
-          item={item} 
+        <SimpleMealCard
+          key={createStableId(item.id, ItemType.MEAL)}
+          item={item}
           index={index}
           isSelected={selectedMeals.some(meal => meal.id === item.id)}
           onToggle={() => handleMealToggle(item)}
-          onAdjustQuantity={(newQuantity) => adjustQuantity(item.id, newQuantity)}
+          onAdjustQuantity={(newQuantity) => handleQuantityChange(item.id, newQuantity)}
+          onMealTypeChange={(type) => handleMealTypeChange(item.id, type)}
           quantity={mealQuantities[item.id] || 100}
+          mealType={mealTypes[item.id]}
         />
       )}
       searchPlaceholder="Rechercher un repas..."

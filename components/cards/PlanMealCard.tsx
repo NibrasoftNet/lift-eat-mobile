@@ -18,7 +18,6 @@ import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { getMealQuantityInPlan } from '@/utils/services/plan.service';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,10 +38,12 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
   useEffect(() => {
     // Si on a un dailyPlanId, on récupère la quantité actuelle du repas dans le plan
     const fetchMealQuantity = async () => {
-      if (drizzleDb && dailyPlanId && meal.id) {
+      if (dailyPlanId && meal.id) {
         try {
-          const quantity = await getMealQuantityInPlan(drizzleDb, dailyPlanId, meal.id);
-          setCurrentQuantity(quantity);
+          const result = await sqliteMCPServer.getMealQuantityInPlanViaMCP(dailyPlanId, meal.id);
+          if (result.success && result.quantity !== undefined) {
+            setCurrentQuantity(result.quantity);
+          }
         } catch (error) {
           console.error('Error fetching meal quantity:', error);
         }
@@ -50,7 +51,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
     };
     
     fetchMealQuantity();
-  }, [drizzleDb, dailyPlanId, meal.id]);
+  }, [dailyPlanId, meal.id]);
   const handleRemoveMealFromPlan = async () => {
     try {
       if (meal.id && dailyPlanId) {

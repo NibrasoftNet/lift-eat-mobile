@@ -8,7 +8,9 @@ import {
   ValidateUserExistsParams,
   ValidateUserExistsResult,
   GetDefaultUserParams,
-  GetDefaultUserResult
+  GetDefaultUserResult,
+  GenerateUserContextParams,
+  GenerateUserContextResult
 } from '../interfaces/user-interfaces';
 import {
   users,
@@ -269,6 +271,61 @@ export async function handleGetDefaultUser(db: any, params: GetDefaultUserParams
     };
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleGetDefaultUser: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}
+
+/**
+ * Handler pour la méthode generateUserContextViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la génération du contexte utilisateur
+ * @returns Résultat de l'opération avec le contexte utilisateur formaté
+ */
+export async function handleGenerateUserContext(db: any, params: GenerateUserContextParams): Promise<GenerateUserContextResult> {
+  const { userId } = params;
+  
+  try {
+    if (!db) throw new Error("Database not initialized");
+    
+    logger.info(LogCategory.DATABASE, `Generating user context for user ${userId} via MCP Server`);
+    
+    // Récupérer les détails de l'utilisateur
+    const userDetails = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (userDetails.length === 0) {
+      logger.warn(LogCategory.DATABASE, `User with ID ${userId} not found`);
+      return { success: false, error: `User with ID ${userId} not found` };
+    }
+    
+    const user = userDetails[0];
+    
+    // Construire le contexte utilisateur
+    const contextElements = [
+      `USER_ID: ${user.id}`,
+      `NAME: ${user.name || 'Unknown'}`,
+      `GENDER: ${user.gender || 'Unknown'}`,
+      `AGE: ${user.age || 'Unknown'}`,
+      `WEIGHT: ${user.weight || 'Unknown'} ${user.weightUnit || 'kg'}`,
+      `HEIGHT: ${user.height || 'Unknown'} ${user.heightUnit || 'cm'}`,
+      `PHYSICAL_ACTIVITY: ${user.physicalActivity || 'Unknown'}`
+    ];
+    
+    // Ajouter d'autres informations conditionnelles si disponibles
+    if (user.goal) contextElements.push(`GOAL: ${user.goal}`);
+    
+    const formattedContext = contextElements.join('\n');
+    
+    logger.info(LogCategory.DATABASE, `Successfully generated context for user ${userId} via MCP Server`);
+    return { success: true, context: formattedContext };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleGenerateUserContext: ${error instanceof Error ? error.message : String(error)}`);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : String(error) 

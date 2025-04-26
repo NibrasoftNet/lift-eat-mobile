@@ -68,6 +68,7 @@ export interface AddMealToDailyPlanParams {
   dailyPlanId: number;
   mealId: number;
   quantity: number;
+  mealType?: MealTypeEnum;
 }
 
 export interface AddMealToDailyPlanResult {

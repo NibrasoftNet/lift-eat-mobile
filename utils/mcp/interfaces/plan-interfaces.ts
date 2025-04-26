@@ -1,5 +1,6 @@
 import { NutritionGoalSchemaFormData } from '@/utils/validation/plan/nutrition-goal.validation';
 import { PlanOrmProps, DailyPlanOrmProps } from '@/db/schema';
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 // Interfaces pour createPlanViaMCP
 export interface CreatePlanParams {
@@ -105,6 +106,7 @@ export interface AddMealToDailyPlanParams {
   dailyPlanId: number;
   mealId: number;
   quantity?: number;
+  mealType?: MealTypeEnum; // Type de repas spécifique (petit-déjeuner, déjeuner, dîner...)
 }
 
 export interface AddMealToDailyPlanResult {

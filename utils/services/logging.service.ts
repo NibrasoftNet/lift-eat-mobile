@@ -1,6 +1,14 @@
 import { Platform } from 'react-native';
 import { LogLevel, LogCategory } from '@/utils/enum/logging.enum';
 
+/**
+ * Service de logging conservé comme exception à l'architecture MCP.
+ * Justification: Service transversal sans accès aux données, utilisé par tous
+ * les composants y compris les handlers MCP eux-mêmes.
+ * Ce service suit le pattern singleton et fournit une interface cohérente
+ * pour la journalisation et la mesure des performances dans toute l'application.
+ */
+
 // Log categories for better organization
 
 interface LogEntry {

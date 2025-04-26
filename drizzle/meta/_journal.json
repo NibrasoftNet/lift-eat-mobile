@@ -64,6 +64,13 @@
       "when": 1745254506524,
       "tag": "0008_furry_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1745768099000,
+      "tag": "0009_flexible_meal_types",
+      "breakpoints": true
     }
   ]
 }

@@ -187,6 +187,10 @@ export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
   mealId: integer('meal_id')
     .references(() => meals.id) // References the id column in meals
     .notNull(),
+  // Type de repas spécifique à cette relation (peut être différent du type par défaut du repas)
+  mealType: text('meal_type', {
+    enum: MealTypeArray,
+  }),
   // Quantity in grams
   quantity: real('quantity').notNull().default(10),
   // Calculated nutritional values for this specific meal-plan relation

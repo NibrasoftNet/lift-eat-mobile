@@ -12,6 +12,7 @@ import { DayEnum } from '@/utils/enum/general.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
@@ -122,7 +123,7 @@ export default function PlanDetailsScreen() {
   };
 
   // Fonction pour ajouter un repas au plan journalier
-  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10) => {
+  const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10, mealType?: MealTypeEnum) => {
     try {
       // Passer l'ID utilisateur pour vérifier les droits d'accès
       if (!userId) {
@@ -133,7 +134,7 @@ export default function PlanDetailsScreen() {
       // S'assurer que la requête est associée à l'utilisateur actuel
       logger.info(LogCategory.USER, `User ${userId} attempting to add meal ${mealId} to daily plan ${dailyPlanId}`);
       
-      const result = await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity);
+      const result = await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity, mealType);
       
       // Vérifier si l'opération a réussi ou échoué avec un message spécifique
       if (!result.success) {

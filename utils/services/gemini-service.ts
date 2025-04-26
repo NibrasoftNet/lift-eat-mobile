@@ -3,6 +3,18 @@ import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 // Suppression de l'import de iaService pour éliminer le cycle d'importation
 
+/**
+ * Service d'orchestration pour les appels à l'API Gemini de Google
+ * 
+ * Ce service est conservé comme une partie de l'architecture d'IA mais adapté pour
+ * fonctionner avec le pattern MCP. Contrairement aux services accédant directement
+ * à la base de données qui ont été migrés vers des handlers, ce service gère uniquement
+ * des appels API externes et est utilisé comme une couche d'orchestration par iaService.
+ * 
+ * Il n'accède pas directement à la base de données et ne nécessite donc pas
+ * une migration complète vers les handlers MCP.
+ */
+
 interface GeminiResponse {
   candidates: {
     content: {
@@ -13,11 +25,6 @@ interface GeminiResponse {
   }[];
 }
 
-/**
- * Service pour interagir avec l'API Gemini de Google
- * Ce service fait désormais partie de l'architecture IA et délègue 
- * les opérations avancées au IAService
- */
 export class GeminiService {
   private static instance: GeminiService;
   private apiKey: string;
@@ -37,7 +44,8 @@ export class GeminiService {
   }
 
   /**
-   * Set the current user ID for context enrichment
+   * Définit l'ID utilisateur courant pour l'enrichissement du contexte
+   * Cette méthode ne stocke l'ID qu'en mémoire et n'accède pas à la base de données
    */
   public setCurrentUserId(userId: number): void {
     this.currentUserId = userId;
@@ -47,14 +55,17 @@ export class GeminiService {
 
   /**
    * Génère une réponse basique depuis l'API Gemini
-   * Pour les fonctionnalités avancées, utilisez directement iaService
+   * Pour les fonctionnalités avancées qui nécessitent un contexte utilisateur enrichi,
+   * utilisez directement iaService qui orchestrera les appels et le contexte
+   * 
+   * @param prompt Le texte de la demande à envoyer à l'API
+   * @returns Le texte de la réponse générée
    */
   async generateResponse(prompt: string): Promise<string> {
     try {
-      // Désormais, ce service ne délègue plus à iaService pour éviter le cycle d'importation
-      // Il gère uniquement les appels directs à l'API Gemini
+      const startTime = logger.startPerformanceLog('GeminiService.generateResponse');
       
-      // Sinon, faire une requête basique à l'API Gemini
+      // Gère uniquement les appels directs à l'API Gemini
       logger.info(LogCategory.IA, `Sending basic prompt to Gemini API: "${prompt.substring(0, 50)}..."`);
 
       const response = await fetch(
@@ -89,7 +100,10 @@ export class GeminiService {
         throw new Error('No response from Gemini API');
       }
 
-      return data.candidates[0].content.parts[0].text;
+      const result = data.candidates[0].content.parts[0].text;
+      logger.endPerformanceLog('GeminiService.generateResponse', startTime);
+      
+      return result;
     } catch (error) {
       logger.error(LogCategory.IA, `Error generating response: ${error instanceof Error ? error.message : String(error)}`);
       return 'Sorry, I encountered an error while processing your request.';

@@ -240,6 +240,7 @@ export async function handleGetMealProgressByDate(db: any, params: GetMealProgre
       SELECT 
         m.*, 
         dpm.id as dailyPlanMealId,
+        dpm.mealType as mealType,
         dmp.id as progressId,
         dmp.consomme,
         dmp.pourcentageConsomme
@@ -258,10 +259,13 @@ export async function handleGetMealProgressByDate(db: any, params: GetMealProgre
         consomme: row.consomme,
         pourcentageConsomme: row.pourcentageConsomme
       } : null,
-      dailyPlanMealId: row.dailyPlanMealId
+      dailyPlanMealId: row.dailyPlanMealId,
+      // Inclure le type de repas spécifique au plan journalier
+      mealType: row.mealType
     }));
 
     logger.debug(LogCategory.DATABASE, `Retrieved ${meals.length} meals with progress for date ${date}`);
+    logger.debug(LogCategory.DATABASE, `Meal types included: ${meals.map((m: any) => ({ id: m.id, name: m.name, type: m.type, mealType: m.mealType }))}`);
     return { success: true, progress, meals };
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleGetMealProgressByDate: ${error instanceof Error ? error.message : String(error)}`);

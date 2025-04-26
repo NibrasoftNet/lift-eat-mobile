@@ -68,7 +68,8 @@ import {
   handleGetUserDetails, 
   handleCreateUser, 
   handleValidateUserExists,
-  handleGetDefaultUser
+  handleGetDefaultUser,
+  handleGenerateUserContext
 } from './handlers/user-handlers';
 import {
   handleGetDailyProgressByDate,
@@ -79,6 +80,16 @@ import {
   handleGetMealProgressByDailyProgress,
   handleGetDailyProgressByPlan
 } from './handlers/progress-handlers';
+
+import {
+  handleGetUserContext,
+  handleGetUserPreferences,
+  handleGetUserFavoriteMeals,
+  handleGetUserActivePlans,
+  handleGetUserActivityHistory
+} from './handlers/ia-handlers';
+
+import { handleRemoveMealFromDailyPlan } from './handlers/plan-handlers-extension';
 
 // Imports des interfaces
 import { CreateNewMealResult } from './interfaces/meal-interfaces';
@@ -133,7 +144,9 @@ import {
   ValidateUserExistsParams,
   ValidateUserExistsResult,
   GetDefaultUserParams,
-  GetDefaultUserResult
+  GetDefaultUserResult,
+  GenerateUserContextParams,
+  GenerateUserContextResult
 } from './interfaces/user-interfaces';
 import {
   GetDailyProgressByDateParams,
@@ -152,16 +165,18 @@ import {
   GetDailyProgressByPlanResult
 } from './interfaces/progress-interfaces';
 
-// Ajout de l'import pour les handlers IA
-import { 
-  handleGetUserContext, 
-  handleGetUserPreferences,
-  handleGetUserFavoriteMeals,
-  handleGetUserActivePlans,
-  handleGetUserActivityHistory
-} from './handlers/ia-handlers';
-
-import { handleRemoveMealFromDailyPlan } from './handlers/plan-handlers-extension';
+import {
+  GetUserContextParams,
+  GetUserContextResult,
+  GetUserPreferencesParams,
+  GetUserPreferencesResult,
+  GetUserFavoriteMealsParams,
+  GetUserFavoriteMealsResult,
+  GetUserActivePlansParams,
+  GetUserActivePlansResult,
+  GetUserActivityHistoryParams,
+  GetUserActivityHistoryResult
+} from './interfaces/ia-interfaces';
 
 /**
  * SQLite MCP Server
@@ -338,43 +353,6 @@ class SQLiteMCPServer {
       logger.error(LogCategory.DATABASE, `Error generating user context: ${error}`);
       return "USER CONTEXT: Not available";
     }
-  }
-
-  /**
-   * Récupère les préférences utilisateur via MCP
-   * @param userId ID de l'utilisateur
-   * @returns Préférences utilisateur ou erreur
-   */
-  public async getUserPreferencesViaMCP(userId: number) {
-    return handleGetUserPreferences(this.db, { userId });
-  }
-
-  /**
-   * Récupère les repas favoris d'un utilisateur via MCP
-   * @param userId ID de l'utilisateur
-   * @returns Liste des repas favoris ou erreur
-   */
-  public async getUserFavoriteMealsViaMCP(userId: number) {
-    return handleGetUserFavoriteMeals(this.db, { userId });
-  }
-
-  /**
-   * Récupère les plans actifs d'un utilisateur via MCP
-   * @param userId ID de l'utilisateur
-   * @returns Liste des plans actifs ou erreur
-   */
-  public async getUserActivePlansViaMCP(userId: number) {
-    return handleGetUserActivePlans(this.db, { userId });
-  }
-
-  /**
-   * Récupère l'historique d'activité d'un utilisateur via MCP
-   * @param userId ID de l'utilisateur
-   * @param daysLimit Nombre de jours à inclure (défaut: 7)
-   * @returns Historique d'activité ou erreur
-   */
-  public async getUserActivityHistoryViaMCP(userId: number, daysLimit?: number) {
-    return handleGetUserActivityHistory(this.db, { userId, daysLimit });
   }
 
   /**
@@ -558,12 +536,14 @@ class SQLiteMCPServer {
    * @param dailyPlanId ID du plan journalier
    * @param mealId ID du repas à ajouter
    * @param quantity Quantité du repas (par défaut: 10 grammes)
+   * @param mealType Type spécifique du repas pour ce plan journalier (optionnel)
    * @returns Résultat de l'opération
    */
   public async addMealToDailyPlanViaMCP(
     dailyPlanId: number,
     mealId: number,
-    quantity: number = 10
+    quantity: number = 10,
+    mealType?: MealTypeEnum
   ): Promise<AddMealToDailyPlanResult> {
     const startTime = logger.startPerformanceLog('addMealToDailyPlanViaMCP');
     
@@ -571,14 +551,15 @@ class SQLiteMCPServer {
       if (!this.db) throw new Error("Database not initialized");
       
       logger.info(LogCategory.DATABASE, 'Adding meal to daily plan via MCP Server', {
-        dailyPlanId, mealId, quantity
+        dailyPlanId, mealId, quantity, mealType
       });
       
       // Appeler le handler avec les paramètres
       const result = await handleAddMealToDailyPlanMealHandler(this.db, {
         dailyPlanId,
         mealId,
-        quantity
+        quantity,
+        mealType
       });
       
       logger.endPerformanceLog('addMealToDailyPlanViaMCP', startTime);
@@ -1300,6 +1281,242 @@ class SQLiteMCPServer {
     } catch (error) {
       logger.error(LogCategory.DATABASE, `Error removing meal from plan via MCP: ${error}`);
       return { success: false, error: `Error removing meal from plan: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+
+  /**
+   * Ajoute un plan journalier à un plan nutritionnel existant
+   * @param planId ID du plan nutritionnel parent
+   * @param dailyPlanData Données du plan journalier à ajouter
+   * @returns Résultat de l'opération avec l'ID du plan journalier créé ou une erreur
+   */
+  public async addDailyPlanViaMCP(
+    planId: number,
+    dailyPlanData: {
+      day: string;
+      week?: number;
+      calories: number;
+      carbs: number;
+      protein: number;
+      fat: number;
+    }
+  ): Promise<AddDailyPlanResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Adding daily plan for day ${dailyPlanData.day} to plan ${planId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const params: AddDailyPlanParams = {
+        planId,
+        dailyPlanData
+      };
+      
+      const result = await handleAddDailyPlan(this.db, params);
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for adding daily plan: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in addDailyPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
+  }
+
+  /**
+   * Génère un contexte utilisateur formaté pour l'IA via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec le contexte utilisateur ou une erreur
+   */
+  public async generateUserContextViaMCP(userId: number): Promise<string> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Generating user context for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGenerateUserContext(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for generating user context: ${accessTime.toFixed(2)}ms`);
+      
+      if (!result.success) {
+        throw new Error(result.error || `Failed to generate context for user ${userId}`);
+      }
+      
+      return result.context || '';
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in generateUserContextViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      // Retourner un contexte minimal en cas d'erreur pour éviter les erreurs en cascade
+      return `USER_ID: ${userId}\nNOTE: Error retrieving complete user context`;
+    }
+  }
+
+  /**
+   * Génère un contexte utilisateur complet pour l'IA via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec le contexte utilisateur ou une erreur
+   */
+  public async getUserContextViaMCP(userId: number): Promise<GetUserContextResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting user context for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetUserContext(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for getting user context: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getUserContextViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Récupère les préférences d'un utilisateur via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec les préférences utilisateur ou une erreur
+   */
+  public async getUserPreferencesViaMCP(userId: number): Promise<GetUserPreferencesResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting user preferences for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetUserPreferences(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for getting user preferences: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getUserPreferencesViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Récupère les repas favoris d'un utilisateur via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec les repas favoris ou une erreur
+   */
+  public async getUserFavoriteMealsViaMCP(userId: number): Promise<GetUserFavoriteMealsResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting favorite meals for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetUserFavoriteMeals(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for getting favorite meals: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getUserFavoriteMealsViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Récupère les plans actifs d'un utilisateur via le MCP server
+   * @param userId ID de l'utilisateur
+   * @returns Résultat de l'opération avec les plans actifs ou une erreur
+   */
+  public async getUserActivePlansViaMCP(userId: number): Promise<GetUserActivePlansResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting active plans for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetUserActivePlans(this.db, { userId });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for getting active plans: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getUserActivePlansViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Récupère l'historique d'activité d'un utilisateur via le MCP server
+   * @param userId ID de l'utilisateur
+   * @param daysLimit Nombre de jours à inclure (par défaut: 7)
+   * @returns Résultat de l'opération avec l'historique d'activité ou une erreur
+   */
+  public async getUserActivityHistoryViaMCP(userId: number, daysLimit: number = 7): Promise<GetUserActivityHistoryResult> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      
+      logger.info(LogCategory.DATABASE, `Getting activity history for user ${userId} via MCP Server`);
+      
+      // Mesurer le temps d'accès pour les logs de performance
+      const startTime = performance.now();
+      
+      // Appeler le handler avec les paramètres
+      const result = await handleGetUserActivityHistory(this.db, { userId, daysLimit });
+      
+      // Calculer le temps d'accès pour les logs
+      const accessTime = performance.now() - startTime;
+      logger.debug(LogCategory.DATABASE, `Database access time for getting activity history: ${accessTime.toFixed(2)}ms`);
+      
+      return result;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error in getUserActivityHistoryViaMCP: ${error instanceof Error ? error.message : String(error)}`);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      };
     }
   }
 }

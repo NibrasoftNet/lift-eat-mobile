@@ -73,17 +73,13 @@ import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../ui/toast';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import useSessionStore from '@/utils/store/sessionStore';
-import { createNewMeal, updateMeal } from '@/utils/services/meal.service';
 import { Colors } from '@/utils/constants/Colors';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { meals } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+
 
 export default function MealForm({
   defaultValues,
@@ -92,7 +88,6 @@ export default function MealForm({
   defaultValues: MealDefaultValuesProps;
   operation: 'create' | 'update';
 }) {
-  const drizzleDb = useDrizzleDb();
   const router = useRouter();
   const toast = useToast();
   // Utiliser le contexte utilisateur de façon standardisée

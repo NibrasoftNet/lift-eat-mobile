@@ -221,17 +221,9 @@ export async function handleAddMealToDailyPlan(db: any, params: AddMealToDailyPl
       return { success: false, error: `Daily plan with ID ${dailyPlanId} not found` };
     }
 
-    // 3. Vérification que la relation repas-plan n'existe pas déjà
-    const existingRelation = await db.query.dailyPlanMeals.findFirst({
-      where: (fields: any) => 
-        eq(dailyPlanMeals.dailyPlanId, dailyPlanId) && 
-        eq(dailyPlanMeals.mealId, mealId)
-    });
-
-    if (existingRelation) {
-      logger.warn(LogCategory.DATABASE, `Meal ${mealId} is already in daily plan ${dailyPlanId}`);
-      return { success: false, error: `This meal is already in this daily plan` };
-    }
+    // Note: Nous permettons d'ajouter plusieurs fois le même repas dans un plan journalier
+    // Ce comportement est désiré pour permettre d'ajouter le même repas à différents moments de la journée
+    // ou pour différentes portions
 
     // Utiliser une transaction pour assurer l'intégrité des données
     return await db.transaction(async (tx: typeof db) => {

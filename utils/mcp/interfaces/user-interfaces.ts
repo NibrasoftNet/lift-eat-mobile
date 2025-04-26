@@ -64,3 +64,14 @@ export interface GetDefaultUserResult {
   user?: UserOrmPros;
   error?: string;
 }
+
+// Interface pour generateUserContextViaMCP
+export interface GenerateUserContextParams {
+  userId: number;
+}
+
+export interface GenerateUserContextResult {
+  success: boolean;
+  context?: string;
+  error?: string;
+}
