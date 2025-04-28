@@ -1,4 +1,6 @@
 import { ImageSourcePropType } from 'react-native';
+import { CountryTypeEnum, CountryConfig } from '@/utils/enum/meal.enum';
+import { formatNutritionalValue } from '../helpers/format.helper';
 
 /**
  * Types for Open Food Facts API responses
@@ -55,12 +57,11 @@ export interface SearchParams {
   search_terms?: string;
   brands?: string;
   categories?: string;
-  countries?: string;
   page?: number;
   page_size?: number;
   sort_by?: string;
-  lang?: string; // Ajout du paramètre de langue
-  tag?: string; // Ajout du paramètre de tag pour filtrer par cuisine
+  tag?: string;
+  country?: CountryTypeEnum;
 }
 
 /**
@@ -91,41 +92,32 @@ export interface ScanResult {
  * Service to interact with Open Food Facts API
  */
 class OpenFoodFactsService {
-  private baseUrl: string = 'https://world.openfoodfacts.org/api/v2';
+  private defaultCountry: CountryTypeEnum = CountryTypeEnum.FRANCE;
 
   /**
    * Get product by barcode
    * @param barcode The product barcode
+   * @param country Country for the search (default: France)
    * @returns Promise with product data
    */
-  async getProductByBarcode(barcode: string): Promise<Product | null> {
+  async getProductByBarcode(barcode: string, country: CountryTypeEnum = this.defaultCountry): Promise<Product | null> {
     try {
-      // Validate barcode format (basic validation)
-      if (!barcode || barcode.trim() === '') {
-        throw new Error('Invalid barcode format');
-      }
-
-      const response = await fetch(`${this.baseUrl}/product/${barcode}.json`);
-
-      if (response.status === 404) {
-        console.log(`Product with barcode ${barcode} not found`);
-        return null; // Return null for 404 instead of throwing error
-      }
-
+      const response = await fetch(`${CountryConfig[country].url}/api/v0/product/${barcode}.json`);
+      
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        throw new Error(`HTTP Error: ${response.status}`);
       }
-
-      const data = (await response.json()) as OpenFoodFactsResponse;
-
-      if (data.status === 1 && data.product) {
-        return data.product;
+      
+      const data: OpenFoodFactsResponse = await response.json();
+      
+      if (data.status === 0 || !data.product) {
+        return null;
       }
-
-      return null;
+      
+      return data.product;
     } catch (error) {
       console.error('Error fetching product by barcode:', error);
-      throw error;
+      return null;
     }
   }
 
@@ -140,7 +132,7 @@ class OpenFoodFactsService {
       if (!barcode || barcode.trim() === '') {
         return {
           isValid: false,
-          message: 'Code-barres invalide ou vide',
+          message: 'Invalid or empty barcode',
           productResult: null,
         };
       }
@@ -150,7 +142,7 @@ class OpenFoodFactsService {
       if (!product) {
         return {
           isValid: false,
-          message: `Le produit avec le code-barres "${barcode}" n'a pas été trouvé . Essayez un autre produit ou vérifiez que le code-barres est correct.`,
+          message: `Product with barcode "${barcode}" not found. Try another product or check that the barcode is correct.`,
           productResult: null,
         };
       }
@@ -162,28 +154,28 @@ class OpenFoodFactsService {
       if (!productResult) {
         return {
           isValid: false,
-          message: `Le produit "${product.product_name || 'sans nom'}" (code-barres: ${barcode}) a été trouvé mais toutes les valeurs nutritionnelles sont à zéro. Essayez un autre produit.`,
+          message: `Product "${product.product_name || 'no name'}" (barcode: ${barcode}) found but all nutritional values are zero. Try another product.`,
           productResult: null,
         };
       }
 
       return {
         isValid: true,
-        message: 'Produit trouvé avec succès',
+        message: 'Product found successfully',
         productResult,
       };
     } catch (error) {
       console.error('Error during barcode scan:', error);
 
       // Provide more informative error message based on error type
-      let errorMessage = 'Erreur lors de la recherche du produit';
+      let errorMessage = 'Error searching for product';
 
       if (error instanceof Error) {
         if (error.message.includes('404')) {
-          errorMessage = 'Produit non trouvé dans la base de données';
+          errorMessage = 'Product not found in database';
         } else if (error.message.includes('network')) {
           errorMessage =
-            'Erreur de connexion réseau. Vérifiez votre connexion internet.';
+            'Network connection error. Check your internet connection.';
         }
       }
 
@@ -207,10 +199,10 @@ class OpenFoodFactsService {
     }
 
     // Calculate nutrition values, defaulting to 0 if not available
-    const calories = Math.round(product.nutriments?.energy_100g || 0);
-    const proteins = Math.round(product.nutriments?.proteins_100g || 0);
-    const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
-    const fats = Math.round(product.nutriments?.fat_100g || 0);
+    const calories = formatNutritionalValue(product.nutriments?.energy_100g || 0);
+    const proteins = formatNutritionalValue(product.nutriments?.proteins_100g || 0);
+    const carbs = formatNutritionalValue(product.nutriments?.carbohydrates_100g || 0);
+    const fats = formatNutritionalValue(product.nutriments?.fat_100g || 0);
 
     // Return null if ALL nutrition values are 0
     if (calories === 0 && proteins === 0 && carbs === 0 && fats === 0) {
@@ -232,7 +224,7 @@ class OpenFoodFactsService {
 
     // Return a simplified object with product information
     return {
-      name: product.product_name || 'Produit sans nom',
+      name: product.product_name || 'Product without name',
       image: productImage,
       calories: calories,
       protein: proteins,
@@ -251,223 +243,54 @@ class OpenFoodFactsService {
    */
   async searchProducts(
     params: SearchParams,
-  ): Promise<OpenFoodFactsResponse | null> {
+  ): Promise<Product[]> {
     try {
-      // Construct URL with query parameters
-      const url = new URL(`${this.baseUrl}/search`);
-
-      // Add fields parameter with all needed fields
-      url.searchParams.append(
-        'fields',
-        'code,product_name,product_name_fr,brands,categories,image_url,image_small_url,image_front_url,nutriscore_grade,nutriments,serving_size,ingredients_text,allergens,labels,stores',
-      );
-
-      // Créer une nouvelle copie des paramètres pour éviter de modifier l'original
-      let searchParams = { ...params };
-
-      // Set default language to french if not specified
-      if (!searchParams.lang) {
-        searchParams.lang = 'fr';
+      const country = params.country || this.defaultCountry;
+      const searchParams = new URLSearchParams();
+      
+      // Paramètres de base
+      if (params.search_terms) {
+        searchParams.append('search_terms', params.search_terms);
       }
-
-      // Ajout d'un paramètre pour obtenir plus de résultats
-      if (!searchParams.page_size) {
-        searchParams.page_size = 50;
+      if (params.brands) {
+        searchParams.append('brands', params.brands);
       }
-
-      // Gérer le tag de cuisine plus directement
-      let tagAdded = false;
-      if (searchParams.tag) {
-        console.log(`Filtrage par cuisine: ${searchParams.tag}`);
-
-        // Ajouter des termes spécifiques à la recherche selon la cuisine
-        switch (searchParams.tag.toLowerCase()) {
-          case 'african':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' african';
-            } else {
-              searchParams.search_terms = 'african food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'africa');
-            tagAdded = true;
-            break;
-          case 'asian':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' asian';
-            } else {
-              searchParams.search_terms = 'asian food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'asia');
-            tagAdded = true;
-            break;
-          case 'european':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' european';
-            } else {
-              searchParams.search_terms = 'european food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'europe');
-            tagAdded = true;
-            break;
-          case 'caribbean':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' caribbean';
-            } else {
-              searchParams.search_terms = 'caribbean food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'caribbean');
-            tagAdded = true;
-            break;
-          case 'tunisian':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' tunisian';
-            } else {
-              searchParams.search_terms = 'tunisian food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'tunisia');
-            tagAdded = true;
-            break;
-          case 'qatari':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' qatar';
-            } else {
-              searchParams.search_terms = 'qatar food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'middle-east');
-            tagAdded = true;
-            break;
-          case 'american':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' american';
-            } else {
-              searchParams.search_terms = 'american food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'united-states');
-            tagAdded = true;
-            break;
-          case 'chinese':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' chinese';
-            } else {
-              searchParams.search_terms = 'chinese food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'china');
-            tagAdded = true;
-            break;
-          case 'french':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' french';
-            } else {
-              searchParams.search_terms = 'french food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'france');
-            tagAdded = true;
-            break;
-          case 'indian':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' indian';
-            } else {
-              searchParams.search_terms = 'indian food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'india');
-            tagAdded = true;
-            break;
-          case 'italian':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' italian';
-            } else {
-              searchParams.search_terms = 'italian food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'italy');
-            tagAdded = true;
-            break;
-          case 'japanese':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' japanese';
-            } else {
-              searchParams.search_terms = 'japanese food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'japan');
-            tagAdded = true;
-            break;
-          case 'mexican':
-            if (searchParams.search_terms) {
-              searchParams.search_terms += ' mexican';
-            } else {
-              searchParams.search_terms = 'mexican food';
-            }
-            url.searchParams.append('tagtype_0', 'origins');
-            url.searchParams.append('tag_contains_0', 'contains');
-            url.searchParams.append('tag_0', 'mexico');
-            tagAdded = true;
-            break;
-        }
-
-        // Supprimer le tag des paramètres pour éviter duplication
-        const { tag, ...otherParams } = searchParams;
-        searchParams = otherParams as SearchParams;
+      if (params.categories) {
+        searchParams.append('categories', params.categories);
       }
-
-      // Si aucun tag n'a été ajouté et que nous avons un terme de recherche, utiliser categories comme fallback
-      if (!tagAdded && searchParams.search_terms) {
-        // Utiliser categories comme fallback
-        url.searchParams.append('tagtype_0', 'categories');
-        url.searchParams.append('tag_contains_0', 'contains');
-        url.searchParams.append('tag_0', searchParams.search_terms);
+      if (params.page) {
+        searchParams.append('page', params.page.toString());
       }
-
-      // Add all other parameters
-      Object.entries(searchParams).forEach(([key, value]) => {
-        if (value !== undefined) {
-          url.searchParams.append(key, value.toString());
-        }
-      });
-
-      console.log('Recherche de produits avec URL:', url.toString());
-
-      const response = await fetch(url.toString());
-
+      if (params.page_size) {
+        searchParams.append('page_size', params.page_size.toString());
+      }
+      if (params.sort_by) {
+        searchParams.append('sort_by', params.sort_by);
+      }
+      
+      // Langue par défaut selon le pays
+      searchParams.append('lc', CountryConfig[country].code);
+      searchParams.append('json', '1');
+      
+      // Construction de l'URL avec le bon domaine selon le pays
+      const url = `${CountryConfig[country].url}/cgi/search.pl?${searchParams.toString()}`;
+      
+      const response = await fetch(url);
+      
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        throw new Error(`HTTP Error: ${response.status}`);
       }
-
-      const data = (await response.json()) as OpenFoodFactsResponse;
-
-      // Log search results count
-      if (data && data.products) {
-        console.log(
-          `Trouvé ${data.products.length} produits pour la recherche: ${searchParams.search_terms} ${params.tag ? `avec cuisine ${params.tag}` : ''}`,
-        );
+      
+      const data: OpenFoodFactsResponse = await response.json();
+      
+      if (!data.products || !Array.isArray(data.products)) {
+        return [];
       }
-
-      return data;
+      
+      return data.products;
     } catch (error) {
       console.error('Error searching products:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -561,7 +384,7 @@ class OpenFoodFactsService {
       console.log('[DEBUG] Statut de la réponse:', response.status);
 
       if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status}`);
+        throw new Error(`API Error: ${response.status}`);
       }
 
       // Afficher les 200 premiers caractères pour le débogage
@@ -657,10 +480,10 @@ class OpenFoodFactsService {
           product.product_name_fr || product.product_name || 'Produit sans nom';
 
         // Valeurs nutritionnelles (avec fallback à 0)
-        const calories = Math.round(product.nutriments?.energy_100g || 0);
-        const protein = Math.round(product.nutriments?.proteins_100g || 0);
-        const carbs = Math.round(product.nutriments?.carbohydrates_100g || 0);
-        const fats = Math.round(product.nutriments?.fat_100g || 0);
+        const calories = formatNutritionalValue(product.nutriments?.energy_value || product.nutriments?.energy_100g || 0);
+        const protein = formatNutritionalValue(product.nutriments?.proteins_100g || 0);
+        const carbs = formatNutritionalValue(product.nutriments?.carbohydrates_100g || 0);
+        const fats = formatNutritionalValue(product.nutriments?.fat_100g || 0);
 
         return {
           name,
@@ -671,7 +494,7 @@ class OpenFoodFactsService {
           fats,
           brands: product.brands,
           categories: product.categories,
-          nutriscore_grade: product.nutriscore_grade,
+          nutriscore_grade: product.nutrition_grade_fr || 'unknown',
         };
       });
 
@@ -691,7 +514,7 @@ class OpenFoodFactsService {
   async getAutocompleteSuggestions(term: string): Promise<string[]> {
     try {
       const response = await fetch(
-        `${this.baseUrl}/suggest/${encodeURIComponent(term)}`,
+        `${CountryConfig[this.defaultCountry].url}/suggest/${encodeURIComponent(term)}`,
       );
 
       if (!response.ok) {
@@ -712,7 +535,7 @@ class OpenFoodFactsService {
    */
   async getCategories(): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/categories.json`);
+      const response = await fetch(`${CountryConfig[this.defaultCountry].url}/categories.json`);
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -732,7 +555,7 @@ class OpenFoodFactsService {
    */
   async getBrands(): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/brands.json`);
+      const response = await fetch(`${CountryConfig[this.defaultCountry].url}/brands.json`);
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);

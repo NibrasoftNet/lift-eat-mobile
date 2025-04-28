@@ -8,7 +8,7 @@ import {
   Flame,
   MessageSquareText,
   Notebook,
-  ScanQrCode,
+  BarChart,
 } from 'lucide-react-native';
 
 export default function TabLayout() {
@@ -83,20 +83,22 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="scanner"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon as={ScanQrCode} className="w-8 h-8" color={color} />
-          ),
-        }}
-      />
+
 
       <Tabs.Screen
         name="progress"
         options={{
           tabBarIcon: ({ color }) => (
             <Icon as={ChartNoAxesCombined} className="w-8 h-8" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Icon as={BarChart} className="w-8 h-8" color={color} />
           ),
         }}
       />

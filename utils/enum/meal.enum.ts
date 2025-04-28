@@ -48,3 +48,33 @@ export enum MealUnitEnum {
 export const MealUnitArray = Object.values(MealUnitEnum) as unknown as Readonly<
   [MealUnitEnum, ...MealUnitEnum[]]
 >;
+
+/**
+ * Énumération des pays disponibles pour la recherche de produits
+ */
+export enum CountryTypeEnum {
+  FRANCE = 'france',
+  TUNISIA = 'tunisia',
+  MOROCCO = 'morocco',
+  ALGERIA = 'algeria',
+  EGYPT = 'egypt',
+  SPAIN = 'spain',
+  ITALY = 'italy',
+  GERMANY = 'germany',
+  UK = 'uk',
+}
+
+/**
+ * Configuration des pays avec leurs URLs et codes
+ */
+export const CountryConfig: Record<CountryTypeEnum, { url: string; code: string }> = {
+  [CountryTypeEnum.FRANCE]: { url: 'https://fr.openfoodfacts.org', code: 'fr' },
+  [CountryTypeEnum.TUNISIA]: { url: 'https://tn.openfoodfacts.org', code: 'tn' },
+  [CountryTypeEnum.MOROCCO]: { url: 'https://ma.openfoodfacts.org', code: 'ma' },
+  [CountryTypeEnum.ALGERIA]: { url: 'https://dz.openfoodfacts.org', code: 'dz' },
+  [CountryTypeEnum.EGYPT]: { url: 'https://eg.openfoodfacts.org', code: 'eg' },
+  [CountryTypeEnum.SPAIN]: { url: 'https://es.openfoodfacts.org', code: 'es' },
+  [CountryTypeEnum.ITALY]: { url: 'https://it.openfoodfacts.org', code: 'it' },
+  [CountryTypeEnum.GERMANY]: { url: 'https://de.openfoodfacts.org', code: 'de' },
+  [CountryTypeEnum.UK]: { url: 'https://uk.openfoodfacts.org', code: 'uk' },
+}

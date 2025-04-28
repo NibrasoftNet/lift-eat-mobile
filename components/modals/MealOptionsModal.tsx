@@ -36,7 +36,7 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
   meal,
   onDelete,
   dailyPlanId,
-  currentQuantity = 10,
+  currentQuantity = 100,
   drizzleDb,
   onQuantityUpdated,
 }) => {
@@ -44,19 +44,11 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
   const router = useRouter();
 
   const handleViewDetails = () => {
-    // Utiliser le service pour gérer la navigation vers les détails
     logger.info(LogCategory.NAVIGATION, 'View meal details button clicked', { mealId: meal.id });
     mealOptionsModalService.handleViewDetails(meal, router, onClose);
   };
 
-  const handleUpdate = () => {
-    // Utiliser le service pour gérer la navigation vers la page de mise à jour
-    logger.info(LogCategory.NAVIGATION, 'Update meal button clicked', { mealId: meal.id });
-    mealOptionsModalService.handleUpdate(meal, router, onClose);
-  };
-
   const handleDelete = async () => {
-    // Utiliser le service pour gérer la suppression
     try {
       logger.info(LogCategory.USER, 'Delete meal button clicked', { mealId: meal.id });
       await mealOptionsModalService.handleDelete(onDelete, onClose);
@@ -65,17 +57,13 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
         error: error instanceof Error ? error.message : String(error),
         mealId: meal.id
       });
-      // L'erreur a été journalisée, mais nous fermions quand même le modal
       onClose();
     }
   };
 
   return (
     <>
-      <Modal 
-      isOpen={isOpen} 
-      onClose={onClose}
-    >
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalBackdrop />
         <ModalContent className="max-w-[305px]">
           <ModalHeader>
@@ -86,49 +74,44 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
           <ModalBody className="mt-0 mb-4">
             <VStack space="md" className="p-2">
               <Text className="text-lg font-semibold text-center">{meal.name}</Text>
-            <Button
-              className="bg-primary-500 w-full"
-              onPress={handleViewDetails}
-            >
-              <ButtonText>View Details</ButtonText>
-            </Button>
-            <Button
-              className="bg-secondary-500 w-full"
-              onPress={handleUpdate}
-            >
-              <ButtonText>Update</ButtonText>
-            </Button>
-            {dailyPlanId && drizzleDb && (
+              
               <Button
-                className="bg-amber-500 w-full"
-                onPress={() => mealOptionsModalService.openQuantityModal(setShowQuantityModal, onClose)}
+                className="bg-primary-500 w-full"
+                onPress={handleViewDetails}
               >
-                <ButtonText>Modifier la quantité</ButtonText>
+                <ButtonText>View Details</ButtonText>
               </Button>
-            )}
-            <Button
-              className="bg-red-500 w-full"
-              onPress={handleDelete}
-            >
-              <ButtonText>Delete</ButtonText>
-            </Button>
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
 
-    {/* Modal pour modifier la quantité */}
-    {dailyPlanId && drizzleDb && (
-      <MealQuantityModal
-        isOpen={showQuantityModal}
-        onClose={() => setShowQuantityModal(false)}
-        meal={meal}
-        dailyPlanId={dailyPlanId}
-        currentQuantity={currentQuantity}
-        drizzleDb={drizzleDb}
-        onQuantityUpdated={onQuantityUpdated}
-      />
-    )}
+              {dailyPlanId && (
+                <Button
+                  className="bg-amber-500 w-full"
+                  onPress={() => setShowQuantityModal(true)}
+                >
+                  <ButtonText>Modifier la quantité</ButtonText>
+                </Button>
+              )}
+
+              <Button
+                className="bg-red-500 w-full"
+                onPress={handleDelete}
+              >
+                <ButtonText>Delete</ButtonText>
+              </Button>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {dailyPlanId && (
+        <MealQuantityModal
+          isOpen={showQuantityModal}
+          onClose={() => setShowQuantityModal(false)}
+          meal={meal}
+          dailyPlanId={dailyPlanId}
+          currentQuantity={currentQuantity}
+          onQuantityUpdated={onQuantityUpdated}
+        />
+      )}
     </>
   );
 };

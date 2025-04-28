@@ -1,16 +1,16 @@
-# Welcome to your Expo app 👋
+# Lift-Eat-Mobile 🍽️🍕💪
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Application mobile de gestion nutritionnelle et planification de repas développée avec Expo et React Native.
 
-## Get started
+## Démarrage rapide
 
-1. Install dependencies
+1. Installer les dépendances
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Lancer l'application
 
    ```bash
     npx expo start
@@ -25,26 +25,46 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Architecture
 
-When you're ready, run:
+Lift-Eat-Mobile suit une architecture modulaire avec séparation des responsabilités :
 
-```bash
-npm run reset-project
+- **/app** : Routes et écrans (auth, tabs, user)
+- **/components** : Composants réutilisables
+- **/utils** : Services, providers et utilitaires
+- **/db** : Schéma et configuration de la base de données
+
+## Services disponibles
+
+### Scanner Service
+
+Service centralisant les interactions avec l'API OpenFoodFacts pour scanner des codes-barres et rechercher des produits alimentaires.
+
+```typescript
+import scannerService from '@/utils/services/scanner.service';
+
+// Scan d'un code-barres
+const result = await scannerService.scanBarcode(barcodeData);
+
+// Recherche de produits
+const products = await scannerService.searchProducts(searchTerms, cuisineType);
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Pour une documentation détaillée sur ce service, voir [scanner-service.md](docs/scanner-service.md).
 
-## Learn more
+## Technologies utilisées
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Frontend** : React Native, Expo, GlueStack UI, NativeWind
+- **Gestion d'état** : Zustand, React Query
+- **Base de données** : SQLite avec Drizzle ORM
+- **Validation** : Zod, React Hook Form
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Fonctionnalités principales
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Calcul des besoins caloriques personnalisés
+- Gestion des repas et ingrédients
+- Plans nutritionnels personnalisés
+- Scanner de codes-barres pour identification des produits
+- Recherche dans la base OpenFoodFacts
+- Suivi des progrès
+- Analyse nutritionnelle assistante par IA

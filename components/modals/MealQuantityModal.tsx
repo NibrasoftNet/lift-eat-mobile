@@ -7,20 +7,18 @@ import {
   ModalHeader,
 } from '@/components/ui/modal';
 import { VStack } from '@/components/ui/vstack';
-import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
+import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
-import { MealOrmProps } from '@/db/schema';
 import { Input, InputField } from '@/components/ui/input';
-import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
-import { MinusCircle, PlusCircle } from 'lucide-react-native';
-import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
-import * as schema from '@/db/schema';
+import { MealOrmProps } from '@/db/schema';
+import { useToast } from '@/components/ui/toast';
+import { Toast, ToastTitle } from '@/components/ui/toast';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { useQueryClient } from '@tanstack/react-query';
-import { mealQuantityModalService } from '@/utils/services/meal-quantity-modal.service';
 
 interface MealQuantityModalProps {
   isOpen: boolean;
@@ -28,7 +26,6 @@ interface MealQuantityModalProps {
   meal: MealOrmProps;
   dailyPlanId: number;
   currentQuantity: number;
-  drizzleDb: ExpoSQLiteDatabase<typeof schema>;
   onQuantityUpdated?: () => Promise<void>;
 }
 
@@ -38,58 +35,65 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
   meal,
   dailyPlanId,
   currentQuantity,
-  drizzleDb,
   onQuantityUpdated,
 }) => {
-  const [quantity, setQuantity] = useState(currentQuantity);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [quantity, setQuantity] = useState<string>(currentQuantity.toString());
   const toast = useToast();
   const queryClient = useQueryClient();
 
-  const handleQuantityChange = (value: string) => {
-    // Utiliser le service pour gérer le changement de quantité
-    const newQuantity = mealQuantityModalService.handleQuantityChange(value);
-    setQuantity(newQuantity);
-  };
-
-  const adjustQuantity = (increment: boolean) => {
-    // Utiliser le service pour ajuster la quantité
-    const newQuantity = mealQuantityModalService.adjustQuantity(quantity, increment);
-    setQuantity(newQuantity);
-  };
-
   const handleUpdateQuantity = async () => {
     try {
-      setIsUpdating(true);
-      logger.info(LogCategory.DATABASE, 'Updating meal quantity via service', {
-        dailyPlanId, mealId: meal.id, newQuantity: quantity
-      });
-      
-      // Utiliser le service pour mettre à jour la quantité
-      const result = await mealQuantityModalService.updateMealQuantity(
-        dailyPlanId, 
-        meal.id, 
-        quantity, 
-        onQuantityUpdated,
-        queryClient,
-        toast
-      );
-      
-      if (result.success) {
-        logger.debug(LogCategory.DATABASE, 'Meal quantity updated successfully via service');
-        mealQuantityModalService.closeModal(onClose);
-      } else {
-        throw new Error(result.message);
+      const numericQuantity = parseFloat(quantity);
+
+      if (isNaN(numericQuantity) || numericQuantity <= 0) {
+        throw new Error('La quantité doit être un nombre positif');
       }
-    } catch (error) {
-      logger.error(LogCategory.DATABASE, 'Error in handling update quantity:', { 
-        error: error instanceof Error ? error.message : String(error),
+
+      logger.info(LogCategory.DATABASE, `Updating meal quantity for meal ${meal.id} in plan ${dailyPlanId} to ${numericQuantity}`);
+
+      const result = await sqliteMCPServer.updateMealQuantityInPlanViaMCP(
         dailyPlanId,
-        mealId: meal.id
+        meal.id,
+        numericQuantity
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors de la mise à jour de la quantité');
+      }
+
+      // Invalider les caches pour forcer le rafraîchissement des données
+      invalidateCache(queryClient, DataType.PLAN);
+      invalidateCache(queryClient, DataType.MEAL);
+      invalidateCache(queryClient, DataType.DAILY_PLAN);
+
+      toast.show({
+        render: ({ id }) => (
+          <Toast nativeID={id} action="success" variant="solid">
+            <ToastTitle>Quantité mise à jour avec succès</ToastTitle>
+          </Toast>
+        ),
       });
-      // Le service gère déjà l'affichage des erreurs via toast
-    } finally {
-      setIsUpdating(false);
+
+      if (onQuantityUpdated) {
+        await onQuantityUpdated();
+      }
+
+      onClose();
+    } catch (error) {
+      toast.show({
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>
+              {error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la quantité'}
+            </ToastTitle>
+          </Toast>
+        ),
+      });
+      logger.error(LogCategory.DATABASE, 'Error updating meal quantity', {
+        error: error instanceof Error ? error.message : String(error),
+        mealId: meal.id,
+        dailyPlanId
+      });
     }
   };
 
@@ -106,57 +110,21 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
           <VStack space="md" className="p-2">
             <Text className="text-lg font-semibold text-center">{meal.name}</Text>
             
-            <HStack className="items-center justify-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onPress={() => adjustQuantity(false)}
-                className="rounded-full"
-              >
-                <ButtonIcon as={MinusCircle} />
-              </Button>
-              
-              <Input className="w-24 mx-2">
-                <InputField
-                  value={quantity.toString()}
-                  onChangeText={handleQuantityChange}
-                  keyboardType="numeric"
-                  className="text-center"
-                />
-              </Input>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onPress={() => adjustQuantity(true)}
-                className="rounded-full"
-              >
-                <ButtonIcon as={PlusCircle} />
-              </Button>
-            </HStack>
-            
-            <Text className="text-center text-gray-500">
-              Grammes
-            </Text>
-            
-            <HStack space="md" className="mt-4">
-              <Button
-                className="flex-1"
-                variant="outline"
-                onPress={() => mealQuantityModalService.closeModal(onClose)}
-              >
-                <ButtonText>Annuler</ButtonText>
-              </Button>
-              <Button
-                className="flex-1 bg-primary-500"
-                onPress={handleUpdateQuantity}
-                isDisabled={isUpdating || quantity === currentQuantity}
-              >
-                <ButtonText>
-                  {isUpdating ? 'Mise à jour...' : 'Mettre à jour'}
-                </ButtonText>
-              </Button>
-            </HStack>
+            <Input className="w-full">
+              <InputField
+                value={quantity}
+                onChangeText={setQuantity}
+                keyboardType="numeric"
+                placeholder="Quantité"
+              />
+            </Input>
+
+            <Button
+              className="bg-primary-500 w-full"
+              onPress={handleUpdateQuantity}
+            >
+              <ButtonText>Mettre à jour</ButtonText>
+            </Button>
           </VStack>
         </ModalBody>
       </ModalContent>

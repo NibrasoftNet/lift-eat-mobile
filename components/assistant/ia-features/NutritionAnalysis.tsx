@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import { StyleSheet, ScrollView, ActivityIndicator, View, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { ArrowLeft, Check, Clock, Calendar, ChevronRight, AlertTriangle } from 'lucide-react-native';
+import { Check, AlertTriangle, ChevronRight } from 'lucide-react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { eq } from 'drizzle-orm';
-import { meals } from '@/db/schema';
 import { useUserContext } from '@/utils/providers/UserContextProvider';
 import iaService from '@/utils/services/ia/ia.service';
+import { Button } from '@/components/ui/button';
 
 // Définition du type manquant pour le linting
 const ToastTypeWarningValues = {
@@ -23,11 +18,13 @@ const ToastTypeWarningValues = {
   WARNING: 'warning' as ToastTypeEnum
 };
 
-export default function NutritionAnalysisScreen() {
-  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
-  const [loading, setLoading] = useState(false);
+interface NutritionAnalysisProps {
+  onAnalysisComplete?: (analysisData: any) => void;
+}
+
+const NutritionAnalysis: React.FC<NutritionAnalysisProps> = ({ onAnalysisComplete }) => {
+  const { currentUser } = useUserContext();
   const [analyzing, setAnalyzing] = useState(false);
-  const [mealCount, setMealCount] = useState(0);
   const [nutritionAnalysis, setNutritionAnalysis] = useState({
     text: '',
     recommendations: [] as string[],
@@ -36,42 +33,7 @@ export default function NutritionAnalysisScreen() {
   });
   const [error, setError] = useState('');
   
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
-  
-  // Récupérer les statistiques de base lorsque l'utilisateur change
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        setLoading(true);
-        
-        // Si aucun utilisateur n'est chargé dans le contexte, récupérer l'utilisateur 1 par défaut
-        if (!currentUser && !isUserLoading) {
-          refreshUser(1);
-          return; // Attendre que l'utilisateur soit chargé avant de continuer
-        }
-        
-        if (currentUser) {
-          // Configurer le service IA avec l'ID de l'utilisateur actuel
-          iaService.setCurrentUserId(currentUser.id);
-          
-          // Récupérer les statistiques de base
-          const userMeals = await drizzleDb.select().from(meals).where(eq(meals.creatorId, currentUser.id));
-          setMealCount(userMeals.length);
-        } else {
-          console.warn('No users found in the database');
-          setError('Aucun utilisateur trouvé dans la base de données');
-        }
-      } catch (error) {
-        console.error('Error initializing nutrition analysis:', error);
-        setError('Erreur lors de l\'initialisation de l\'analyse nutritionnelle');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initialize();
-  }, [currentUser, drizzleDb, isUserLoading, refreshUser]);
 
   const analyzeNutrition = async () => {
     if (!currentUser) return;
@@ -80,7 +42,6 @@ export default function NutritionAnalysisScreen() {
       setAnalyzing(true);
       
       // Utiliser le service IA pour analyser les habitudes nutritionnelles
-      // Passer l'utilisateur actuel au service IA si nu00e9cessaire via le contexte
       const analysisResult = await iaService.analyzeNutritionHabits();
       
       if (analysisResult.success) {
@@ -114,6 +75,11 @@ export default function NutritionAnalysisScreen() {
             />
           ),
         });
+
+        // Callback pour le composant parent
+        if (onAnalysisComplete) {
+          onAnalysisComplete(mockData);
+        }
       } else {
         toast.show({
           render: ({ id }) => (
@@ -209,229 +175,120 @@ export default function NutritionAnalysisScreen() {
     
     return (
       <ThemedView style={styles.emptyContainer}>
-        <ThemedText style={styles.emptyTitle}>Analysez vos habitudes alimentaires</ThemedText>
-        <ThemedText style={styles.emptyDescription}>
-          Notre IA peut analyser vos repas enregistrés pour vous fournir des insights personnalisés
-          sur vos habitudes alimentaires et vous aider à atteindre vos objectifs nutritionnels.
+        <ThemedText style={styles.emptyTitle}>Analyse Nutritionnelle</ThemedText>
+        <ThemedText style={styles.emptyText}>
+          Obtenez une analyse complète de vos habitudes alimentaires actuelles et des recommandations personnalisées pour atteindre vos objectifs de santé.
         </ThemedText>
-        
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <View style={[styles.iconContainerLarge, { backgroundColor: '#2196F3' }]}>
-              <Calendar color="#FFFFFF" size={24} />
-            </View>
-            <ThemedText style={styles.statValue}>{mealCount}</ThemedText>
-            <ThemedText style={styles.statLabel}>Repas enregistrés</ThemedText>
-          </View>
-          
-          <View style={styles.statItem}>
-            <View style={[styles.iconContainerLarge, { backgroundColor: '#4CAF50' }]}>
-              <Clock color="#FFFFFF" size={24} />
-            </View>
-            <ThemedText style={styles.statValue}>30 jours</ThemedText>
-            <ThemedText style={styles.statLabel}>Historique disponible</ThemedText>
-          </View>
-        </View>
-        
-        <TouchableOpacity 
-          style={[styles.button, (analyzing || mealCount === 0) ? styles.buttonDisabled : {}]} 
-          onPress={analyzeNutrition} 
-          disabled={analyzing || mealCount === 0}>
-          <ThemedText style={styles.buttonText}>Commencer l'analyse</ThemedText>
-        </TouchableOpacity>
-        
-        {mealCount === 0 && (
-          <ThemedText style={styles.warningText}>
-            Vous devez avoir au moins un repas enregistré pour effectuer une analyse.
-          </ThemedText>
-        )}
+        <Button onPress={analyzeNutrition} style={styles.analyzeButton}>
+          <ThemedText style={styles.buttonText}>Lancer l'analyse</ThemedText>
+        </Button>
       </ThemedView>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar style="auto" />
-      
+    <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={20} color="#000" />
-          <ThemedText style={styles.backButtonText}>Retour</ThemedText>
-        </TouchableOpacity>
         <ThemedText style={styles.headerTitle}>Analyse Nutritionnelle</ThemedText>
+        <ThemedText style={styles.headerSubtitle}>
+          Comprendre vos habitudes alimentaires pour mieux les améliorer
+        </ThemedText>
       </ThemedView>
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {loading ? (
-          <ThemedView style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-            <ThemedText>Chargement...</ThemedText>
-          </ThemedView>
-        ) : error ? (
-          <ThemedView style={styles.errorContainer}>
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
-            <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-              <ThemedText style={styles.buttonText}>Retour</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-        ) : (
-          renderAnalysisContent()
-        )}
+        {renderAnalysisContent()}
       </ScrollView>
-    </SafeAreaView>
+    </ThemedView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    marginLeft: 4,
-    color: '#2196F3',
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 32,
-  },
-  buttonDisabled: {
-    backgroundColor: '#BDBDBD',
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  progressBarContainer: {
-    width: '90%',
-    height: 10,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 5,
-    marginTop: 16,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    width: '65%',
-    height: '100%',
-    backgroundColor: '#2196F3',
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginTop: 16,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#EEEEEE',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: 16,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    opacity: 0.7,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    padding: 16,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center',
+    padding: 24,
   },
   loadingText: {
-    marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#EEEEEE',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  progressBar: {
+    width: '60%',  // Fixe pour la démo
+    height: '100%',
+    backgroundColor: '#2196F3',
   },
   smallText: {
     fontSize: 12,
     opacity: 0.6,
-    marginTop: 8,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    textAlign: 'center',
   },
   emptyContainer: {
-    flex: 1,
-    padding: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    fontSize: 16,
-    opacity: 0.7,
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  /* Propriété statsContainer déjà définie plus haut */
-  iconContainerLarge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    opacity: 0.7,
-  },
-  warningText: {
-    marginTop: 16,
-    color: 'orange',
+    marginBottom: 16,
     textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  analyzeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   analysisContainer: {
     padding: 16,
   },
   analysisText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: 24,
   },
   section: {
@@ -442,17 +299,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
   },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   iconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
+    marginRight: 12,
   },
   listItemText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     lineHeight: 20,
   },
 });
+
+export default NutritionAnalysis;

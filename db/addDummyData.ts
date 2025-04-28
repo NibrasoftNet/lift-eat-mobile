@@ -391,6 +391,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
           dailyPlanMealsWithIds.push({
             dailyPlanId: dailyPlanId.id,
             mealId: meal.id,
+            mealType: null, // Adding this back to fix the type error
             quantity: 1,
             calories: 0,
             carbs: 0,

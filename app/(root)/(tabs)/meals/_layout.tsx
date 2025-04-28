@@ -39,25 +39,37 @@ export default function MealsLayout() {
         }}
       />
 
-      {/* Community Tab */}
+      {/* Scanner Tab */}
       <Tabs.Screen
-        name="community"
+        name="scanner"
         options={{
           tabBarLabel: ({ focused, color }) => (
             <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
-              Community
+              Scanner
             </Text>
           ),
         }}
       />
 
-      {/* Company Tab */}
+      {/* Recherche Tab */}
       <Tabs.Screen
-        name="company"
+        name="search"
         options={{
           tabBarLabel: ({ focused, color }) => (
             <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
-              Company
+              Recherche
+            </Text>
+          ),
+        }}
+      />
+
+      {/* Test Recherche Tab - pour diagnostic */}
+      <Tabs.Screen
+        name="test-search"
+        options={{
+          tabBarLabel: ({ focused, color }) => (
+            <Text style={{ color, fontWeight: focused ? 'bold' : 'normal' }}>
+              Test-API
             </Text>
           ),
         }}

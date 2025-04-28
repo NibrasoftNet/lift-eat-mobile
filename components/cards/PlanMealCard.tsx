@@ -18,25 +18,26 @@ import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
-import * as schema from '@/db/schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { calculateProportionalMacros } from '@/utils/helpers/nutrition.helper';
 
 interface PlanMealCardProps {
   meal: MealOrmProps;
   onMealDeleted?: () => Promise<void>;
-  drizzleDb?: ExpoSQLiteDatabase<typeof schema>;
   dailyPlanId?: number | null;
 }
 
-const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzleDb, dailyPlanId }) => {
+const PlanMealCard: React.FC<PlanMealCardProps> = ({ 
+  meal, 
+  onMealDeleted, 
+  dailyPlanId 
+}) => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [currentQuantity, setCurrentQuantity] = useState<number>(meal.quantity);
+  const [currentQuantity, setCurrentQuantity] = useState<number>(meal.quantity || 100);
   const toast = useToast();
   const queryClient = useQueryClient();
   
   useEffect(() => {
-    // Si on a un dailyPlanId, on récupère la quantité actuelle du repas dans le plan
     const fetchMealQuantity = async () => {
       if (dailyPlanId && meal.id) {
         try {
@@ -52,20 +53,18 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
     
     fetchMealQuantity();
   }, [dailyPlanId, meal.id]);
+
   const handleRemoveMealFromPlan = async () => {
     try {
       if (meal.id && dailyPlanId) {
-        logger.info(LogCategory.DATABASE, `Removing meal ${meal.id} from plan ${dailyPlanId} via MCP Server`);
+        logger.info(LogCategory.DATABASE, `Removing meal ${meal.id} from plan ${dailyPlanId}`);
         
-        // Utiliser notre nouvelle fonction qui retire le repas du plan sans le supprimer complètement
         const result = await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, meal.id);
         
         if (!result.success) {
-          logger.error(LogCategory.DATABASE, `Failed to remove meal ${meal.id} from plan ${dailyPlanId}: ${result.error}`);
           throw new Error(result.error || `Failed to remove meal from plan`);
         }
         
-        // Invalider uniquement le cache du plan, pas celui des repas car on garde le repas en base
         invalidateCache(queryClient, DataType.PLAN);
         
         toast.show({
@@ -76,13 +75,11 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
           ),
         });
 
-        // Callback après suppression si fourni
         if (onMealDeleted) {
           await onMealDeleted();
         }
       }
     } catch (error) {
-      // Gérer l'erreur
       toast.show({
         render: ({ id }) => (
           <Toast nativeID={id} action="error" variant="solid">
@@ -93,6 +90,17 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
       console.error('Error removing meal from plan:', error);
     }
   };
+
+  const calculatedCalories = calculateProportionalMacros(
+    meal.quantity || 100,
+    {
+      calories: meal.calories || 0,
+      protein: meal.protein || 0,
+      carbs: meal.carbs || 0,
+      fat: meal.fat || 0
+    },
+    currentQuantity
+  ).calories;
 
   return (
     <>
@@ -122,11 +130,11 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
           <VStack>
             <Text className="font-medium">{meal.name}</Text>
             <Text className="text-gray-600">
-              Qty: {currentQuantity} {meal.unit}
+              Qty: {currentQuantity} {meal.unit || 'g'}
             </Text>
           </VStack>
           <HStack className="items-center">
-            <Text className="text-gray-600 mr-2">{meal.calories} Kcal</Text>
+            <Text className="text-gray-600 mr-2">{Math.round(calculatedCalories)} Kcal</Text>
             <Icon
               as={CircleChevronRight}
               className="w-10 h-10 text-tertiary-500"
@@ -135,15 +143,14 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
         </HStack>
       </Pressable>
 
-      {/* Modal d'options pour le repas */}
       <MealOptionsModal
         isOpen={showOptionsModal}
         onClose={() => setShowOptionsModal(false)}
         meal={meal}
         onDelete={handleRemoveMealFromPlan}
-        dailyPlanId={dailyPlanId || undefined}
+        dailyPlanId={dailyPlanId || 0}
         currentQuantity={currentQuantity}
-        drizzleDb={drizzleDb}
+        drizzleDb={undefined}
         onQuantityUpdated={onMealDeleted}
       />
     </>

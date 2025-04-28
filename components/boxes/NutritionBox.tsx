@@ -2,6 +2,7 @@ import React from 'react';
 import { Box } from '../ui/box';
 import { HStack } from '../ui/hstack';
 import { Text } from '../ui/text';
+import { formatNutritionalValue } from '@/utils/helpers/format.helper';
 
 interface NutritionBoxProps {
   title: string;
@@ -20,15 +21,16 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
   titleClassName = '',
   valueClassName = '',
 }: NutritionBoxProps) => {
+  const formattedValue = formatNutritionalValue(value);
+
   return (
     <Box
-      className={`flex rounded-md items-center drop-shadow-xl ${className}`} // Apply passed className for the entire box
+      className={`flex rounded-md items-center drop-shadow-xl ${className}`}
     >
       {/* Top Section (Title) */}
       <HStack
         className={`w-full justify-center rounded-t-xl ${titleClassName}`}
       >
-        {/* Apply titleClassName */}
         <Text className={`font-semibold text-center text-white`}>{title}</Text>
       </HStack>
 
@@ -36,9 +38,8 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
       <HStack
         className={`w-full rounded-b-xl ${valueClassName} p-1 justify-center gap-2 items-center`}
       >
-        {/* Apply valueClassName */}
         <Text className={`text-gray-600 font-semibold text-center`}>
-          {value} {unit}
+          {formattedValue} {unit}
         </Text>
       </HStack>
     </Box>

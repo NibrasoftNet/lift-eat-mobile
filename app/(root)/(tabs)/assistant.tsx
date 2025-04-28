@@ -22,9 +22,8 @@ import { assistantPagesService } from '@/utils/services/pages/assistant-pages.se
 import geminiService from '@/utils/services/gemini-service';
 import nutritionDatabaseService from '@/utils/services/nutrition-database.service';
 
-// Import des composants IA
-import MealGeneratorForm from '@/components/ia/MealGeneratorForm';
-import PlanGeneratorForm from '@/components/ia/PlanGeneratorForm';
+// Import des composants IA depuis le dossier centralisé
+import { IAChat, MealGenerator, NutritionAnalysis, PlanGenerator } from '@/components/assistant/ia-features';
 import { IaMealType, IaPlanType } from '@/utils/validation/ia/ia.schemas';
 
 interface Message {
@@ -175,7 +174,7 @@ export default function AssistantScreen() {
             style={[styles.navButton, activeIAFeature === 'plan-generator' && styles.navButtonActive]} 
             onPress={() => setActiveIAFeature(activeIAFeature === 'plan-generator' ? null : 'plan-generator')}
           >
-            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'plan-generator' && styles.navButtonIconActive]}>
+            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'plan-generator' && styles.navButtonIconActive]}>  
               <ThemedText style={styles.iconText}>📅</ThemedText>
             </ThemedView>
             <ThemedText style={styles.navButtonText}>Plan Nutritionnel</ThemedText>
@@ -185,7 +184,7 @@ export default function AssistantScreen() {
             style={[styles.navButton, activeIAFeature === 'nutrition-analysis' && styles.navButtonActive]} 
             onPress={() => setActiveIAFeature(activeIAFeature === 'nutrition-analysis' ? null : 'nutrition-analysis')}
           >
-            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'nutrition-analysis' && styles.navButtonIconActive]}>
+            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'nutrition-analysis' && styles.navButtonIconActive]}>  
               <ThemedText style={styles.iconText}>📊</ThemedText>
             </ThemedView>
             <ThemedText style={styles.navButtonText}>Analyse Nutrition</ThemedText>
@@ -195,7 +194,7 @@ export default function AssistantScreen() {
             style={[styles.navButton, activeIAFeature === 'ia-chat' && styles.navButtonActive]} 
             onPress={() => setActiveIAFeature(activeIAFeature === 'ia-chat' ? null : 'ia-chat')}
           >
-            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'ia-chat' && styles.navButtonIconActive]}>
+            <ThemedView style={[styles.navButtonIcon, activeIAFeature === 'ia-chat' && styles.navButtonIconActive]}>  
               <ThemedText style={styles.iconText}>💬</ThemedText>
             </ThemedView>
             <ThemedText style={styles.navButtonText}>Chat IA</ThemedText>
@@ -210,23 +209,11 @@ export default function AssistantScreen() {
             <ScrollView style={styles.iaContentScroll}>
               <ThemedView style={styles.iaContentContainer}>
                 <ThemedText style={styles.iaFeatureTitle}>Générateur de Repas IA</ThemedText>
-                <MealGeneratorForm 
-                  onMealGenerated={(meal: IaMealType) => {
-                    toast.show({
-                      render: ({ id }) => (
-                        <MultiPurposeToast 
-                          id={id}
-                          color={ToastTypeEnum.SUCCESS}
-                          title="Repas généré"
-                          description="Le repas a été généré avec succès!"
-                        />
-                      ),
-                      placement: "bottom"
-                    });
-                    // Retourner à l'assistant après génération
-                    setActiveIAFeature(null);
-                  }} 
-                />
+                <MealGenerator onMealGenerated={(meal) => {
+                  console.log('Meal generated successfully:', meal.name);
+                  setActiveIAFeature(null);
+                  handleSendMessage(`L'IA a généré un nouveau repas: ${meal.name}`);
+                }} />
               </ThemedView>
             </ScrollView>
           )}
@@ -235,54 +222,11 @@ export default function AssistantScreen() {
             <ScrollView style={styles.iaContentScroll}>
               <ThemedView style={styles.iaContentContainer}>
                 <ThemedText style={styles.iaFeatureTitle}>Générateur de Plan Nutritionnel</ThemedText>
-                <PlanGeneratorForm 
-                  onPlanGenerated={(plan: IaPlanType) => {
-                    // Utiliser assistantPagesService pour générer un plan nutritionnel
-                    assistantPagesService.generatePlan(plan)
-                      .then(result => {
-                        if (result.success) {
-                          toast.show({
-                            render: ({ id }) => (
-                              <MultiPurposeToast 
-                                id={id}
-                                color={ToastTypeEnum.SUCCESS}
-                                title="Plan généré"
-                                description="Le plan nutritionnel a été généré avec succès!"
-                              />
-                            ),
-                            placement: "bottom"
-                          });
-                        } else {
-                          toast.show({
-                            render: ({ id }) => (
-                              <MultiPurposeToast 
-                                id={id}
-                                color={ToastTypeEnum.ERROR}
-                                title="Échec de génération"
-                                description={result.error || "Une erreur est survenue lors de la génération du plan"}
-                              />
-                            ),
-                            placement: "bottom"
-                          });
-                        }
-                      })
-                      .catch(error => {
-                        toast.show({
-                          render: ({ id }) => (
-                            <MultiPurposeToast 
-                              id={id}
-                              color={ToastTypeEnum.ERROR}
-                              title="Erreur"
-                              description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
-                            />
-                          ),
-                          placement: "bottom"
-                        });
-                      });
-                    // Retourner à l'assistant après génération
-                    setActiveIAFeature(null);
-                  }}
-                />
+                <PlanGenerator onPlanGenerated={(plan) => {
+                  console.log('Plan generated successfully.');
+                  setActiveIAFeature(null);
+                  handleSendMessage(`L'IA a généré un nouveau plan nutritionnel pour vous.`);
+                }} />
               </ThemedView>
             </ScrollView>
           )}
@@ -291,89 +235,27 @@ export default function AssistantScreen() {
             <ScrollView style={styles.iaContentScroll}>
               <ThemedView style={styles.iaContentContainer}>
                 <ThemedText style={styles.iaFeatureTitle}>Analyse Nutritionnelle</ThemedText>
-                <ThemedText style={styles.iaDescription}>
-                  Notre outil d'analyse évaluera vos habitudes alimentaires et vous fournira des recommandations personnalisées.
-                </ThemedText>
-                <TouchableOpacity 
-                  style={styles.iaButton}
-                  onPress={() => {
-                    toast.show({
-                      render: ({ id }) => (
-                        <MultiPurposeToast 
-                          id={id}
-                          color={ToastTypeEnum.SUCCESS}
-                          title="Analyse en cours"
-                          description="Analyse de vos habitudes nutritionnelles en cours..."
-                        />
-                      ),
-                      placement: "bottom"
-                    });
-                    // Utiliser assistantPagesService pour l'analyse nutritionnelle
-                    // Analyser les 30 derniers jours
-                    const today = new Date();
-                    const thirtyDaysAgo = new Date(today);
-                    thirtyDaysAgo.setDate(today.getDate() - 30);
-                    
-                    const startDate = thirtyDaysAgo.toISOString().split('T')[0]; // Format YYYY-MM-DD
-                    const endDate = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
-                    
-                    assistantPagesService.analyzeProgress(startDate, endDate)
-                      .then(result => {
-                        if (result.success) {
-                          toast.show({
-                            render: ({ id }) => (
-                              <MultiPurposeToast 
-                                id={id}
-                                color={ToastTypeEnum.SUCCESS}
-                                title="Analyse terminée"
-                                description="L'analyse de vos habitudes nutritionnelles est terminée."
-                              />
-                            ),
-                            placement: "bottom"
-                          });
-                        } else {
-                          toast.show({
-                            render: ({ id }) => (
-                              <MultiPurposeToast 
-                                id={id}
-                                color={ToastTypeEnum.ERROR}
-                                title="Échec de l'analyse"
-                                description={result.error || "Une erreur est survenue lors de l'analyse"}
-                              />
-                            ),
-                            placement: "bottom"
-                          });
-                        }
-                      })
-                      .catch(error => {
-                        toast.show({
-                          render: ({ id }) => (
-                            <MultiPurposeToast 
-                              id={id}
-                              color={ToastTypeEnum.ERROR}
-                              title="Erreur"
-                              description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
-                            />
-                          ),
-                          placement: "bottom"
-                        });
-                      });
-                      
-                    setActiveIAFeature(null);
-                  }}
-                >
-                  <ThemedText style={styles.iaButtonText}>Démarrer l'analyse</ThemedText>
-                </TouchableOpacity>
+                <NutritionAnalysis onAnalysisComplete={(analysis) => {
+                  console.log('Nutrition analysis completed');
+                  // Option: laisser l'analyse visible ou revenir au chat
+                  // setActiveIAFeature(null);
+                  // handleSendMessage(`L'analyse nutritionnelle a été complétée.`);
+                }} />
               </ThemedView>
             </ScrollView>
           )}
           
           {activeIAFeature === 'ia-chat' && (
             <View style={styles.iaChatContainer}>
-              <ThemedText style={styles.iaFeatureTitle}>Chat avec l'IA</ThemedText>
-              <ThemedText style={styles.iaDescription}>
-                Posez toutes vos questions sur la nutrition, les exercices ou demandez des conseils personnalisés.
-              </ThemedText>
+              <IAChat onMessageSent={(userMessage, assistantResponse) => {
+                console.log('Message sent in IA Chat');
+                // Option: on peut choisir de synchroniser les messages avec le chat principal
+                // setMessages(prev => [
+                //   ...prev,
+                //   { id: Date.now().toString(), text: userMessage, type: 'user', timestamp: new Date() },
+                //   { id: (Date.now() + 1).toString(), text: assistantResponse, type: 'assistant', timestamp: new Date() }
+                // ]);
+              }} />
             </View>
           )}
         </View>

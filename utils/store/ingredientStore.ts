@@ -2,6 +2,12 @@ import { create } from 'zustand';
 import { IngredientStandardOrmProps } from '../../db/schema';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { TotalMacrosProps } from '@/types/meal.type';
+import {
+  calculateProportionalMacros,
+  calculateTotalMacros,
+  adjustMacrosByFinalWeight,
+  isValidWeight,
+} from '@/utils/helpers/nutrition.helper';
 
 interface IngredientStore {
   selectedIngredients: IngredientWithStandardProps[];
@@ -18,56 +24,71 @@ interface IngredientStore {
   resetIngredients: () => void;
 }
 
-// Utility function to transform IngredientStandardOrmProps to IngredientWithStandardProps
+// Transforme un IngredientStandardOrmProps en IngredientWithStandardProps
 const mapToIngredientWithStandard = (
   ingredient: IngredientStandardOrmProps,
-): IngredientWithStandardProps => ({
-  quantity: ingredient.quantity,
-  calories: ingredient.calories,
-  carbs: ingredient.carbs,
-  fat: ingredient.fat,
-  protein: ingredient.protein,
-  ingredientStandardId: ingredient.id,
-  ingredientsStandard: ingredient,
-});
+): IngredientWithStandardProps => {
+  const macros = calculateProportionalMacros(
+    ingredient.quantity,
+    {
+      calories: ingredient.calories,
+      carbs: ingredient.carbs,
+      fat: ingredient.fat,
+      protein: ingredient.protein,
+    },
+    ingredient.quantity,
+  );
 
-// Calculate total weight of all ingredients
+  return {
+    quantity: ingredient.quantity,
+    ...macros,
+    ingredientStandardId: ingredient.id,
+    ingredientsStandard: ingredient,
+  };
+};
+
+// Calcule le poids total des ingrédients
 const calculateTotalWeight = (ingredients: IngredientWithStandardProps[]): number => {
   return ingredients.reduce((total, ingredient) => total + ingredient.quantity, 0);
 };
 
-// Function to recalculate total macros with weight adjustment
-const calculateTotalMacros = (
+// Recalcule les macros totaux avec ajustement du poids
+const recalculateTotalMacros = (
   ingredients: IngredientWithStandardProps[],
-  mealWeight?: number
+  mealWeight?: number,
 ): TotalMacrosProps => {
-  // Calculate raw totals first
-  const rawTotals = ingredients.reduce(
-    (totals, ingredient) => ({
-      totalCalories: totals.totalCalories + ingredient.calories,
-      totalFats: totals.totalFats + ingredient.fat,
-      totalCarbs: totals.totalCarbs + ingredient.carbs,
-      totalProtein: totals.totalProtein + ingredient.protein,
-    }),
-    { totalCalories: 0, totalFats: 0, totalCarbs: 0, totalProtein: 0 },
-  );
-  
-  // If no meal weight specified or no ingredients, return raw totals
-  if (!mealWeight || ingredients.length === 0) {
-    return rawTotals;
+  // Si pas d'ingrédients, retourner des valeurs à 0
+  if (ingredients.length === 0) {
+    return {
+      totalCalories: 0,
+      totalFats: 0,
+      totalCarbs: 0,
+      totalProtein: 0,
+    };
   }
-  
-  // Calculate the ratio between meal weight and total ingredients weight
-  const totalIngredientsWeight = calculateTotalWeight(ingredients);
-  // Si le repas fait 100g et les ingrédients 300g, on doit diviser par 3
-  const adjustmentFactor = totalIngredientsWeight / mealWeight;
-  
-  // Appliquer le facteur pour ajuster les macros en fonction du poids final du repas
+
+  // Calculer les totaux bruts
+  const rawTotals = calculateTotalMacros(ingredients);
+
+  // Si pas de poids final spécifié, retourner les totaux bruts
+  if (!mealWeight || !isValidWeight(mealWeight)) {
+    return {
+      totalCalories: rawTotals.calories,
+      totalFats: rawTotals.fat,
+      totalCarbs: rawTotals.carbs,
+      totalProtein: rawTotals.protein,
+    };
+  }
+
+  // Ajuster les macros selon le poids final
+  const totalWeight = calculateTotalWeight(ingredients);
+  const adjustedMacros = adjustMacrosByFinalWeight(rawTotals, totalWeight, mealWeight);
+
   return {
-    totalCalories: Math.round(rawTotals.totalCalories / adjustmentFactor),
-    totalFats: Math.round(rawTotals.totalFats / adjustmentFactor),
-    totalCarbs: Math.round(rawTotals.totalCarbs / adjustmentFactor),
-    totalProtein: Math.round(rawTotals.totalProtein / adjustmentFactor),
+    totalCalories: adjustedMacros.calories,
+    totalFats: adjustedMacros.fat,
+    totalCarbs: adjustedMacros.carbs,
+    totalProtein: adjustedMacros.protein,
   };
 };
 
@@ -84,139 +105,159 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
 
   setSelectedIngredients: (ingredients) =>
     set((state) => {
-      const totalWeight = calculateTotalWeight(ingredients);
-      // If meal weight was previously 0, set it to match the total ingredients weight
-      const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
-      return {
-        selectedIngredients: ingredients,
-        totalWeight: totalWeight,
-        mealWeight: mealWeight,
-        totalMacros: calculateTotalMacros(ingredients, mealWeight),
-      };
+      try {
+        const totalWeight = calculateTotalWeight(ingredients);
+        const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
+        return {
+          selectedIngredients: ingredients,
+          totalWeight: totalWeight,
+          mealWeight: mealWeight,
+          totalMacros: recalculateTotalMacros(ingredients, mealWeight),
+        };
+      } catch (error) {
+        console.error('Erreur lors du calcul des macros:', error);
+        return state;
+      }
     }),
 
   setTotalMacros: (macros) =>
     set(() => ({
       totalMacros: macros,
     })),
-    
+
   setMealWeight: (weight) =>
-    set((state) => ({
-      mealWeight: weight,
-      totalMacros: calculateTotalMacros(state.selectedIngredients, weight),
-    })),
+    set((state) => {
+      try {
+        if (!isValidWeight(weight)) {
+          throw new Error('Poids invalide');
+        }
+        return {
+          mealWeight: weight,
+          totalMacros: recalculateTotalMacros(state.selectedIngredients, weight),
+        };
+      } catch (error) {
+        console.error('Erreur lors du calcul des macros:', error);
+        return state;
+      }
+    }),
 
   addIngredient: (ingredient) =>
     set((state) => {
-      const updatedIngredients = [
-        ...state.selectedIngredients,
-        mapToIngredientWithStandard(ingredient),
-      ];
-      const totalWeight = calculateTotalWeight(updatedIngredients);
-      // If meal weight was previously 0, set it to match the total ingredients weight
-      const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
-      return {
-        selectedIngredients: updatedIngredients,
-        totalWeight: totalWeight,
-        mealWeight: mealWeight,
-        totalMacros: calculateTotalMacros(updatedIngredients, mealWeight),
-      } as Partial<IngredientStore>; // ✅ Explicitly casting to Partial<IngredientStore>
+      try {
+        const updatedIngredients = [
+          ...state.selectedIngredients,
+          mapToIngredientWithStandard(ingredient),
+        ];
+        const totalWeight = calculateTotalWeight(updatedIngredients);
+        const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
+        return {
+          selectedIngredients: updatedIngredients,
+          totalWeight: totalWeight,
+          mealWeight: mealWeight,
+          totalMacros: recalculateTotalMacros(updatedIngredients, mealWeight),
+        };
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout de l\'ingrédient:', error);
+        return state;
+      }
     }),
 
   removeIngredient: (id) =>
     set((state) => {
-      const updatedIngredients = state.selectedIngredients.filter(
-        (ing) => ing.ingredientStandardId !== id,
-      );
-      const totalWeight = calculateTotalWeight(updatedIngredients);
-      // If all ingredients are removed, reset meal weight to 0
-      const mealWeight = updatedIngredients.length === 0 ? 0 : state.mealWeight;
-      return {
-        selectedIngredients: updatedIngredients,
-        totalWeight: totalWeight,
-        mealWeight: mealWeight,
-        totalMacros: calculateTotalMacros(updatedIngredients, mealWeight),
-      } as Partial<IngredientStore>; // ✅ Ensure Zustand recognizes the partial update
+      try {
+        const updatedIngredients = state.selectedIngredients.filter(
+          (ing) => ing.ingredientStandardId !== id,
+        );
+        const totalWeight = calculateTotalWeight(updatedIngredients);
+        const mealWeight = updatedIngredients.length === 0 ? 0 : state.mealWeight;
+        return {
+          selectedIngredients: updatedIngredients,
+          totalWeight: totalWeight,
+          mealWeight: mealWeight,
+          totalMacros: recalculateTotalMacros(updatedIngredients, mealWeight),
+        };
+      } catch (error) {
+        console.error('Erreur lors de la suppression de l\'ingrédient:', error);
+        return state;
+      }
     }),
 
   toggleIngredient: (ingredient) =>
     set((state) => {
-      // Optimisation: trouver l'index en une seule passe du tableau
-      const existingIndex = state.selectedIngredients.findIndex(
-        (ing) => ing.ingredientStandardId === ingredient.id
-      );
-      const isPresent = existingIndex !== -1;
+      try {
+        const existingIndex = state.selectedIngredients.findIndex(
+          (ing) => ing.ingredientStandardId === ingredient.id
+        );
 
-      let updatedIngredients;
-      if (isPresent) {
-        // Optimisation: Utilisation de slice pour éviter la reconstruction complète
-        updatedIngredients = [
-          ...state.selectedIngredients.slice(0, existingIndex),
-          ...state.selectedIngredients.slice(existingIndex + 1)
-        ];
-      } else {
-        updatedIngredients = [
-          ...state.selectedIngredients,
-          mapToIngredientWithStandard(ingredient),
-        ];
-      }
+        let updatedIngredients;
+        if (existingIndex !== -1) {
+          updatedIngredients = [
+            ...state.selectedIngredients.slice(0, existingIndex),
+            ...state.selectedIngredients.slice(existingIndex + 1)
+          ];
+        } else {
+          updatedIngredients = [
+            ...state.selectedIngredients,
+            mapToIngredientWithStandard(ingredient),
+          ];
+        }
 
-      // Optimisation: calcul rapide du nouveau poids total
-      let totalWeight;
-      if (isPresent) {
-        // Si on supprime un ingrédient, soustraire son poids du total
-        totalWeight = state.totalWeight - state.selectedIngredients[existingIndex].quantity;
-      } else {
-        // Si on ajoute un ingrédient, ajouter son poids au total
-        totalWeight = state.totalWeight + ingredient.quantity;
+        const totalWeight = calculateTotalWeight(updatedIngredients);
+        const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
+
+        return {
+          selectedIngredients: updatedIngredients,
+          totalWeight,
+          mealWeight,
+          totalMacros: recalculateTotalMacros(updatedIngredients, mealWeight),
+        };
+      } catch (error) {
+        console.error('Erreur lors du basculement de l\'ingrédient:', error);
+        return state;
       }
-      
-      // Si meal weight était 0, on le définit au poids total
-      const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
-      
-      return {
-        selectedIngredients: updatedIngredients,
-        totalWeight,
-        mealWeight,
-        totalMacros: calculateTotalMacros(updatedIngredients, mealWeight),
-      } as Partial<IngredientStore>; // Ensure Zustand recognizes the update
     }),
 
   updateIngredient: (ingredientStandardId: number, newQuantity: number) =>
     set((state) => {
-      const updatedIngredients = state.selectedIngredients.map((ing) =>
-        ing.ingredientStandardId === ingredientStandardId
-          ? {
+      try {
+        if (!isValidWeight(newQuantity)) {
+          throw new Error('Quantité invalide');
+        }
+
+        const updatedIngredients = state.selectedIngredients.map((ing) => {
+          if (ing.ingredientStandardId === ingredientStandardId) {
+            const macros = calculateProportionalMacros(
+              ing.ingredientsStandard.quantity,
+              {
+                calories: ing.ingredientsStandard.calories,
+                carbs: ing.ingredientsStandard.carbs,
+                fat: ing.ingredientsStandard.fat,
+                protein: ing.ingredientsStandard.protein,
+              },
+              newQuantity,
+            );
+
+            return {
               ...ing,
               quantity: newQuantity,
-              calories: Math.round(
-                (newQuantity / ing.ingredientsStandard.quantity) *
-                  ing.ingredientsStandard.calories,
-              ),
-              carbs: Math.round(
-                (newQuantity / ing.ingredientsStandard.quantity) *
-                  ing.ingredientsStandard.carbs,
-              ),
-              fat: Math.round(
-                (newQuantity / ing.ingredientsStandard.quantity) *
-                  ing.ingredientsStandard.fat,
-              ),
-              protein: Math.round(
-                (newQuantity / ing.ingredientsStandard.quantity) *
-                  ing.ingredientsStandard.protein,
-              ),
-            }
-          : ing,
-      );
+              ...macros,
+            };
+          }
+          return ing;
+        });
 
-      const totalWeight = calculateTotalWeight(updatedIngredients);
-      
-      return {
-        selectedIngredients: updatedIngredients,
-        totalWeight: totalWeight,
-        totalMacros: calculateTotalMacros(updatedIngredients, state.mealWeight),
-      } as Partial<IngredientStore>;
+        const totalWeight = calculateTotalWeight(updatedIngredients);
+        return {
+          selectedIngredients: updatedIngredients,
+          totalWeight,
+          totalMacros: recalculateTotalMacros(updatedIngredients, state.mealWeight),
+        };
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de l\'ingrédient:', error);
+        return state;
+      }
     }),
+
   resetIngredients: () =>
     set({
       selectedIngredients: [],
@@ -228,5 +269,5 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
       },
       totalWeight: 0,
       mealWeight: 0,
-    } as Partial<IngredientStore>), // ✅ Ensure Zustand correctly processes the update,
+    }),
 }));
