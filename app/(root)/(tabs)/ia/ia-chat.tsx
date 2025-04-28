@@ -11,7 +11,7 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { users } from '@/db/schema';
+import { useUserContext } from '@/utils/providers/UserContextProvider';
 import iaService from '@/utils/services/ia/ia.service';
 
 interface Message {
@@ -31,7 +31,7 @@ const initialSuggestions = [
 ];
 
 export default function AssistantScreen() {
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,19 +41,19 @@ export default function AssistantScreen() {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   
-  // Récupérer l'ID de l'utilisateur actuel
+  // Récupérer l'utilisateur actuel via le contexte global
   useEffect(() => {
-    const getCurrentUser = async () => {
-      try {        
-        // Pour cette démo, nous prenons le premier utilisateur de la base de données
-        const userResults = await drizzleDb.select().from(users).limit(1);
+    const initializeChat = async () => {
+      try {
+        // Si aucun utilisateur n'est chargé dans le contexte, récupérer l'utilisateur 1 par défaut
+        if (!currentUser && !isUserLoading) {
+          refreshUser(1);
+          return; // Attendre que l'utilisateur soit chargé avant de continuer
+        }
         
-        if (userResults.length > 0) {
-          const userId = userResults[0].id;
-          setCurrentUserId(userId);
-          
+        if (currentUser) {
           // Configurer le service IA avec l'ID de l'utilisateur actuel
-          iaService.setCurrentUserId(userId);
+          iaService.setCurrentUserId(currentUser.id);
           
           // Ajouter un message de bienvenue
           setMessages([
@@ -72,8 +72,8 @@ export default function AssistantScreen() {
       }
     };
 
-    getCurrentUser();
-  }, [drizzleDb]);
+    initializeChat();
+  }, [currentUser, isUserLoading, refreshUser, drizzleDb]);
 
   // Faire défiler vers le bas lorsque de nouveaux messages arrivent
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function AssistantScreen() {
   }, [messages]);
 
   const sendMessage = async (text: string = inputText) => {
-    if (!text.trim() || !currentUserId) return;
+    if (!text.trim() || !currentUser) return;
     
     // Ajouter le message de l'utilisateur
     const userMessage: Message = {

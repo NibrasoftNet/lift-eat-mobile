@@ -1,5 +1,5 @@
 import { VStack } from '@/components/ui/vstack';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button, ButtonText } from '@/components/ui/button';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
@@ -32,6 +32,10 @@ import GenderFormInput from '@/components/forms-input/GenderFormInput';
 import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 export default function CalculateCaloriesIntakeForm({
   defaultValues,
@@ -44,6 +48,9 @@ export default function CalculateCaloriesIntakeForm({
 
   // Init Tanstack Query client
   const queryClient = useQueryClient();
+  
+  // Obtenir l'ID de l'utilisateur actuel de façon standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
 
   const {
     setValue,
@@ -57,8 +64,47 @@ export default function CalculateCaloriesIntakeForm({
 
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
     try {
-      // Sauvegarder les données si nécessaire
-      console.log('calories', data);
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.warn(LogCategory.AUTH, 'User not authenticated when submitting calorie intake form');
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.ERROR}
+                title="Authentication Required"
+                description="Please log in to save your calorie intake data"
+              />
+            );
+          },
+        });
+        return;
+      }
+      
+      logger.info(LogCategory.USER, `Saving calorie intake data for user ${userId}`, {
+        age: data.age,
+        gender: data.gender,
+        physicalActivity: data.physicalActivity
+      });
+      
+      // Sauvegarder les données via le MCP server
+      // Note: Nous supposons ici que vous avez une méthode pour mettre à jour les préférences utilisateur
+      // Si cette méthode n'existe pas, il faudrait la créer dans le MCP server
+      const updateResult = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, {
+        age: data.age,
+        gender: data.gender,
+        physicalActivity: data.physicalActivity
+      });
+      
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to save calorie intake data');
+      }
+      
+      // Utilisation du queryClient pour invalider les données utilisateur en cache
+      queryClient.invalidateQueries({ queryKey: ['user-details', userId] });
       
       // Navigation vers l'étape suivante en utilisant un chemin relatif
       router.push('/(root)/(tabs)/plans/my-plans/create/target');
@@ -79,6 +125,7 @@ export default function CalculateCaloriesIntakeForm({
         },
       });
     } catch (error) {
+      logger.error(LogCategory.USER, `Error saving calorie intake data: ${error instanceof Error ? error.message : String(error)}`);
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {

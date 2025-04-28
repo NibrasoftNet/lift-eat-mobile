@@ -1,5 +1,5 @@
 import { VStack } from '../ui/vstack';
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '../ui/button';
 import { Card } from '../ui/card';
 import { Controller, useForm } from 'react-hook-form';
@@ -33,7 +33,6 @@ import {
   ActionsheetItemText,
 } from '@/components/ui/actionsheet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateUser } from '@/utils/services/users.service';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -41,6 +40,13 @@ import { useToast } from '@/components/ui/toast';
 import { getImageFromPicker } from '@/utils/utils';
 import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { useRouter } from 'expo-router';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export default function UserProfileForm({
   defaultValues,
@@ -49,7 +55,53 @@ export default function UserProfileForm({
 }) {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
+  
+  // Obtenir l'ID de l'utilisateur actuel de façon standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
+  
+  // Vérifier que l'utilisateur ne modifie que ses propres données
+  useEffect(() => {
+    if (!userId) {
+      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing profile form');
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Authentication Required"
+              description="Please log in to edit your profile"
+            />
+          );
+        },
+      });
+      router.back();
+      return;
+    }
+    
+    if (userId !== defaultValues.id) {
+      logger.warn(LogCategory.AUTH, `User ${userId} attempting to modify profile for user ${defaultValues.id}`);
+      toast.show({
+        placement: 'top',
+        render: ({ id }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.ERROR}
+              title="Access Denied"
+              description="You can only edit your own profile"
+            />
+          );
+        },
+      });
+      router.back();
+    }
+  }, [userId, defaultValues.id, toast, router]);
   const [isActionSheetOpen, setActionSheetOpen] = useState(false);
   const [photo, setPhoto] = useState<Buffer<ArrayBufferLike> | string>(
     `${defaultValues.profileImage}`,
@@ -83,10 +135,50 @@ export default function UserProfileForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserProfileFormData) => {
-      return await updateUser(drizzleDb, defaultValues.id, data);
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when updating profile');
+        throw new Error('You must be logged in to update your profile');
+      }
+      
+      // Vérifier que l'utilisateur ne modifie que ses propres données
+      if (userId !== defaultValues.id) {
+        logger.error(LogCategory.AUTH, `User ${userId} attempting to update profile for user ${defaultValues.id}`);
+        throw new Error('You can only update your own profile');
+      }
+      
+      logger.info(LogCategory.USER, `Updating user profile for user ${userId}`);
+      
+      // Mise à jour directe du profil utilisateur en utilisant drizzle
+      logger.info(LogCategory.DATABASE, `Updating user profile directly for user ${userId}`);
+      
+      try {
+        // Mettre à jour les informations utilisateur
+        await drizzleDb
+          .update(users)
+          .set({
+            name: data.name,
+            email: data.email,
+            profileImage: data.profileImage,
+            updatedAt: new Date().toISOString()
+          })
+          .where(eq(users.id, userId));
+          
+        logger.info(LogCategory.DATABASE, `Successfully updated profile for user ${userId}`);
+      } catch (dbError) {
+        const errorMessage = `Database error updating user profile: ${dbError instanceof Error ? dbError.message : String(dbError)}`;
+        logger.error(LogCategory.DATABASE, errorMessage);
+        throw new Error('Failed to update profile: Database error');
+      }
+      
+      return { success: true };
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+      // Utiliser l'utilitaire standardisé d'invalidation du cache
+      await invalidateCache(queryClient, DataType.USER, { 
+        id: userId || undefined, // Gérer le cas où userId pourrait être null
+        invalidateRelated: true 
+      });
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -95,8 +187,8 @@ export default function UserProfileForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success update profile"
+              title="Profile Updated"
+              description="Your profile has been successfully updated"
             />
           );
         },
@@ -112,8 +204,8 @@ export default function UserProfileForm({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
+              title="Profile Update Failed"
+              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
             />
           );
         },
@@ -122,7 +214,13 @@ export default function UserProfileForm({
   });
 
   const onSubmit = async (data: UserProfileFormData) => {
-    await mutateAsync(data);
+    try {
+      logger.info(LogCategory.USER, 'Submitting profile update', { userId });
+      await mutateAsync(data);
+    } catch (error) {
+      // L'erreur est déjà gérée par onError
+      logger.error(LogCategory.USER, `Error in profile update handler: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   return (

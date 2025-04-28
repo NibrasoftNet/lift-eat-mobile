@@ -11,12 +11,38 @@ import { Card } from '@/components/ui/card';
 import { Divider } from '@/components/ui/divider';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteMeal,
-  getMealByIdWithIngredients,
-} from '@/utils/services/meal.service';
+import { invalidateCache, DataType } from "@/utils/helpers/queryInvalidation";
+import { useToast } from "@/components/ui/toast";
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { getCurrentUserIdSync } from "@/utils/helpers/userContext";
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { MealWithIngredientAndStandardOrmProps } from '@/db/schema';
+import {
+  MealWithIngredientAndStandardOrmProps,
+  MealIngredientsOrmProps,
+  IngredientStandardOrmProps,
+  IngredientWithStandardOrmProps
+} from '@/db/schema';
+
+// Interface pour les ingrédients retournés par la méthode MCP
+// Adapté au format retourné par handleGetMealDetails
+interface MealIngredientDetailProps {
+  id: number;
+  mealId: number;
+  ingredientStandardId: number;
+  quantity: number;
+  unit: string;
+  ingredient: IngredientStandardOrmProps;
+}
+
+interface MealDetailPageProps {
+  success: boolean;
+  meal: MealWithIngredientAndStandardOrmProps;
+  ingredients: IngredientWithStandardOrmProps[];
+  error?: string;
+}
+
 import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
 import { Pressable } from '@/components/ui/pressable';
 import {
@@ -38,7 +64,6 @@ import { Accordion } from '@/components/ui/accordion';
 import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useToast } from '@/components/ui/toast';
 import DeletionModal from '@/components/modals/DeletionModal';
 
 export default function MealDetailsScreen() {
@@ -50,40 +75,112 @@ export default function MealDetailsScreen() {
   const queryClient = useQueryClient();
 
   const {
-    data: singleMeal,
-    isPending,
-    isFetching,
-    isRefetching,
+    data,
     isLoading,
-  } = useQuery({
-    queryKey: [`meal-${id}`],
-    queryFn: async () =>
-      await getMealByIdWithIngredients(drizzleDb, Number(id)),
+    isFetching,
+    isPending,
+    isRefetching,
+  } = useQuery<MealDetailPageProps>({
+    queryKey: [DataType.MEAL, id],
+    queryFn: async () => {
+      logger.info(LogCategory.DATABASE, `Getting meal ${id} details via MCP Server`);
+      
+      const result = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(Number(id));
+      
+      if (!result.success) {
+        throw new Error(result.error || `Failed to get meal ${id} details via MCP Server`);
+      }
+      
+      // Adaptation de la structure des données pour correspondre à ce qu'attend le composant
+      const adaptedIngredients = result.ingredients?.map((ing: MealIngredientDetailProps) => ({
+        id: ing.id,
+        mealId: ing.mealId,
+        ingredientStandardId: ing.ingredientStandardId,
+        quantity: ing.quantity,
+        // Ajout des propriétés requises par IngredientWithStandardOrmProps
+        calories: ing.ingredient?.calories || 0,
+        carbs: ing.ingredient?.carbs || 0,
+        fat: ing.ingredient?.fat || 0,
+        protein: ing.ingredient?.protein || 0,
+        createdAt: null,
+        updatedAt: null,
+        unit: ing.unit || 'g',
+        ingredientsStandard: ing.ingredient
+      })) as IngredientWithStandardOrmProps[] || [];
+      
+      return {
+        success: true,
+        meal: result.meal,
+        ingredients: adaptedIngredients
+      };
+    },
   });
 
   const { mutateAsync, isPending: isDeletionPending } = useMutation({
-    mutationFn: async () => await deleteMeal(drizzleDb, Number(id)),
+    mutationFn: async () => {
+      logger.info(LogCategory.DATABASE, `Deleting meal ${id} via MCP Server`);
+      
+      // Récupérer l'ID utilisateur de manière centralisée
+      const userId = getCurrentUserIdSync();
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+      
+      const result = await sqliteMCPServer.deleteMealViaMCP(Number(id), userId);
+      
+      if (!result.success) {
+        throw new Error(result.error || `Failed to delete meal ${id} via MCP Server`);
+      }
+      
+      return result;
+    },
     onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Success delete Meal`}
-              description={`Success delete Meal`}
-            />
-          );
-        },
-      });
-      await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some((key) => key?.toString().startsWith('my-meals')),
-      });
-      router.back();
-      setShowModal(false);
+      try {
+        // Afficher le toast de succès
+        toast.show({
+          placement: 'top',
+          render: ({ id: toastId }: { id: string }) => {
+            const uniqueToastId = 'toast-' + toastId;
+            return (
+              <MultiPurposeToast
+                id={uniqueToastId}
+                color={ToastTypeEnum.SUCCESS}
+                title={`Meal deleted successfully`}
+                description={`The meal has been removed from your collection`}
+              />
+            );
+          },
+        });
+        
+        // Invalider le cache avant la navigation
+        await invalidateCache(queryClient, DataType.MEAL, {
+          id: Number(id),
+          invalidateRelated: true
+        });
+        
+        // Fermer le modal et naviguer uniquement après l'invalidation du cache
+        setShowModal(false);
+        router.back();
+      } catch (error) {
+        logger.error(LogCategory.APP, `Error in deletion success handler: ${error}`);
+        // Gérer l'erreur sans planter l'application
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            return (
+              <MultiPurposeToast
+                id={`toast-${id}`}
+                color={ToastTypeEnum.ERROR}
+                title={`Meal deleted with warning`}
+                description={`The meal was deleted but there may be display issues`}
+              />
+            );
+          },
+        });
+        // Naviguer quand même en cas d'erreur d'invalidation du cache
+        setShowModal(false);
+        router.back();
+      }
     },
     onError: (error: any) => {
       // Show error toast
@@ -110,7 +207,7 @@ export default function MealDetailsScreen() {
 
   return (
     <QueryStateHandler<MealWithIngredientAndStandardOrmProps>
-      data={singleMeal}
+      data={data?.meal}
       isLoading={isLoading}
       isFetching={isFetching}
       isPending={isPending}
@@ -163,13 +260,13 @@ export default function MealDetailsScreen() {
         <Box className="h-44 w-full items-center justify-center">
           <Avatar>
             <AvatarFallbackText>
-              {singleMeal?.name?.slice(0, 2).toUpperCase()}
+              {data?.meal?.name?.slice(0, 2).toUpperCase()}
             </AvatarFallbackText>
-            {singleMeal?.image ? (
+            {data?.meal?.image ? (
               <AvatarImage
                 className="border-2 border-tertiary-500 w-44 h-44 shadow-xl"
                 source={{
-                  uri: `${singleMeal?.image}`,
+                  uri: `${data?.meal?.image}`,
                 }}
               />
             ) : (
@@ -190,10 +287,10 @@ export default function MealDetailsScreen() {
               <Icon as={UtensilsCrossedIcon} className="text-gray-600" />
               <VStack className="flex-1">
                 <Text className="font-semibold text-lg">
-                  {singleMeal?.name}
+                  {data?.meal?.name}
                 </Text>
                 <Text className="text-sm">
-                  {singleMeal?.type} • {singleMeal?.cuisine}
+                  {data?.meal?.type} • {data?.meal?.cuisine}
                 </Text>
               </VStack>
             </HStack>
@@ -205,7 +302,7 @@ export default function MealDetailsScreen() {
               <HStack className="gap-2 items-center">
                 <Icon as={SquareSigma} size="md" />
                 <Text>Serving:</Text>
-                <Text>{singleMeal?.quantity}</Text>
+                <Text>{data?.meal?.quantity}</Text>
               </HStack>
               <Divider
                 orientation="vertical"
@@ -214,7 +311,7 @@ export default function MealDetailsScreen() {
               <HStack className="gap-2 items-center">
                 <Icon as={Weight} size="md" />
                 <Text>Unit:</Text>
-                <Text>{singleMeal?.unit}</Text>
+                <Text>{data?.meal?.unit}</Text>
               </HStack>
             </HStack>
           </Card>
@@ -228,24 +325,24 @@ export default function MealDetailsScreen() {
               className={`w-full h-0.5 bg-gray-100`}
             />
             <Text className="font-semibold text-lg">
-              {singleMeal?.description}
+              {data?.meal?.description}
             </Text>
           </Card>
           <MacrosInfoCard
-            calories={singleMeal?.calories!}
-            carbs={singleMeal?.carbs!}
-            fats={singleMeal?.fat!}
-            protein={singleMeal?.protein!}
+            calories={data?.meal?.calories!}
+            carbs={data?.meal?.carbs!}
+            fats={data?.meal?.fat!}
+            protein={data?.meal?.protein!}
             unit="Gr"
           />
-          {singleMeal?.mealIngredients.length === 0 ? (
+          {data?.ingredients?.length === 0 ? (
             <Box className="gap-4 w-full h-full items-center">
               <Icon as={SoupIcon} className="w-16 h-16" />
               <Text>No ingrdients available.</Text>
             </Box>
           ) : (
             <Accordion className="w-full">
-              {singleMeal?.mealIngredients.map((mealIngredient) => (
+              {data?.ingredients?.map((mealIngredient) => (
                 <IngredientAccordion
                   key={mealIngredient.id}
                   item={mealIngredient}

@@ -15,9 +15,13 @@ import { MealOrmProps } from '@/db/schema';
 import { Input, InputField } from '@/components/ui/input';
 import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
 import { MinusCircle, PlusCircle } from 'lucide-react-native';
-import { updateMealQuantityInPlan } from '@/utils/services/plan.service';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface MealQuantityModalProps {
   isOpen: boolean;
@@ -41,6 +45,7 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
   const [quantity, setQuantity] = useState(currentQuantity);
   const [isUpdating, setIsUpdating] = useState(false);
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const handleQuantityChange = (value: string) => {
     const newValue = parseInt(value) || 0;
@@ -58,7 +63,18 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
   const handleUpdateQuantity = async () => {
     try {
       setIsUpdating(true);
-      await updateMealQuantityInPlan(drizzleDb, dailyPlanId, meal.id, quantity);
+      logger.info(LogCategory.DATABASE, 'Updating meal quantity in plan via MCP Server', {
+        dailyPlanId, mealId: meal.id, newQuantity: quantity
+      });
+      
+      const result = await sqliteMCPServer.updateMealQuantityInPlanViaMCP(dailyPlanId, meal.id, quantity);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to update meal quantity: ${result.error}`);
+        throw new Error(result.error || 'Failed to update meal quantity in plan');
+      }
+      
+      logger.debug(LogCategory.DATABASE, 'Meal quantity updated successfully');
       
       toast.show({
         placement: "top",
@@ -71,13 +87,22 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
         },
       });
       
+      // Invalider le cache pour les repas et les plans
+      invalidateCache(queryClient, DataType.DAILY_PLAN, { id: dailyPlanId });
+      invalidateCache(queryClient, DataType.MEAL, { id: meal.id });
+      
       if (onQuantityUpdated) {
         await onQuantityUpdated();
       }
       
       onClose();
     } catch (error) {
-      console.error('Error updating meal quantity:', error);
+      logger.error(LogCategory.DATABASE, 'Error updating meal quantity:', { 
+        error: error instanceof Error ? error.message : String(error),
+        dailyPlanId,
+        mealId: meal.id
+      });
+      
       toast.show({
         placement: "top",
         render: ({ id }) => {

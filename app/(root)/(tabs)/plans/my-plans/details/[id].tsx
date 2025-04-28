@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ImageBackground, ScrollView } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -8,8 +9,11 @@ import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
 import { GetGoalImages } from '@/utils/utils';
 import { DayEnum } from '@/utils/enum/general.enum';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -33,11 +37,10 @@ export default function PlanDetailsScreen() {
   const drizzleDb = useDrizzleDb();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedDay, setSelectedDay] = useState<DayEnum>(DayEnum.MONDAY);
-  const [filteredDailyMeals, setFilteredDailyMeals] = useState<
-    MealOrmProps[] | undefined
-  >([]);
+  const [filteredDailyMeals, setFilteredDailyMeals] = useState<MealOrmProps[]>([]);
   const [selectedDailyPlanId, setSelectedDailyPlanId] = useState<number | null>(
     null,
   );
@@ -52,7 +55,24 @@ export default function PlanDetailsScreen() {
     isRefetching,
   } = useQuery({
     queryKey: [`plan-${id}`],
-    queryFn: async () => await getPlanDetails(drizzleDb, id),
+    queryFn: async () => {
+      const planData = await getPlanDetails(drizzleDb, id);
+      // Modification pour garantir la compatibilité des types
+      if (planData) {
+        // S'assurer que chaque dailyPlan a une propriété meals
+        const enhancedDailyPlans = planData.dailyPlans.map(dp => ({
+          ...dp,
+          meals: 'meals' in dp ? dp.meals : [] as MealOrmProps[]
+        }));
+        
+        // Retourner un objet compatible avec PlanWithDailyPlansAndMealsOrmProps
+        return {
+          ...planData,
+          dailyPlans: enhancedDailyPlans
+        } as unknown as PlanWithDailyPlansAndMealsOrmProps;
+      }
+      return planData as PlanWithDailyPlansAndMealsOrmProps | null;
+    },
   });
 
   // Filter daily plans based on selectedDay and selectedWeek
@@ -62,8 +82,19 @@ export default function PlanDetailsScreen() {
         (dailyPlan) =>
           dailyPlan.day === selectedDay && dailyPlan.week === selectedWeek,
       );
-      setFilteredDailyMeals(filteredPlans?.meals);
+      
+      // Vérifiez si filteredPlans existe et si la propriété meals existe aussi
+      // Si meals n'existe pas, initialisez avec un tableau vide
+      setFilteredDailyMeals(filteredPlans && 'meals' in filteredPlans && Array.isArray(filteredPlans.meals) ? filteredPlans.meals as MealOrmProps[] : []);
       setSelectedDailyPlanId(filteredPlans?.id || null);
+      
+      // Log pour débogage
+      logger.debug(LogCategory.APP, 'Daily plan selected', {
+        day: selectedDay,
+        week: selectedWeek,
+        filteredPlansId: filteredPlans?.id,
+        hasMeals: filteredPlans && 'meals' in filteredPlans
+      });
     }
   }, [selectedDay, selectedWeek, singlePlan]);
 
@@ -93,11 +124,34 @@ export default function PlanDetailsScreen() {
   // Fonction pour ajouter un repas au plan journalier
   const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10) => {
     try {
-      await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity);
-      return true;
+      // Passer l'ID utilisateur pour vérifier les droits d'accès
+      if (!userId) {
+        console.error('No user ID available, cannot add meal to plan');
+        return { success: false, error: 'Aucun utilisateur identifié' };
+      }
+
+      // S'assurer que la requête est associée à l'utilisateur actuel
+      logger.info(LogCategory.USER, `User ${userId} attempting to add meal ${mealId} to daily plan ${dailyPlanId}`);
+      
+      const result = await addMealToDailyPlan(drizzleDb, dailyPlanId, mealId, quantity);
+      
+      // Vérifier si l'opération a réussi ou échoué avec un message spécifique
+      if (!result.success) {
+        // Si l'erreur indique que le repas est déjà dans le plan
+        if (result.error?.includes('already in this daily plan')) {
+          return { success: false, error: 'Ce repas est déjà présent dans le plan journalier', alreadyExists: true };
+        }
+        return { success: false, error: result.error || 'Erreur lors de l\'ajout du repas' };
+      }
+      
+      // Invalidate les requêtes pour forcer le rafraîchissement des données
+      await queryClient.invalidateQueries({ queryKey: [`plan-${id}`] });
+      
+      return { success: true };
     } catch (error) {
+      logger.error(LogCategory.USER, `Error adding meal to plan: ${error instanceof Error ? error.message : String(error)}`);
       console.error('Error adding meal to plan:', error);
-      return false;
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   };
 

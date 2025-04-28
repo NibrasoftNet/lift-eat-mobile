@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useMemo, useEffect } from 'react';
 import {
   Drawer,
   DrawerBackdrop,
@@ -31,7 +31,10 @@ import { Button, ButtonText } from '../ui/button';
 import { UserOrmPros } from '@/db/schema';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import useSessionStore from '@/utils/store/sessionStore';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 
 const menuItems = [
   { title: 'Analytics', icon: Compass, tag: 'analytics' },
@@ -46,39 +49,88 @@ const menuItems = [
 ];
 
 const MenuItem = ({ item }: { item: (typeof menuItems)[0] }) => {
-  const { user } = useSessionStore();
   const router = useRouter();
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
 
-  return (
-    <Pressable
-      onPress={() =>
-        item.tag === 'newPassword'
-          ? router.push(`/new-password`)
-          : item.tag === 'profile'
-            ? router.push(`/profile/${user?.id!}`)
-            : item.tag === 'details'
-              ? router.push(`/details/edit/${user?.id!}`)
-              : item.tag === 'preference'
-                ? router.push(`/preference/edit/${user?.id!}`)
-                : router.push(`/analytics`)
-      }
-      className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
-    >
-      <Text className="text-xl">{item.title}</Text>
-      <Icon as={item.icon} size="xl" />
-    </Pressable>
-  );
+  // Gestion de la navigation vers les différentes pages de paramètres
+  const renderItem = ({ item }: { item: any }) => {
+    // Vérifier l'authentification
+    if (!userId) {
+      logger.warn(LogCategory.AUTH, 'Attempting to navigate to settings while not authenticated');
+      // Utiliser un chemin valide pour Expo Router au lieu de la racine simple
+      router.push('/(root)/(auth)/login');
+      return null;
+    }
+    
+    return (
+      <Pressable
+        onPress={() =>
+          item.tag === 'newPassword'
+            ? router.push(`/new-password`)
+            : item.tag === 'profile'
+              ? router.push(`/profile/${userId}`)
+              : item.tag === 'details'
+                ? router.push(`/details/edit/${userId}`)
+                : item.tag === 'preference'
+                  ? router.push(`/preference/edit/${userId}`)
+                  : router.push(`/analytics`)
+        }
+        className="flex flex-row w-full items-center justify-between border-b border-gray-500 py-4 mb-2"
+      >
+        <Text className="text-xl">{item.title}</Text>
+        <Icon as={item.icon} size="xl" />
+      </Pressable>
+    );
+  };
+
+  return renderItem({ item });
 };
 
 const UserSettingsDrawer = ({
   showUserSettingsDrawer,
   setShowUserSettingsDrawer,
-  user,
 }: {
   showUserSettingsDrawer: boolean;
   setShowUserSettingsDrawer: Dispatch<SetStateAction<boolean>>;
-  user: UserOrmPros;
 }) => {
+  // Obtenir l'ID utilisateur de manière standardisée
+  const userId = useMemo(() => getCurrentUserIdSync(), []);
+  
+  // État local pour stocker les données utilisateur
+  const [user, setUser] = React.useState<UserOrmPros | null>(null);
+  
+  // Charger les données utilisateur quand le drawer s'ouvre
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) {
+        logger.warn(LogCategory.AUTH, 'User not authenticated when accessing settings drawer');
+        setShowUserSettingsDrawer(false);
+        return;
+      }
+      
+      try {
+        const result = await sqliteMCPServer.getUserDetailsViaMCP(userId);
+        if (result.success && result.user) {
+          setUser(result.user);
+        } else {
+          logger.error(LogCategory.USER, `Failed to get user details: ${result.error}`);
+          setShowUserSettingsDrawer(false);
+        }
+      } catch (error) {
+        logger.error(LogCategory.USER, `Error fetching user details: ${error instanceof Error ? error.message : String(error)}`);
+        setShowUserSettingsDrawer(false);
+      }
+    };
+    
+    if (showUserSettingsDrawer) {
+      fetchUserData();
+    }
+  }, [showUserSettingsDrawer, userId, setShowUserSettingsDrawer]);
+  // Si aucun utilisateur n'est chargé, ne rien afficher
+  if (!user) {
+    return null;
+  }
+  
   return (
     <Drawer
       isOpen={showUserSettingsDrawer}
@@ -131,7 +183,7 @@ const UserSettingsDrawer = ({
             }}
             className="flex-1"
           >
-            <ButtonText>CLose</ButtonText>
+            <ButtonText>Close</ButtonText>
           </Button>
         </DrawerFooter>
       </DrawerContent>

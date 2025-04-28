@@ -12,7 +12,8 @@ import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { eq } from 'drizzle-orm';
-import { users, meals } from '@/db/schema';
+import { meals } from '@/db/schema';
+import { useUserContext } from '@/utils/providers/UserContextProvider';
 import iaService from '@/utils/services/ia/ia.service';
 
 // Définition du type manquant pour le linting
@@ -23,7 +24,7 @@ const ToastTypeWarningValues = {
 };
 
 export default function NutritionAnalysisScreen() {
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [mealCount, setMealCount] = useState(0);
@@ -38,25 +39,24 @@ export default function NutritionAnalysisScreen() {
   const drizzleDb = useDrizzleDb();
   const toast = useToast();
   
-  // Récupérer l'ID de l'utilisateur actuel et les stats de base
+  // Récupérer les statistiques de base lorsque l'utilisateur change
   useEffect(() => {
     const initialize = async () => {
       try {
         setLoading(true);
         
-        // Pour cette démo, nous prenons le premier utilisateur de la base de données
-        const userResults = await drizzleDb.select().from(users).limit(1);
+        // Si aucun utilisateur n'est chargé dans le contexte, récupérer l'utilisateur 1 par défaut
+        if (!currentUser && !isUserLoading) {
+          refreshUser(1);
+          return; // Attendre que l'utilisateur soit chargé avant de continuer
+        }
         
-        if (userResults.length > 0) {
-          const userId = userResults[0].id;
-          setCurrentUserId(userId);
-          
+        if (currentUser) {
           // Configurer le service IA avec l'ID de l'utilisateur actuel
-          iaService.setCurrentUserId(userId);
+          iaService.setCurrentUserId(currentUser.id);
           
           // Récupérer les statistiques de base
-          // Dans le schéma actuel, nous supposons que meals a une colonne userId ou creatorId
-          const userMeals = await drizzleDb.select().from(meals).where(eq(meals.creatorId, userId));
+          const userMeals = await drizzleDb.select().from(meals).where(eq(meals.creatorId, currentUser.id));
           setMealCount(userMeals.length);
         } else {
           console.warn('No users found in the database');
@@ -71,15 +71,16 @@ export default function NutritionAnalysisScreen() {
     };
 
     initialize();
-  }, [drizzleDb]);
+  }, [currentUser, drizzleDb, isUserLoading, refreshUser]);
 
   const analyzeNutrition = async () => {
-    if (!currentUserId) return;
+    if (!currentUser) return;
     
     try {
       setAnalyzing(true);
       
       // Utiliser le service IA pour analyser les habitudes nutritionnelles
+      // Passer l'utilisateur actuel au service IA si nu00e9cessaire via le contexte
       const analysisResult = await iaService.analyzeNutritionHabits();
       
       if (analysisResult.success) {

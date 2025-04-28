@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo, useMemo } from 'react';
 import { Pressable } from '../ui/pressable';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
@@ -14,7 +14,7 @@ import {
 import { MealOrmProps } from '@/db/schema';
 import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
 import { Menu, MenuItem, MenuItemLabel } from '../ui/menu';
 import { Button, ButtonIcon } from '../ui/button';
@@ -22,7 +22,11 @@ import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteMeal } from '@/utils/services/meal.service';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import MultiPurposeToast from '../MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '../ui/toast';
@@ -42,12 +46,40 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   const queryClient = useQueryClient();
 
   const handleMealCardPress = (meal: MealOrmProps) => {
-    console.log(meal.name);
+    // Remplacer le console.log par un log approprié
+    logger.info(LogCategory.USER, `User viewing meal details: ${meal.name}`, { mealId: meal.id });
     router.push(`/meals/my-meals/details/${meal.id}`);
   };
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async () => await deleteMeal(drizzleDb, item.id),
+    mutationFn: async () => {
+      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} via MCP Server`);
+      
+      // Récupérer l'ID utilisateur de manière centralisée
+      const userId = getCurrentUserIdSync();
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'Authentication required to delete a meal');
+        throw new Error('You must be logged in to delete a meal');
+      }
+      
+      // Le handler deleteMealViaMCP vérifie déjà si le repas existe et si l'utilisateur est son créateur
+      // en comparant l'ID utilisateur passé en paramètre avec l'ID du créateur du repas
+      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} for user ${userId}`);
+      
+      // Vérifier que l'item a bien été créé par l'utilisateur connecté
+      if (item.creatorId !== userId) {
+        logger.warn(LogCategory.AUTH, `User ${userId} attempted to delete meal ${item.id} owned by user ${item.creatorId}`);
+        throw new Error('You can only delete your own meals');
+      }
+      const result = await sqliteMCPServer.deleteMealViaMCP(item.id, userId);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to delete meal: ${result.error}`);
+        throw new Error(result.error || `Failed to delete meal ${item.id} via MCP Server`);
+      }
+      
+      return result;
+    },
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -57,16 +89,19 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.SUCCESS}
-              title={`Success delete Meal`}
-              description={`Success delete Meal`}
+              title={`Meal Deleted Successfully`}
+              description={`The meal has been permanently removed from your collection`}
             />
           );
         },
       });
-      await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some((key) => key?.toString().startsWith('my-meals')),
+      
+      // Utiliser la méthode standardisée pour invalider le cache
+      invalidateCache(queryClient, DataType.MEAL, {
+        id: item.id,
+        invalidateRelated: true
       });
+      
       setShowModal(false);
     },
     onError: (error: any) => {
@@ -79,8 +114,8 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title={`Failure delete Meal`}
-              description={error.toString()}
+              title={`Could Not Delete Meal`}
+              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
             />
           );
         },
@@ -89,14 +124,17 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   });
 
   const handleMealDelete = async () => {
-    await mutateAsync();
+    try {
+      await mutateAsync();
+    } catch (error) {
+      // Erreur déjà gérée par onError
+      logger.error(LogCategory.USER, `Error in meal deletion handler: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
+
   return (
     <>
-      <Animated.View
-        entering={FadeInUp.delay(index * 100)}
-        className="mb-4 rounded-xl overflow-hidden"
-      >
+      <Animated.View entering={FadeIn.delay(index * 100).duration(300)} className="mb-4 rounded-xl overflow-hidden" key={`meal-${item.id}`}>
         <Pressable
           onPress={() => handleMealCardPress(item)}
           onLongPress={() => setShowOptionsDrawer(true)}

@@ -4,7 +4,7 @@ import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { UserOrmPros, DailyProgressOrmProps } from '@/db/schema';
+import { UserOrmPros, DailyProgressOrmProps, PlanOrmProps, MealOrmProps } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
 import { HStack } from '../ui/hstack';
 import { Box } from '../ui/box';
@@ -13,12 +13,17 @@ import { Center } from '../ui/center';
 import { Spinner } from '../ui/spinner';
 import { Button } from '../ui/button';
 import { useToast } from '../ui/toast';
-import { getCurrentPlan } from '@/utils/services/plan.service';
-import { getDailyProgressByDate, getMealProgressByDate } from '@/utils/services/progress.service';
+import { getDailyProgressByDate, getDailyProgressByPlan } from '@/utils/services/progress.service';
 import useProgressStore, { MealWithProgress, MealsByType } from '@/utils/store/progressStore';
 import { View, ScrollView } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import MealsClickSelection from '../progress/MealsClickSelection';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { getCurrentUserId, getCurrentUserIdSync, hasUserInSession } from '@/utils/helpers/userContext';
+import { getCacheConfig } from '@/utils/helpers/cacheConfig';
+import { DataType } from '@/utils/helpers/queryInvalidation';
 
 const ProgressCalendarTab = () => {
   const drizzleDb = useDrizzleDb();
@@ -44,11 +49,51 @@ const ProgressCalendarTab = () => {
     isLoading: isUserLoading,
     isRefetching: isUserRefetching,
   } = useQuery({
-    queryKey: ['me'],
+    queryKey: [DataType.USER, 'me'],
     queryFn: async () => {
-      const userResult = await drizzleDb.query.users.findFirst();
-      return userResult ?? null;
+      // Enregistrer le début du processus de récupération utilisateur
+      logger.info(LogCategory.DATABASE, "Fetching user data for progress calendar");
+      
+      try {
+        // Utiliser notre fonction centralisée pour récupérer l'ID utilisateur
+        const userId = await getCurrentUserId(true);
+        
+        if (userId) {
+          logger.info(LogCategory.DATABASE, `Using user ID: ${userId}`);
+          
+          // Utiliser le MCP Server pour récupérer l'utilisateur
+          const result = await sqliteMCPServer.getDefaultUserViaMCP(userId);
+          
+          if (result.success && result.user) {
+            return result.user;
+          } else {
+            logger.warn(LogCategory.DATABASE, `Failed to get user with ID ${userId}, trying default user`);
+          }
+        }
+        
+        // Si pas d'utilisateur en session ou la récupération a échoué, récupérer l'utilisateur par défaut
+        const defaultUserResult = await sqliteMCPServer.getDefaultUserViaMCP();
+        
+        if (!defaultUserResult.success || !defaultUserResult.user) {
+          logger.error(LogCategory.DATABASE, "Failed to get default user");
+          throw new Error("No user found");
+        }
+        
+        const userResult = defaultUserResult.user;
+        logger.info(LogCategory.DATABASE, `Loaded user from database: ${userResult?.id}`);
+        
+        // Si on trouve un utilisateur, mettre à jour la session
+        if (userResult && !hasUserInSession()) {
+          useSessionStore.setState({ user: { id: userResult.id, email: userResult.email } });
+        }
+        
+        return userResult;
+      } catch (error) {
+        logger.error(LogCategory.DATABASE, `Error fetching user: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
     },
+    ...getCacheConfig(DataType.USER)
   });
 
   // Requête pour récupérer le plan courant
@@ -57,50 +102,70 @@ const ProgressCalendarTab = () => {
     isPending: isPlanPending,
     isLoading: isPlanLoading,
     error: planError,
-  } = useQuery({
-    queryKey: ['currentPlan', user?.id],
+  } = useQuery<PlanOrmProps | null>({
+    queryKey: ['currentPlan', getCurrentUserIdSync()],
     queryFn: async () => {
-      if (!user?.id) return null;
+      const userId = await getCurrentUserId();
+      if (!userId) return null;
+      
       try {
-        const result = await getCurrentPlan(drizzleDb, user.id);
-        return result || null; // Assurer que undefined devient null
+        logger.info(LogCategory.DATABASE, `Fetching current plan for user ${userId} via MCP`);
+        
+        const result = await sqliteMCPServer.getCurrentPlanViaMCP(userId);
+        
+        if (!result.success) {
+          logger.error(LogCategory.DATABASE, `Failed to get current plan: ${result.error}`);
+          return null;
+        }
+        
+        // Assurez-vous que nous retournons toujours un PlanOrmProps ou null, jamais undefined
+        return result.plan || null;
       } catch (error) {
-        console.error('Erreur lors de la récupération du plan courant:', error);
+        logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération du plan courant:', { error });
         return null; // Retourner null en cas d'erreur
       }
     },
-    enabled: !!user?.id,
+    enabled: hasUserInSession(),
+    ...getCacheConfig(DataType.PLAN)
   });
 
   // Récupérer tous les jours avec progression pour le plan courant
   const {
-    data: allProgressDays,
-    isPending: isProgressPending,
+    data: progressDays,
     isLoading: isProgressLoading,
-  } = useQuery({
+  } = useQuery<DailyProgressOrmProps[]>({    
     queryKey: ['progressDays', currentPlan?.id],
     queryFn: async () => {
-      if (!currentPlan?.id || !user?.id) return [];
+      const userId = await getCurrentUserId();
+      if (!currentPlan?.id || !userId) return [];
       
-      // Vous devrez compléter cette fonction dans progress.service.ts
-      // pour récupérer toutes les progressions associées au plan courant
-      // Exemple de structure attendue:
-      return await drizzleDb.query.dailyProgress.findMany({
-        where: (fields, { eq, and }) => and(
-          eq(fields.userId, user.id),
-          eq(fields.planId, currentPlan.id)
-        )
+      // Utiliser la méthode MCP au lieu de l'accès direct à la base de données
+      logger.info(LogCategory.DATABASE, 'Fetching progress days for current plan via MCP', {
+        userId,
+        planId: currentPlan.id
       });
+      
+      const result = await getDailyProgressByPlan(drizzleDb, userId, currentPlan.id);
+      
+      if (!result) {
+        logger.warn(LogCategory.DATABASE, 'No progress days found for current plan', {
+          userId,
+          planId: currentPlan.id
+        });
+        return [];
+      }
+      
+      return result;
     },
-    enabled: !!currentPlan?.id && !!user?.id,
+    enabled: !!currentPlan?.id && hasUserInSession(),
   });
 
   // Préparer les dates marquées pour le calendrier
   const markedDates: Record<string, any> = {};
   
-  if (allProgressDays && allProgressDays.length > 0) {
+  if (progressDays && progressDays.length > 0) {
     // Créer les marqueurs pour chaque date avec progression
-    allProgressDays.forEach((progress: DailyProgressOrmProps) => {
+    progressDays.forEach((progress) => {
       const isSelected = selectedDate === progress.date;
       
       // Déterminer la couleur directement basée sur le pourcentage
@@ -135,37 +200,42 @@ const ProgressCalendarTab = () => {
   }
 
   // Gérer la sélection d'une date
-  const handleDateSelection = async (day: DateData) => {
+  const handleDateSelect = async (day: any) => {
     try {
-      if (!user?.id || !currentPlan) {
+      // Utiliser notre fonction centralisée pour récupérer l'ID utilisateur
+      const userId = await getCurrentUserId();
+      if (!userId || !currentPlan) {
         setError('Aucun plan actif. Veuillez définir un plan comme courant.');
         return;
       }
       
-      setIsLoading(true);
       setSelectedDate(day.dateString);
       
       // Récupérer la progression pour cette date
-      const progressResult = await getMealProgressByDate(drizzleDb, user.id, day.dateString);
-      
-      setDailyProgress(progressResult.progress);
-      setMealsWithProgress(progressResult.meals);
-      setIsLoading(false);
-    } catch (error: any) {
-      setError(error.message || 'Une erreur est survenue');
-      setIsLoading(false);
-      toast.show({
-        placement: "top",
-        render: ({ id }: { id: string }) => {
-          return (
-            <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-              <Text className="text-white font-medium">
-                Erreur: {error.message || 'Une erreur est survenue'}
-              </Text>
-            </Box>
-          );
-        }
+      logger.info(LogCategory.DATABASE, 'Récupération de la progression des repas via MCP Server', {
+        userId: userId,
+        date: day.dateString
       });
+      
+      const result = await sqliteMCPServer.getMealProgressByDateViaMCP(userId, day.dateString);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Échec de récupération des données de progression: ${result.error}`);
+        throw new Error(result.error || 'Erreur lors de la récupération des données de progression');
+      }
+      
+      // Conversion explicite des types pour satisfaire TypeScript
+      const dailyProgressData = result.progress || null;
+      const mealsProgressData = result.meals || [];
+      
+      setDailyProgress(dailyProgressData);
+      setMealsWithProgress(mealsProgressData);
+
+      // Réinitialiser les erreurs si tout va bien
+      setError(null);
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération des données de progression', { error });
+      setError(`Erreur: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -242,7 +312,7 @@ const ProgressCalendarTab = () => {
           <Calendar
             markingType={'multi-dot'}
             markedDates={markedDates}
-            onDayPress={handleDateSelection}
+            onDayPress={handleDateSelect}
             theme={{
               todayTextColor: '#007AFF',
               arrowColor: '#007AFF',
@@ -284,17 +354,19 @@ const ProgressCalendarTab = () => {
                 ) : (
                   <Box className="mt-3" style={{ minHeight: 300 }}>
                     <Text className="text-blue-800 mb-2">Nombre de repas trouvés: {mealsWithProgress.length}</Text>
-                    <MealsClickSelection 
-                      selectedDate={selectedDate}
-                      dailyProgress={dailyProgress!}
-                      mealsWithProgress={mealsWithProgress}
-                      onMealStatusChange={() => {
-                        // Rafraîchir les données de progression après un changement
-                        if (user?.id) {
-                          queryClient.invalidateQueries({ queryKey: ['progressDays', currentPlan?.id] });
-                        }
-                      }}
-                    />
+                    {dailyProgress && (
+                      <MealsClickSelection 
+                        selectedDate={selectedDate}
+                        dailyProgress={dailyProgress}
+                        mealsWithProgress={mealsWithProgress}
+                        onMealStatusChange={() => {
+                          // Rafraîchir les données de progression après un changement
+                          if (hasUserInSession()) {
+                            queryClient.invalidateQueries({ queryKey: ['progressDays', currentPlan?.id] });
+                          }
+                        }}
+                      />
+                    )}
                   </Box>
                 )}
               </Box>

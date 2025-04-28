@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import geminiService from '@/utils/services/gemini-service';
+import iaService from '@/utils/services/ia/ia.service';
+import { getCurrentUserId } from '@/utils/helpers/userContext';
 
 interface UseGeminiReturn {
   loading: boolean;
@@ -18,9 +20,17 @@ export const useGemini = (): UseGeminiReturn => {
     try {
       setLoading(true);
       setError(null);
-      const result = await geminiService.generateResponse(prompt);
-      setResponse(result);
-      return result;
+      
+      // Récupérer l'ID utilisateur courant et le définir pour IAService
+      const userId = await getCurrentUserId();
+      if (userId) {
+        iaService.setCurrentUserId(userId);
+      }
+      
+      // Utiliser IAService qui enrichit le prompt avec le contexte utilisateur
+      const result = await iaService.generateResponse(prompt);
+      setResponse(result.text); // IAService retourne un objet avec text et action
+      return result.text;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       console.error('Error in useGemini hook:', err);

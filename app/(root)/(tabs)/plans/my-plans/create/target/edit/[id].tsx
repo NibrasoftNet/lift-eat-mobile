@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
 import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
-import useSessionStore from '@/utils/store/sessionStore';
+import { getCurrentUserId } from '@/utils/helpers/userContext';
 
 export default function EditNutritionTarget() {
-  const { user } = useSessionStore();
+  // État pour stocker l'ID utilisateur
+  const [userId, setUserId] = useState<number | null>(null);
+  
+  // Charger l'ID utilisateur au montage du composant
+  useEffect(() => {
+    const loadUserId = async () => {
+      const id = await getCurrentUserId();
+      setUserId(id || 0);
+    };
+    
+    loadUserId();
+  }, []);
+  
   const nutritionGoalDefaultValueProps: NutritionGoalDefaultValueProps =
     {
       initialWeight: 50,
@@ -13,11 +25,12 @@ export default function EditNutritionTarget() {
       durationWeeks: 1,
       goalUnit: GoalEnum.MAINTAIN,
     };
+    
   return (
     <NutritionGoalForm
       defaultValues={nutritionGoalDefaultValueProps}
       operation='update'
-      userId={user?.id ?? 0}
+      userId={userId ?? 0}
     />
   );
 }

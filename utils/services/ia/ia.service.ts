@@ -14,7 +14,8 @@ import { IaIngredientType, IaMealType, IaPlanType } from '@/utils/validation/ia/
  */
 export class IAService {
   private static instance: IAService;
-  private currentUserId: number | null = null;
+  private currentUserId: number = 1; // Initialisation avec un ID par défaut (1)
+  private lastSetUserIdTime: number = 0; // Pour tracker quand l'ID a été établi pour la dernière fois
 
   // Déclaration de la méthode pour TypeScript
   directGeminiRequest!: (prompt: string) => Promise<string>;
@@ -37,8 +38,49 @@ export class IAService {
    */
   public setCurrentUserId(userId: number): void {
     this.currentUserId = userId;
+    this.lastSetUserIdTime = Date.now();
     // Ne plus appeler geminiService ici pour éviter le cycle d'importation
-    logger.info(LogCategory.IA, `IAService: Current user ID set to ${userId}`);
+    logger.info(LogCategory.IA, `Current user ID set to: ${userId} (User ${userId})`);
+  }
+  
+  /**
+   * Récupère l'ID de l'utilisateur actuel, avec fallback si nécessaire
+   * @returns L'ID de l'utilisateur actuel (jamais null grâce au mécanisme de fallback)
+   */
+  private async ensureCurrentUserId(): Promise<number> {
+    // Si l'ID a été établi dans les dernières 30 minutes, l'utiliser directement
+    const thirtyMinutesInMs = 30 * 60 * 1000;
+    if (Date.now() - this.lastSetUserIdTime < thirtyMinutesInMs) {
+      return this.currentUserId; // L'ID est toujours défini (au moins avec la valeur par défaut)
+    }
+    
+    try {
+      // Tenter de récupérer l'utilisateur depuis la base de données
+      logger.debug(LogCategory.IA, `IAService: Current user ID may be stale, attempting to refresh from database`);
+      
+      // Utiliser la méthode findOrCreateUser qui retourne toujours un utilisateur
+      const result = await sqliteMCPServer.findOrCreateUserViaMCP('test1@test.com');
+      
+      if (result.success && result.user) {
+        // Mettre à jour l'ID courant
+        this.currentUserId = result.user.id;
+        this.lastSetUserIdTime = Date.now();
+        
+        logger.info(LogCategory.IA, `IAService: Refreshed current user ID to ${this.currentUserId}`);
+      } else {
+        // En cas d'échec, on garde l'ID actuel mais on met à jour le timestamp pour éviter
+        // de multiples tentatives d'appels à la base dans un court laps de temps
+        this.lastSetUserIdTime = Date.now();
+        logger.warn(LogCategory.IA, `IAService: Failed to refresh user ID, keeping current ID: ${this.currentUserId}`);
+      }
+      
+      return this.currentUserId;
+    } catch (error) {
+      logger.error(LogCategory.IA, `IAService: Error retrieving user ID: ${error instanceof Error ? error.message : String(error)}`);
+      // On garde l'ID actuel mais on met à jour le timestamp
+      this.lastSetUserIdTime = Date.now();
+      return this.currentUserId;
+    }
   }
 
   /**
@@ -55,16 +97,12 @@ export class IAService {
     };
   }> {
     try {
-      if (!this.currentUserId) {
-        logger.warn(LogCategory.IA, "IAService: No current user ID set, using basic response");
-        const basicResponse = await this.directGeminiRequest(prompt);
-        return { text: basicResponse };
-      }
+      const userId = await this.ensureCurrentUserId();
 
       // 1. Déterminer le type de prompt et l'enrichir avec le contexte utilisateur
       logger.info(LogCategory.IA, `IAService: Processing prompt: "${prompt.substring(0, 50)}..."`);
       const promptType = determinePromptType(prompt);
-      const enrichedPrompt = await buildEnrichedPrompt(this.currentUserId, prompt, promptType);
+      const enrichedPrompt = await buildEnrichedPrompt(userId, prompt, promptType);
 
       // 2. Envoyer le prompt enrichi directement à l'API Gemini plutôt que passer par geminiService
       logger.info(LogCategory.IA, `IAService: Sending enriched prompt to Gemini (type: ${promptType})`);
@@ -78,26 +116,25 @@ export class IAService {
       if (detectedAction.type !== 'NONE') {
         logger.info(LogCategory.IA, `IAService: Detected ${detectedAction.type} action`);
         try {
-          if (detectedAction.isValid && this.currentUserId) {
-            await processDatabaseAction(detectedAction, this.currentUserId);
+          if (detectedAction.isValid && userId !== null) {
+            await processDatabaseAction(detectedAction, userId);
             actionResult = {
               type: detectedAction.type,
               success: true
             };
-            logger.info(LogCategory.IA, `IAService: Successfully processed ${detectedAction.type} action`);
           } else {
+            logger.warn(LogCategory.IA, `IAService: Invalid action or no user ID: ${detectedAction.type}`);
             actionResult = {
               type: detectedAction.type,
               success: false,
-              message: detectedAction.validationMessage
+              message: !detectedAction.isValid ? "Action invalide" : "ID utilisateur non défini"
             };
-            logger.warn(LogCategory.IA, `IAService: Invalid action: ${detectedAction.validationMessage}`);
           }
-        } catch (actionError) {
+        } catch (error) {
           actionResult = {
             type: detectedAction.type,
             success: false,
-            message: actionError instanceof Error ? actionError.message : String(actionError)
+            message: error instanceof Error ? error.message : String(error)
           };
           logger.error(LogCategory.IA, `IAService: Error processing action: ${actionResult.message}`);
         }
@@ -137,9 +174,7 @@ export class IAService {
     }
   ): Promise<{ text: string; plan?: IaPlanType; success: boolean }> {
     try {
-      if (!this.currentUserId) {
-        throw new Error("No user ID set");
-      }
+      const userId = await this.ensureCurrentUserId();
 
       // Construire un prompt spécifique pour la génération de plan
       let planPrompt = `Génère un plan nutritionnel hebdomadaire pour ${goal}.`;
@@ -165,13 +200,24 @@ export class IAService {
       // Vérifier si une action de plan a été détectée
       if (response.action?.type === 'ADD_PLAN' && response.action.success) {
         // Récupérer le plan récemment créé
-        const userPlans = await sqliteMCPServer.getUserActivePlans(this.currentUserId);
-        const latestPlan = userPlans.length > 0 ? userPlans[0] : null;
+        const userPlansData = await sqliteMCPServer.getUserActivePlans(userId);
         
-        if (latestPlan) {
+        // Vérifier si nous avons des plans ou un tableau vide
+        if (Array.isArray(userPlansData)) {
+          // C'est un tableau vide, aucun plan actif
           return {
             text: response.text,
-            plan: latestPlan as unknown as IaPlanType,
+            success: true
+          };
+        }
+        
+        // Nous avons des plans, utiliser le plan courant s'il existe, sinon le premier plan de la liste
+        const planToUse = userPlansData.currentPlan || (userPlansData.plans.length > 0 ? userPlansData.plans[0] : null);
+        
+        if (planToUse) {
+          return {
+            text: response.text,
+            plan: planToUse as unknown as IaPlanType,
             success: true
           };
         }
@@ -200,29 +246,59 @@ export class IAService {
     mealType: string
   ): Promise<{ text: string; meal?: IaMealType; success: boolean }> {
     try {
-      if (!this.currentUserId) {
-        throw new Error("No user ID set");
-      }
+      // S'assurer que nous avons un ID utilisateur, avec fallback si nécessaire
+      const userId = await this.ensureCurrentUserId();
 
-      // Construire un prompt spécifique pour la génération de repas
-      const mealPrompt = `Génère un ${mealType} avec ces ingrédients: ${ingredients.join(', ')}.`;
+      // Loguer l'ID utilisateur et les ingrédients pour aider au débogage
+      logger.info(LogCategory.IA, `IAService: Génération de repas pour l'utilisateur ${userId}`);
+      logger.info(LogCategory.IA, `IAService: Ingrédients: ${ingredients.join(', ')}`);
+      logger.info(LogCategory.IA, `IAService: Type de repas: ${mealType}`);
+
+      // Construire un prompt spécifique pour la génération de repas avec instructions précises pour le format JSON
+      const mealPrompt = `Génère un ${mealType} avec ces ingrédients: ${ingredients.join(', ')}. 
+\nIMPORTANT: Tu dois générer une réponse au format JSON dans des balises <ADD_MEAL>...</ADD_MEAL>. 
+\nLe JSON doit contenir: 
+- name: nom du repas
+- type: type de repas (doit être BREAKFAST, LUNCH, DINNER ou SNACK)
+- description: description du repas
+- cuisine: type de cuisine (doit être GENERAL, AFRICAN, EUROPEAN, ASIAN, CARIBBEAN, TUNISIAN, QATARI, AMERICAN, CHINESE, FRENCH, INDIAN, ITALIAN, JAPANESE ou MEXICAN)
+- calories: nombre de calories
+- carbs: grammes de glucides
+- protein: grammes de protéines
+- fat: grammes de lipides
+- unit: unité de mesure (doit être GRAMMES, KILOGRAMMES, MILLILITRES, LITRES, PIECES, PORTION, CUILLERES_A_SOUPE, CUILLERES_A_CAFE, TASSES, SERVING, PLATE ou BOWL)
+- ingredients: tableau d'ingrédients, chacun avec name, quantity, unit, calories, carbs, protein, fat
+\nEssaie d'utiliser exactement les valeurs d'énumération indiquées et pas d'autres termes.`;
       
       // Utiliser notre service pour générer la réponse
       const response = await this.generateResponse(mealPrompt);
       
       // Vérifier si une action de repas a été détectée
-      if (response.action?.type === 'ADD_MEAL' && response.action.success) {
-        // Récupérer le repas récemment créé
-        const userMeals = await sqliteMCPServer.getUserFavoriteMeals(this.currentUserId, 1);
-        const latestMeal = userMeals.length > 0 ? userMeals[0] : null;
+      if (response.action?.type === 'ADD_MEAL') {
+        logger.info(LogCategory.IA, 'IAService: Action ADD_MEAL détectée, vérification de la réussite');
         
-        if (latestMeal) {
-          return {
-            text: response.text,
-            meal: latestMeal as unknown as IaMealType,
-            success: true
-          };
+        // Vérifier si l'action a été exécutée avec succès
+        if (response.action.success) {
+          // Récupérer le repas récemment créé
+          const userMeals = await sqliteMCPServer.getUserFavoriteMeals(userId, 1);
+          
+          // getUserFavoriteMeals retourne directement un tableau
+          if (userMeals && userMeals.length > 0) {
+            const latestMeal = userMeals[0];
+            logger.info(LogCategory.IA, `IAService: Repas récupéré avec succès: ${latestMeal.name}`);
+            return {
+              text: response.text,
+              meal: latestMeal as unknown as IaMealType,
+              success: true
+            };
+          } else {
+            logger.warn(LogCategory.IA, 'IAService: Repas créé mais aucun repas récent trouvé');
+          }
+        } else {
+          logger.warn(LogCategory.IA, `IAService: Action ADD_MEAL déclenchée mais non réussie: ${JSON.stringify(response.action)}`);
         }
+      } else {
+        logger.warn(LogCategory.IA, 'IAService: Aucune action ADD_MEAL détectée dans la réponse');
       }
       
       return {
@@ -243,9 +319,7 @@ export class IAService {
    */
   public async analyzeNutritionHabits(): Promise<{ text: string; success: boolean }> {
     try {
-      if (!this.currentUserId) {
-        throw new Error("No user ID set");
-      }
+      const userId = await this.ensureCurrentUserId();
 
       // Construire un prompt pour l'analyse
       const analysisPrompt = `Analyse mes habitudes alimentaires récentes et fais-moi des recommandations pour améliorer mon alimentation.`;
@@ -260,7 +334,7 @@ export class IAService {
     } catch (error) {
       logger.error(LogCategory.IA, `IAService: Error analyzing nutrition habits: ${error instanceof Error ? error.message : String(error)}`);
       return {
-        text: `Désolé, une erreur s'est produite lors de l'analyse: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Désolé, une erreur s'est produite lors de l'analyse de vos habitudes alimentaires: ${error instanceof Error ? error.message : String(error)}`,
         success: false
       };
     }

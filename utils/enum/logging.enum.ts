@@ -18,4 +18,7 @@ export enum LogCategory {
   UI = 'UI',
   IA = 'IA',
   PERFORMANCE = 'PERFORMANCE',
+  CACHE = 'CACHE',
+  APP = 'APP',  // Catégorie générale pour les logs liés à l'application
+  USER = 'USER', // Logs liés à la gestion des utilisateurs
 }

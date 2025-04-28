@@ -35,7 +35,7 @@ const weightLossPlan: NutritionPlan = {
           protein: 50,
           type: MealTypeEnum.DINNER,
           image: null,
-          cuisineType: CuisineTypeEnum.THAI,
+          cuisineType: CuisineTypeEnum.TUNISIAN,
           unit: MealUnitEnum.GRAMMES,
           quantity: 1,
           ingredients: [
