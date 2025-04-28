@@ -15,16 +15,16 @@ import MealOptionsModal from '../modals/MealOptionsModal';
 import { useToast } from '@/components/ui/toast';
 import { Toast, ToastTitle } from '@/components/ui/toast';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { calculateProportionalMacros } from '@/utils/helpers/nutrition.helper';
+import { planService } from '@/utils/services/plan.service';
 
 interface PlanMealCardProps {
   meal: MealOrmProps;
   onMealDeleted?: () => Promise<void>;
   dailyPlanId?: number | null;
+  key?: string | number;
 }
 
 const PlanMealCard: React.FC<PlanMealCardProps> = ({ 
@@ -34,32 +34,75 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
 }) => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(meal.quantity || 100);
+  const [calculatedCalories, setCalculatedCalories] = useState<number>(meal.calories || 0);
   const toast = useToast();
   const queryClient = useQueryClient();
   
+  // Créer une clé de requête unique pour ce repas spécifique
+  const mealQueryKey = [`meal-${meal.id}-plan-${dailyPlanId}`];
+  
+  // Utiliser useQuery pour automatiser le rafraîchissement des données
+  const { data: mealData, refetch } = useQuery({
+    queryKey: mealQueryKey,
+    queryFn: async () => {
+      if (!dailyPlanId || !meal.id) return null;
+      
+      // Récupérer la quantité actuelle via le service
+      const quantityResult = await planService.getMealQuantityInPlan(dailyPlanId, meal.id);
+      if (!quantityResult.success) return null;
+      
+      // Calculer les valeurs nutritionnelles via le service
+      const nutritionResult = await planService.calculateMealNutrition(
+        meal.id, 
+        quantityResult.quantity || currentQuantity
+      );
+      
+      return {
+        quantity: quantityResult.quantity,
+        calories: nutritionResult.success ? nutritionResult.nutrition?.calories : meal.calories
+      };
+    },
+    // Activer le rafraîchissement automatique
+    staleTime: 0,
+    // Éviter de mettre en cache les résultats trop longtemps (gcTime remplace cacheTime dans React Query v4+)
+    gcTime: 1000,
+  });
+  
+  // Mettre à jour l'état local lorsque les données sont rafraîchies
   useEffect(() => {
-    const fetchMealQuantity = async () => {
-      if (dailyPlanId && meal.id) {
-        try {
-          const result = await sqliteMCPServer.getMealQuantityInPlanViaMCP(dailyPlanId, meal.id);
-          if (result.success && result.quantity !== undefined) {
-            setCurrentQuantity(result.quantity);
-          }
-        } catch (error) {
-          console.error('Error fetching meal quantity:', error);
-        }
-      }
-    };
+    if (mealData) {
+      setCurrentQuantity(mealData.quantity || meal.quantity || 100);
+      setCalculatedCalories(mealData.calories || meal.calories || 0);
+    }
+  }, [mealData, meal.id, meal.quantity, meal.calories]);
+  
+  // Forcer le rafraîchissement lorsque le composant est monté
+  useEffect(() => {
+    refetch();
+  }, [refetch, dailyPlanId, meal.id]);
+
+  const handleMealUpdated = async () => {
+    // Invalider toutes les requêtes liées aux plans et aux repas
+    invalidateCache(queryClient, DataType.PLAN, { invalidateRelated: true });
+    invalidateCache(queryClient, DataType.MEAL, { invalidateRelated: true });
+    invalidateCache(queryClient, DataType.DAILY_PLAN, { invalidateRelated: true });
     
-    fetchMealQuantity();
-  }, [dailyPlanId, meal.id]);
+    // Forcer le rafraîchissement des données de ce repas spécifique
+    await refetch();
+    
+    // Propager la mise à jour si nécessaire
+    if (onMealDeleted) {
+      await onMealDeleted();
+    }
+  };
 
   const handleRemoveMealFromPlan = async () => {
     try {
       if (meal.id && dailyPlanId) {
         logger.info(LogCategory.DATABASE, `Removing meal ${meal.id} from plan ${dailyPlanId}`);
         
-        const result = await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, meal.id);
+        // Note: Cette méthode devrait aussi être déplacée dans le service de plan
+        const result = await planService.removeMealFromDailyPlan(dailyPlanId, meal.id);
         
         if (!result.success) {
           throw new Error(result.error || `Failed to remove meal from plan`);
@@ -90,17 +133,6 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
       console.error('Error removing meal from plan:', error);
     }
   };
-
-  const calculatedCalories = calculateProportionalMacros(
-    meal.quantity || 100,
-    {
-      calories: meal.calories || 0,
-      protein: meal.protein || 0,
-      carbs: meal.carbs || 0,
-      fat: meal.fat || 0
-    },
-    currentQuantity
-  ).calories;
 
   return (
     <>
@@ -134,7 +166,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
             </Text>
           </VStack>
           <HStack className="items-center">
-            <Text className="text-gray-600 mr-2">{Math.round(calculatedCalories)} Kcal</Text>
+            <Text className="text-gray-600 mr-2">{calculatedCalories} Kcal</Text>
             <Icon
               as={CircleChevronRight}
               className="w-10 h-10 text-tertiary-500"
@@ -151,7 +183,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
         dailyPlanId={dailyPlanId || 0}
         currentQuantity={currentQuantity}
         drizzleDb={undefined}
-        onQuantityUpdated={onMealDeleted}
+        onQuantityUpdated={handleMealUpdated}
       />
     </>
   );

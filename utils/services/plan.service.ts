@@ -94,5 +94,96 @@ export const planService = {
   isAuthorizedToModify(plan: PlanOrmProps): boolean {
     const userId = getCurrentUserIdSync();
     return userId === plan.userId;
+  },
+
+  /**
+   * Récupère la quantité d'un repas dans un plan journalier
+   * @param dailyPlanId - ID du plan journalier
+   * @param mealId - ID du repas
+   * @returns Promise avec la quantité ou une erreur
+   */
+  async getMealQuantityInPlan(
+    dailyPlanId: number,
+    mealId: number
+  ): Promise<{ success: boolean; quantity?: number; error?: string }> {
+    try {
+      logger.info(LogCategory.DATABASE, `Getting quantity for meal ${mealId} in daily plan ${dailyPlanId}`);
+      return await sqliteMCPServer.getMealQuantityInPlanViaMCP(dailyPlanId, mealId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, `Error getting meal quantity: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  /**
+   * Calcule les valeurs nutritionnelles d'un repas pour une quantité donnée
+   * @param mealId - ID du repas
+   * @param quantity - Quantité pour laquelle calculer les valeurs
+   * @returns Promise avec les valeurs nutritionnelles calculées
+   */
+  async calculateMealNutrition(
+    mealId: number,
+    quantity: number
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    nutrition?: {
+      calories: number;
+      carbs: number;
+      fat: number;
+      protein: number;
+    };
+  }> {
+    try {
+      logger.info(LogCategory.DATABASE, `Calculating nutrition for meal ${mealId} with quantity ${quantity}`);
+      return await sqliteMCPServer.calculateMealNutritionViaMCP(mealId, quantity);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, `Error calculating meal nutrition: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  /**
+   * Met à jour la quantité d'un repas dans un plan journalier
+   * @param dailyPlanId - ID du plan journalier
+   * @param mealId - ID du repas
+   * @param newQuantity - Nouvelle quantité
+   * @returns Promise avec le résultat de l'opération
+   */
+  async updateMealQuantityInPlan(
+    dailyPlanId: number,
+    mealId: number,
+    newQuantity: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      logger.info(LogCategory.DATABASE, `Updating quantity for meal ${mealId} in daily plan ${dailyPlanId} to ${newQuantity}`);
+      return await sqliteMCPServer.updateMealQuantityInPlanViaMCP(dailyPlanId, mealId, newQuantity);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, `Error updating meal quantity: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  /**
+   * Retire un repas d'un plan journalier
+   * @param dailyPlanId - ID du plan journalier
+   * @param mealId - ID du repas à retirer
+   * @returns Promise avec le résultat de l'opération
+   */
+  async removeMealFromDailyPlan(
+    dailyPlanId: number,
+    mealId: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      logger.info(LogCategory.DATABASE, `Removing meal ${mealId} from daily plan ${dailyPlanId}`);
+      return await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, mealId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, `Error removing meal from daily plan: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
   }
 };

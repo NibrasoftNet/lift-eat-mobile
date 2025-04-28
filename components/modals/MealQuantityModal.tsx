@@ -14,11 +14,11 @@ import { Input, InputField } from '@/components/ui/input';
 import { MealOrmProps } from '@/db/schema';
 import { useToast } from '@/components/ui/toast';
 import { Toast, ToastTitle } from '@/components/ui/toast';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { useQueryClient } from '@tanstack/react-query';
+import { planService } from '@/utils/services/plan.service';
 
 interface MealQuantityModalProps {
   isOpen: boolean;
@@ -51,7 +51,8 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
 
       logger.info(LogCategory.DATABASE, `Updating meal quantity for meal ${meal.id} in plan ${dailyPlanId} to ${numericQuantity}`);
 
-      const result = await sqliteMCPServer.updateMealQuantityInPlanViaMCP(
+      // Utiliser le service de plan au lieu du MCP directement
+      const result = await planService.updateMealQuantityInPlan(
         dailyPlanId,
         meal.id,
         numericQuantity
@@ -62,9 +63,13 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
       }
 
       // Invalider les caches pour forcer le rafraîchissement des données
-      invalidateCache(queryClient, DataType.PLAN);
+      // Utiliser true pour invalider aussi les requêtes liées
+      invalidateCache(queryClient, DataType.PLAN, { invalidateRelated: true });
       invalidateCache(queryClient, DataType.MEAL);
       invalidateCache(queryClient, DataType.DAILY_PLAN);
+      
+      // Forcer le rafraîchissement des requêtes spécifiques
+      queryClient.refetchQueries({ queryKey: ['plan'] });
 
       toast.show({
         render: ({ id }) => (

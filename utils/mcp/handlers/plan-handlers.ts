@@ -860,3 +860,66 @@ export async function handleGetCurrentPlan(db: any, params: GetCurrentPlanParams
     };
   }
 }
+
+/**
+ * Handler pour calculer les valeurs nutritionnelles en fonction d'une quantité
+ * @param db Instance de la base de données
+ * @param params Paramètres pour le calcul
+ * @returns Les valeurs nutritionnelles calculées
+ */
+export async function handleCalculateMealNutrition(
+  db: any,
+  params: {
+    mealId: number;
+    quantity: number;
+  }
+): Promise<{
+  success: boolean;
+  error?: string;
+  nutrition?: {
+    calories: number;
+    carbs: number;
+    fat: number;
+    protein: number;
+  };
+}> {
+  try {
+    if (!db) throw new Error("Database not initialized");
+    
+    const { mealId, quantity } = params;
+    
+    // Récupérer les informations sur le repas
+    const meal = await db
+      .select()
+      .from(meals)
+      .where(eq(meals.id, mealId))
+      .limit(1);
+      
+    if (meal.length === 0) {
+      logger.warn(LogCategory.DATABASE, `Meal with ID ${mealId} not found`);
+      return { success: false, error: `Meal with ID ${mealId} not found` };
+    }
+    
+    const mealInfo = meal[0];
+    
+    // Calculer les valeurs nutritionnelles pour la quantité donnée
+    const quantityRatio = quantity / (mealInfo.quantity || 100);
+    const calculatedNutrition = {
+      calories: Math.round(mealInfo.calories * quantityRatio),
+      carbs: Math.round(mealInfo.carbs * quantityRatio),
+      fat: Math.round(mealInfo.fat * quantityRatio),
+      protein: Math.round(mealInfo.protein * quantityRatio)
+    };
+    
+    return { 
+      success: true,
+      nutrition: calculatedNutrition
+    };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleCalculateMealNutrition: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}

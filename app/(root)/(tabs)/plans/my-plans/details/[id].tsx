@@ -1,7 +1,6 @@
-
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { ImageBackground, ScrollView } from 'react-native';
+import { ImageBackground, ScrollView, RefreshControl } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
@@ -54,6 +53,18 @@ function PlanDetailsComponent(props: {
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<MealOrmProps[]>([]);
   const [selectedDailyPlanId, setSelectedDailyPlanId] = useState<number | null>(null);
   const [showMealsDrawer, setShowMealsDrawer] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  // Fonction pour actualiser les données
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Invalider les requêtes pour forcer le rechargement des données
+    queryClient.invalidateQueries({ queryKey: [`plan-${planId}`] });
+    // Simuler un délai pour montrer le spinner de chargement
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, [planId, queryClient]);
 
   // Utiliser le hook refetch du HOC
   const refetch = () => {
@@ -175,7 +186,12 @@ function PlanDetailsComponent(props: {
 
   return (
     <Box className="flex-1 bg-background-50">
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <Box className="p-4">
           <Animated.View
             entering={FadeInDown.delay(300)}

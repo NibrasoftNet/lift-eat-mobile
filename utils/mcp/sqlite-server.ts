@@ -48,7 +48,8 @@ import {
   handleGetMealQuantityInPlan,
   handleUpdateMealQuantityInPlan,
   handleSetCurrentPlan,
-  handleGetCurrentPlan
+  handleGetCurrentPlan,
+  handleCalculateMealNutrition,
 } from './handlers/plan-handlers';
 import { 
   handleGetMealsList,
@@ -1727,6 +1728,22 @@ class SQLiteMCPServer {
         error: error instanceof Error ? error.message : String(error)
       };
     }
+  }
+
+  async calculateMealNutritionViaMCP(
+    mealId: number,
+    quantity: number
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    nutrition?: {
+      calories: number;
+      carbs: number;
+      fat: number;
+      protein: number;
+    };
+  }> {
+    return await handleCalculateMealNutrition(this.db, { mealId, quantity });
   }
 }
 
