@@ -8,6 +8,7 @@ import sqliteMCPServer from "@/utils/mcp/sqlite-server";
 import { logger } from "@/utils/services/common/logging.service";
 import { LogCategory } from "@/utils/enum/logging.enum";
 import { getCurrentUserIdSync } from "@/utils/helpers/userContext";
+import { MealTypeEnum } from "@/utils/enum/meal.enum";
 
 /**
  * Service pour les opérations liées aux pages de plans nutritionnels
@@ -463,6 +464,87 @@ class PlanPagesService implements PlanPagesServiceInterface {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la récupération du plan courant'
+      };
+    }
+  }
+  
+  /**
+   * Ajoute un repas à un plan journalier
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas à ajouter
+   * @param quantity Quantité du repas (poids en grammes)
+   * @param mealType Type du repas (optionnel)
+   * @returns Résultat de l'opération
+   */
+  async addMealToDailyPlan(
+    dailyPlanId: number,
+    mealId: number,
+    quantity: number = 10,
+    mealType?: MealTypeEnum
+  ): Promise<OperationResult> {
+    try {
+      // Récupérer l'ID utilisateur et gérer le cas où il est null
+      const userIdOrNull = getCurrentUserIdSync();
+      if (userIdOrNull === null) {
+        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour ajouter un repas au plan journalier');
+        return {
+          success: false,
+          error: 'Utilisateur non authentifié'
+        };
+      }
+      
+      const userId = userIdOrNull;
+      
+      logger.info(LogCategory.DATABASE, `Ajout du repas ${mealId} au plan journalier ${dailyPlanId}`, { 
+        userId,
+        dailyPlanId,
+        mealId,
+        quantity,
+        mealType
+      });
+      
+      // Appel au service MCP pour ajouter le repas au plan journalier
+      const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(
+        dailyPlanId,
+        mealId,
+        quantity,
+        mealType
+      );
+      
+      if (!result) {
+        logger.error(LogCategory.DATABASE, 'Échec de l\'ajout du repas au plan journalier: résultat null');
+        return {
+          success: false,
+          error: 'Échec de l\'ajout du repas au plan journalier: résultat null'
+        };
+      }
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, 'Échec de l\'ajout du repas au plan journalier', {
+          error: result.error
+        });
+        
+        return {
+          success: false,
+          error: result.error || 'Échec de l\'ajout du repas au plan journalier'
+        };
+      }
+      
+      return {
+        success: true,
+        message: 'Repas ajouté au plan journalier avec succès'
+      };
+      
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, 'Erreur lors de l\'ajout du repas au plan journalier', {
+        error: error instanceof Error ? error.message : String(error),
+        dailyPlanId,
+        mealId
+      });
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'ajout du repas au plan journalier'
       };
     }
   }

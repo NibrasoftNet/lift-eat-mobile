@@ -5,6 +5,7 @@ import { drawerService } from '@/utils/services/ui/ui-drawer.service';
 import { IngredientDrawerServiceInterface, GetIngredientsParams, GetIngredientsResult, IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
 import { GetIngredientsListParams } from '@/utils/mcp/interfaces/ingredient-interfaces';
 import { IngredientStandardOrmProps } from '@/db/schema';
+import { MealUnitEnum } from '@/utils/enum/meal.enum';
 
 class IngredientDrawerService implements IngredientDrawerServiceInterface {
   async fetchIngredients(params: GetIngredientsParams): Promise<GetIngredientsResult> {
@@ -43,8 +44,8 @@ class IngredientDrawerService implements IngredientDrawerServiceInterface {
     return ingredients.map((ingredient, index) => ({
       ...ingredient,
       uniqueId: drawerService.generateUniqueId('ing', ingredient.id, pageParam, index),
-      displayName: this.getIngredientDisplayInfo(ingredient.id).displayName,
-      displayUnit: this.getIngredientDisplayInfo(ingredient.id).displayUnit,
+      displayName: this.getIngredientDisplayInfo(ingredient).displayName,
+      displayUnit: this.getIngredientDisplayInfo(ingredient).displayUnit,
       hasImage: !!ingredient.image,
       createdAt: ingredient.createdAt || new Date().toISOString(),
       updatedAt: ingredient.updatedAt || new Date().toISOString()
@@ -59,12 +60,97 @@ class IngredientDrawerService implements IngredientDrawerServiceInterface {
     drawerService.debounceSearchTerm(searchTerm, callback, delay);
   }
 
-  getIngredientDisplayInfo(ingredientId: number): { displayName: string; displayUnit: string } {
-    // TODO: Implémenter la logique pour obtenir les informations d'affichage
-    return {
-      displayName: 'Ingredient',
-      displayUnit: 'g'
-    };
+  /**
+   * Obtient les informations d'affichage pour un ingrédient
+   * @param ingredientIdOrObject ID de l'ingrédient ou objet ingrédient complet
+   * @returns Nom et unité formatés pour l'affichage
+   */
+  getIngredientDisplayInfo(
+    ingredientIdOrObject: number | IngredientStandardOrmProps
+  ): { displayName: string; displayUnit: string } {
+    try {
+      // Si l'entrée est un ID, nous n'avons pas encore l'ingrédient
+      // Comme nous n'avons pas de méthode getIngredientById synchrone,
+      // nous retournons des valeurs par défaut qui seront mises à jour
+      // quand l'optimizeIngredientData recevra l'objet complet
+      if (typeof ingredientIdOrObject === 'number') {
+        return {
+          displayName: `Ingrédient #${ingredientIdOrObject}`,
+          displayUnit: 'g'
+        };
+      }
+      
+      // À ce stade, nous avons l'objet ingrédient complet
+      const ingredient = ingredientIdOrObject;
+      
+      // Formater le nom pour l'affichage (première lettre en majuscule)
+      const displayName = ingredient.name 
+        ? ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1).toLowerCase()
+        : 'Ingrédient';
+      
+      // Formater l'unité selon les standards de l'application
+      let displayUnit = 'g'; // Valeur par défaut
+      
+      if (ingredient.unit) {
+        switch (ingredient.unit) {
+          case MealUnitEnum.GRAMMES:
+            displayUnit = 'g';
+            break;
+          case MealUnitEnum.KILOGRAMMES:
+            displayUnit = 'kg';
+            break;
+          case MealUnitEnum.MILLILITRES:
+            displayUnit = 'ml';
+            break;
+          case MealUnitEnum.LITRES:
+            displayUnit = 'L';
+            break;
+          case MealUnitEnum.PIECES:
+            displayUnit = 'pièce(s)';
+            break;
+          case MealUnitEnum.PORTION:
+            displayUnit = 'portion(s)';
+            break;
+          case MealUnitEnum.TASSES:
+            displayUnit = 'tasse(s)';
+            break;
+          case MealUnitEnum.CUILLERES_A_SOUPE:
+            displayUnit = 'c. à s.';
+            break;
+          case MealUnitEnum.CUILLERES_A_CAFE:
+            displayUnit = 'c. à c.';
+            break;
+          case MealUnitEnum.SERVING:
+            displayUnit = 'portion';
+            break;
+          case MealUnitEnum.PLATE:
+            displayUnit = 'assiette';
+            break;
+          case MealUnitEnum.BOWL:
+            displayUnit = 'bol';
+            break;
+          default:
+            displayUnit = 'g';
+        }
+      }
+      
+      return { displayName, displayUnit };
+    } catch (error) {
+      logger.error(LogCategory.UI, `Erreur lors de la récupération des informations d'affichage de l'ingrédient`, {
+        error: error instanceof Error ? error.message : String(error),
+        ingredientId: typeof ingredientIdOrObject === 'number' ? ingredientIdOrObject : ingredientIdOrObject.id
+      });
+      
+      // Retourner des valeurs par défaut en cas d'erreur
+      const defaultName = typeof ingredientIdOrObject === 'number' 
+        ? `Ingrédient #${ingredientIdOrObject}` 
+        : (ingredientIdOrObject.name || 'Ingrédient');
+      
+      return {
+        displayName: defaultName,
+        displayUnit: 'g'
+      };
+    }
   }
 
   getItemType(item: IngredientWithUniqueId): string {

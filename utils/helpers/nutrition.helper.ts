@@ -156,29 +156,40 @@ export const adjustMacrosByFinalWeight = (
   totalIngredientsWeight: number,
   finalMealWeight: number,
 ) => {
-  // Vérification des poids
-  if (!isValidWeight(totalIngredientsWeight) || !isValidWeight(finalMealWeight)) {
-    throw new Error('Poids invalides');
+  // Cas spécial: si l'un des poids est nul ou trop faible, retourner des macros à zéro
+  // Cela évite l'erreur "Poids invalide" lors de la création d'un nouveau repas sans ingrédients
+  if (totalIngredientsWeight < MIN_WEIGHT || finalMealWeight < MIN_WEIGHT) {
+    return {
+      calories: 0,
+      carbs: 0,
+      fat: 0,
+      protein: 0
+    };
   }
 
-  // Calcul du facteur d'ajustement
-  const adjustmentFactor = totalIngredientsWeight / finalMealWeight;
+  try {
+    // Calcul du facteur d'ajustement
+    const adjustmentFactor = totalIngredientsWeight / finalMealWeight;
 
-  // Ajustement et arrondissement des valeurs
-  const adjustedMacros = {
-    calories: Math.round(macros.calories / adjustmentFactor),
-    carbs: Math.round(macros.carbs / adjustmentFactor),
-    fat: Math.round(macros.fat / adjustmentFactor),
-    protein: Math.round(macros.protein / adjustmentFactor),
-  };
+    // Ajustement et arrondissement des valeurs
+    const adjustedMacros = {
+      calories: Math.round(macros.calories / adjustmentFactor),
+      carbs: Math.round(macros.carbs / adjustmentFactor),
+      fat: Math.round(macros.fat / adjustmentFactor),
+      protein: Math.round(macros.protein / adjustmentFactor),
+    };
 
-  // Vérification des résultats
-  if (!isValidCalories(adjustedMacros.calories)) {
-    throw new Error('Calories ajustées invalides');
+    // Vérification des résultats
+    if (!isValidCalories(adjustedMacros.calories)) {
+      return macros; // Retourner les macros originales si les calories ajustées sont invalides
+    }
+    if (!isValidMacro(adjustedMacros.carbs) || !isValidMacro(adjustedMacros.fat) || !isValidMacro(adjustedMacros.protein)) {
+      return macros; // Retourner les macros originales si les macros ajustées sont invalides
+    }
+
+    return adjustedMacros;
+  } catch (error) {
+    console.error("Erreur lors de l'ajustement des macros:", error);
+    return macros; // En cas d'erreur, retourner les macros originales
   }
-  if (!isValidMacro(adjustedMacros.carbs) || !isValidMacro(adjustedMacros.fat) || !isValidMacro(adjustedMacros.protein)) {
-    throw new Error('Macronutriments ajustés invalides');
-  }
-
-  return adjustedMacros;
 };

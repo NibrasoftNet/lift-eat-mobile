@@ -132,30 +132,41 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
     set((state) => {
       try {
         const totalWeight = calculateTotalWeight(ingredients);
-        const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
         return {
           selectedIngredients: ingredients,
-          totalWeight: totalWeight,
-          mealWeight: mealWeight,
-          totalMacros: recalculateTotalMacros(ingredients, mealWeight),
+          totalWeight,
+          totalMacros: recalculateTotalMacros(ingredients, state.mealWeight),
         };
       } catch (error) {
-        console.error('Erreur lors du calcul des macros:', error);
+        console.error('Erreur lors de la mise à jour des ingrédients:', error);
         return state;
       }
     }),
 
   setTotalMacros: (macros) =>
-    set(() => ({
+    set({
       totalMacros: macros,
-    })),
+    }),
 
   setMealWeight: (weight) =>
     set((state) => {
       try {
+        // Si le poids n'est pas valide (trop faible ou nul), utiliser 0 comme poids
+        // sans lancer d'erreur, pour la création de nouveaux repas
         if (!isValidWeight(weight)) {
-          throw new Error('Poids invalide');
+          console.log('Poids spécifié trop faible, utilisation de valeurs par défaut');
+          return {
+            mealWeight: weight,
+            totalMacros: {
+              totalCalories: 0,
+              totalFats: 0,
+              totalCarbs: 0,
+              totalProtein: 0,
+            }
+          };
         }
+        
+        // Sinon, calculer normalement les macros pour le poids spécifié
         return {
           mealWeight: weight,
           totalMacros: recalculateTotalMacros(state.selectedIngredients, weight),
@@ -169,16 +180,27 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
   addIngredient: (ingredient) =>
     set((state) => {
       try {
-        const updatedIngredients = [
-          ...state.selectedIngredients,
-          mapToIngredientWithStandard(ingredient),
-        ];
+        // Vérifier si l'ingrédient existe déjà
+        const existingIndex = state.selectedIngredients.findIndex(
+          (ing) => ing.ingredientStandardId === ingredient.id
+        );
+        
+        if (existingIndex !== -1) {
+          return state; // Ingrédient déjà présent, ne rien faire
+        }
+        
+        // Transformer l'ingrédient et l'ajouter à la liste
+        const newIngredient = mapToIngredientWithStandard(ingredient);
+        const updatedIngredients = [...state.selectedIngredients, newIngredient];
         const totalWeight = calculateTotalWeight(updatedIngredients);
+        
+        // Ajuster le poids du repas si nécessaire
         const mealWeight = state.mealWeight === 0 ? totalWeight : state.mealWeight;
+        
         return {
           selectedIngredients: updatedIngredients,
-          totalWeight: totalWeight,
-          mealWeight: mealWeight,
+          totalWeight,
+          mealWeight,
           totalMacros: recalculateTotalMacros(updatedIngredients, mealWeight),
         };
       } catch (error) {

@@ -133,17 +133,28 @@ function PlanDetailsComponent(props: {
   };
 
   // Fonction pour ajouter un repas au plan journalier
-  // Note: Cette fonctionnalité n'est pas encore implémentée dans le service planPagesService
-  // Une fois implémentée, nous pourrons remplacer cette logique directe
   const handleAddMealToPlan = async (dailyPlanId: number, mealId: number, quantity: number = 10, mealType?: MealTypeEnum) => {
     try {
       logger.info(LogCategory.USER, `Adding meal ${mealId} to daily plan ${dailyPlanId}`);
       
-      // TODO: Remplacer par un appel au service planPagesService une fois cette méthode implémentée
-      // const result = await planPagesService.addMealToDailyPlan(dailyPlanId, mealId, quantity, mealType);
+      // Utiliser le service planPagesService pour ajouter le repas au plan journalier
+      const result = await planPagesService.addMealToDailyPlan(dailyPlanId, mealId, quantity, mealType);
       
-      // Solution temporaire - simuler un succès pour l'exemple
-      const mockResult = { success: true };
+      if (!result.success) {
+        logger.error(LogCategory.USER, `Failed to add meal to daily plan: ${result.error}`);
+        toast.show({
+          placement: "top",
+          render: () => (
+            <Toast action="error">
+              <ToastTitle>Erreur</ToastTitle>
+              <ToastDescription>
+                {result.error || "Échec de l'ajout du repas au plan"}
+              </ToastDescription>
+            </Toast>
+          ),
+        });
+        return { success: false, error: result.error };
+      }
       
       // Rafraîchir les données après l'ajout
       await queryClient.invalidateQueries({ queryKey: [`plan-${planId}`] });
@@ -151,31 +162,31 @@ function PlanDetailsComponent(props: {
       
       toast.show({
         placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast action="success" variant="solid">
-              <ToastTitle>Succès</ToastTitle>
-              <ToastDescription>Repas ajouté au plan journalier</ToastDescription>
-            </Toast>
-          );
-        },
+        render: () => (
+          <Toast action="success">
+            <ToastTitle>Succès</ToastTitle>
+            <ToastDescription>
+              Repas ajouté au plan journalier avec succès
+            </ToastDescription>
+          </Toast>
+        ),
       });
       
-      return mockResult;
+      return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(LogCategory.USER, `Error adding meal to plan: ${errorMessage}`);
       
       toast.show({
         placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast action="error" variant="solid">
-              <ToastTitle>Erreur</ToastTitle>
-              <ToastDescription>Impossible d'ajouter le repas: {errorMessage}</ToastDescription>
-            </Toast>
-          );
-        },
+        render: () => (
+          <Toast action="error">
+            <ToastTitle>Erreur</ToastTitle>
+            <ToastDescription>
+              Impossible d'ajouter le repas: {errorMessage}
+            </ToastDescription>
+          </Toast>
+        ),
       });
       
       return { success: false, error: errorMessage };
