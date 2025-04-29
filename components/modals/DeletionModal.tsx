@@ -50,20 +50,17 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
           </Box>
         </ModalHeader>
         <ModalBody className="mt-0 mb-4">
-          <Heading size="md" className="text-typography-950 mb-2 text-center">
+          <Heading className="text-typography-950 mb-2 text-center text-lg">
             {title}
           </Heading>
-          <Text size="sm" className="text-typography-500 text-center">
+          <Text className="text-typography-500 text-center text-sm">
             {description}
           </Text>
         </ModalBody>
         <ModalFooter className="w-full">
           <Button
-            variant="outline"
-            action="secondary"
-            size="sm"
+            className="flex-grow bg-transparent border border-gray-300 h-9"
             onPress={() => deletionModalService.handleCancelDelete(setShowModal)}
-            className="flex-grow"
           >
             <ButtonText>Cancel</ButtonText>
           </Button>
@@ -72,8 +69,7 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
               logger.info(LogCategory.USER, 'Delete confirmation button clicked');
               deletionModalService.handleConfirmDelete(handleDelete, setShowModal);
             }} 
-            size="sm" 
-            className="flex-grow"
+            className="flex-grow bg-primary-500 h-9"
           >
             {isPending ? (
               <ButtonSpinner color={Colors.light.icon} />

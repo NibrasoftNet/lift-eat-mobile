@@ -4,12 +4,12 @@
  * en particulier la logique de calcul des macronutriments et la gestion des objectifs
  */
 
-import { FormOperationResult, NutritionGoalFormServiceInterface } from "../interfaces/forms.interface";
-import { NutritionGoalDefaultValueProps, NutritionGoalSchemaFormData } from "../validation/plan/nutrition-goal.validation";
-import { ToastTypeEnum } from "../enum/general.enum";
-import { LogCategory } from "../enum/logging.enum";
-import { logger } from "./logging.service";
-import { GoalEnum } from "../enum/user-details.enum";
+import { FormOperationResult, NutritionGoalFormServiceInterface } from "../../interfaces/forms.interface";
+import { NutritionGoalDefaultValueProps, NutritionGoalSchemaFormData } from "../../validation/plan/nutrition-goal.validation";
+import { ToastTypeEnum } from "../../enum/general.enum";
+import { LogCategory } from "../../enum/logging.enum";
+import { logger } from "../common/logging.service";
+import { GoalEnum } from "../../enum/user-details.enum";
 
 /**
  * Service pour la gestion du formulaire d'objectif nutritionnel

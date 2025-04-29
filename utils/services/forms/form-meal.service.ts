@@ -28,18 +28,22 @@ class MealFormService {
   validateUserAccess(userId: string | null, toast: any): boolean {
     if (!userId) {
       logger.warn(LogCategory.AUTH, 'User not authenticated when accessing meal form');
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return {
-            id: toastId,
-            color: ToastTypeEnum.ERROR,
-            title: "Authentication Required",
-            description: "Please log in to create or edit a meal"
-          };
-        },
-      });
+      if (toast && typeof toast.show === 'function') {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return {
+              id: toastId,
+              color: ToastTypeEnum.ERROR,
+              title: "Authentication Required",
+              description: "Please log in to create or edit a meal"
+            };
+          },
+        });
+      } else {
+        logger.warn(LogCategory.UI, 'Toast service not available for displaying authentication error');
+      }
       return false;
     }
     
@@ -51,18 +55,38 @@ class MealFormService {
    * @param data - Les données du formulaire
    * @param userId - L'ID de l'utilisateur
    * @param mealId - L'ID du repas (si modification)
-   * @param toast - Service toast pour afficher les messages
+   * @param toastOrMacros - Soit le service toast pour les messages, soit les macros totaux
    * @returns Un résultat d'opération avec le repas créé/modifié
    */
   async submitMealForm(
     data: MealFormData,
     userId: string | null,
     mealId: number | null = null,
-    toast: any
+    toastOrMacros: any
   ): Promise<FormOperationResult> {
     try {
-      // Valider l'accès utilisateur
-      if (!this.validateUserAccess(userId, toast)) {
+      // Vérifier si toastOrMacros est un service toast (il aura une méthode 'show')
+      const isToast = toastOrMacros && typeof toastOrMacros.show === 'function';
+      const macros = isToast ? null : toastOrMacros;
+      const toast = isToast ? toastOrMacros : null;
+      
+      // Valider l'accès utilisateur - mais ne pas utiliser toast ici si ce n'est pas un objet toast
+      if (!userId) {
+        logger.warn(LogCategory.AUTH, 'User not authenticated when submitting meal form');
+        if (toast) {
+          toast.show({
+            placement: 'top',
+            render: ({ id }: { id: string }) => {
+              const toastId = 'toast-' + id;
+              return {
+                id: toastId,
+                color: ToastTypeEnum.ERROR,
+                title: "Authentication Required",
+                description: "Please log in to create or edit a meal"
+              };
+            },
+          });
+        }
         return {
           success: false,
           message: "Authentication required",
@@ -74,10 +98,10 @@ class MealFormService {
       const mealData = {
         name: data.name,
         description: data.description,
-        calories: data.calories,
-        protein: data.protein,
-        carbs: data.carbs,
-        fat: data.fat,
+        calories: macros ? macros.totalCalories : data.calories,
+        protein: macros ? macros.totalProtein : data.protein,
+        carbs: macros ? macros.totalCarbs : data.carbs,
+        fat: macros ? macros.totalFats : data.fat,
         type: data.type,
         cuisine: data.cuisine,
         // Autres champs...
@@ -100,18 +124,20 @@ class MealFormService {
           const queryClient = new QueryClient();
           invalidateCache(queryClient, DataType.MEAL);
           
-          toast.show({
-            placement: 'top',
-            render: ({ id }: { id: string }) => {
-              const toastId = 'toast-' + id;
-              return {
-                id: toastId,
-                color: ToastTypeEnum.SUCCESS,
-                title: "Meal Updated",
-                description: "Your meal has been updated successfully"
-              };
-            },
-          });
+          if (toast) {
+            toast.show({
+              placement: 'top',
+              render: ({ id }: { id: string }) => {
+                const toastId = 'toast-' + id;
+                return {
+                  id: toastId,
+                  color: ToastTypeEnum.SUCCESS,
+                  title: "Meal Updated",
+                  description: "Your meal has been updated successfully"
+                };
+              },
+            });
+          }
           
           return {
             success: true,
@@ -123,16 +149,22 @@ class MealFormService {
         }
       } else {
         // Création via MCP
+        logger.info(LogCategory.DATABASE, 'Creating new meal via MCP', { userId });
+        
+        // Structure des macros au format attendu par l'API
+        const totalMacrosFormatted = {
+          totalCalories: macros ? macros.totalCalories : data.calories || 0,
+          totalCarbs: macros ? macros.totalCarbs : data.carbs || 0,
+          totalFats: macros ? macros.totalFats : data.fat || 0,
+          totalProtein: macros ? macros.totalProtein : data.protein || 0,
+        };
+        
+        // Appel à createNewMealViaMCP avec les 4 paramètres attendus
         result = await sqliteMCPServer.createNewMealViaMCP(
-          mealData, 
-          [], // pas d'ingrédients à ajouter
-          { 
-            totalCalories: data.calories || 0, 
-            totalCarbs: data.carbs || 0, 
-            totalFats: data.fat || 0, 
-            totalProtein: data.protein || 0
-          },
-          userId ? parseInt(userId, 10) : 1 // Utiliser l'ID 1 par défaut si userId est null
+          mealData,                           // data
+          [],                                 // selectedIngredients (à intégrer dans un second temps)
+          totalMacrosFormatted,               // totalMacros
+          parseInt(userId, 10)                // creatorId
         );
         
         if (result && result.success) {
@@ -140,18 +172,20 @@ class MealFormService {
           const queryClient = new QueryClient();
           invalidateCache(queryClient, DataType.MEAL);
           
-          toast.show({
-            placement: 'top',
-            render: ({ id }: { id: string }) => {
-              const toastId = 'toast-' + id;
-              return {
-                id: toastId,
-                color: ToastTypeEnum.SUCCESS,
-                title: "Meal Created",
-                description: "Your meal has been created successfully"
-              };
-            },
-          });
+          if (toast) {
+            toast.show({
+              placement: 'top',
+              render: ({ id }: { id: string }) => {
+                const toastId = 'toast-' + id;
+                return {
+                  id: toastId,
+                  color: ToastTypeEnum.SUCCESS,
+                  title: "Meal Created",
+                  description: "Your meal has been created successfully"
+                };
+              },
+            });
+          }
           
           return {
             success: true,
@@ -166,19 +200,23 @@ class MealFormService {
       // Journaliser l'erreur
       logger.error(LogCategory.FORM, 'Error submitting meal form', { error, userId, mealId });
       
-      // Afficher un toast d'erreur
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return {
-            id: toastId,
-            color: ToastTypeEnum.ERROR,
-            title: "Submission Error",
-            description: "An error occurred while saving your meal"
-          };
-        },
-      });
+      // Afficher un toast d'erreur si le service toast est disponible
+      if (toastOrMacros && typeof toastOrMacros.show === 'function') {
+        toastOrMacros.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return {
+              id: toastId,
+              color: ToastTypeEnum.ERROR,
+              title: "Submission Error",
+              description: "An error occurred while saving your meal"
+            };
+          },
+        });
+      } else {
+        logger.warn(LogCategory.UI, 'Toast service not available for displaying submission error');
+      }
       
       return {
         success: false,

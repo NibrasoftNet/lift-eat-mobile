@@ -3,15 +3,15 @@
  * Fournit des fonctionnalités pour la validation, la soumission et la gestion des erreurs
  */
 
-import { FormOperationResult, UserDetailsFormServiceInterface } from "../interfaces/forms.interface";
-import { UserDetailsDefaultValuesProps, UserDetailsFormData } from "../validation/user/user-details.validation";
-import { logger } from "./logging.service";
+import { FormOperationResult, UserDetailsFormServiceInterface } from "../../interfaces/forms.interface";
+import { UserDetailsDefaultValuesProps, UserDetailsFormData } from "../../validation/user/user-details.validation";
+import { logger } from "../common/logging.service";
 import { LogCategory } from "@/utils/enum/logging.enum";
 import { useToast } from "@/components/ui/toast";
 import { ToastTypeEnum } from "@/utils/enum/general.enum";
 import { HeightUnitEnum, WeightUnitEnum } from "@/utils/enum/user-details.enum";
 import { ReactNode } from 'react';
-import { userService } from "./userService";
+import { userService } from "../core/user.service";
 
 // Type pour le service de toast
 type ToastServiceType = ReturnType<typeof useToast>;

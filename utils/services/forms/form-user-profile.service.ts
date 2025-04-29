@@ -4,12 +4,12 @@
  * permettant une meilleure séparation des préoccupations
  */
 
-import { FormOperationResult, UserProfileFormServiceInterface } from "../interfaces/forms.interface";
-import { UserProfileDefaultValuesProps, UserProfileFormData } from "../validation/user/user-profile.validation";
-import { ToastTypeEnum } from "../enum/general.enum";
-import { LogCategory } from "../enum/logging.enum";
-import { logger } from "./logging.service";
-import { getImageFromPicker } from "../utils";
+import { FormOperationResult, UserProfileFormServiceInterface } from "../../interfaces/forms.interface";
+import { UserProfileDefaultValuesProps, UserProfileFormData } from "../../validation/user/user-profile.validation";
+import { ToastTypeEnum } from "../../enum/general.enum";
+import { LogCategory } from "../../enum/logging.enum";
+import { logger } from "../common/logging.service";
+import { getImageFromPicker } from "../../utils";
 
 /**
  * Service pour la gestion du formulaire de profil utilisateur

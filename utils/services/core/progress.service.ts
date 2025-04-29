@@ -3,8 +3,8 @@
  * Ce service encapsule la logique métier liée à la progression des repas et des objectifs
  */
 
-import { LogCategory } from "../enum/logging.enum";
-import { logger } from "./logging.service";
+import { LogCategory } from "../../enum/logging.enum";
+import { logger } from "../common/logging.service";
 import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
 import * as schema from '@/db/schema';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';

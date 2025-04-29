@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useToast, Toast, ToastDescription } from "@gluestack-ui/themed";
 import {
-  useToast,
   Modal,
   ModalBackdrop,
   ModalContent,
@@ -12,14 +12,11 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  Heading,
-  Text,
-  Button,
-  ButtonText,
-  CloseIcon,
-  Toast,
-  ToastDescription,
-} from "@gluestack-ui/themed";
+} from "@/components/ui/modal";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { Heading } from "@/components/ui/heading";
+import { CloseIcon } from "@/components/ui/icon";
 import { forgetSchema } from "../../utils/validation/auth/forget-schema.validation";
 import { ResetPasswordData } from "../../utils/interfaces/auth.interface";
 import { useModalContext } from "../../utils/providers/ModalProvider";
@@ -73,7 +70,7 @@ export function ForgetPasswordModal() {
       <ModalBackdrop />
       <ModalContent>
         <ModalHeader>
-          <Heading size="lg">Mot de passe oublié</Heading>
+          <Heading className="text-xl">Mot de passe oublié</Heading>
           <ModalCloseButton>
             <CloseIcon />
           </ModalCloseButton>
@@ -92,9 +89,7 @@ export function ForgetPasswordModal() {
         </ModalBody>
         <ModalFooter>
           <Button
-            variant="outline"
-            action="secondary"
-            mr="$3"
+            className="bg-transparent border border-gray-300 mr-3"
             onPress={() => {
               reset();
               onClose();
@@ -103,7 +98,7 @@ export function ForgetPasswordModal() {
             <ButtonText>Annuler</ButtonText>
           </Button>
           <Button
-            action="primary"
+            className="bg-primary-500"
             onPress={handleSubmit(onSubmit)}
             isDisabled={isPending}
           >

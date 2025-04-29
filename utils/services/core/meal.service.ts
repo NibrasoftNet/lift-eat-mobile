@@ -14,9 +14,51 @@ export const mealService = {
   /**
    * Récupère la liste des repas avec filtrage pour la page d'index
    */
-  async getMealsList(filters: any): Promise<{ success: boolean; meals: any[]; totalCount: number; pageInfo?: { currentPage: number; totalPages: number } }> {
-    // TODO: Implémenter la logique réelle de récupération avec MCP et pagination
-    return { success: false, meals: [], totalCount: 0 };
+  async getMealsList(filters: any): Promise<{ success: boolean; meals: any[]; totalCount: number; pageInfo?: { currentPage: number; totalPages: number }; error?: string }> {
+    try {
+      const userId = getCurrentUserIdSync();
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'Authentication required to get meals list');
+        return { success: false, meals: [], totalCount: 0, error: 'You must be logged in to view meals' };
+      }
+
+      logger.info(LogCategory.DATABASE, 'Getting meals list via MCP Server', { userId, filters });
+      
+      // Appel MCP pour récupérer la liste des repas
+      const result = await sqliteMCPServer.getMealsListViaMCP(userId, filters);
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to get meals list: ${result.error}`);
+        return { 
+          success: false, 
+          meals: [], 
+          totalCount: 0,
+          error: result.error || 'Error retrieving meals'
+        };
+      }
+      
+      // Vérifier la présence de repas dans le résultat
+      if (!result.meals || result.meals.length === 0) {
+        logger.warn(LogCategory.DATABASE, 'No meals returned from service');
+      } else {
+        logger.info(LogCategory.DATABASE, `Successfully retrieved ${result.meals.length} meals`);
+      }
+      
+      // La structure de retour correspond à l'interface GetMealsListResult
+      return { 
+        success: true, 
+        meals: result.meals || [], 
+        totalCount: result.meals?.length || 0,
+        pageInfo: filters.page ? {
+          currentPage: filters.page,
+          totalPages: Math.ceil((result.meals?.length || 0) / (filters.limit || 10))
+        } : undefined
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, `Error getting meals list: ${errorMessage}`);
+      return { success: false, meals: [], totalCount: 0, error: errorMessage };
+    }
   },
 
   /**

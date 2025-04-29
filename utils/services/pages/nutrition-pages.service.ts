@@ -1,5 +1,5 @@
 import { OperationResult } from "@/utils/interfaces/pages.interface";
-import { nutritionService } from "@/utils/services/nutritionService";
+import { nutritionService } from "../core/nutrition.service";
 import { logger } from "@/utils/services/common/logging.service";
 import { LogCategory } from "@/utils/enum/logging.enum";
 

@@ -3,9 +3,9 @@
  * Ce service encapsule la logique simplifiée liée au modal de confirmation de suppression
  */
 
-import { DeletionModalServiceInterface } from "../interfaces/modals.interface";
-import { LogCategory } from "../enum/logging.enum";
-import { logger } from "./logging.service";
+import { DeletionModalServiceInterface } from "../../interfaces/modals.interface";
+import { LogCategory } from "../../enum/logging.enum";
+import { logger } from "../common/logging.service";
 
 /**
  * Service pour la gestion du modal de suppression
