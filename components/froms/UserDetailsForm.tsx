@@ -3,31 +3,33 @@ import {
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
+  FormControlHelper,
+  FormControlHelperText,
   FormControlLabel,
-  FormControlLabelText,
+  FormControlLabelText
 } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Grid, GridItem } from '@/components/ui/grid';
-import Animated, {
-  useAnimatedStyle,
+import {
   useSharedValue,
-  withTiming,
+  useAnimatedStyle,
+  withSpring
 } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 import {
-  UserDetailsDefaultValuesProps,
   UserDetailsFormData,
-  userDetailsSchema,
+  UserDetailsDefaultValuesProps,
+  userDetailsSchema
 } from '@/utils/validation/user/user-details.validation';
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
@@ -39,6 +41,7 @@ import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { userDetailsFormService } from '@/utils/services/user-details-form.service';
+import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function UserDetailsForm({
   defaultValues,
@@ -47,7 +50,6 @@ export default function UserDetailsForm({
   defaultValues: UserDetailsDefaultValuesProps;
   operation: 'create' | 'update';
 }) {
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
   
@@ -64,13 +66,12 @@ export default function UserDetailsForm({
     if (userId && !userDetailsFormService.validateUserAccess(
       // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
       String(userId), 
-      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
-      String(defaultValues.id), 
+      normalizedDefaultValues?.id?.toString() || '', 
       toast
     )) {
       router.back();
     }
-  }, [userId, defaultValues.id, toast, router]);
+  }, [userId, normalizedDefaultValues?.id, toast, router]);
   const [weightUnit, setWeightUnit] = useState<WeightUnitEnum>(
     defaultValues.weightUnit,
   );
@@ -122,7 +123,7 @@ export default function UserDetailsForm({
     
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
-    slidePosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
+    slidePosition.value = withSpring(position, { duration: 300 }); // Each button is 100px wide
   };
 
   const handleHeightUnitChange = (unit: HeightUnitEnum, index: number) => {
@@ -133,15 +134,39 @@ export default function UserDetailsForm({
     
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
-    slideHeightPosition.value = withTiming(position, { duration: 300 }); // Each button is 100px wide
+    slideHeightPosition.value = withSpring(position, { duration: 300 }); // Each button is 100px wide
   };
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserDetailsFormData) => {
+      // Si nous avons besoin de valider à nouveau au niveau du composant
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
       // Déléguer entièrement au service la soumission du formulaire
       // S'assurer que userId est toujours une chaîne pour respecter l'interface du service
       const userIdString = userId ? String(userId) : '';
-      return userDetailsFormService.submitForm(data, userIdString, operation);
+      
+      // Nous récupérons d'abord le résultat du service de formulaire pour la validation et la préparation des données
+      const formResult = await userDetailsFormService.submitForm(data, userIdString, operation);
+      
+      if (!formResult.success) {
+        throw new Error(formResult.error || 'Failed to prepare user details data');
+      }
+      
+      // Puis nous utilisons le service de page qui gérera l'accès au service métier
+      // C'est une architecture MCP en couches : UI -> PageService -> BusinessService -> MCPServer
+      const serviceResult = await userPagesService.updateUserPreferences(
+        Number(userId), 
+        formResult.data
+      );
+      
+      if (!serviceResult.success) {
+        throw new Error(serviceResult.error || 'Failed to update user details');
+      }
+      
+      return serviceResult;
     },
     onSuccess: async () => {
       // Utiliser l'utilitaire standardisé d'invalidation du cache

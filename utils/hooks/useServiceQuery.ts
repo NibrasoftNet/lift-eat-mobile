@@ -2,7 +2,7 @@ import { UseQueryOptions, UseQueryResult, useQuery } from '@tanstack/react-query
 import { OperationResult } from '@/utils/interfaces/pages.interface';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
 import { DataType } from '@/utils/helpers/queryInvalidation';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**

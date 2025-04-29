@@ -2,11 +2,10 @@ import React from 'react';
 import UserGenderActivityForm from '@/components/froms/UserGenderActivityForm';
 import { UserGenderActivityDefaultValueProps } from '@/utils/validation/user/user-gender-activity.validation';
 import { useLocalSearchParams } from 'expo-router';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
 import { UserOrmPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
@@ -14,7 +13,6 @@ import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function EditUserPreference() {
   const { id } = useLocalSearchParams();
-  const drizzleDb = useDrizzleDb();
 
   const {
     data: actualUser,

@@ -12,12 +12,11 @@ import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { MealOrmProps, PlanWithDailyPlansAndMealsOrmProps } from '@/db/schema';
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { withQueryState } from '@/utils/hoc';
 import { usePlanQuery } from '@/utils/hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { useToast, Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
@@ -45,7 +44,6 @@ function PlanDetailsComponent(props: {
   const queryClient = useQueryClient();
   const router = useRouter();
   const toast = useToast();
-  const drizzleDb = useDrizzleDb();
   
   // États locaux pour la gestion de l'interface
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
@@ -191,6 +189,7 @@ function PlanDetailsComponent(props: {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        key={`day-${selectedDay}-week-${selectedWeek}-dailyPlan-${selectedDailyPlanId}`}
       >
         <Box className="p-4">
           <Animated.View
@@ -340,7 +339,6 @@ function PlanDetailsComponent(props: {
           planId={planId}
           onMealsAdded={handleMealsAdded}
           onAddMealToPlan={handleAddMealToPlan}
-          drizzleDb={drizzleDb}
         />
       )}
     </Box>

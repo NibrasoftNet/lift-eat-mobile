@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { VStack } from '../ui/vstack';
 import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { UserOrmPros, DailyProgressOrmProps, PlanOrmProps, MealOrmProps, DailyPlanOrmProps } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
@@ -27,7 +26,6 @@ import { DataType } from '@/utils/helpers/queryInvalidation';
 import { progressPagesService } from '@/utils/services/pages/progress-pages.service';
 import { userPagesService } from '@/utils/services/pages/user-pages.service';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { DayEnum } from '@/utils/enum/general.enum';
 
 // Interface pour le type de plan journalier avec repas
@@ -36,7 +34,6 @@ interface DailyPlanWithMeals extends DailyPlanOrmProps {
 }
 
 const ProgressCalendarTab = () => {
-  const drizzleDb = useDrizzleDb();
   const { user } = useSessionStore();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -130,12 +127,7 @@ const ProgressCalendarTab = () => {
         logger.info(LogCategory.DATABASE, `Fetching current plan for user ${userId} via MCP`);
         
         // Utiliser planPagesService pour récupérer le plan courant
-        // Note: la méthode getCurrentPlan devrait être implémentée dans le service
-        // Pour le moment, continuons à utiliser la méthode MCP directement
-        const result = await sqliteMCPServer.getCurrentPlanViaMCP(userId);
-        
-        // Pour référence future, nous devrions implémenter:
-        // const result = await planPagesService.getCurrentPlan();
+        const result = await planPagesService.getCurrentPlan();
         
         if (!result.success) {
           logger.error(LogCategory.DATABASE, `Failed to get current plan: ${result.error}`);
@@ -143,7 +135,7 @@ const ProgressCalendarTab = () => {
         }
         
         // Assurez-vous que nous retournons toujours un PlanOrmProps ou null, jamais undefined
-        return result.plan || null;
+        return result.data?.plan || null;
       } catch (error) {
         logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération du plan courant:', { error });
         return null; // Retourner null en cas d'erreur

@@ -29,7 +29,7 @@ import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useToast } from '../ui/toast';
 import DeletionModal from '@/components/modals/DeletionModal';
 import OptionsDrawer from '@/components/drawers/OptionsDrawer';
-import { mealService } from '@/utils/services/meal.service';
+import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 
 /**
  * Composant qui affiche un repas dans une carte interactive
@@ -55,7 +55,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   };
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: () => mealService.deleteMeal(item.id),
+    mutationFn: () => mealPagesService.deleteMeal(item.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
@@ -73,7 +73,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
       });
       
       // Utiliser la fonction d'invalidation du cache du service meal
-      await mealService.invalidateMealCache(queryClient, item.id);
+      await mealPagesService.invalidateMealCache(queryClient, item.id);
       
       setShowModal(false);
     },

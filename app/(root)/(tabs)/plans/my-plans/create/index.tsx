@@ -3,11 +3,10 @@ import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 import { CalculateCaloriesIntakeDefaultValueProps } from '@/utils/validation/plan/calculate-calories-intake.validation';
 import CalculateCaloriesIntakeForm from '@/components/froms/CalculateCaloriesIntakeForm';
 import useSessionStore from '@/utils/store/sessionStore';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';
 import { UserOrmPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { getCurrentUserId } from '@/utils/helpers/userContext';
 import { DataType } from '@/utils/helpers/queryInvalidation';
@@ -16,7 +15,6 @@ import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function CreateCaloriesCount() {
   const { user } = useSessionStore();
-  const drizzleDb = useDrizzleDb();
   const [userId, setUserId] = useState<number | null>(null);
 
   // Récupérer l'ID utilisateur au chargement du composant

@@ -1,5 +1,5 @@
 import useSessionStore from '../store/sessionStore';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '../mcp/sqlite-server';
 

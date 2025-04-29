@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
 import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { useQueryClient } from '@tanstack/react-query';
+import { progressPagesService } from '@/utils/services/pages/progress-pages.service';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
 interface MealWithProgressExtended extends MealWithProgress {
@@ -111,9 +111,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   mealsWithProgress,
   onMealStatusChange,
 }) => {
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
+  const queryClient = useQueryClient();
 
   // Initialize empty lists
   const initialLeftList: MealList = {
@@ -276,15 +276,15 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         });
       }
       
-      // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
-      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
+      // Utiliser le service de progression pour marquer le repas comme consommé
+      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via progressService', {
         dailyProgressId: dailyProgress.id,
         mealId: selectedItem.id,
-        dailyPlanMealId: dailyPlanMealId, // Utiliser la variable locale sécurisée
+        dailyPlanMealId: dailyPlanMealId,
         consumed: toConsumed
       });
       
-      const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
+      const result = await progressPagesService.markMealAsConsumed(
         dailyProgress.id,
         selectedItem.id,
         Number(dailyPlanMealId), // Conversion explicite en number pour éviter l'erreur TypeScript
@@ -295,6 +295,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
         throw new Error(result.error || 'Erreur lors du marquage du repas');
       }
+      
+      // Invalider le cache après la mise à jour
+      progressPagesService.invalidateProgressionCache(queryClient, dailyProgress.id);
       
       // Mettre à jour les listes localement
       if (toConsumed) {
@@ -408,25 +411,26 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
       // Notifier le composant parent
       onMealStatusChange();
       
-      // Réinitialiser l'état de sélection
-      setSelectedItem(null);
-      setSelectionMode(false);
     } catch (error) {
-      logger.error(LogCategory.DATABASE, `Échec de l'opération: ${error instanceof Error ? error.message : String(error)}`);
+      let errorMessage = 'Erreur lors du changement de statut du repas';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       
-      // Afficher une notification d'erreur
+      logger.error(LogCategory.DATABASE, `Erreur lors du déplacement du repas: ${errorMessage}`);
+      
       toast.show({
         placement: "top",
         render: () => (
           <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
             <Text style={styles.toastText}>
-              Erreur : {error instanceof Error ? error.message : 'Opération échouée'}
+              {errorMessage}
             </Text>
           </Box>
         )
       });
-      
-      // Réinitialiser l'état de sélection
+    } finally {
+      // Réinitialiser l'état de sélection après l'opération
       setSelectedItem(null);
       setSelectionMode(false);
     }

@@ -65,11 +65,27 @@ const MealQuantityModal: React.FC<MealQuantityModalProps> = ({
       // Invalider les caches pour forcer le rafraîchissement des données
       // Utiliser true pour invalider aussi les requêtes liées
       invalidateCache(queryClient, DataType.PLAN, { invalidateRelated: true });
-      invalidateCache(queryClient, DataType.MEAL);
-      invalidateCache(queryClient, DataType.DAILY_PLAN);
+      invalidateCache(queryClient, DataType.MEAL, { invalidateRelated: true });
+      invalidateCache(queryClient, DataType.DAILY_PLAN, { invalidateRelated: true });
       
-      // Forcer le rafraîchissement des requêtes spécifiques
+      // Forcer le rafraîchissement de toutes les requêtes liées aux plans
       queryClient.refetchQueries({ queryKey: ['plan'] });
+      
+      // Forcer le rafraîchissement des requêtes spécifiques à ce plan/repas
+      queryClient.refetchQueries({ 
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          // Rafraîchir toute requête contenant l'ID du repas ou l'ID du plan journalier
+          return (
+            Array.isArray(queryKey) && 
+            (
+              queryKey.some(k => k && k.toString().includes(`meal-${meal.id}`)) ||
+              queryKey.some(k => k && k.toString().includes(`plan-${dailyPlanId}`)) ||
+              queryKey.some(k => k && k.toString().includes(`daily-plan-${dailyPlanId}`))
+            )
+          );
+        }
+      });
 
       toast.show({
         render: ({ id }) => (

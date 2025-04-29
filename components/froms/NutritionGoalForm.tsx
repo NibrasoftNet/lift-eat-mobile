@@ -10,18 +10,16 @@ import { Text } from '@/components/ui/text';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
 import { GetGoalImages } from '@/utils/utils';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import {
+  NutritionGoalSchemaFormData,
   NutritionGoalDefaultValueProps,
   nutritionGoalSchema,
-  NutritionGoalSchemaFormData,
 } from '@/utils/validation/plan/nutrition-goal.validation';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { usePlanStore } from '@/utils/store/planStore';
@@ -31,6 +29,7 @@ import DurationFormInput from '@/components/forms-input/DurationFormInput';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { nutritionGoalFormService } from '@/utils/services/nutrition-goal-form.service';
+import { nutritionPagesService } from '@/utils/services/pages/nutrition-pages.service';
 
 export default function NutritionGoalForm({
   defaultValues,
@@ -41,7 +40,6 @@ export default function NutritionGoalForm({
   operation: 'create' | 'update';
   userId: number;
 }) {
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
   
@@ -116,20 +114,20 @@ export default function NutritionGoalForm({
       // Soumettre les données préparées au serveur MCP
       logger.info(LogCategory.DATABASE, 'Creating plan via MCP Server', { userId });
       
-      const result = await sqliteMCPServer.createPlanViaMCP(formResult.data, userId);
+      const result = await nutritionPagesService.createPlan(formResult.data, userId);
       
       if (!result.success) {
         logger.error(LogCategory.DATABASE, `Failed to create plan: ${result.error}`);
         throw new Error(result.error || 'Failed to create plan');
       }
       
-      if (!result.planId) {
+      if (!result.data || !result.data.planId) {
         logger.error(LogCategory.DATABASE, 'No plan ID returned from server');
         throw new Error('No plan ID returned from server');
       }
       
-      logger.debug(LogCategory.DATABASE, 'Plan created successfully', { planId: result.planId });
-      return result.planId;
+      logger.debug(LogCategory.DATABASE, 'Plan created successfully', { planId: result.data.planId });
+      return result.data.planId;
     },
     onSuccess: async (data) => {
       // Utiliser l'utilitaire standardisé d'invalidation du cache

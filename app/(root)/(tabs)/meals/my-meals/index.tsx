@@ -7,7 +7,6 @@ import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
 import { AddIcon, Icon } from '@/components/ui/icon';
 import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import MealCard from '@/components/cards/MealCard';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
 import { MealOrmProps } from '@/db/schema';
@@ -21,7 +20,7 @@ import { Colors } from '@/utils/constants/Colors';
 import { Card } from '@/components/ui/card';
 import MealTypeBox from '@/components/boxes/MealTypeBox';
 import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
@@ -29,7 +28,6 @@ import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 
 export default function MyMealsScreen() {
   const router = useRouter();
-  const drizzleDb = useDrizzleDb();
   const { resetIngredients } = useIngredientStore();
   const [searchMealName, setSearchMealName] = useState<string | undefined>(
     undefined,

@@ -12,15 +12,17 @@ import {
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
+  FormControlHelper,
+  FormControlHelperText,
   FormControlLabel,
-  FormControlLabelText,
+  FormControlLabelText
 } from '../ui/form-control';
 import { Input, InputField } from '../ui/input';
 import { AlertCircleIcon, Icon } from '../ui/icon';
 import {
-  UserProfileDefaultValuesProps,
   UserProfileFormData,
-  userProfileSchema,
+  UserProfileDefaultValuesProps,
+  userProfileSchema
 } from '@/utils/validation/user/user-profile.validation';
 import { User, Images, Camera } from 'lucide-react-native';
 import { Pressable } from '@/components/ui/pressable';
@@ -28,33 +30,31 @@ import {
   Actionsheet,
   ActionsheetBackdrop,
   ActionsheetContent,
-  ActionsheetDragIndicatorWrapper,
   ActionsheetDragIndicator,
-  ActionsheetItemText,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetItem,
+  ActionsheetItemText
 } from '@/components/ui/actionsheet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
-import { getImageFromPicker } from '@/utils/utils';
 import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { useRouter } from 'expo-router';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { userProfileFormService } from '@/utils/services/user-profile-form.service';
+import { userPagesService } from '@/utils/services/pages/user-pages.service';
+import { useRouter } from 'expo-router';
+import Animated from 'react-native-reanimated';
 
 export default function UserProfileForm({
   defaultValues,
 }: {
   defaultValues: UserProfileDefaultValuesProps;
 }) {
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -131,11 +131,17 @@ export default function UserProfileForm({
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: UserProfileFormData) => {
-      logger.debug(LogCategory.FORM, 'Initiating profile form submission via service');
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        logger.error(LogCategory.AUTH, 'User not authenticated when updating profile');
+        throw new Error('You must be logged in to update your profile');
+      }
       
-      // Déléguer au service la validation et préparation des données
+      logger.info(LogCategory.USER, `Submitting profile update for user ${userId}`);
+      
+      // Déléguer au service de formulaire pour préparer et valider les données
       const serviceResult = await userProfileFormService.submitForm(
-        data, 
+        data,
         // Convertir l'ID numérique en chaîne pour respecter l'interface du service
         userId ? String(userId) : ''
       );
@@ -144,32 +150,22 @@ export default function UserProfileForm({
         throw serviceResult.error || new Error(serviceResult.message);
       }
       
-      // La mise à jour en base de données est faite ici car le service ne peut pas accéder à drizzleDb (hook React)
-      logger.info(LogCategory.DATABASE, `Updating user profile directly for user ${userId}`);
+      // Utiliser le service MCP via userPagesService pour la persistance
+      // C'est l'architecture MCP en couches: UI -> PageService -> BusinessService -> MCPServer
+      const updateResult = await userPagesService.updateUserProfileData(
+        userId,
+        serviceResult.data
+      );
       
-      try {
-        const updateData = serviceResult.data;
-        
-        // Mettre à jour les informations utilisateur
-        await drizzleDb
-          .update(users)
-          .set({
-            name: updateData.name,
-            email: updateData.email,
-            profileImage: updateData.profileImage,
-            updatedAt: updateData.updatedAt
-          })
-          // Utiliser une assertion de type non-null pour userId car nous avons déjà vérifié
-          // qu'il n'est pas null dans le service de validation
-          .where(eq(users.id, userId as number));
-          
-        logger.info(LogCategory.DATABASE, `Successfully updated profile for user ${userId}`);
-      } catch (dbError) {
-        const errorMessage = `Database error updating user profile: ${dbError instanceof Error ? dbError.message : String(dbError)}`;
-        logger.error(LogCategory.DATABASE, errorMessage);
-        throw new Error('Failed to update profile: Database error');
+      if (!updateResult.success) {
+        logger.error(LogCategory.DATABASE, 'Failed to update user profile via MCP', { 
+          userId, 
+          error: updateResult.error 
+        });
+        throw new Error(updateResult.error || 'Failed to update profile');
       }
       
+      logger.info(LogCategory.USER, `Successfully updated profile for user ${userId}`);
       return { success: true };
     },
     onSuccess: async () => {

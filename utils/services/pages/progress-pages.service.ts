@@ -9,6 +9,7 @@ import sqliteMCPServer from "@/utils/mcp/sqlite-server";
 import { logger } from "@/utils/services/logging.service";
 import { LogCategory } from "@/utils/enum/logging.enum";
 import { getCurrentUserIdSync, getCurrentUserId } from "@/utils/helpers/userContext";
+import { QueryClient } from "@tanstack/react-query";
 
 /**
  * Service pour les opérations liées aux pages de progression
@@ -485,6 +486,71 @@ class ProgressPagesService implements ProgressPagesServiceInterface {
         error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la récupération de l\'historique de progression'
       };
     }
+  }
+  
+  /**
+   * Marque un repas comme consommé ou non
+   * @param dailyProgressId ID de la progression journalière
+   * @param mealId ID du repas
+   * @param dailyPlanMealId ID du repas dans le plan journalier
+   * @param consumed Indique si le repas est consommé (true) ou non (false)
+   */
+  async markMealAsConsumed(
+    dailyProgressId: number, 
+    mealId: number, 
+    dailyPlanMealId: number, 
+    consumed: boolean
+  ): Promise<OperationResult<any>> {
+    try {
+      logger.info(LogCategory.DATABASE, 'Demande de marquage de repas via service de pages', {
+        dailyProgressId,
+        mealId,
+        dailyPlanMealId,
+        consumed
+      });
+      
+      // Appel au service MCP pour marquer le repas comme consommé
+      const result = await sqliteMCPServer.markMealAsConsumedViaMCP(dailyProgressId, mealId, dailyPlanMealId, consumed);
+      
+      if (!result || !result.success) {
+        logger.error(LogCategory.DATABASE, 'Erreur lors du marquage du repas via service de pages', {
+          error: result?.error,
+          dailyProgressId,
+          mealId
+        });
+        
+        return {
+          success: false,
+          error: result?.error || 'Erreur lors du marquage du repas'
+        };
+      }
+      
+      return {
+        success: true,
+        message: 'Repas marqué comme consommé avec succès'
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, 'Erreur lors du marquage du repas via service de pages', {
+        error: error instanceof Error ? error.message : String(error),
+        dailyProgressId,
+        mealId
+      });
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur lors du marquage du repas'
+      };
+    }
+  }
+  
+  /**
+   * Invalide le cache de progression après une mise à jour
+   * @param queryClient Client de requête React Query
+   * @param dailyProgressId ID de la progression journalière
+   */
+  invalidateProgressionCache(queryClient: QueryClient, dailyProgressId: number): void {
+    // Invalider le cache de progression pour la date spécifique
+    queryClient.invalidateQueries({ queryKey: ['dailyProgress', dailyProgressId] });
   }
 }
 

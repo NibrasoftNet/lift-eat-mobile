@@ -1,6 +1,5 @@
 import React from 'react';
 import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MealForm from '@/components/froms/MealForm';
 import { useLocalSearchParams, Link } from 'expo-router';
 import { useMealQuery } from '@/utils/hooks';
@@ -9,7 +8,7 @@ import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
@@ -22,7 +21,6 @@ import { withQueryState } from '@/utils/hoc';
 function EditMealComponent(props: { data: { meal: MealWithIngredientAndStandardOrmProps; ingredients: any[] } }) {
   const { data: mealData } = props;
   const { id } = useLocalSearchParams();
-  const drizzleDb = useDrizzleDb();
   const { setTotalMacros, setSelectedIngredients } = useIngredientStore();
 
   // Traitement des données du repas pour le formulaire

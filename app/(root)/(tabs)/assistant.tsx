@@ -12,15 +12,13 @@ import ChatInput from '@/components/assistant/ChatInput';
 import ChatMessage, { MessageType } from '@/components/assistant/ChatMessage';
 import { useGemini } from '@/hooks/useGemini';
 import { Colors } from '@/utils/constants/Colors';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useUserContext } from '@/utils/providers/UserContextProvider';
 import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 
 // Import des services refactorisés
 import { assistantPagesService } from '@/utils/services/pages/assistant-pages.service';
-import geminiService from '@/utils/services/gemini-service';
-import nutritionDatabaseService from '@/utils/services/nutrition-database.service';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 // Import des composants IA depuis le dossier centralisé
 import { IAChat, MealGenerator, NutritionAnalysis, PlanGenerator } from '@/components/assistant/ia-features';
@@ -38,7 +36,6 @@ export default function AssistantScreen() {
   const { loading, generateResponse } = useGemini();
   const flatListRef = useRef<FlatList>(null);
   const { currentUser, isLoading: isUserLoading, refreshUser } = useUserContext();
-  const drizzleDb = useDrizzleDb();
   const toast = useToast();
   
   // État pour gérer la fonctionnalité IA active
@@ -49,100 +46,99 @@ export default function AssistantScreen() {
     // Utilisons une variable pour éviter des appels multiples
     let isUserFetched = false;
     
-    const initializeServices = async () => {
-      if (isUserFetched) return; // Prévenir la récursion
-      isUserFetched = true;
-      
+    const initializeAssistant = async () => {
       try {
-        // Récupérer l'utilisateur depuis le contexte global ou l'utilisateur 1 par défaut
-        if (!currentUser && !isUserLoading) {
-          refreshUser(1);
-        }
-        
-        // Initialiser le service de base de données nutritionnelle
-        if (nutritionDatabaseService && typeof nutritionDatabaseService.initialize === 'function') {
-          nutritionDatabaseService.initialize(drizzleDb);
-        }
-        
-        // Configurer le service Gemini avec l'ID de l'utilisateur actuel
-        if (currentUser && geminiService && typeof geminiService.setCurrentUserId === 'function') {
-          geminiService.setCurrentUserId(currentUser.id);
-          console.log(`Assistant initialized with user ID: ${currentUser.id} (${currentUser.name})`);
+        if (currentUser && !isUserFetched) {
+          isUserFetched = true;
+          logger.info(LogCategory.USER, 'Initializing assistant services with user ID', { userId: currentUser.id });
+          
+          // Nous pouvons configurer des services via assistantPagesService si nécessaire
+          
+          // Ajouter un message de bienvenue
+          addSystemMessage(`Bonjour ${currentUser.name || 'utilisateur'}, je suis votre assistant nutritionnel. Comment puis-je vous aider aujourd'hui ?`);
         }
       } catch (error) {
-        console.error('Error initializing services:', error);
+        logger.error(LogCategory.USER, 'Error initializing assistant:', { error });
+        toast.show({
+          render: ({ id }) => <MultiPurposeToast 
+            id={id}
+            title="Erreur" 
+            description="Erreur lors de l'initialisation de l'assistant" 
+            color={ToastTypeEnum.ERROR} 
+          />
+        });
       }
     };
-
-    initializeServices();
     
-    // Nettoyage
+    if (!isUserLoading) {
+      initializeAssistant();
+    }
+    
     return () => {
       isUserFetched = false;
     };
-  }, [currentUser, isUserLoading, refreshUser, drizzleDb]);
+  }, [currentUser, isUserLoading, refreshUser]);
   
   const handleSendMessage = async (text: string) => {
     // Add user message
-    const userMessage: Message = {
+    const newUserMessage: Message = {
       id: Date.now().toString(),
       text,
       type: 'user',
       timestamp: new Date(),
     };
     
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    addMessage(newUserMessage);
     
-    // Scroll to bottom
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-
-    // Get response from Gemini
     try {
+      // Utiliser Gemini pour la réponse (via le hook existant)
       const responseText = await generateResponse(text);
       
-      // Check if this was likely a request to add meal/plan
-      const isAddingMeal = text.toLowerCase().includes('ajoute') && text.toLowerCase().includes('repas');
-      const isAddingPlan = text.toLowerCase().includes('ajoute') && text.toLowerCase().includes('plan');
-      
-      if (isAddingMeal || isAddingPlan) {
-        // Show confirmation toast using MultiPurposeToast
-        toast.show({
-          render: ({ id }) => {
-            return (
-              <MultiPurposeToast 
-                id={id}
-                color={ToastTypeEnum.SUCCESS}
-                title={isAddingMeal ? "Repas ajouté" : "Plan ajouté"}
-                description={isAddingMeal 
-                  ? "Le repas a été ajouté à votre base de données avec succès."
-                  : "Le plan nutritionnel a été ajouté à votre base de données avec succès."
-                }
-              />
-            );
-          },
-          placement: "bottom"
-        });
-      }
-      
-      // Add assistant message
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: responseText,
         type: 'assistant',
         timestamp: new Date(),
       };
-      
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-      
-      // Scroll to bottom again
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      addMessage(assistantMessage);
     } catch (error) {
-      console.error('Error getting response:', error);
+      const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue";
+      logger.error(LogCategory.USER, 'Error generating response:', { error });
+      
+      toast.show({
+        render: ({ id }) => <MultiPurposeToast 
+          id={id}
+          title="Erreur" 
+          description="Désolé, je rencontre un problème technique." 
+          color={ToastTypeEnum.ERROR} 
+        />
+      });
+      
+      const assistantErrorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Désolé, je rencontre un problème technique. Pouvez-vous reformuler votre demande ?",
+        type: 'assistant',
+        timestamp: new Date(),
+      };
+      addMessage(assistantErrorMessage);
     }
+  };
+
+  const addMessage = (message: Message) => {
+    setMessages((prevMessages) => [...prevMessages, message]);
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
+  const addSystemMessage = (text: string) => {
+    const systemMessage: Message = {
+      id: Date.now().toString(),
+      text,
+      type: 'assistant',
+      timestamp: new Date(),
+    };
+    addMessage(systemMessage);
   };
 
   return (
@@ -212,7 +208,7 @@ export default function AssistantScreen() {
                 <MealGenerator onMealGenerated={(meal) => {
                   console.log('Meal generated successfully:', meal.name);
                   setActiveIAFeature(null);
-                  handleSendMessage(`L'IA a généré un nouveau repas: ${meal.name}`);
+                  addSystemMessage(`L'IA a généré un nouveau repas: ${meal.name}`);
                 }} />
               </ThemedView>
             </ScrollView>
@@ -225,7 +221,7 @@ export default function AssistantScreen() {
                 <PlanGenerator onPlanGenerated={(plan) => {
                   console.log('Plan generated successfully.');
                   setActiveIAFeature(null);
-                  handleSendMessage(`L'IA a généré un nouveau plan nutritionnel pour vous.`);
+                  addSystemMessage(`L'IA a généré un nouveau plan nutritionnel pour vous.`);
                 }} />
               </ThemedView>
             </ScrollView>
@@ -239,7 +235,7 @@ export default function AssistantScreen() {
                   console.log('Nutrition analysis completed');
                   // Option: laisser l'analyse visible ou revenir au chat
                   // setActiveIAFeature(null);
-                  // handleSendMessage(`L'analyse nutritionnelle a été complétée.`);
+                  // addSystemMessage(`L'analyse nutritionnelle a été complétée.`);
                 }} />
               </ThemedView>
             </ScrollView>

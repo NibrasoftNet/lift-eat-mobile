@@ -1,6 +1,6 @@
 import { DataType } from '@/utils/enum/cache.enum';
 import { QueryClient } from '@tanstack/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**

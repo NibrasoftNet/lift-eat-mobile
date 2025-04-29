@@ -8,7 +8,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/utils/constants/Colors';
 import { useUserContext } from '@/utils/providers/UserContextProvider';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import { analyticsPagesService } from '@/utils/services/pages/analytics-pages.service';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface AnalyticsCardProps {
   title: string;
@@ -32,10 +34,9 @@ const AnalyticsCard = ({ title, description, icon, color, onPress }: AnalyticsCa
 
 export default function AnalyticsScreen() {
   const { currentUser } = useUserContext();
-  const drizzleDb = useDrizzleDb();
   const [selectedAnalytics, setSelectedAnalytics] = useState<string | null>(null);
   
-  // Stats simulées (à remplacer par des données réelles de la base de données)
+  // Stats à afficher
   const [stats, setStats] = useState({
     caloriesAverageDaily: 0,
     proteinsAverageDaily: 0,
@@ -50,10 +51,37 @@ export default function AnalyticsScreen() {
       if (!currentUser) return;
       
       try {
-        // Ici, vous implémenteriez la logique pour récupérer les statistiques réelles
-        // depuis la base de données
+        logger.info(LogCategory.USER, 'Chargement des statistiques analytiques', { userId: currentUser.id });
         
-        // Données simulées pour l'exemple
+        // Utilisation du service d'analytics MCP
+        const result = await analyticsPagesService.getUserNutritionStatistics(currentUser.id);
+        
+        if (result.success && result.data) {
+          setStats(result.data);
+          logger.info(LogCategory.USER, 'Statistiques chargées avec succès', { userId: currentUser.id });
+        } else {
+          // Si l'API échoue, on utilise des données de démonstration pour l'interface
+          logger.warn(LogCategory.USER, 'Utilisation de données de démonstration', { 
+            error: result.error, 
+            userId: currentUser.id 
+          });
+          
+          setStats({
+            caloriesAverageDaily: 2150,
+            proteinsAverageDaily: 95,
+            carbsAverageDaily: 225,
+            fatsAverageDaily: 70,
+            mealsCount: 28,
+            plansCount: 4,
+          });
+        }
+      } catch (error) {
+        logger.error(LogCategory.USER, 'Erreur lors du chargement des statistiques', { 
+          error,
+          userId: currentUser.id
+        });
+        
+        // Fallback sur des données de démonstration
         setStats({
           caloriesAverageDaily: 2150,
           proteinsAverageDaily: 95,
@@ -62,13 +90,11 @@ export default function AnalyticsScreen() {
           mealsCount: 28,
           plansCount: 4,
         });
-      } catch (error) {
-        console.error('Error fetching analytics stats:', error);
       }
     };
 
     fetchStats();
-  }, [currentUser, drizzleDb]);
+  }, [currentUser]);
 
   return (
     <SafeAreaView style={styles.container}>

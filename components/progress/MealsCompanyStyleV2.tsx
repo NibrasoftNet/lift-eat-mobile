@@ -15,18 +15,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import { DailyProgressOrmProps } from '@/db/schema';
 import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
 import { 
   mealsCompanyStyleService, 
   MealItem, 
-  MealList, 
   MealType, 
+  MealList, 
   MealListsState 
 } from '@/utils/services/meals-company-style.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { logger } from '@/utils/services/logging.service';
+import { useQueryClient } from '@tanstack/react-query';
+import { progressPagesService } from '@/utils/services/pages/progress-pages.service';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
 interface MealWithProgressExtended extends MealWithProgress {
@@ -157,7 +158,7 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   mealsWithProgress,
   onMealStatusChange,
 }) => {
-  const drizzleDb = useDrizzleDb();
+  const queryClient = useQueryClient();
   const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
 
@@ -228,7 +229,7 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
 
         // Utiliser le service pour mettre à jour les statuts dans la BD
         const result = await mealsCompanyStyleService.updateMealsStatus(
-          drizzleDb,
+          queryClient,
           dailyProgress.id,
           movedItems,
           droppedOnRight

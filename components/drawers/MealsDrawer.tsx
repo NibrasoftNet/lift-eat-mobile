@@ -3,13 +3,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { CircleChevronDown, SearchIcon, MinusCircle, PlusCircle } from 'lucide-react-native';
 /* Custom Providers */
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite/driver';
-import * as schema from '@/db/schema'; // Importation du schéma pour le typage
 /* Types */
 import { MealOrmProps } from '@/db/schema';
 import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
@@ -61,7 +59,6 @@ interface MealsDrawerProps {
   dailyPlanId: number;
   planId: number;
   onMealsAdded?: () => Promise<void>;
-  drizzleDb: ExpoSQLiteDatabase<typeof schema>;
   onAddMealToPlan: (dailyPlanId: number, mealId: number, quantity: number, mealType?: MealTypeEnum) => Promise<{ success: boolean; error?: string; alreadyExists?: boolean }>;
 }
 
@@ -208,7 +205,6 @@ function MealsDrawer({
   dailyPlanId,
   planId,
   onMealsAdded,
-  drizzleDb,
   onAddMealToPlan,
 }: MealsDrawerProps) {
   // États locaux

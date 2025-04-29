@@ -25,4 +25,5 @@ export enum LogCategory {
   INTEGRATION = 'INTEGRATION', // Logs liés aux intégrations d'API externes
   FORM = 'FORM', // Logs liés aux formulaires et à la validation des données
   QUERY = 'QUERY', // Logs liés aux requêtes et à la gestion du cache
+  DEPRECATED = 'DEPRECATED',
 }

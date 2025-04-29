@@ -34,9 +34,9 @@ import GenderFormInput from '@/components/forms-input/GenderFormInput';
 import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { userGenderActivityFormService } from '@/utils/services/user-gender-activity-form.service';
+import { userGenderActivityFormService } from '@/utils/services/forms/form-user-gender-activity.service';
 
 export default function UserGenderActivityForm({
   defaultValues,

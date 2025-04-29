@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory, LogLevel } from '@/utils/enum/logging.enum';
 
 // Compteur pour identifier uniqement chaque occurrence du message

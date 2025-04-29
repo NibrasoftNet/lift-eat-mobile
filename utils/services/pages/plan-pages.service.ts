@@ -405,6 +405,67 @@ class PlanPagesService implements PlanPagesServiceInterface {
       };
     }
   }
+  
+  /**
+   * Récupère le plan courant de l'utilisateur
+   * @returns Résultat de l'opération avec le plan courant
+   */
+  async getCurrentPlan(): Promise<OperationResult<{ plan: any }>> {
+    try {
+      // Récupérer l'ID utilisateur et gérer le cas où il est null
+      const userIdOrNull = getCurrentUserIdSync();
+      if (userIdOrNull === null) {
+        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour récupérer le plan courant');
+        return {
+          success: false,
+          error: 'Utilisateur non authentifié'
+        };
+      }
+      
+      const userId = userIdOrNull;
+      
+      logger.info(LogCategory.DATABASE, 'Récupération du plan courant', { userId });
+      
+      // Appel au service MCP pour récupérer le plan courant
+      const result = await sqliteMCPServer.getCurrentPlanViaMCP(userId);
+      
+      if (!result) {
+        logger.error(LogCategory.DATABASE, 'Échec de la récupération du plan courant: résultat null');
+        return {
+          success: false,
+          error: 'Échec de la récupération du plan courant: résultat null'
+        };
+      }
+      
+      if (!result.success) {
+        logger.error(LogCategory.DATABASE, 'Échec de la récupération du plan courant', {
+          error: result.error
+        });
+        
+        return {
+          success: false,
+          error: result.error || 'Échec de la récupération du plan courant'
+        };
+      }
+      
+      return {
+        success: true,
+        data: {
+          plan: result.plan || null
+        },
+        message: result.plan ? 'Plan courant récupéré avec succès' : 'Aucun plan courant défini'
+      };
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération du plan courant', {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la récupération du plan courant'
+      };
+    }
+  }
 }
 
 // Exporter une instance singleton du service

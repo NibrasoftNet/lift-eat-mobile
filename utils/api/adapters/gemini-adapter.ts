@@ -1,7 +1,7 @@
 import { GEMINI_API_KEY, GEMINI_API_BASE_URL } from '@/utils/constants/Config';
 import { ApiVersionImpl } from '../interfaces/version';
 import { ExternalApiAdapter } from './api-adapter';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**

@@ -3,12 +3,42 @@ import { IngredientStandardOrmProps } from '../../db/schema';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { TotalMacrosProps } from '@/types/meal.type';
 import {
-  calculateProportionalMacros,
-  calculateTotalMacros,
   adjustMacrosByFinalWeight,
   isValidWeight,
 } from '@/utils/helpers/nutrition.helper';
 
+// Fonction utilitaire pour calculer les macros totaux pour les ingrédients
+const calculateIngredientsTotalMacros = (ingredients: IngredientWithStandardProps[]) => {
+  try {
+    const totals = ingredients.reduce(
+      (acc, ingredient) => {
+        return {
+          calories: acc.calories + (ingredient.calories || 0),
+          carbs: acc.carbs + (ingredient.carbs || 0),
+          fat: acc.fat + (ingredient.fat || 0),
+          protein: acc.protein + (ingredient.protein || 0),
+        };
+      },
+      { calories: 0, carbs: 0, fat: 0, protein: 0 }
+    );
+
+    // Recalculer les calories à partir des macros pour assurer la cohérence
+    const calculatedCalories =
+      totals.carbs * 4 + totals.fat * 9 + totals.protein * 4;
+
+    return {
+      calories: Math.round(calculatedCalories),
+      carbs: Math.round(totals.carbs),
+      fat: Math.round(totals.fat),
+      protein: Math.round(totals.protein),
+    };
+  } catch (error) {
+    console.error('Erreur dans calculateIngredientsTotalMacros:', error);
+    return { calories: 0, carbs: 0, fat: 0, protein: 0 };
+  }
+};
+
+// Interface du store d'ingrédients
 interface IngredientStore {
   selectedIngredients: IngredientWithStandardProps[];
   totalMacros: TotalMacrosProps;
@@ -28,23 +58,18 @@ interface IngredientStore {
 const mapToIngredientWithStandard = (
   ingredient: IngredientStandardOrmProps,
 ): IngredientWithStandardProps => {
-  const macros = calculateProportionalMacros(
-    ingredient.quantity,
-    {
-      calories: ingredient.calories,
-      carbs: ingredient.carbs,
-      fat: ingredient.fat,
-      protein: ingredient.protein,
-    },
-    ingredient.quantity,
-  );
-
-  return {
-    quantity: ingredient.quantity,
-    ...macros,
+  // Créer l'objet avec la bonne structure avant de calculer les macros
+  const ingredientWithStandard: IngredientWithStandardProps = {
+    quantity: ingredient.quantity || 1,
+    calories: ingredient.calories || 0,
+    carbs: ingredient.carbs || 0,
+    fat: ingredient.fat || 0,
+    protein: ingredient.protein || 0,
     ingredientStandardId: ingredient.id,
     ingredientsStandard: ingredient,
   };
+
+  return ingredientWithStandard;
 };
 
 // Calcule le poids total des ingrédients
@@ -68,7 +93,7 @@ const recalculateTotalMacros = (
   }
 
   // Calculer les totaux bruts
-  const rawTotals = calculateTotalMacros(ingredients);
+  const rawTotals = calculateIngredientsTotalMacros(ingredients);
 
   // Si pas de poids final spécifié, retourner les totaux bruts
   if (!mealWeight || !isValidWeight(mealWeight)) {
@@ -220,40 +245,46 @@ export const useIngredientStore = create<IngredientStore>((set) => ({
   updateIngredient: (ingredientStandardId: number, newQuantity: number) =>
     set((state) => {
       try {
-        if (!isValidWeight(newQuantity)) {
-          throw new Error('Quantité invalide');
+        // Si l'ingrédient n'existe pas, ne rien faire
+        if (
+          !state.selectedIngredients.some(
+            (ing) => ing.ingredientStandardId === ingredientStandardId,
+          )
+        ) {
+          return state;
         }
 
         const updatedIngredients = state.selectedIngredients.map((ing) => {
           if (ing.ingredientStandardId === ingredientStandardId) {
-            const macros = calculateProportionalMacros(
-              ing.ingredientsStandard.quantity,
-              {
-                calories: ing.ingredientsStandard.calories,
-                carbs: ing.ingredientsStandard.carbs,
-                fat: ing.ingredientsStandard.fat,
-                protein: ing.ingredientsStandard.protein,
-              },
-              newQuantity,
-            );
-
+            // Créer un nouvel objet pour l'ingrédient avec la quantité mise à jour
+            // mais en conservant toutes les autres propriétés
             return {
               ...ing,
               quantity: newQuantity,
-              ...macros,
+              // Mettre à jour les valeurs nutritionnelles proportionnellement
+              calories: (ing.ingredientsStandard.calories * newQuantity) / ing.ingredientsStandard.quantity,
+              carbs: (ing.ingredientsStandard.carbs * newQuantity) / ing.ingredientsStandard.quantity,
+              fat: (ing.ingredientsStandard.fat * newQuantity) / ing.ingredientsStandard.quantity,
+              protein: (ing.ingredientsStandard.protein * newQuantity) / ing.ingredientsStandard.quantity,
             };
           }
           return ing;
         });
 
+        // Calculer les nouvelles valeurs totales
         const totalWeight = calculateTotalWeight(updatedIngredients);
+        const totalMacros = recalculateTotalMacros(
+          updatedIngredients,
+          state.mealWeight,
+        );
+
         return {
           selectedIngredients: updatedIngredients,
           totalWeight,
-          totalMacros: recalculateTotalMacros(updatedIngredients, state.mealWeight),
+          totalMacros,
         };
       } catch (error) {
-        console.error('Erreur lors de la mise à jour de l\'ingrédient:', error);
+        console.error('Erreur dans updateIngredient:', error);
         return state;
       }
     }),

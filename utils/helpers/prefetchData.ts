@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { DataType } from './queryInvalidation';
 import { getCacheConfig } from './cacheConfig';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { getCurrentUserId } from './userContext';

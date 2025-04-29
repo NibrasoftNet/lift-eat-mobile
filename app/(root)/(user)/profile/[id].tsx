@@ -1,12 +1,11 @@
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { UserOrmPros } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import UserProfileForm from '@/components/froms/UserProfileForm';
 import { UserProfileDefaultValuesProps } from '@/utils/validation/user/user-profile.validation';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
@@ -15,7 +14,6 @@ import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function EditUserProfile() {
   const { id } = useLocalSearchParams();
-  const drizzleDb = useDrizzleDb();
   const queryClient = useQueryClient();
 
   const {

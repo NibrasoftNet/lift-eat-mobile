@@ -26,13 +26,11 @@ import { HStack } from '@/components/ui/hstack';
 import ForgetPasswordModal from '@/components/modals/ForgetPasswordModal';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/toast';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import useSessionStore from '@/utils/store/sessionStore';
 import { Colors } from '@/utils/constants/Colors';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { authPagesService } from '@/utils/services/pages/auth-pages.service';
 

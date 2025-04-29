@@ -696,19 +696,31 @@ export async function handleUpdateMealQuantityInPlan(db: any, params: UpdateMeal
     const mealInfo = meal[0];
     const relationInfo = currentRelation[0];
     
-    // Calculer les anciennes valeurs nutritionnelles
-    const oldQuantityRatio = relationInfo.quantity / 100;
-    const oldCalories = mealInfo.calories * oldQuantityRatio;
-    const oldCarbs = mealInfo.carbs * oldQuantityRatio;
-    const oldFat = mealInfo.fat * oldQuantityRatio;
-    const oldProtein = mealInfo.protein * oldQuantityRatio;
+    // Calculer les valeurs nutritionnelles avec plus de précision
+    // Utiliser directement la fonction de calcul du helper pour cohérence
+    const baseQuantity = mealInfo.quantity || 100;
+    const baseMacros = {
+      calories: mealInfo.calories || 0,
+      carbs: mealInfo.carbs || 0,
+      fat: mealInfo.fat || 0,
+      protein: mealInfo.protein || 0
+    };
     
-    // Calculer les nouvelles valeurs nutritionnelles
-    const newQuantityRatio = newQuantity / 100;
-    const newCalories = mealInfo.calories * newQuantityRatio;
-    const newCarbs = mealInfo.carbs * newQuantityRatio;
-    const newFat = mealInfo.fat * newQuantityRatio;
-    const newProtein = mealInfo.protein * newQuantityRatio;
+    // Anciennes valeurs précisément calculées selon la quantité actuelle
+    const oldMacros = {
+      calories: Math.round((relationInfo.calories || 0) * 100) / 100,
+      carbs: Math.round((relationInfo.carbs || 0) * 100) / 100,
+      fat: Math.round((relationInfo.fat || 0) * 100) / 100,
+      protein: Math.round((relationInfo.protein || 0) * 100) / 100
+    };
+    
+    // Nouvelles valeurs précisément calculées proportionnellement
+    const newMacros = {
+      calories: Math.round((baseMacros.calories * newQuantity / baseQuantity) * 100) / 100,
+      carbs: Math.round((baseMacros.carbs * newQuantity / baseQuantity) * 100) / 100,
+      fat: Math.round((baseMacros.fat * newQuantity / baseQuantity) * 100) / 100,
+      protein: Math.round((baseMacros.protein * newQuantity / baseQuantity) * 100) / 100
+    };
     
     // Récupérer le plan journalier actuel
     const currentDailyPlan = await db
@@ -724,15 +736,36 @@ export async function handleUpdateMealQuantityInPlan(db: any, params: UpdateMeal
     
     const dailyPlanInfo = currentDailyPlan[0];
     
+    // Calculer les nouveaux totaux avec précision
+    const newDailyTotals = {
+      calories: Math.round((dailyPlanInfo.calories - oldMacros.calories + newMacros.calories) * 100) / 100,
+      carbs: Math.round((dailyPlanInfo.carbs - oldMacros.carbs + newMacros.carbs) * 100) / 100,
+      fat: Math.round((dailyPlanInfo.fat - oldMacros.fat + newMacros.fat) * 100) / 100,
+      protein: Math.round((dailyPlanInfo.protein - oldMacros.protein + newMacros.protein) * 100) / 100
+    };
+    
+    logger.debug(LogCategory.DATABASE, 'Nutrition values calculation', {
+      mealBase: baseMacros,
+      oldValues: oldMacros,
+      newValues: newMacros,
+      dailyPlanOld: {
+        calories: dailyPlanInfo.calories,
+        carbs: dailyPlanInfo.carbs,
+        fat: dailyPlanInfo.fat,
+        protein: dailyPlanInfo.protein
+      },
+      dailyPlanNew: newDailyTotals
+    });
+    
     // Mettre à jour la relation avec les nouvelles valeurs nutritionnelles
     await db
       .update(dailyPlanMeals)
       .set({
         quantity: newQuantity,
-        calories: newCalories,
-        carbs: newCarbs,
-        fat: newFat,
-        protein: newProtein,
+        calories: newMacros.calories,
+        carbs: newMacros.carbs,
+        fat: newMacros.fat,
+        protein: newMacros.protein,
         updatedAt: new Date().toISOString(),
       })
       .where(
@@ -746,10 +779,10 @@ export async function handleUpdateMealQuantityInPlan(db: any, params: UpdateMeal
     await db
       .update(dailyPlan)
       .set({
-        calories: dailyPlanInfo.calories - oldCalories + newCalories,
-        carbs: dailyPlanInfo.carbs - oldCarbs + newCarbs,
-        fat: dailyPlanInfo.fat - oldFat + newFat,
-        protein: dailyPlanInfo.protein - oldProtein + newProtein,
+        calories: newDailyTotals.calories,
+        carbs: newDailyTotals.carbs,
+        fat: newDailyTotals.fat,
+        protein: newDailyTotals.protein,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(dailyPlan.id, dailyPlanId));

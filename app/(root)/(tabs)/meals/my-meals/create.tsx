@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation';
 import MealForm from '@/components/froms/MealForm';
 import {
@@ -12,7 +11,6 @@ import { getCurrentUserId } from '@/utils/helpers/userContext';
 export default function CreateNewMealScreen() {
   // État pour stocker l'ID utilisateur
   const [userId, setUserId] = useState<number>(0);
-  const drizzleDb = useDrizzleDb();
   
   // Charger l'ID utilisateur au montage du composant
   useEffect(() => {

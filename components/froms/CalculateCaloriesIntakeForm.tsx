@@ -18,7 +18,6 @@ import {
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from 'expo-router';
 import { HStack } from '@/components/ui/hstack';
@@ -33,28 +32,25 @@ import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivity
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { caloriesIntakeFormService } from '@/utils/services/calories-intake-form.service';
+import { nutritionPagesService } from '@/utils/services/pages/nutrition-pages.service';
 
 export default function CalculateCaloriesIntakeForm({
   defaultValues,
 }: {
   defaultValues: CalculateCaloriesIntakeDefaultValueProps;
 }) {
-  const drizzleDb = useDrizzleDb();
+  const queryClient = useQueryClient();
   const toast = useToast();
   const router = useRouter();
 
-  // Init Tanstack Query client
-  const queryClient = useQueryClient();
-  
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   // Préparer les valeurs par défaut normalisées via le service
-  const normalizedDefaultValues = useMemo(() => 
+  const normalizedDefaultValues = useMemo(() =>
     caloriesIntakeFormService.prepareDefaultValues(defaultValues),
   [defaultValues]);
 
@@ -79,39 +75,39 @@ export default function CalculateCaloriesIntakeForm({
       router.back();
     }
   }, [userId, toast, router]);
-  
+
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
     try {
       logger.debug(LogCategory.FORM, 'Component initiating calorie intake form submission');
-      
+
       if (!userId) {
         return; // Déjà géré par validateUserAccess
       }
-      
+
       // Déléguer au service pour préparer les données à soumettre
       const serviceResult = await caloriesIntakeFormService.submitForm(
         data,
         // Convertir l'ID numérique en chaîne pour respecter l'interface du service
         userId ? String(userId) : ''
       );
-      
+
       if (!serviceResult.success) {
         throw serviceResult.error || new Error(serviceResult.message);
       }
-      
-      // Utiliser les données préparées par le service pour les soumettre au MCP server
-      const updateResult = await sqliteMCPServer.updateUserPreferencesViaMCP(userId, serviceResult.data);
-      
+
+      // Utiliser le service MCP pour mettre à jour les préférences de l'utilisateur
+      const updateResult = await nutritionPagesService.updateUserNutritionPreferences(userId, serviceResult.data);
+
       if (!updateResult.success) {
         throw new Error(updateResult.error || 'Failed to save calorie intake data');
       }
-      
+
       // Utilisation du queryClient pour invalider les données utilisateur en cache
       queryClient.invalidateQueries({ queryKey: ['user-details', userId] });
-      
+
       // Navigation vers l'étape suivante en utilisant un chemin relatif
       router.push('/(root)/(tabs)/plans/my-plans/create/target');
-      
+
       // Afficher un message de succès
       toast.show({
         placement: 'top',
@@ -172,7 +168,7 @@ export default function CalculateCaloriesIntakeForm({
         <Text className="text-lg font-semibold text-gray-800 mb-4">
           Personal Information
         </Text>
-        
+
         {/* Age Input */}
         <FormControl isInvalid={!!errors.age} className="mb-4">
           <FormControlLabel>
