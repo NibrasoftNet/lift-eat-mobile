@@ -17,8 +17,8 @@ import { Button, ButtonIcon } from '../ui/button';
 import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import { IngredientWithStandardProps } from '../../types/ingredient.type';
-import { ingredientService } from '@/utils/services/ingredient.service';
-import { logger } from '@/utils/services/logging.service';
+import { ingredientService } from '@/utils/services/core/ingredient.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**

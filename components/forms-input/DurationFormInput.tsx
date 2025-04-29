@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { durationFormService } from '@/utils/services/duration-form.service';
+import { durationFormService } from '@/utils/services/forms/form-duration.service';
 
 interface DurationFormInputProps {
   control: Control<any>;

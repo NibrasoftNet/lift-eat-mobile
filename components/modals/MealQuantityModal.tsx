@@ -14,11 +14,11 @@ import { Input, InputField } from '@/components/ui/input';
 import { MealOrmProps } from '@/db/schema';
 import { useToast } from '@/components/ui/toast';
 import { Toast, ToastTitle } from '@/components/ui/toast';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { useQueryClient } from '@tanstack/react-query';
-import { planService } from '@/utils/services/plan.service';
+import { planService } from '@/utils/services/core/plan.service';
 
 interface MealQuantityModalProps {
   isOpen: boolean;

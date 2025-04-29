@@ -43,9 +43,9 @@ import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { userProfileFormService } from '@/utils/services/user-profile-form.service';
+import { userProfileFormService } from '@/utils/services/forms/form-user-profile.service';
 import { userPagesService } from '@/utils/services/pages/user-pages.service';
 import { useRouter } from 'expo-router';
 import Animated from 'react-native-reanimated';
@@ -80,8 +80,8 @@ export default function UserProfileForm({
     }
   }, [userId, defaultValues.id, toast, router]);
   const [isActionSheetOpen, setActionSheetOpen] = useState(false);
-  const [photo, setPhoto] = useState<Buffer<ArrayBufferLike> | string>(
-    `${normalizedDefaultValues.profileImage || ''}`,
+  const [photo, setPhoto] = useState<string>(
+    normalizedDefaultValues.profileImage || '',
   );
   const {
     setValue,

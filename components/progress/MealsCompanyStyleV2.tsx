@@ -23,9 +23,9 @@ import {
   MealType, 
   MealList, 
   MealListsState 
-} from '@/utils/services/meals-company-style.service';
+} from '@/utils/services/common/meals-company-style.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { progressPagesService } from '@/utils/services/pages/progress-pages.service';
 

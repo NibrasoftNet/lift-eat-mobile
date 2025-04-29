@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import React, { useEffect, useState, memo } from 'react';
-import { genderFormService } from '@/utils/services/gender-form.service';
+import { genderFormService } from '@/utils/services/forms/form-gender.service';
 
 const GenderFormInput = memo(({ 
   defaultGender,

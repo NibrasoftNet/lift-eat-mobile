@@ -23,7 +23,7 @@ import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
-import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
+// Le fichier logging-interceptor.ts a été supprimé
 import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 
 export default function MyMealsScreen() {
@@ -71,8 +71,7 @@ export default function MyMealsScreen() {
       // Valider chaque repas pour éviter les "meal undefined"
       const validMeals = result.data.meals.filter(meal => {
         if (!meal || typeof meal !== 'object' || meal === null) {
-          logger.error(LogCategory.DATABASE, `Invalid meal object found in meals list`);
-          monitorObjectExistence('meal', meal, 'MyMealsScreen.queryFn');
+          logger.error(LogCategory.DATABASE, `Invalid meal object found in meals list. Stack: ${new Error().stack}`);
           return false;
         }
         return true;

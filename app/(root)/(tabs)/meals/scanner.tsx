@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import scannerService from '@/utils/services/scanner.service';
+import scannerService from '@/utils/services/common/scanner.service';
 
 export default function ScannerTab() {
   const [permission, requestPermission] = useCameraPermissions();

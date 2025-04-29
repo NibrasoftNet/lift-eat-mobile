@@ -32,14 +32,13 @@ import { UserOrmPros } from '@/db/schema';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { userSettingsDrawerService } from '@/utils/services/user-settings-drawer.service';
+import { userSettingsDrawerService } from '@/utils/services/ui/ui-user-settings-drawer.service';
 import { MenuItem } from '@/utils/interfaces/drawer.interface';
-import { drawerService } from '@/utils/services/drawer.service';
 
-// Utiliser le service pour obtenir les u00e9lu00e9ments du menu
-// Cette variable sert de mappage pour convertir les noms d'icu00f4nes en composants
+// Utiliser le service pour obtenir les éléments du menu
+// Cette variable sert de mappage pour convertir les noms d'icônes en composants
 const iconMapping: Record<string, any> = {
   'Compass': Compass,
   'PencilRuler': PencilRuler,
@@ -95,22 +94,29 @@ const MenuItemComponent = ({ item }: { item: MenuItem }) => {
 const UserSettingsDrawer = ({
   showUserSettingsDrawer,
   setShowUserSettingsDrawer,
+  user: initialUser,
 }: {
   showUserSettingsDrawer: boolean;
   setShowUserSettingsDrawer: Dispatch<SetStateAction<boolean>>;
+  user?: UserOrmPros;
 }) => {
   // Obtenir l'ID utilisateur de manière standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   
   // État local pour stocker les données utilisateur
-  const [user, setUser] = React.useState<UserOrmPros | null>(null);
+  const [user, setUser] = React.useState<UserOrmPros | null>(initialUser || null);
   
-  // Charger les données utilisateur quand le drawer s'ouvre
+  // Charger les données utilisateur quand le drawer s'ouvre et qu'il n'y a pas d'utilisateur initial
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) {
         logger.warn(LogCategory.AUTH, 'User not authenticated when accessing settings drawer');
         setShowUserSettingsDrawer(false);
+        return;
+      }
+      
+      if (initialUser) {
+        setUser(initialUser);
         return;
       }
       
@@ -132,7 +138,7 @@ const UserSettingsDrawer = ({
     if (showUserSettingsDrawer) {
       fetchUserData();
     }
-  }, [showUserSettingsDrawer, userId, setShowUserSettingsDrawer]);
+  }, [showUserSettingsDrawer, userId, setShowUserSettingsDrawer, initialUser]);
   // Si aucun utilisateur n'est chargé, ne rien afficher
   if (!user) {
     return null;

@@ -1,7 +1,7 @@
 import { MealOrmProps } from '@/db/schema';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { useQueryClient } from '@tanstack/react-query';

@@ -1,5 +1,12 @@
 import { UserOrmPros } from '@/db/schema';
 
+// Interface pour les préférences d'interface utilisateur
+export interface UIPreferences {
+  language?: string;
+  theme?: string;
+  notifications?: boolean;
+}
+
 // Interface pour updateUserPreferencesViaMCP
 export interface UpdateUserPreferencesParams {
   userId: number;

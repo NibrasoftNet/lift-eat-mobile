@@ -12,9 +12,9 @@ import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { MealOrmProps } from '@/db/schema';
 import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { createStableId, ItemType } from '@/utils/helpers/uniqueId';
-import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
+// L'ancienne fonction monitorObjectExistence a été retirée
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
-import { mealDrawerService } from '@/utils/services/meal-drawer.service';
+import { mealDrawerService } from '@/utils/services/ui/ui-meal-drawer.service';
 import { MealWithQuantity } from '@/utils/interfaces/drawer.interface';
 
 /* Custom components */
@@ -268,17 +268,17 @@ function MealsDrawer({
         // Ajouter un identifiant stable et unique à chaque repas
         const mealsWithStableIds = result.meals.map(meal => {
           // Vérifier si un repas est undefined et logger la source
-          monitorObjectExistence('meal', meal, 'MealsDrawer.queryFn');
-          
-          if (meal) {
-            return {
-              ...meal,
-              uniqueId: createStableId(ItemType.MEAL, meal.id)
-            };
+          if (!meal) {
+            logger.error(LogCategory.APP, `Meal is undefined in MealsDrawer.queryFn. Stack: ${new Error().stack}`);
+            return null;
           }
-          return null;
+          
+          return {
+            ...meal,
+            uniqueId: createStableId(ItemType.MEAL, meal.id)
+          };
         }).filter(Boolean);
-        
+      
         return mealsWithStableIds;
       } else {
         logger.error(LogCategory.APP, 'MealsDrawer - Meals is not an array in queryFn', result);
@@ -325,9 +325,12 @@ function MealsDrawer({
   const handleMealToggle = useCallback((meal: MealOrmProps) => {
     try {
       // Vérifier si le repas est valide
-      monitorObjectExistence('meal', meal, 'MealsDrawer.handleMealToggle');
+      if (!meal) {
+        logger.error(LogCategory.APP, `Meal is undefined in MealsDrawer.handleMealToggle. Stack: ${new Error().stack}`);
+        return;
+      }
       
-      if (!meal || typeof meal.id !== 'number') {
+      if (typeof meal.id !== 'number') {
         logger.error(LogCategory.APP, 'MealsDrawer - Invalid meal in handleMealToggle', { meal });
         toast.show({
           render: ({ id }) => (
@@ -410,7 +413,7 @@ function MealsDrawer({
       }));
       
       // Utiliser le service pour ajouter les repas au plan
-      const result = await mealDrawerService.addMealsToPlan(dailyPlanId, planId, mealsToAdd);
+      const result = await mealDrawerService.addMealsToPlan(dailyPlanId, mealsToAdd);
 
       // Traiter les résultats
       if (!result.success && result.errors && result.errors.length > 0) {
@@ -466,7 +469,7 @@ function MealsDrawer({
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedMeals, mealQuantities, dailyPlanId, planId, onAddMealToPlan, onMealsAdded, queryClient, toast, setShowMealsDrawer]);
+  }, [selectedMeals, mealQuantities, dailyPlanId, onAddMealToPlan, onMealsAdded, queryClient, toast, setShowMealsDrawer]);
 
   // Composant de filtres pour les types de repas et cuisines
   const FiltersComponent = useCallback(() => (

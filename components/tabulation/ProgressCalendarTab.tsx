@@ -18,7 +18,7 @@ import useProgressStore, { MealWithProgress, MealsByType } from '@/utils/store/p
 import { View, ScrollView } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import MealsClickSelection from '../progress/MealsClickSelection';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { getCurrentUserId, getCurrentUserIdSync, hasUserInSession } from '@/utils/helpers/userContext';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';

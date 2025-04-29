@@ -18,9 +18,9 @@ import { useAppState } from '@/hooks/useAppState';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { setupGlobalConsoleInterceptors } from '@/utils/helpers/logging-interceptor';
+// Le fichier logging-interceptor.ts a été supprimé
 import { ActivityIndicator, GestureResponderEvent, View } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
@@ -93,10 +93,9 @@ export default function ProjectLayout() {
   useOnlineManager();
   useAppState();
 
-  // Configurer l'intercepteur de logs pour capturer les messages "meal undefined"
+  // Ancienne configuration de logs supprimée
   useEffect(() => {
-    setupGlobalConsoleInterceptors();
-    logger.info(LogCategory.APP, 'Intercepteurs de console configurés');
+    logger.info(LogCategory.APP, 'Application démarrée');
   }, []);
 
   useEffect(() => {

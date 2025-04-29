@@ -26,9 +26,9 @@ import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import DeletionModal from '@/components/modals/DeletionModal';
 import { useToast } from '@/components/ui/toast';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { planService } from '@/utils/services/plan.service';
+import { planService } from '@/utils/services/core/plan.service';
 
 /**
  * Composant qui affiche un plan nutritionnel dans une carte interactive

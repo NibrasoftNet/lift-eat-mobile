@@ -32,12 +32,12 @@ import {
   SelectPortal,
   SelectTrigger,
 } from '../ui/select';
-import { generalSettingsDrawerService } from '@/utils/services/general-settings-drawer.service';
+import { generalSettingsDrawerService } from '@/utils/services/ui/ui-general-settings-drawer.service';
 import { GeneralSettingsMenuItem } from '@/utils/interfaces/drawer.interface';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
-// Mappage des noms d'icu00f4nes aux composants d'icu00f4nes
+// Mappage des noms d'icônes aux composants d'icônes
 const iconMapping: Record<string, any> = {
   'CircleHelp': CircleHelp,
   'ShieldAlert': ShieldAlert,
@@ -46,18 +46,18 @@ const iconMapping: Record<string, any> = {
   'Settings': Settings,
 };
 
-// Composant pour afficher un u00e9lu00e9ment du menu des paramètres
+// Composant pour afficher un élément du menu des paramètres
 const GeneralMenuItem = ({ item }: { item: GeneralSettingsMenuItem }) => {
-  // Utiliser le callback pour gu00e9rer l'action de l'u00e9lu00e9ment
+  // Utiliser le callback pour gérer l'action de l'élément
   const handlePress = useCallback(() => {
-    // Utiliser le service pour gu00e9rer l'action du menu
+    // Utiliser le service pour gérer l'action du menu
     generalSettingsDrawerService.handleMenuAction(item.action, () => {
       logger.info(LogCategory.UI, `Menu action '${item.action}' completed`);
     });
   }, [item.action]);
   
-  // Obtenir le composant d'icu00f4ne correspondant au nom d'icu00f4ne
-  const IconComponent = iconMapping[item.icon] || Settings; // Fallback sur Settings si l'icu00f4ne n'est pas trouvge
+  // Obtenir le composant d'icône correspondant au nom d'icône
+  const IconComponent = iconMapping[item.icon] || Settings; // Fallback sur Settings si l'icône n'est pas trouvée
   
   return (
     <Pressable
@@ -77,13 +77,13 @@ function GeneralSettingsDrawer({
   showGeneralSettingsDrawer: boolean;
   setShowGeneralSettingsDrawer: Dispatch<SetStateAction<boolean>>;
 }) {
-  // u00c9tat pour la langue su00e9lectionnu00e9e
+  // État pour la langue sélectionnée
   const [selectedLanguage, setSelectedLanguage] = useState<string>('ux');
   
   // Gestionnaire de changement de langue
-  const handleLanguageChange = useCallback((value: string) => {
-    setSelectedLanguage(value);
-    generalSettingsDrawerService.changeLanguage(value);
+  const handleLanguageChange = useCallback((lang: string) => {
+    setSelectedLanguage(lang);
+    generalSettingsDrawerService.changeLanguage(lang);
   }, []);
   return (
     <Drawer
@@ -133,7 +133,7 @@ function GeneralSettingsDrawer({
           </Pressable>
           
           {/* Utiliser le service pour générer les éléments du menu */}
-          {generalSettingsDrawerService.getGeneralMenuItems().map((item) => (
+          {generalSettingsDrawerService.getGeneralMenuItems().map((item: GeneralSettingsMenuItem) => (
             <GeneralMenuItem key={item.action} item={item} />
           ))}
         </DrawerBody>
@@ -144,7 +144,7 @@ function GeneralSettingsDrawer({
             }}
             className="flex-1"
           >
-            <ButtonText>CLose</ButtonText>
+            <ButtonText>Close</ButtonText>
           </Button>
         </DrawerFooter>
       </DrawerContent>

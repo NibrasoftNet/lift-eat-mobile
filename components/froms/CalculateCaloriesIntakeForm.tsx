@@ -32,9 +32,9 @@ import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivity
 import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { caloriesIntakeFormService } from '@/utils/services/calories-intake-form.service';
+import { caloriesIntakeFormService } from '@/utils/services/forms/form-calories-intake.service';
 import { nutritionPagesService } from '@/utils/services/pages/nutrition-pages.service';
 
 export default function CalculateCaloriesIntakeForm({

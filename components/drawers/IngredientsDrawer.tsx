@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useState, useMemo, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
@@ -10,7 +10,7 @@ import IngredientStandardCard from '@/components/cards/IngredientStandardCard';
 import SelectionDrawer from './SelectionDrawer';
 /* Types */
 import { IngredientStandardOrmProps } from '@/db/schema';
-import { ingredientDrawerService } from '@/utils/services/ingredient-drawer.service';
+import { ingredientDrawerService } from '@/utils/services/ui/ui-ingredient-drawer.service';
 import { GetIngredientsParams, IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
 
 // Constantes de pagination et performance importées du service

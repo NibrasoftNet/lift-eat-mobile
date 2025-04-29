@@ -1,16 +1,9 @@
 import * as z from 'zod';
+import { ResetPasswordData } from '@/utils/interfaces/auth.interface';
 
-export const forgetPasswordSchema = z.object({
-  email: z
-    .string()
-    .transform((val) => val.trim().toLowerCase()) // Trim & lowercase first
-    .refine((val) => z.string().email().safeParse(val).success, {
-      message: 'Email invalide!',
-    }),
+export const forgetSchema = z.object({
+  email: z.string().email('Email invalide'),
 });
 
-export type ForgetPasswordFormData = z.infer<typeof forgetPasswordSchema>;
-
-export type LoginDefaultValuesProps = {
-  email: string;
-};
+// Ensure this matches the interface from auth.interface.ts
+export type ForgetPasswordFormData = ResetPasswordData;

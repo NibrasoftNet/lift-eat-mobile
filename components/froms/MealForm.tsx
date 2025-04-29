@@ -75,9 +75,9 @@ import { useToast } from '../ui/toast';
 import { Colors } from '@/utils/constants/Colors';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { mealFormService } from '@/utils/services/meal-form.service';
+import { mealFormService } from '@/utils/services/forms/form-meal.service';
 
 
 export default function MealForm({
@@ -103,8 +103,8 @@ export default function MealForm({
   
   // Préparer les valeurs par défaut en utilisant le service
   const processedDefaultValues = useMemo(
-    () => mealFormService.prepareDefaultValues(defaultValues),
-    [defaultValues]
+    () => mealFormService.getDefaultValues(),
+    []  // Remove defaultValues dependency since getDefaultValues doesn't take parameters
   );
   
   const [image, setImage] = useState<
@@ -143,17 +143,23 @@ export default function MealForm({
 
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setIsImageActionSheetOpen(false); // Close the action sheet
-    await mealFormService.handleImageSelection(source, setValue, setImage);
+    // handleImageSelection in service only takes one parameter (setFieldValue)
+    const imageSelectionHandler = mealFormService.handleImageSelection((field, value) => {
+      if (field === 'image') {
+        setValue('image', value);
+        setImage(value);
+      }
+    });
+    await imageSelectionHandler();
   };
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: MealFormData) => {
       // Utiliser le service pour soumettre le formulaire
-      const formResult = await mealFormService.submitForm(
+      const formResult = await mealFormService.submitMealForm(
         data, 
-        userId?.toString() || '', 
-        operation,
-        selectedIngredients,
+        userId?.toString() || null,
+        operation === 'update' ? defaultValues.id || null : null,
         {
           totalCalories: totalMacros.totalCalories,
           totalCarbs: totalMacros.totalCarbs,
@@ -242,8 +248,22 @@ export default function MealForm({
   });
 
   const onSubmit = async (data: MealFormData) => {
-    // Utiliser le service pour valider les ingrédients
-    if (!mealFormService.validateIngredients(selectedIngredients, toast)) {
+    // Validate ingredients locally since the service doesn't have this method
+    if (selectedIngredients.length === 0) {
+      toast.show({
+        placement: 'top',
+        render: ({ id }: { id: string }) => {
+          const toastId = 'toast-' + id;
+          return (
+            <MultiPurposeToast
+              id={toastId}
+              color={ToastTypeEnum.INFOS}
+              title="Missing Ingredients"
+              description="Please add at least one ingredient to your meal"
+            />
+          );
+        },
+      });
       return;
     }
     
@@ -259,7 +279,7 @@ export default function MealForm({
     <>
       <VStack className="flex-1 w-full p-4">
         <HStack className="w-full h-8 justify-between">
-          <Pressable onPress={() => mealFormService.handleCancel(router)}>
+          <Pressable onPress={() => router.back()}>
             <Icon as={CircleChevronLeft} className="w-10 h-10" />
           </Pressable>
           <Button

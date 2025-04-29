@@ -98,7 +98,7 @@ Pour rappel, l'architecture MCP se compose de :
 // auth-pages.service.ts
 import { LoginFormData } from '@/utils/validation/auth/login-schema.validation';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 export const authPagesService = {

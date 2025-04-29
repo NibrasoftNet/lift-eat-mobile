@@ -34,7 +34,7 @@ import {
   MealOrmProps
 } from '@/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { WeightUnitEnum, GoalEnum } from '@/utils/enum/user-details.enum';
 import { MealUnitEnum } from '@/utils/enum/meal.enum';

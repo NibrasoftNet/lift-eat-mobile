@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import geminiService from '@/utils/services/gemini-service';
+import geminiService from '@/utils/services/core/gemini.service';
 import iaService from '@/utils/services/ia/ia.service';
 import { getCurrentUserId } from '@/utils/helpers/userContext';
 

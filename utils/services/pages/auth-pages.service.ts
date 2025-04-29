@@ -1,6 +1,7 @@
-import { AuthPagesServiceInterface, OperationResult } from "@/utils/interfaces/pages.interface";
-import { LoginFormData } from "@/utils/validation/auth/login-schema.validation";
-import { authService } from "@/utils/services/authService";
+import { AuthPagesServiceInterface, OperationResult } from "../../interfaces/pages.interface";
+import { AuthenticationResult, LoginFormData, RegisterFormData, ResetPasswordData, UpdatePasswordData } from "../../interfaces/auth.interface";
+import { authService } from "../core/auth.service";
+import { logger } from "../common/logging.service";
 
 /**
  * Service d'orchestration pour les pages d'authentification (UI)
@@ -11,19 +12,19 @@ class AuthPagesService implements AuthPagesServiceInterface {
     return authService.findOrCreateUser(email);
   }
 
-  async login(data: LoginFormData): Promise<OperationResult<{ user: any; token: string }>> {
+  async login(data: LoginFormData): Promise<OperationResult<AuthenticationResult>> {
     return authService.login(data);
   }
 
-  async register(data: any): Promise<OperationResult<{ user: any }>> {
+  async register(data: RegisterFormData): Promise<OperationResult<AuthenticationResult>> {
     return authService.register(data);
   }
 
-  async resetPassword(data: { email: string }): Promise<OperationResult> {
+  async resetPassword(data: ResetPasswordData): Promise<OperationResult> {
     return authService.resetPassword(data);
   }
 
-  async updatePassword(data: { password: string }, token: string): Promise<OperationResult> {
+  async updatePassword(data: UpdatePasswordData, token: string): Promise<OperationResult> {
     return authService.updatePassword(data, token);
   }
 }

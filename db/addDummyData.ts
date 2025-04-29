@@ -21,7 +21,7 @@ import {
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { eq, sql } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 // Static image paths using require()

@@ -22,7 +22,7 @@ import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import MultiPurposeToast from '../MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';

@@ -16,8 +16,8 @@ import {
 } from '../ui/modal';
 import { Heading } from '../ui/heading';
 import { Colors } from '@/utils/constants/Colors';
-import { deletionModalService } from '@/utils/services/deletion-modal.service';
-import { logger } from '@/utils/services/logging.service';
+import { deletionModalService } from '@/utils/services/ui/ui-deletion-modal.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface DeletionModalProps {

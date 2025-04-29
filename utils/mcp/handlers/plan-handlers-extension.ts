@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { dailyPlanMeals } from '@/db/schema';
 

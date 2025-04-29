@@ -2,7 +2,7 @@ import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useQueryClient } from '@tanstack/react-query';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { prefetchEssentialData } from '@/utils/helpers/prefetchData';
 

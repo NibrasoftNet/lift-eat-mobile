@@ -38,9 +38,9 @@ import { Colors } from '@/utils/constants/Colors';
 import { HStack } from '@/components/ui/hstack';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { userDetailsFormService } from '@/utils/services/user-details-form.service';
+import { userDetailsFormService } from '@/utils/services/forms/form-user-details.service';
 import { userPagesService } from '@/utils/services/pages/user-pages.service';
 
 export default function UserDetailsForm({

@@ -16,7 +16,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { planSchema, PlanFormValues, defaultPlanValues } from '@/utils/validation/plan/plan.validation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';

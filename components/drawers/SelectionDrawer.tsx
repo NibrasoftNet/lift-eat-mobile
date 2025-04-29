@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useState, useMemo, useEffect, useCallback } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { RefreshControl, ActivityIndicator } from 'react-native';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 /* Custom Providers */
@@ -21,7 +21,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { CircleChevronDown, SearchIcon } from 'lucide-react-native';
 /* Services */
-import { drawerService } from '@/utils/services/drawer.service';
+import { drawerService } from '@/utils/services/ui/ui-drawer.service';
 
 // Interface générique pour les items avec ID
 interface SelectionItem {
@@ -109,9 +109,9 @@ function SelectionDrawer<T extends SelectionItem>({
     setDebouncedSearchTerm(term || '');
   };
 
-  // Utiliser le service pour cru00e9er un gestionnaire optimisu00e9 de fin de liste
+  // Utiliser le service pour créer un gestionnaire optimisé de fin de liste
   const handleEndReached = useCallback(() => {
-    // Utiliser le service pour gu00e9rer la fin de liste atteinte
+    // Utiliser le service pour gérer la fin de liste atteinte
     drawerService.createEndReachedHandler(hasNextPage, fetchNextPage)();
   }, [hasNextPage, fetchNextPage]);
 

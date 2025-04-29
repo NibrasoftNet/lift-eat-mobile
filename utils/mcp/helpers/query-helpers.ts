@@ -1,5 +1,5 @@
 import { SQLiteSelect } from 'drizzle-orm/sqlite-core';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**

@@ -3,10 +3,13 @@
  * Ces interfaces définissent les contrats pour les services gérant les différents modaux
  */
 
-import { ForgetPasswordFormData } from "../validation/auth/forget-schema.validation";
-import { MealOrmProps } from "@/db/schema";
+import { MealOrmProps } from "../../db/schema";
+import { MealFormData } from "../validation/meal/meal-schema.validation";
+import { MealTypeEnum } from "../enum/meal.enum";
+import { IaMealType } from "../validation/ia/ia.schemas";
+import { ResetPasswordData } from "./auth.interface";
 import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { QueryClient } from '@tanstack/react-query';
 
 // Type pour le service de toast
@@ -17,9 +20,8 @@ type ToastServiceType = any; // À remplacer par le type réel si nécessaire
  */
 export interface ModalOperationResult {
   success: boolean;
+  error?: string;
   message: string;
-  data?: any;
-  error?: any;
 }
 
 /**
@@ -30,14 +32,14 @@ export interface ForgetPasswordModalServiceInterface {
    * Initialise les valeurs par défaut pour le formulaire
    * @returns Les valeurs par défaut pour le formulaire
    */
-  getDefaultValues(): ForgetPasswordFormData;
+  getDefaultValues(): any;
   
   /**
    * Soumet le formulaire de réinitialisation de mot de passe
    * @param data - Les données du formulaire
    * @returns Le résultat de l'opération
    */
-  submitForm(data: ForgetPasswordFormData): Promise<ModalOperationResult>;
+  submitForm(data: any): Promise<ModalOperationResult>;
   
   /**
    * Gère la navigation après une soumission réussie
@@ -158,4 +160,92 @@ export interface DeletionModalServiceInterface {
    * @param setShowModal - Fonction pour fermer le modal
    */
   handleCancelDelete(setShowModal: (show: boolean) => void): void;
+}
+
+/**
+ * Interface pour le service de gestion du modal de réinitialisation de mot de passe
+ */
+export interface ResetPasswordModalServiceInterface {
+  /**
+   * Soumet le formulaire de réinitialisation de mot de passe
+   * @param data - Les données du formulaire
+   * @returns Le résultat de l'opération
+   */
+  submitForm(data: ResetPasswordData): Promise<ModalOperationResult>;
+  
+  /**
+   * Gère la navigation après une soumission réussie
+   * @param router - Le router pour la navigation
+   * @param setShowModal - Fonction pour modifier la visibilité du modal
+   */
+  handleSuccessNavigation(router: any, setShowModal: (show: boolean) => void): void;
+  
+  /**
+   * Gère l'affichage des erreurs
+   * @param error - L'erreur à afficher
+   * @param toast - Service toast pour afficher les messages
+   */
+  handleError(error: any, toast: ToastServiceType): void;
+  
+  /**
+   * Ferme le modal
+   * @param setShowModal - Fonction pour modifier la visibilité du modal
+   */
+  closeModal(setShowModal: (show: boolean) => void): void;
+}
+
+/**
+ * Interface pour le contexte des modaux
+ */
+export interface ModalContextProps {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onSubmit?: () => void;
+  modalType?: ModalType;
+  modalData?: any;
+}
+
+/**
+ * Enumération des types de modaux
+ */
+export enum ModalType {
+  MEAL_FORM = "meal_form",
+  MEAL_DETAILS = "meal_details",
+  MEAL_DELETE = "meal_delete",
+  MEAL_EDIT = "meal_edit",
+  MEAL_GENERATE = "meal_generate",
+  FORGET_PASSWORD = "forget_password",
+  RESET_PASSWORD = "reset_password",
+}
+
+/**
+ * Interface pour les données du modal de formulaire de repas
+ */
+export interface MealFormModalData {
+  meal?: MealOrmProps;
+  defaultValues?: MealFormData;
+  onSubmit?: (data: MealFormData) => void;
+  mealType?: MealTypeEnum;
+}
+
+/**
+ * Interface pour les données du modal de génération de repas
+ */
+export interface MealGenerateModalData {
+  onSubmit?: (data: IaMealType) => void;
+}
+
+/**
+ * Interface pour les données du modal d'oubli de mot de passe
+ */
+export interface ForgetPasswordModalData {
+  onSubmit?: (data: any) => void;
+}
+
+/**
+ * Interface pour les données du modal de réinitialisation de mot de passe
+ */
+export interface ResetPasswordModalData {
+  onSubmit?: (data: ResetPasswordData) => void;
 }

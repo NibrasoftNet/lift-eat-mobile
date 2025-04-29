@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { weightInputService } from '@/utils/services/weight-input.service';
+import { weightInputService } from '@/utils/services/ui/weight-input.service';
 
 interface WeightFormInputProps {
   control: Control<any>;

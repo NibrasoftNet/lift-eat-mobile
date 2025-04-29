@@ -5,7 +5,7 @@ import { PhysicalActivityEnum } from '../../utils/enum/user-gender-activity.enum
 import Animated from 'react-native-reanimated';
 import React, { useState } from 'react';
 import { ImageBackground } from 'react-native';
-import { physicalActivityFormService } from '@/utils/services/physical-activity-form.service';
+import { physicalActivityFormService } from '@/utils/services/forms/form-physical-activity.service';
 
 const PhysicalActivityFormInput = ({
   defaultPhysicalActivity,

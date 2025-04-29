@@ -12,7 +12,7 @@ import { Divider } from '@/components/ui/divider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { invalidateCache, DataType } from "@/utils/helpers/queryInvalidation";
 import { useToast } from "@/components/ui/toast";
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { getCurrentUserIdSync } from "@/utils/helpers/userContext";
 import { withQueryState } from '@/utils/hoc';

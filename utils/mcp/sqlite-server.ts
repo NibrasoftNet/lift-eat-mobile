@@ -21,7 +21,7 @@ import {
 } from '@/utils/validation/ia/ia.schemas';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { sql } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { QueryClient } from '@tanstack/react-query';

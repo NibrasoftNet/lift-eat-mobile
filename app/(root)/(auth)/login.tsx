@@ -23,7 +23,8 @@ import {
 } from '@/utils/validation/auth/login-schema.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HStack } from '@/components/ui/hstack';
-import ForgetPasswordModal from '@/components/modals/ForgetPasswordModal';
+import { ForgetPasswordModal } from '@/components/modals/ForgetPasswordModal';
+import { ModalProvider } from '@/utils/providers/ModalProvider';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components/MultiPurposeToast';
@@ -38,7 +39,8 @@ export default function Login() {
   const router = useRouter();
   const { setUser } = useSessionStore();
   const toast = useToast();
-  const [showModal, setShowModal] = React.useState<boolean>(false);
+  // État local pour le modal
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const {
     control,
     handleSubmit,
@@ -192,7 +194,7 @@ export default function Login() {
             <Button
               className="bg-transparent ml-2"
               size="sm"
-              onPress={() => setShowModal(true)}
+              onPress={() => setIsModalOpen(true)}
             >
               <ButtonText className="text-lg underline text-tertiary-500">
                 Recover
@@ -221,7 +223,11 @@ export default function Login() {
           </Text>
         </Text>
       </VStack>
-      <ForgetPasswordModal showModal={showModal} setShowModal={setShowModal} />
+      {isModalOpen && (
+        <ModalProvider>
+          <ForgetPasswordModal />
+        </ModalProvider>
+      )}
     </>
   );
 }

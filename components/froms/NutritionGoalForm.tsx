@@ -20,7 +20,7 @@ import {
   NutritionGoalDefaultValueProps,
   nutritionGoalSchema,
 } from '@/utils/validation/plan/nutrition-goal.validation';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { usePlanStore } from '@/utils/store/planStore';
 import WeightFormInput from '@/components/forms-input/WeightFormInput';
@@ -28,7 +28,7 @@ import GoalTypeFormInput from '@/components/forms-input/GoalTypeFormInput';
 import DurationFormInput from '@/components/forms-input/DurationFormInput';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { nutritionGoalFormService } from '@/utils/services/nutrition-goal-form.service';
+import { nutritionGoalFormService } from '@/utils/services/forms/form-nutrition-goal.service';
 import { nutritionPagesService } from '@/utils/services/pages/nutrition-pages.service';
 
 export default function NutritionGoalForm({

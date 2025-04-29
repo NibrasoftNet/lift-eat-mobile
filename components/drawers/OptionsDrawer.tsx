@@ -17,7 +17,7 @@ import {
 } from 'lucide-react-native';
 import { Text } from '../ui/text';
 import { Pressable } from '../ui/pressable';
-import { optionsDrawerService } from '@/utils/services/options-drawer.service';
+import { optionsDrawerService } from '@/utils/services/ui/ui-options-drawer.service';
 
 function OptionsDrawer({
   showOptionDrawer,

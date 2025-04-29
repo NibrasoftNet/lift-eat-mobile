@@ -3,7 +3,7 @@
  * Ces interfaces définissent les contrats pour les services gérant la logique des pages
  */
 
-import { LoginFormData } from "../validation/auth/login-schema.validation";
+import { LoginFormData, RegisterFormData, ResetPasswordData, UpdatePasswordData, AuthenticationResult } from "./auth.interface";
 import { MealOrmProps, MealWithIngredientAndStandardOrmProps, DailyProgressOrmProps } from "@/db/schema";
 import { MealTypeEnum, CuisineTypeEnum } from "@/utils/enum/meal.enum";
 import { IaMealType, IaPlanType } from "@/utils/validation/ia/ia.schemas";
@@ -30,26 +30,26 @@ export interface AuthPagesServiceInterface {
    * Authentifie un utilisateur
    * @param data Données de formulaire de connexion
    */
-  login(data: LoginFormData): Promise<OperationResult<{ user: any, token: string }>>;
+  login(data: LoginFormData): Promise<OperationResult<AuthenticationResult>>;
   
   /**
    * Enregistre un nouvel utilisateur
    * @param data Données de formulaire d'inscription
    */
-  register(data: any): Promise<OperationResult<{ user: any }>>;
+  register(data: RegisterFormData): Promise<OperationResult<AuthenticationResult>>;
   
   /**
    * Envoie un email de réinitialisation de mot de passe
    * @param data Données de formulaire de réinitialisation
    */
-  resetPassword(data: {email: string}): Promise<OperationResult>;
+  resetPassword(data: ResetPasswordData): Promise<OperationResult>;
   
   /**
    * Met à jour le mot de passe d'un utilisateur
    * @param data Données de formulaire de nouveau mot de passe
    * @param token Token de réinitialisation
    */
-  updatePassword(data: {password: string}, token: string): Promise<OperationResult>;
+  updatePassword(data: UpdatePasswordData, token: string): Promise<OperationResult>;
 }
 
 /**

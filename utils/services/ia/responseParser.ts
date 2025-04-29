@@ -9,7 +9,7 @@ import {
   IaMealType,
   IaPlanType
 } from '@/utils/validation/ia/ia.schemas';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 export interface DetectedAction {

@@ -15,8 +15,8 @@ import { MealOrmProps } from '@/db/schema';
 import MealQuantityModal from './MealQuantityModal';
 import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@/db/schema';
-import { mealOptionsModalService } from '@/utils/services/meal-options-modal.service';
-import { logger } from '@/utils/services/logging.service';
+import { mealOptionsModalService } from '@/utils/services/ui/ui-meal-options-modal.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface MealOptionsModalProps {

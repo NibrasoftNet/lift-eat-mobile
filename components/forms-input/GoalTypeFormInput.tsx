@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { goalFormService } from '@/utils/services/goal-form.service';
+import { goalFormService } from '@/utils/services/forms/form-goal.service';
 
 interface GoalTypeFormInputProps {
   selectedGoal: GoalEnum;

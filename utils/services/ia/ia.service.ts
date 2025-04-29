@@ -1,4 +1,4 @@
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 // Import gérer différemment pour éviter le cycle d'importation
 import { GEMINI_API_KEY, GEMINI_API_BASE_URL } from '@/utils/constants/Config';

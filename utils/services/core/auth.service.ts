@@ -4,9 +4,9 @@
  * Les services pages ne font qu'orchestrer pour la UI.
  */
 import { AuthPagesServiceInterface, OperationResult } from "@/utils/interfaces/pages.interface";
-import { LoginFormData } from "@/utils/validation/auth/login-schema.validation";
+import { AuthenticationResult, LoginFormData, RegisterFormData, ResetPasswordData, UpdatePasswordData } from "@/utils/interfaces/auth.interface";
 import sqliteMCPServer from "@/utils/mcp/sqlite-server";
-import { logger } from "@/utils/services/logging.service";
+import { logger } from "@/utils/services/common/logging.service";
 import { LogCategory } from "@/utils/enum/logging.enum";
 
 class AuthService implements AuthPagesServiceInterface {
@@ -50,7 +50,7 @@ class AuthService implements AuthPagesServiceInterface {
   /**
    * Authentifie un utilisateur via le MCP server (login)
    */
-  async login(data: LoginFormData): Promise<OperationResult<{ user: any; token: string }>> {
+  async login(data: LoginFormData): Promise<OperationResult<AuthenticationResult>> {
     try {
       logger.info(LogCategory.AUTH, "Tentative de connexion via findOrCreateUser", { email: data.email });
       const result = await this.findOrCreateUser(data.email);
@@ -63,6 +63,7 @@ class AuthService implements AuthPagesServiceInterface {
       return {
         success: true,
         data: {
+          success: true,
           user: result.data,
           token: "simulated-token",
         },
@@ -82,7 +83,7 @@ class AuthService implements AuthPagesServiceInterface {
   /**
    * Enregistre un nouvel utilisateur via le MCP server
    */
-  async register(data: any): Promise<OperationResult<{ user: any }>> {
+  async register(data: RegisterFormData): Promise<OperationResult<AuthenticationResult>> {
     try {
       logger.info(LogCategory.AUTH, "Tentative d'inscription", { email: data.email });
       const result = await this.findOrCreateUser(data.email);
@@ -95,7 +96,8 @@ class AuthService implements AuthPagesServiceInterface {
       return {
         success: true,
         data: {
-          user: result.data,
+          success: true,
+          user: result.data
         },
         message: "Inscription réussie via findOrCreateUser",
       };
@@ -113,7 +115,7 @@ class AuthService implements AuthPagesServiceInterface {
   /**
    * Envoie un email de réinitialisation de mot de passe via le MCP server
    */
-  async resetPassword(data: { email: string }): Promise<OperationResult> {
+  async resetPassword(data: ResetPasswordData): Promise<OperationResult> {
     try {
       logger.info(LogCategory.AUTH, "Demande de réinitialisation de mot de passe", { email: data.email });
       logger.warn(LogCategory.AUTH, "La réinitialisation de mot de passe n'est pas encore implémentée");
@@ -135,7 +137,7 @@ class AuthService implements AuthPagesServiceInterface {
   /**
    * Met à jour le mot de passe d'un utilisateur via le MCP server
    */
-  async updatePassword(data: { password: string }, token: string): Promise<OperationResult> {
+  async updatePassword(data: UpdatePasswordData, token: string): Promise<OperationResult> {
     try {
       logger.info(LogCategory.AUTH, "Mise à jour du mot de passe");
       logger.warn(LogCategory.AUTH, "La mise à jour de mot de passe n'est pas encore implémentée");

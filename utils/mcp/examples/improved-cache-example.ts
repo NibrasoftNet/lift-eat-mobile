@@ -1,4 +1,4 @@
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { QueryClient } from '@tanstack/react-query';
 import { buildQueryKey, invalidateQueries } from '@/utils/cache/react-query-config';
