@@ -480,9 +480,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
                 isEmpty={leftList[mealType].length === 0}
               />
               
-              {leftList[mealType].map((item) => (
+              {leftList[mealType].map((item, index) => (
                 <MealItem
-                  key={`left-${mealType}-${item.id}`}
+                  key={`left-${mealType}-${item.id}-${index}`}
                   item={item}
                   isSelected={selectedItem?.id === item.id}
                   onSelect={handleItemSelect}
@@ -512,9 +512,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
                 isEmpty={rightList[mealType].length === 0}
               />
               
-              {rightList[mealType].map((item) => (
+              {rightList[mealType].map((item, index) => (
                 <MealItem
-                  key={`right-${mealType}-${item.id}`}
+                  key={`right-${mealType}-${item.id}-${index}`}
                   item={item}
                   isSelected={selectedItem?.id === item.id}
                   onSelect={handleItemSelect}

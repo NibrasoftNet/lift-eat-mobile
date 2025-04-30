@@ -18,6 +18,7 @@ import {
   dailyProgress,
   dailyMealProgress,
   dailyPlanMeals,
+  dailyPlan,
   plan,
   meals,
   DailyProgressOrmProps,
@@ -295,12 +296,56 @@ export async function handleMarkMealAsConsumed(db: any, params: MarkMealAsConsum
     // Utiliser une transaction pour s'assurer que toutes les mises à jour sont atomiques
     await db.transaction(async (tx: any) => {
       // 1. Vérifier si la progression quotidienne existe
-      const progress = await tx.query.dailyProgress.findFirst({
+      let progress = await tx.query.dailyProgress.findFirst({
         where: eq(dailyProgress.id, dailyProgressId),
       });
 
+      // Si la progression n'existe pas avec cet ID, essayer de la trouver par l'ID du plan quotidien
+      if (!progress && dailyPlanMealId) {
+        logger.info(LogCategory.DATABASE, `Daily progress with ID ${dailyProgressId} not found, trying to find by daily plan ID ${dailyPlanMealId}`);
+        
+        // Récupérer d'abord le plan quotidien pour obtenir son planId
+        const dailyPlanEntity = await tx.query.dailyPlan.findFirst({
+          where: eq(dailyPlan.id, dailyPlanMealId),
+        });
+        
+        if (dailyPlanEntity) {
+          // Chercher une progression existante pour ce plan
+          progress = await tx.query.dailyProgress.findFirst({
+            where: eq(dailyProgress.planId, dailyPlanEntity.planId),
+          });
+          
+          // Si toujours pas de progression, en créer une nouvelle
+          if (!progress) {
+            logger.info(LogCategory.DATABASE, `Creating new daily progress for plan ID ${dailyPlanEntity.planId}`);
+            
+            // Obtenir la date courante au format ISO
+            const currentDate = new Date().toISOString();
+            
+            // Créer une nouvelle progression avec des valeurs par défaut
+            [progress] = await tx
+              .insert(dailyProgress)
+              .values({
+                planId: dailyPlanEntity.planId,
+                date: currentDate.split('T')[0], // Format YYYY-MM-DD
+                calories: 0,
+                carbs: 0,
+                fat: 0,
+                protein: 0,
+                pourcentageCompletion: 0,
+                createdAt: currentDate,
+                updatedAt: currentDate,
+              })
+              .returning();
+              
+            logger.info(LogCategory.DATABASE, `Created new daily progress with ID ${progress.id} for plan ID ${dailyPlanEntity.planId}`);
+          }
+        }
+      }
+
+      // Vérifier si on a trouvé ou créé une progression
       if (!progress) {
-        throw new Error(`Daily progress with ID ${dailyProgressId} not found`);
+        throw new Error(`Daily progress with ID ${dailyProgressId} not found and couldn't create a new one`);
       }
 
       // 2. Récupérer les informations du repas
@@ -315,7 +360,7 @@ export async function handleMarkMealAsConsumed(db: any, params: MarkMealAsConsum
       // 3. Vérifier si une progression pour ce repas existe déjà
       const existingMealProgress = await tx.query.dailyMealProgress.findFirst({
         where: and(
-          eq(dailyMealProgress.dailyProgressId, dailyProgressId),
+          eq(dailyMealProgress.dailyProgressId, progress.id), // Utiliser l'ID de progression trouvé/créé
           eq(dailyMealProgress.mealId, mealId)
         ),
       });
@@ -347,7 +392,7 @@ export async function handleMarkMealAsConsumed(db: any, params: MarkMealAsConsum
         [mealProgress] = await tx
           .insert(dailyMealProgress)
           .values({
-            dailyProgressId,
+            dailyProgressId: progress.id, // Utiliser l'ID de progression trouvé/créé
             mealId,
             dailyPlanMealId,
             consomme: consumed,
@@ -364,7 +409,7 @@ export async function handleMarkMealAsConsumed(db: any, params: MarkMealAsConsum
 
       // 5. Recalculer les totaux pour la progression quotidienne
       const allMealProgresses = await tx.query.dailyMealProgress.findMany({
-        where: eq(dailyMealProgress.dailyProgressId, dailyProgressId),
+        where: eq(dailyMealProgress.dailyProgressId, progress.id), // Utiliser l'ID de progression trouvé/créé
       });
 
       const totalCalories = allMealProgresses
@@ -406,7 +451,7 @@ export async function handleMarkMealAsConsumed(db: any, params: MarkMealAsConsum
           pourcentageCompletion: pourc,
           updatedAt: new Date().toISOString(),
         })
-        .where(eq(dailyProgress.id, dailyProgressId));
+        .where(eq(dailyProgress.id, progress.id)); // Utiliser l'ID de progression trouvé/créé
     });
 
     logger.debug(LogCategory.DATABASE, `Meal ${mealId} marked as ${consumed ? 'consumed' : 'not consumed'}`);
