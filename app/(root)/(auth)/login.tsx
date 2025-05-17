@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageBackground } from 'react-native';
+import { Image } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
@@ -13,9 +13,8 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
-import { AlertCircleIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
-import { app_logo, login_background } from '@/utils/constants/images';
+import { app_logo_no_bg } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import {
   LoginFormData,
@@ -23,20 +22,19 @@ import {
 } from '@/utils/validation/auth/login-schema.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HStack } from '@/components/ui/hstack';
-import ForgetPasswordModal from '@/components/modals/ForgetPasswordModal';
+//import ForgetPasswordModal from '@/components/modals/ForgetPasswordModal';
 import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/toast';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import useSessionStore from '@/utils/store/sessionStore';
 import { findOrCreateUser } from '@/utils/services/users.service';
 import { Colors } from '@/utils/constants/Colors';
+import { AlertCircleIcon } from 'lucide-react-native';
+import Toast from 'react-native-toast-message';
+import ForgetPasswordModal from '@/components/ui/modal/ForgetPasswordModal';
 
 export default function Login() {
   const router = useRouter();
   const { setUser } = useSessionStore();
-  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = React.useState<boolean>(false);
   const {
@@ -50,25 +48,15 @@ export default function Login() {
       password: '',
     },
   });
-
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
       return await findOrCreateUser(drizzleDb, data.email);
     },
     onSuccess: async (data) => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success user login"
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success user login 👋',
       });
       setUser({
         id: data?.id!,
@@ -78,19 +66,10 @@ export default function Login() {
     },
     onError: (error: any) => {
       // Show error toast
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
@@ -103,7 +82,7 @@ export default function Login() {
     <>
       <VStack className="size-full p-4 items-center justify-center gap-2">
         <Image
-          source={app_logo}
+          source={app_logo_no_bg}
           className="h-48 w-48 object-contain rounded-xl"
           style={{ alignSelf: 'center' }}
         />
@@ -162,7 +141,7 @@ export default function Login() {
             />
             {errors.password && (
               <FormControlError>
-                <FormControlErrorIcon as={AlertCircleIcon} />
+                {/*<FormControlErrorIcon as={AlertCircleIcon} />*/}
                 <FormControlErrorText>
                   {errors.password.message ||
                     'At least 6 characters are required.'}

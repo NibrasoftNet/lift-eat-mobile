@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Text } from '@/components/ui/text';
 import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
-import { AddIcon, Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon';
 import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import MealCard from '@/components/cards/MealCard';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMealsList } from '@/utils/services/meal.service';
 import { MealOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-import { SearchIcon, SoupIcon } from 'lucide-react-native';
+import { PlusIcon, SearchIcon, SoupIcon } from 'lucide-react-native';
 import { RefreshControl } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';
@@ -86,7 +86,6 @@ export default function MyMealsScreen() {
     await refetch();
   }, []);
 
-  // @ts-ignore
   return (
     <VStack className="flex-1 p-2">
       <CuisineTypeBox
@@ -98,8 +97,12 @@ export default function MyMealsScreen() {
         selectedMealType={selectedMealType}
         handleMealTypeSelect={handleMealTypeSelect}
       />
-      <Input variant="outline" className="bg-white/90 rounded-xl h-12 p-2">
-        <InputIcon as={SearchIcon} className="text-gray-400" />
+      <Input className="bg-white/90 rounded-xl h-14 p-2">
+        <InputIcon
+          as={SearchIcon}
+          color={Colors.tertiary.icon}
+          className="border rounded-md p-1 border-primary-500"
+        />
         <InputField
           placeholder="Search meals..."
           value={searchMealName}
@@ -147,7 +150,7 @@ export default function MyMealsScreen() {
         isPressed={false}
         onPress={handleNewMeal}
       >
-        <FabIcon as={AddIcon} />
+        <FabIcon as={PlusIcon} />
         <FabLabel>New</FabLabel>
       </Fab>
     </VStack>

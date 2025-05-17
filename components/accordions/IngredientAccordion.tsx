@@ -7,7 +7,6 @@ import { HandPlatter, Minus, Plus } from 'lucide-react-native';
 import { IngredientWithStandardOrmProps } from '@/db/schema';
 import {
   Avatar,
-  AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
 import { Divider } from '@/components/ui/divider';
@@ -35,11 +34,6 @@ const IngredientAccordion: React.FC<{
               <HStack className="w-full justify-between h-12 items-center">
                 <HStack className="flex-1 gap-2 items-center">
                   <Avatar>
-                    <AvatarFallbackText>
-                      {item.ingredientsStandard?.name
-                        ?.slice(0, 2)
-                        .toUpperCase()}
-                    </AvatarFallbackText>
                     {item.ingredientsStandard?.image ? (
                       <AvatarImage
                         className="border border-tertiary-500 w-10 h-10"
@@ -48,13 +42,11 @@ const IngredientAccordion: React.FC<{
                         }}
                       />
                     ) : (
-                      <AvatarFallbackText>
-                        <Icon
-                          as={HandPlatter}
-                          size="lg"
-                          className="stroke-white"
-                        />
-                      </AvatarFallbackText>
+                      <Icon
+                        as={HandPlatter}
+                        size={30}
+                        className="stroke-white"
+                      />
                     )}
                   </Avatar>
                   <AccordionTitleText>

@@ -22,7 +22,7 @@ import { CircleChevronLeft, Plus } from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
 import PlanMealCard from '@/components/cards/PlanMealCard';
 import NutritionBox from '@/components/boxes/NutritionBox';
-import MealsDrawer from '@/components/drawers/MealsDrawer';
+// import MealsDrawer from '@/components/drawers/MealsDrawer';
 import MacrosDetailsBox from '@/components/boxes/MacrosDetailsBox';
 import NutritionsChart from '@/components/charts/NutritionChart';
 import WeekDaysBox from '@/components/boxes/WeekDaysBox';
@@ -222,7 +222,7 @@ export default function PlanDetailsScreen() {
       </ScrollView>
 
       {/* Composant Drawer pour ajouter des repas */}
-      {selectedDailyPlanId && (
+      {/*     {selectedDailyPlanId && (
         <MealsDrawer
           showMealsDrawer={showMealsDrawer}
           setShowMealsDrawer={setShowMealsDrawer}
@@ -232,7 +232,7 @@ export default function PlanDetailsScreen() {
           drizzleDb={drizzleDb}
           onAddMealToPlan={handleAddMealToPlan}
         />
-      )}
+      )}*/}
     </QueryStateHandler>
   );
 }

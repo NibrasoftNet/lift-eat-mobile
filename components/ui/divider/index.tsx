@@ -1,39 +1,37 @@
-'use client';
 import React from 'react';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import { Platform, View } from 'react-native';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+import { View, ViewProps } from 'react-native';
+import { tv, VariantProps } from 'tailwind-variants';
+import { cn } from '@/utils/nativewind-utils/cn';
 
-const dividerStyle = tva({
-  base: 'bg-background-200',
+const dividerStyle = tv({
+  base: 'bg-gray-200',
   variants: {
     orientation: {
-      vertical: 'w-px h-full',
-      horizontal: 'h-px w-full',
+      horizontal: 'w-full h-px',
+      vertical: 'h-full w-px',
     },
+  },
+  defaultVariants: {
+    orientation: 'horizontal',
   },
 });
 
-type IUIDividerProps = React.ComponentPropsWithoutRef<typeof View> &
-  VariantProps<typeof dividerStyle>;
+type DividerProps = ViewProps &
+  VariantProps<typeof dividerStyle> & {
+    className?: string;
+  };
 
-const Divider = React.forwardRef<
-  React.ElementRef<typeof View>,
-  IUIDividerProps
->(({ className, orientation = 'horizontal', ...props }, ref) => {
-  return (
-    <View
-      ref={ref}
-      {...props}
-      aria-orientation={orientation}
-      role={Platform.OS === 'web' ? 'separator' : undefined}
-      className={dividerStyle({
-        orientation,
-        class: className,
-      })}
-    />
-  );
-});
+const Divider = React.forwardRef<View, DividerProps>(
+  ({ orientation = 'horizontal', className, ...props }, ref) => {
+    return (
+      <View
+        ref={ref}
+        className={cn(dividerStyle({ orientation }), className)}
+        {...props}
+      />
+    );
+  },
+);
 
 Divider.displayName = 'Divider';
 

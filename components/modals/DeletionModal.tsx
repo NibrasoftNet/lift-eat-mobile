@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 
-import { Icon, TrashIcon } from '../ui/icon';
+import { Icon } from '../ui/icon';
 
 import { Button, ButtonSpinner, ButtonText } from '../ui/button';
 
@@ -16,6 +16,7 @@ import {
 } from '../ui/modal';
 import { Heading } from '../ui/heading';
 import { Colors } from '@/utils/constants/Colors';
+import { TrashIcon } from 'lucide-react-native';
 
 interface DeletionModalProps {
   title: string;
@@ -41,11 +42,11 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
         setShowModal(false);
       }}
     >
-      <ModalBackdrop />
+      <ModalBackdrop children={undefined} />
       <ModalContent className="max-w-[305px] items-center">
         <ModalHeader>
           <Box className="w-[56px] h-[56px] rounded-full bg-background-error items-center justify-center">
-            <Icon as={TrashIcon} className="stroke-error-600" size="xl" />
+            <Icon as={TrashIcon} className="stroke-error-600" size={30} />
           </Box>
         </ModalHeader>
         <ModalBody className="mt-0 mb-4">
@@ -59,7 +60,6 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
         <ModalFooter className="w-full">
           <Button
             variant="outline"
-            action="secondary"
             size="sm"
             onPress={() => {
               setShowModal(false);

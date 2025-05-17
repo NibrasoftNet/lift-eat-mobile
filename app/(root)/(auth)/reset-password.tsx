@@ -12,7 +12,6 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
-import { AlertCircleIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
 import { app_logo, login_background } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
@@ -22,14 +21,12 @@ import {
   resetForgotPasswordSchema,
   ResetPasswordFormData,
 } from '@/utils/validation/auth/reset-password-schema.validation';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/toast';
+import Toast from 'react-native-toast-message';
+import { AlertCircleIcon } from 'lucide-react-native';
 
 export default function ResetPassword() {
   const router = useRouter();
-  const toast = useToast();
   const {
     control,
     handleSubmit,
@@ -56,35 +53,17 @@ export default function ResetPassword() {
     try {
       await mutateAsync(data);
       if (isSuccess) {
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.SUCCESS}
-                title="Success"
-                description="Success update profile"
-              />
-            );
-          },
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Success reset password 👋',
         });
       }
     } catch (error: any) {
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     }
   };

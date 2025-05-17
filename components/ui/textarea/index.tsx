@@ -1,93 +1,100 @@
-'use client';
-import React from 'react';
-import { createTextarea } from '@gluestack-ui/textarea';
-import { View, TextInput } from 'react-native';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import {
-  withStyleContext,
-  useStyleContext,
-} from '@gluestack-ui/nativewind-utils/withStyleContext';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+import React, { forwardRef } from 'react';
+import { View, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { cn } from '@/utils/nativewind-utils/cn';
 
-const SCOPE = 'TEXTAREA';
-const UITextarea = createTextarea({
-  Root: withStyleContext(View, SCOPE),
-  Input: TextInput,
-});
+// TextareaProps defines the properties for the container component
+interface TextareaProps {
+  children: React.ReactNode;
+  className?: string;
+  label?: string;
+  error?: string;
+  disabled?: boolean;
+}
 
-const textareaStyle = tva({
-  base: 'w-full h-[100px] border border-background-300 rounded data-[hover=true]:border-outline-400 data-[focus=true]:border-primary-700 data-[focus=true]:data-[hover=true]:border-primary-700 data-[disabled=true]:opacity-40 data-[disabled=true]:bg-background-50 data-[disabled=true]:data-[hover=true]:border-background-300',
+// TextareaInputProps extends React Native's TextInputProps
+interface TextareaInputProps extends Omit<TextInputProps, 'style'> {
+  className?: string;
+  error?: boolean;
+}
 
-  variants: {
-    variant: {
-      default:
-        'data-[focus=true]:border-primary-700 data-[focus=true]:web:ring-1 data-[focus=true]:web:ring-inset data-[focus=true]:web:ring-indicator-primary data-[invalid=true]:border-error-700 data-[invalid=true]:web:ring-1 data-[invalid=true]:web:ring-inset data-[invalid=true]:web:ring-indicator-error data-[invalid=true]:data-[hover=true]:border-error-700 data-[invalid=true]:data-[focus=true]:data-[hover=true]:border-primary-700 data-[invalid=true]:data-[focus=true]:data-[hover=true]:web:ring-1 data-[invalid=true]:data-[focus=true]:data-[hover=true]:web:ring-inset data-[invalid=true]:data-[focus=true]:data-[hover=true]:web:ring-indicator-primary data-[invalid=true]:data-[disabled=true]:data-[hover=true]:border-error-700 data-[invalid=true]:data-[disabled=true]:data-[hover=true]:web:ring-1 data-[invalid=true]:data-[disabled=true]:data-[hover=true]:web:ring-inset data-[invalid=true]:data-[disabled=true]:data-[hover=true]:web:ring-indicator-error ',
-    },
-    size: {
-      sm: '',
-      md: '',
-      lg: '',
-      xl: '',
-    },
+// Container component
+export const Textarea: React.FC<TextareaProps> = ({
+  children,
+  className,
+  label,
+  error,
+  disabled = false,
+}) => {
+  return (
+    <View
+      className={cn('w-full space-y-1', disabled && 'opacity-50', className)}
+    >
+      {label && (
+        <View className="flex-row justify-between">
+          <View className="flex-row items-center space-x-1">
+            <TextInput
+              className={cn(
+                'text-sm font-medium text-gray-900',
+                error && 'text-red-500',
+              )}
+              editable={false}
+              value={label}
+            />
+          </View>
+        </View>
+      )}
+      <View
+        className={cn(
+          'min-h-[100px] rounded-md border border-gray-300 bg-white px-3 py-2',
+          error && 'border-red-500',
+        )}
+      >
+        {children}
+      </View>
+      {error && (
+        <TextInput
+          className="text-sm text-red-500"
+          editable={false}
+          value={error}
+        />
+      )}
+    </View>
+  );
+};
+
+// Input component with forwardRef to work with form libraries
+export const TextareaInput = forwardRef<TextInput, TextareaInputProps>(
+  ({ className, error, ...props }, ref) => {
+    return (
+      <TextInput
+        ref={ref}
+        multiline
+        textAlignVertical="top"
+        className={cn(
+          'flex-1 h-full text-base text-gray-900',
+          error && 'text-red-500',
+          className,
+        )}
+        placeholderTextColor="#9CA3AF" // gray-400
+        style={styles.input}
+        {...props}
+      />
+    );
+  },
+);
+
+const styles = StyleSheet.create({
+  input: {
+    // Native styles that can't be handled by Tailwind
+    textAlignVertical: 'top',
+    paddingTop: 0, // Prevent default padding on Android
+    paddingLeft: 0, // Prevent default padding
+    paddingRight: 0, // Prevent default padding
   },
 });
 
-const textareaInputStyle = tva({
-  base: 'p-2 web:outline-0 web:outline-none flex-1 color-typography-900 align-text-top placeholder:text-typography-500 web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
-  parentVariants: {
-    size: {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
-      xl: 'text-xl',
-    },
-  },
-});
-
-type ITextareaProps = React.ComponentProps<typeof UITextarea> &
-  VariantProps<typeof textareaStyle>;
-
-const Textarea = React.forwardRef<
-  React.ComponentRef<typeof UITextarea>,
-  ITextareaProps
->(function Textarea(
-  { className, variant = 'default', size = 'md', ...props },
-  ref
-) {
-  return (
-    <UITextarea
-      ref={ref}
-      {...props}
-      className={textareaStyle({ variant, class: className })}
-      context={{ size }}
-    />
-  );
-});
-
-type ITextareaInputProps = React.ComponentProps<typeof UITextarea.Input> &
-  VariantProps<typeof textareaInputStyle>;
-
-const TextareaInput = React.forwardRef<
-  React.ComponentRef<typeof UITextarea.Input>,
-  ITextareaInputProps
->(function TextareaInput({ className, ...props }, ref) {
-  const { size: parentSize } = useStyleContext(SCOPE);
-
-  return (
-    <UITextarea.Input
-      ref={ref}
-      {...props}
-      className={textareaInputStyle({
-        parentVariants: {
-          size: parentSize,
-        },
-        class: className,
-      })}
-    />
-  );
-});
-
-Textarea.displayName = 'Textarea';
+// Add display name for React DevTools
 TextareaInput.displayName = 'TextareaInput';
 
-export { Textarea, TextareaInput };
+// Export both components
+export default { Textarea, TextareaInput };

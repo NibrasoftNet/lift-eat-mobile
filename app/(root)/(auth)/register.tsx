@@ -12,30 +12,28 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
-import { AlertCircleIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
 import { app_logo } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import AuthDrawer from '@/components/drawers/AuthDrawer';
+import AuthBottomSheet from '@/components/sheets/AuthBottomSheet';
 import {
   RegisterFormData,
   registerSchema,
 } from '@/utils/validation/auth/register-schema.validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useToast } from '@/components/ui/toast';
 import { Colors } from '@/utils/constants/Colors';
 /* import { useSignUp } from '@clerk/clerk-react'; */
-import OauthButton from '@/components/buttons/OauthButton';
+// import OauthButton from '@/components/buttons/OauthButton';
 import { Box } from '@/components/ui/box';
+import Toast from 'react-native-toast-message';
+import { AlertCircleIcon } from 'lucide-react-native';
+import BottomSheet from '@/components/ui/bottom-sheet';
 
 export default function Register() {
   /*  const { isLoaded, signUp, setActive } = useSignUp();*/
   const router = useRouter();
-  const toast = useToast();
   const [showDrawer, setShowDrawer] = useState<boolean>(false);
   const {
     control,
@@ -65,36 +63,19 @@ export default function Register() {
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });*/
     },
     onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success update profile"
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success useer register 👋',
       });
       setShowDrawer(true);
     },
     onError: (error: Error) => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
-            />
-          );
-        },
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
@@ -219,7 +200,7 @@ export default function Register() {
               <ButtonText>Register</ButtonText>
             )}
           </Button>
-          <OauthButton />
+          {/*<OauthButton />*/}
           <Text className=" text-center">
             Already have an account?{' '}
             <Text
@@ -231,7 +212,7 @@ export default function Register() {
           </Text>
         </Box>
       </VStack>
-      <AuthDrawer showDrawer={showDrawer} setShowDrawer={setShowDrawer} />
+      <AuthBottomSheet showDrawer={showDrawer} setShowDrawer={setShowDrawer} />
     </>
   );
 }

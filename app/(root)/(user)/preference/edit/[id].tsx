@@ -1,5 +1,4 @@
 import React from 'react';
-import UserGenderActivityForm from '../../../../../components/froms/UserGenderActivityForm';
 import { UserGenderActivityDefaultValueProps } from '@/utils/validation/user/user-gender-activity.validation';
 import { useLocalSearchParams } from 'expo-router';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -7,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
 import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
+import UserGenderActivityForm from '@/components/forms/UserGenderActivityForm';
 
 export default function EditUserPreference() {
   const { id } = useLocalSearchParams();

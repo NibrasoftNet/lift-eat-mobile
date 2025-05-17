@@ -22,7 +22,11 @@ export default function TabLayout() {
       />
       <Stack.Screen
         name="login"
-        options={{ headerShown: false, animation: 'slide_from_left' }}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_left',
+          animationDuration: 1000,
+        }}
       />
       <Stack.Screen
         name="reset-password"

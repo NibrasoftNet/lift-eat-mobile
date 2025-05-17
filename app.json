@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "lift-eat",
-    "slug": "fitness",
+    "name": "lift&eat",
+    "slug": "L&E",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.jpg",
@@ -31,7 +31,9 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-asset"
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

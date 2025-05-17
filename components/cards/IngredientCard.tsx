@@ -12,12 +12,12 @@ import {
 } from 'lucide-react-native';
 import { Card } from '../ui/card';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarImage } from '../ui/avatar';
 import { Button, ButtonIcon } from '../ui/button';
-import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import { useIngredientStore } from '../../utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '../../types/ingredient.type';
+import NutritionBox from '../boxes/NutritionBox';
 
 const IngredientCard: React.FC<{
   item: IngredientWithStandardProps;
@@ -46,16 +46,13 @@ const IngredientCard: React.FC<{
           <HStack className="flex-1 items-center gap-2">
             <Box className="flex-col items-center justify-center w-16 h-16">
               <Avatar>
-                <AvatarFallbackText>
-                  {item.ingredientsStandard.name?.slice(0, 2).toUpperCase()}
-                </AvatarFallbackText>
                 {item.ingredientsStandard.image ? (
                   <AvatarImage
                     className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
                     source={{ uri: `${item.ingredientsStandard.image}` }}
                   />
                 ) : (
-                  <Icon as={HandPlatter} size="lg" className="stroke-white" />
+                  <Icon as={HandPlatter} size={30} className="stroke-white" />
                 )}
               </Avatar>
             </Box>
@@ -72,7 +69,6 @@ const IngredientCard: React.FC<{
             <Button
               onPress={() => handleQuantityChange('decrease')}
               disabled={newQuantity <= item.ingredientsStandard.quantity}
-              action="secondary"
               className="w-12 h-12 bg-transparent disabled:bg-secondary-500 disabled:text-white"
             >
               <ButtonIcon as={MinusCircle} className="w-10 h-10" />
@@ -80,7 +76,6 @@ const IngredientCard: React.FC<{
             <Text>{newQuantity}</Text>
             <Button
               onPress={() => handleQuantityChange('increase')}
-              action="secondary"
               className="w-12 h-12 bg-transparent"
             >
               <ButtonIcon as={PlusCircle} className="w-10 h-10" />

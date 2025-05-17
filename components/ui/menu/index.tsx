@@ -1,208 +1,92 @@
-'use client';
-import React from 'react';
-import { createMenu } from '@gluestack-ui/menu';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import { cssInterop } from 'nativewind';
-import { Pressable, Text, View } from 'react-native';
-import { Motion, AnimatePresence } from '@legendapp/motion';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+import React, { ReactNode } from 'react';
+import { View, Text } from 'react-native';
+import { cn } from '@/utils/nativewind-utils/cn';
+import { Pressable } from '@/components/ui/pressable';
 
-const menuStyle = tva({
-  base: 'rounded-md bg-background-0 border border-outline-100 p-1 shadow-hard-5',
-});
+export type Placement =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top left'
+  | 'top right'
+  | 'bottom left'
+  | 'bottom right';
 
-const menuItemStyle = tva({
-  base: 'min-w-[200px] p-3 flex-row items-center rounded data-[hover=true]:bg-background-50 data-[active=true]:bg-background-100 data-[focus=true]:bg-background-50 data-[focus=true]:web:outline-none data-[focus=true]:web:outline-0 data-[disabled=true]:opacity-40 data-[disabled=true]:web:cursor-not-allowed data-[focus-visible=true]:web:outline-2 data-[focus-visible=true]:web:outline-primary-700 data-[focus-visible=true]:web:outline data-[focus-visible=true]:web:cursor-pointer data-[disabled=true]:data-[focus=true]:bg-transparent',
-});
+interface MenuProps {
+  placement?: Placement;
+  offset?: number;
+  disabledKeys?: string[];
+  trigger: (props: any) => React.ReactNode;
+  children: ReactNode;
+}
 
-const menuBackdropStyle = tva({
-  base: 'absolute top-0 bottom-0 left-0 right-0 web:cursor-default',
-  // add this classnames if you want to give background color to backdrop
-  // opacity-50 bg-background-500,
-});
-
-const menuSeparatorStyle = tva({
-  base: 'bg-background-200 h-px w-full',
-});
-
-const menuItemLabelStyle = tva({
-  base: 'text-typography-700 font-normal font-body',
-
-  variants: {
-    isTruncated: {
-      true: 'web:truncate',
-    },
-    bold: {
-      true: 'font-bold',
-    },
-    underline: {
-      true: 'underline',
-    },
-    strikeThrough: {
-      true: 'line-through',
-    },
-    size: {
-      '2xs': 'text-2xs',
-      xs: 'text-xs',
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
-      xl: 'text-xl',
-      '2xl': 'text-2xl',
-      '3xl': 'text-3xl',
-      '4xl': 'text-4xl',
-      '5xl': 'text-5xl',
-      '6xl': 'text-6xl',
-    },
-    sub: {
-      true: 'text-xs',
-    },
-    italic: {
-      true: 'italic',
-    },
-    highlight: {
-      true: 'bg-yellow-500',
-    },
-  },
-});
-
-const BackdropPressable = React.forwardRef<
-  React.ElementRef<typeof Pressable>,
-  React.ComponentPropsWithoutRef<typeof Pressable> &
-    VariantProps<typeof menuBackdropStyle>
->(({ className, ...props }, ref) => {
+export const Menu = ({
+  placement = 'bottom',
+  offset = 0,
+  trigger,
+  children,
+}: MenuProps) => {
+  // You can use floating-ui or custom logic here for actual placement behavior
   return (
-    <Pressable
-      ref={ref}
-      className={menuBackdropStyle({
-        class: className,
-      })}
-      {...props}
-    />
-  );
-});
-
-type IMenuItemProps = VariantProps<typeof menuItemStyle> & {
-  className?: string;
-} & React.ComponentPropsWithoutRef<typeof Pressable>;
-
-const Item = React.forwardRef<
-  React.ElementRef<typeof Pressable>,
-  IMenuItemProps
->(({ className, ...props }, ref) => {
-  return (
-    <Pressable
-      ref={ref}
-      className={menuItemStyle({
-        class: className,
-      })}
-      {...props}
-    />
-  );
-});
-
-const Separator = React.forwardRef(
-  ({ className, ...props }: any, ref?: any) => {
-    return (
+    <View className="relative">
+      {trigger({})}
       <View
-        ref={ref}
-        className={menuSeparatorStyle({ class: className })}
-        {...props}
-      />
-    );
-  },
-);
-export const UIMenu = createMenu({
-  Root: Motion.View,
-  Item: Item,
-  Label: Text,
-  Backdrop: BackdropPressable,
-  AnimatePresence: AnimatePresence,
-  Separator: Separator,
-});
+        className={cn(
+          'absolute z-50 rounded-md border border-gray-200 bg-white shadow-md',
+          placement.includes('top') && 'bottom-full mb-2',
+          placement.includes('bottom') && 'top-full mt-2',
+          placement.includes('right') && 'left-full ml-2',
+          placement.includes('left') && 'right-full mr-2',
+        )}
+      >
+        {children}
+      </View>
+    </View>
+  );
+};
 
-cssInterop(Motion.View, { className: 'style' });
+// MenuItem
 
-type IMenuProps = React.ComponentProps<typeof UIMenu> &
-  VariantProps<typeof menuStyle> & { className?: string };
-type IMenuItemLabelProps = React.ComponentProps<typeof UIMenu.ItemLabel> &
-  VariantProps<typeof menuItemLabelStyle> & { className?: string };
+interface MenuItemProps {
+  key: string;
+  textValue: string;
+  onPress?: () => void;
+  children: React.ReactNode;
+  disabled?: boolean;
+  className?: string;
+}
 
-const Menu = React.forwardRef<React.ElementRef<typeof UIMenu>, IMenuProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <UIMenu
-        ref={ref}
-        initial={{
-          opacity: 0,
-          scale: 0.8,
-        }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-        }}
-        exit={{
-          opacity: 0,
-          scale: 0.8,
-        }}
-        transition={{
-          type: 'timing',
-          duration: 100,
-        }}
-        className={menuStyle({
-          class: className,
-        })}
-        {...props}
-      />
-    );
-  },
-);
+export const MenuItem = ({
+  onPress,
+  disabled,
+  children,
+  className,
+}: MenuItemProps) => {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className={cn('flex-row items-center px-4 py-2', className)}
+    >
+      {children}
+    </Pressable>
+  );
+};
 
-const MenuItem = UIMenu.Item;
+// MenuItemLabel
+export const MenuItemLabel = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <Text className={cn('text-sm text-gray-900', className)}>{children}</Text>
+  );
+};
 
-const MenuItemLabel = React.forwardRef<
-  React.ElementRef<typeof UIMenu.ItemLabel>,
-  IMenuItemLabelProps
->(
-  (
-    {
-      className,
-      isTruncated,
-      bold,
-      underline,
-      strikeThrough,
-      size = 'md',
-      sub,
-      italic,
-      highlight,
-      ...props
-    },
-    ref,
-  ) => {
-    return (
-      <UIMenu.ItemLabel
-        ref={ref}
-        className={menuItemLabelStyle({
-          isTruncated,
-          bold,
-          underline,
-          strikeThrough,
-          size,
-          sub,
-          italic,
-          highlight,
-          class: className,
-        })}
-        {...props}
-      />
-    );
-  },
-);
-
-const MenuSeparator = UIMenu.Separator;
-
-Menu.displayName = 'Menu';
-MenuItem.displayName = 'MenuItem';
-MenuItemLabel.displayName = 'MenuItemLabel';
-MenuSeparator.displayName = 'MenuSeparator';
-export { Menu, MenuItem, MenuItemLabel, MenuSeparator };
+export const MenuSeparator = () => {
+  return <View className="h-[1px] bg-gray-200 my-1 w-full" />;
+};

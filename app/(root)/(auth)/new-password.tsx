@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageBackground } from 'react-native';
+import { Image } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
@@ -12,26 +12,23 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control';
 import { Input, InputField } from '@/components/ui/input';
-import { AlertCircleIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
-import { app_logo, login_background } from '@/utils/constants/images';
+import { app_logo_no_bg } from '@/utils/constants/images';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { zodResolver } from '@hookform/resolvers/zod';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/toast';
 import {
   NewPasswordFormData,
   newPasswordSchema,
 } from '@/utils/validation/auth/new-password-schema.validation';
 import { HStack } from '@/components/ui/hstack';
 import { Colors } from '@/utils/constants/Colors';
+import Toast from 'react-native-toast-message';
+import { AlertCircleIcon } from 'lucide-react-native';
 
 export default function NewPassword() {
   const router = useRouter();
-  const toast = useToast();
   const {
     control,
     handleSubmit,
@@ -54,35 +51,18 @@ export default function NewPassword() {
       });
     },
     onSuccess: async (data) => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title="Success"
-              description="Success update profile"
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success update password 👋',
       });
+      router.back();
     },
     onError: async (error: Error) => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Error"
-              description={error.toString()}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
@@ -94,12 +74,12 @@ export default function NewPassword() {
   return (
     <VStack className="size-full p-4 items-center justify-center gap-4">
       <Image
-        source={app_logo}
+        source={app_logo_no_bg}
         className="h-40 w-40 object-contain rounded-xl"
         style={{ alignSelf: 'center' }}
       />
       <Card className="flex w-full bg-transparent items-center justify-center">
-        <Text className="text-center text-2xl font-bold">Change Password</Text>
+        <Text className="text-center text-2xl font-bold">Password</Text>
         <Text className="text-center text-xl font-semibold">
           Create new password
         </Text>

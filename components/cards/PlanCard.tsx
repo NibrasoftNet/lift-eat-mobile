@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { Pressable } from '../ui/pressable';
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
-import {
-  EditIcon,
-  GlobeIcon,
-  Icon,
-  ThreeDotsIcon,
-  TrashIcon,
-} from '../ui/icon';
+import { Icon } from '../ui/icon';
 import { Text } from '../ui/text';
 import { PlanOrmProps } from '@/db/schema';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -20,20 +14,25 @@ import { Box } from '../ui/box';
 import { useRouter } from 'expo-router';
 import NutritionBox from '@/components/boxes/NutritionBox';
 import MacrosDetailsBox from '@/components/boxes/MacrosDetailsBox';
-import OptionsDrawer from '@/components/drawers/OptionsDrawer';
+// import OptionsDrawer from '@/components/drawers/OptionsDrawer';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import DeletionModal from '@/components/modals/DeletionModal';
-import { useToast } from '@/components/ui/toast';
+// import DeletionModal from '@/components/modals/DeletionModal';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
+import Toast from 'react-native-toast-message';
+import {
+  EditIcon,
+  EllipsisVerticalIcon,
+  GlobeIcon,
+  TrashIcon,
+} from 'lucide-react-native';
+import OptionsBottomSheet from '@/components/sheets/OptionsBottomSheet';
+import DeletionModal from '../modals/DeletionModal';
 
 const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   item,
   index,
 }) => {
   const router = useRouter();
-  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
@@ -49,19 +48,10 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
         resolve({ success: true, message: 'Plan deleted successfully' }),
       ),
     onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Success delete Plan`}
-              description={`Success delete Plan`}
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success delete plan 👋',
       });
       await queryClient.invalidateQueries({
         predicate: (query) =>
@@ -71,19 +61,10 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
     },
     onError: (error: any) => {
       // Show error toast
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Failure delete Plan`}
-              description={error.toString()}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
@@ -125,7 +106,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
                     </Text>
                   </HStack>
                   <Menu
-                    placement="left top"
+                    placement="top right"
                     offset={5}
                     disabledKeys={['Settings']}
                     trigger={({ ...triggerProps }) => {
@@ -136,7 +117,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
                           className="bg-transparent m-0 p-1"
                         >
                           <ButtonIcon
-                            as={ThreeDotsIcon}
+                            as={EllipsisVerticalIcon}
                             className="text-black w-8 h-8"
                           />
                         </Button>
@@ -148,8 +129,8 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
                       textValue="Select Current"
                       disabled={item.current}
                     >
-                      <Icon as={GlobeIcon} size="sm" className="mr-2" />
-                      <MenuItemLabel size="sm">Select Current</MenuItemLabel>
+                      <Icon as={GlobeIcon} size={30} className="mr-2" />
+                      <MenuItemLabel>Select Current</MenuItemLabel>
                     </MenuItem>
                     <MenuItem
                       key="Edit Plan"
@@ -158,16 +139,16 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
                         router.push(`/plans/my-plans/edit/${item.id}`)
                       }
                     >
-                      <Icon as={EditIcon} size="sm" className="mr-2" />
-                      <MenuItemLabel size="sm">Edit</MenuItemLabel>
+                      <Icon as={EditIcon} size={30} className="mr-2" />
+                      <MenuItemLabel>Edit</MenuItemLabel>
                     </MenuItem>
                     <MenuItem
                       key="Delete Plan"
                       textValue="Delete Plan"
                       onPress={() => setShowModal(true)}
                     >
-                      <Icon as={TrashIcon} size="sm" className="mr-2" />
-                      <MenuItemLabel size="sm">Delete</MenuItemLabel>
+                      <Icon as={TrashIcon} size={30} className="mr-2" />
+                      <MenuItemLabel>Delete</MenuItemLabel>
                     </MenuItem>
                   </Menu>
                 </HStack>
@@ -204,7 +185,7 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
           </Pressable>
         </ImageBackground>
       </Animated.View>
-      <OptionsDrawer
+      <OptionsBottomSheet
         showOptionDrawer={showOptionDrawer}
         setShowOptionsDrawer={setShowOptionsDrawer}
         disableEdit={false}

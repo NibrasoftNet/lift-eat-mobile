@@ -20,16 +20,6 @@ import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
 import { BlurView } from 'expo-blur';
 import { Card } from '@/components/ui/card';
-import { Divider } from '@/components/ui/divider';
-import {
-  Actionsheet,
-  ActionsheetContent,
-  ActionsheetDragIndicator,
-  ActionsheetDragIndicatorWrapper,
-  ActionsheetBackdrop,
-  ActionsheetItem,
-  ActionsheetItemText,
-} from '@/components/ui/actionsheet';
 import OpenFoodFactsService, {
   ScanResult,
 } from '@/utils/api/OpenFoodFactsService';
@@ -269,7 +259,7 @@ export default function Scanner() {
       )}
 
       {/* Error Action Sheet - visible when product is not found */}
-      <Actionsheet
+      {/*      <Actionsheet
         isOpen={showErrorSheet}
         onClose={() => setShowErrorSheet(false)}
       >
@@ -296,7 +286,7 @@ export default function Scanner() {
             </ActionsheetItem>
           </VStack>
         </ActionsheetContent>
-      </Actionsheet>
+      </Actionsheet>*/}
     </VStack>
   );
 }

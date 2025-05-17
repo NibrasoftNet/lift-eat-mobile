@@ -84,8 +84,7 @@ async function prepareIngredientStandardWithImages() {
         );
         return {
           ...ingStandard,
-          image:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
+          image: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
       return ingStandard;
@@ -103,8 +102,7 @@ async function prepareMealsWithImages() {
         const imageBuffer = await getImageBuffer(images[meal.type]);
         return {
           ...meal,
-          image:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
+          image: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
       return meal;

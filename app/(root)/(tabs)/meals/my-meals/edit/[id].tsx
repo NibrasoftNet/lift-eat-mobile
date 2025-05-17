@@ -1,7 +1,6 @@
 import React from 'react';
 import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import MealForm from '../../../../../../components/froms/MealForm';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { MealWithIngredientAndStandardOrmProps } from '@/db/schema';
@@ -9,6 +8,7 @@ import { getMealByIdWithIngredients } from '@/utils/services/meal.service';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
+import MealForm from '@/components/forms/MealForm';
 
 export default function EditMealScreen() {
   const { id } = useLocalSearchParams();

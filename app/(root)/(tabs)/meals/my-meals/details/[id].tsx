@@ -6,7 +6,7 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonIcon } from '@/components/ui/button';
-import { EditIcon, ThreeDotsIcon, Icon, TrashIcon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
 import { Divider } from '@/components/ui/divider';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
@@ -21,10 +21,13 @@ import { Menu, MenuItem, MenuItemLabel } from '@/components/ui/menu';
 import { Pressable } from '@/components/ui/pressable';
 import {
   CircleChevronLeft,
+  EditIcon,
+  EllipsisVerticalIcon,
   HandPlatter,
   Info,
   SoupIcon,
   SquareSigma,
+  TrashIcon,
   UtensilsCrossedIcon,
   Weight,
 } from 'lucide-react-native';
@@ -33,18 +36,17 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
-import IngredientAccordion from '@/components/accordions/IngredientAccordion';
-import { Accordion } from '@/components/ui/accordion';
+//import IngredientAccordion from '@/components/accordions/IngredientAccordion';
+//import { Accordion } from '@/components/ui/accordion';
 import MacrosInfoCard from '@/components/cards/MacrosInfoCard';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useToast } from '@/components/ui/toast';
-import DeletionModal from '@/components/modals/DeletionModal';
+//import DeletionModal from '@/components/modals/DeletionModal';
+import Toast from 'react-native-toast-message';
+import { Accordion } from '@/components/ui/accordion';
+import IngredientAccordion from '@/components/accordions/IngredientAccordion';
 
 export default function MealDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -64,19 +66,10 @@ export default function MealDetailsScreen() {
   const { mutateAsync, isPending: isDeletionPending } = useMutation({
     mutationFn: async () => await deleteMeal(drizzleDb, Number(id)),
     onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Success delete Meal`}
-              description={`Success delete Meal`}
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success delete meal 👋',
       });
       await queryClient.invalidateQueries({
         predicate: (query) =>
@@ -87,19 +80,10 @@ export default function MealDetailsScreen() {
     },
     onError: (error: any) => {
       // Show error toast
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Failure delete Meal`}
-              description={error.toString()}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
@@ -124,18 +108,14 @@ export default function MealDetailsScreen() {
             </Pressable>
           </Link>
           <Menu
-            placement="right top"
+            placement="top right"
             offset={5}
             disabledKeys={['Settings']}
             trigger={({ ...triggerProps }) => {
               return (
-                <Button
-                  action="secondary"
-                  {...triggerProps}
-                  className="bg-transparent m-0 p-0"
-                >
+                <Button {...triggerProps} className="bg-transparent m-0 p-0">
                   <ButtonIcon
-                    as={ThreeDotsIcon}
+                    as={EllipsisVerticalIcon}
                     className="text-black w-8 h-8"
                   />
                 </Button>
@@ -147,24 +127,21 @@ export default function MealDetailsScreen() {
               textValue="Edit Plan"
               onPress={() => router.push(`/meals/my-meals/edit/${id}`)}
             >
-              <Icon as={EditIcon} size="sm" className="mr-2" />
-              <MenuItemLabel size="sm">Edit</MenuItemLabel>
+              <Icon as={EditIcon} size={30} className="mr-2" />
+              <MenuItemLabel>Edit</MenuItemLabel>
             </MenuItem>
             <MenuItem
               key="Delete Plan"
               textValue="Delete Plan"
               onPress={() => setShowModal(true)}
             >
-              <Icon as={TrashIcon} size="sm" className="mr-2" />
-              <MenuItemLabel size="sm">Delete</MenuItemLabel>
+              <Icon as={TrashIcon} size={30} className="mr-2" />
+              <MenuItemLabel>Delete</MenuItemLabel>
             </MenuItem>
           </Menu>
         </HStack>
         <Box className="h-44 w-full items-center justify-center">
           <Avatar>
-            <AvatarFallbackText>
-              {singleMeal?.name?.slice(0, 2).toUpperCase()}
-            </AvatarFallbackText>
             {singleMeal?.image ? (
               <AvatarImage
                 className="border-2 border-tertiary-500 w-44 h-44 shadow-xl"
@@ -173,9 +150,7 @@ export default function MealDetailsScreen() {
                 }}
               />
             ) : (
-              <AvatarFallbackText>
-                <Icon as={HandPlatter} size="lg" className="stroke-white" />
-              </AvatarFallbackText>
+              <Icon as={HandPlatter} size={30} className="stroke-white" />
             )}
           </Avatar>
         </Box>
@@ -203,7 +178,7 @@ export default function MealDetailsScreen() {
             />
             <HStack className="items-center justify-center w-full">
               <HStack className="gap-2 items-center">
-                <Icon as={SquareSigma} size="md" />
+                <Icon as={SquareSigma} size={30} />
                 <Text>Serving:</Text>
                 <Text>{singleMeal?.quantity}</Text>
               </HStack>
@@ -212,7 +187,7 @@ export default function MealDetailsScreen() {
                 className={`w-0.5 h-10 bg-gray-100 mx-3`}
               />
               <HStack className="gap-2 items-center">
-                <Icon as={Weight} size="md" />
+                <Icon as={Weight} size={30} />
                 <Text>Unit:</Text>
                 <Text>{singleMeal?.unit}</Text>
               </HStack>
@@ -256,14 +231,14 @@ export default function MealDetailsScreen() {
           )}
         </ScrollView>
       </VStack>
-      <DeletionModal
+      {/*      <DeletionModal
         title="Delete single meal"
         description="Are you sure you want to delete this meal? This action cannot be undone."
         showModal={showModal}
         setShowModal={setShowModal}
         isPending={isDeletionPending}
         handleDelete={() => handleMealDelete()}
-      />
+      />*/}
     </QueryStateHandler>
   );
 }

@@ -1,223 +1,172 @@
-'use client';
-import React from 'react';
-import { createFab } from '@gluestack-ui/fab';
-import { Pressable, Text } from 'react-native';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import {
-  withStyleContext,
-  useStyleContext,
-} from '@gluestack-ui/nativewind-utils/withStyleContext';
-import { cssInterop } from 'nativewind';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
-import { PrimitiveIcon, UIIcon } from '@gluestack-ui/icon';
+import React, { forwardRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SvgProps } from 'react-native-svg';
+import { LucideIcon } from 'lucide-react-native';
+import { cn } from '@/utils/nativewind-utils/cn';
 
-const SCOPE = 'FAB';
-const Root = withStyleContext(Pressable, SCOPE);
-const UIFab = createFab({
-  Root: Root,
-  Label: Text,
-  Icon: UIIcon,
-});
+// Type definitions
+type FabSize = 'sm' | 'md' | 'lg';
+type FabPlacement =
+  | 'bottom right'
+  | 'bottom left'
+  | 'bottom center'
+  | 'top right'
+  | 'top left'
+  | 'top center';
 
-cssInterop(PrimitiveIcon, {
-  className: {
-    target: 'style',
-    nativeStyleToProp: {
-      height: true,
-      width: true,
-      fill: true,
-      color: 'classNameColor',
-      stroke: true,
-    },
+// Props interfaces
+interface FabProps {
+  children: React.ReactNode;
+  size?: FabSize;
+  placement?: FabPlacement;
+  isHovered?: boolean;
+  isPressed?: boolean;
+  isDisabled?: boolean;
+  onPress?: () => void;
+  className?: string;
+}
+
+interface FabIconProps {
+  as: LucideIcon | React.FC<SvgProps>;
+  color?: string;
+  size?: number;
+  className?: string;
+}
+
+interface FabLabelProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+// Size mappings
+const sizeMap = {
+  sm: {
+    button: 'h-10 px-3',
+    icon: 16,
+    text: 'text-xs',
   },
-});
-
-const fabStyle = tva({
-  base: 'group/fab bg-primary-500 rounded-full z-20 p-4 flex-row items-center justify-center absolute hover:bg-primary-600 active:bg-primary-700 disabled:opacity-40 disabled:pointer-events-all disabled:cursor-not-allowed data-[focus=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[focus-visible=true]:web:ring-indicator-info shadow-hard-2',
-  variants: {
-    size: {
-      sm: 'px-2.5 py-2.5',
-      md: 'px-3 py-3',
-      lg: 'px-4 py-4',
-    },
-    placement: {
-      'top right': 'top-4 right-4',
-      'top left': 'top-4 left-4',
-      'bottom right': 'bottom-4 right-4',
-      'bottom left': 'bottom-4 left-4',
-      'top center': 'top-4 self-center',
-      'bottom center': 'bottom-4 self-center',
-    },
+  md: {
+    button: 'h-12 px-4',
+    icon: 20,
+    text: 'text-sm',
   },
-});
-
-const fabLabelStyle = tva({
-  base: 'text-typography-50 font-normal font-body tracking-md text-left mx-2',
-  variants: {
-    isTruncated: {
-      true: '',
-    },
-    bold: {
-      true: 'font-bold',
-    },
-    underline: {
-      true: 'underline',
-    },
-    strikeThrough: {
-      true: 'line-through',
-    },
-    size: {
-      '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
-      '2xl': 'text-2xl',
-      '3xl': 'text-3xl',
-      '4xl': 'text-4xl',
-      '5xl': 'text-5xl',
-      '6xl': 'text-6xl',
-    },
-    sub: {
-      true: 'text-xs',
-    },
-    italic: {
-      true: 'italic',
-    },
-    highlight: {
-      true: 'bg-yellow-500',
-    },
+  lg: {
+    button: 'h-14 px-5',
+    icon: 24,
+    text: 'text-base',
   },
-  parentVariants: {
-    size: {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
-    },
-  },
-});
+};
 
-const fabIconStyle = tva({
-  base: 'text-typography-50 fill-none',
-  variants: {
-    size: {
-      '2xs': 'h-3 w-3',
-      'xs': 'h-3.5 w-3.5',
-      'sm': 'h-4 w-4',
-      'md': 'w-[18px] h-[18px]',
-      'lg': 'h-5 w-5',
-      'xl': 'h-6 w-6',
-    },
-  },
-});
+// Placement mappings
+const placementMap = {
+  'bottom right': 'bottom-4 right-4',
+  'bottom left': 'bottom-4 left-4',
+  'bottom center': 'bottom-4 left-1/2 -translate-x-1/2',
+  'top right': 'top-4 right-4',
+  'top left': 'top-4 left-4',
+  'top center': 'top-4 left-1/2 -translate-x-1/2',
+};
 
-type IFabProps = Omit<React.ComponentPropsWithoutRef<typeof UIFab>, 'context'> &
-  VariantProps<typeof fabStyle>;
-
-const Fab = React.forwardRef<React.ElementRef<typeof UIFab>, IFabProps>(
-  ({ size = 'md', placement = 'bottom right', className, ...props }, ref) => {
+// FabIcon Component
+const FabIcon = forwardRef<View, FabIconProps>(
+  ({ as: Icon, color = 'white', size, className }, ref) => {
     return (
-      <UIFab
-        ref={ref}
-        {...props}
-        className={fabStyle({ size, placement, class: className })}
-        context={{ size }}
-      />
+      <View ref={ref} className={cn('mr-2', className)}>
+        <Icon color={color} size={size} />
+      </View>
     );
-  }
+  },
 );
 
-type IFabLabelProps = React.ComponentPropsWithoutRef<typeof UIFab.Label> &
-  VariantProps<typeof fabLabelStyle>;
-
-const FabLabel = React.forwardRef<
-  React.ElementRef<typeof UIFab.Label>,
-  IFabLabelProps
->(
-  (
-    {
-      size,
-      isTruncated = false,
-      bold = false,
-      underline = false,
-      strikeThrough = false,
-      className,
-      ...props
-    },
-    ref
-  ) => {
-    const { size: parentSize } = useStyleContext(SCOPE);
+// FabLabel Component
+const FabLabel = forwardRef<Text, FabLabelProps>(
+  ({ children, className }, ref) => {
     return (
-      <UIFab.Label
-        ref={ref}
-        {...props}
-        className={fabLabelStyle({
-          parentVariants: {
-            size: parentSize,
-          },
-          size,
-          isTruncated,
-          bold,
-          underline,
-          strikeThrough,
-          class: className,
-        })}
-      />
+      <Text ref={ref} className={cn('text-white font-medium', className)}>
+        {children}
+      </Text>
     );
-  }
+  },
 );
 
-type IFabIconProps = React.ComponentPropsWithoutRef<typeof UIFab.Icon> &
-  VariantProps<typeof fabIconStyle> & {
-    height?: number;
-    width?: number;
-  };
+// Main Fab Component
+const Fab: React.FC<FabProps> = ({
+  children,
+  size = 'md',
+  placement = 'bottom right',
+  isHovered = false,
+  isPressed = false,
+  isDisabled = false,
+  onPress,
+  className,
+}) => {
+  // Get size and placement styles
+  const sizeStyle = sizeMap[size];
+  const placementStyle = placementMap[placement];
 
-const FabIcon = React.forwardRef<
-  React.ElementRef<typeof UIFab.Icon>,
-  IFabIconProps
->(({ size, className, ...props }, ref) => {
-  const { size: parentSize } = useStyleContext(SCOPE);
+  // Prepare child components with proper sizing
+  const childrenWithProps = React.Children.map(children, (child) => {
+    if (React.isValidElement<FabIconProps | FabLabelProps>(child)) {
+      // Check if the child is a FabIcon
+      if (child.type === FabIcon) {
+        const props = child.props as FabIconProps;
+        // @ts-ignore
+        return React.cloneElement<FabIconProps>(child, {
+          ...props,
+          size: props.size || sizeStyle.icon,
+        });
+      }
 
-  if (typeof size === 'number') {
-    return (
-      <UIFab.Icon
-        ref={ref}
-        {...props}
-        className={fabIconStyle({ class: className })}
-        size={size}
-      />
-    );
-  } else if (
-    (props.height !== undefined || props.width !== undefined) &&
-    size === undefined
-  ) {
-    return (
-      <UIFab.Icon
-        ref={ref}
-        {...props}
-        className={fabIconStyle({ class: className })}
-      />
-    );
-  }
+      // Check if the child is a FabLabel
+      if (child.type === FabLabel) {
+        const props = child.props as FabLabelProps;
+        // @ts-ignore
+        return React.cloneElement<FabLabelProps>(child, {
+          ...props,
+          className: cn(sizeStyle.text, props.className),
+        });
+      }
+    }
+    return child;
+  });
+
   return (
-    <UIFab.Icon
-      ref={ref}
-      {...props}
-      className={fabIconStyle({
-        parentVariants: {
-          size: parentSize,
-        },
-        size,
-        class: className,
-      })}
-    />
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={isDisabled}
+      activeOpacity={0.8}
+      style={styles.fabContainer}
+      className={cn(
+        'absolute rounded-full flex-row items-center justify-center',
+        placementStyle,
+        sizeStyle.button,
+        'bg-blue-500',
+        isHovered && 'bg-blue-600',
+        isPressed && 'bg-blue-700',
+        isDisabled && 'bg-gray-400',
+        className,
+      )}
+    >
+      {childrenWithProps}
+    </TouchableOpacity>
   );
+};
+
+// Additional styles
+const styles = StyleSheet.create({
+  fabContainer: {
+    elevation: 3, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    zIndex: 10,
+  },
 });
 
-Fab.displayName = 'Fab';
-FabLabel.displayName = 'FabLabel';
+// Set Display Names
 FabIcon.displayName = 'FabIcon';
+FabLabel.displayName = 'FabLabel';
+Fab.displayName = 'Fab';
 
 export { Fab, FabLabel, FabIcon };

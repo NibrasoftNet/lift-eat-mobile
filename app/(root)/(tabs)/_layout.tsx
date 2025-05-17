@@ -47,7 +47,7 @@ export default function TabLayout() {
               style={{
                 width: 65,
                 height: 65,
-                backgroundColor: Colors.light.background,
+                backgroundColor: Colors.secondary.background,
                 borderRadius: 35,
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -76,7 +76,7 @@ export default function TabLayout() {
                   elevation: 5,
                 }}
               >
-                <Icon as={Flame} className="w-10 h-10 text-white" />
+                <Icon as={Flame} size={40} color={Colors.secondary.icon} />
               </View>
             </View>
           ),

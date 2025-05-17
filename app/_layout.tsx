@@ -4,7 +4,6 @@ import {
   ThemeProvider,
 } from '@react-navigation/native';
 import '@/global.css';
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { useFonts } from 'expo-font';
 import ErrorBoundary from 'react-native-error-boundary';
 import { Stack, useRouter } from 'expo-router';
@@ -30,29 +29,32 @@ import '@/i18n';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { Icon } from '@/components/ui/icon';
 import { CloudAlert } from 'lucide-react-native';
 import { tokenCache } from '@/cache';
 import { ConvexReactClient } from 'convex/react';
 import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
+import { Colors } from '@/utils/constants/Colors';
+import Toast from 'react-native-toast-message';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
 
 // Init convex client
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+/* const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
-});
+}); */
 
 const InitialLayout = () => {
   const router = useRouter();
   const { user } = useSessionStore();
   useEffect(() => {
     if (!user) {
+      router.replace('/intro');
+    } else if (user.id === 0) {
       router.replace('/login');
     } else {
-      router.replace('/intro');
+      router.replace('/register');
     }
   }, []);
 
@@ -127,7 +129,7 @@ export default function ProjectLayout() {
     resetError: (event: GestureResponderEvent) => void;
   }) => (
     <VStack className="size-full items-center justify-center gap-4 p-4">
-      <Icon as={CloudAlert} className="w-10 h-10 text-red-500" />
+      <CloudAlert size={30} color={Colors.red.icon} />
       <Text>Oops! Something went wrong:</Text>
       <Text>{error.toString()}</Text>
       <Button className="w-full mt-10 mx-2" onPress={resetError}>
@@ -137,34 +139,33 @@ export default function ProjectLayout() {
   );
 
   return (
-    <GluestackUIProvider mode="system">
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <QueryClientProvider client={queryClient}>
-          <ClerkProvider
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <QueryClientProvider client={queryClient}>
+        {/*          <ClerkProvider
             tokenCache={tokenCache}
             publishableKey="pk_test_YW1hemluZy13ZXJld29sZi02NS5jbGVyay5hY2NvdW50cy5kZXYk"
           >
             <ClerkLoaded>
-              <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-                <Suspense fallback={<ActivityIndicator size="large" />}>
-                  <SQLiteProvider
-                    databaseName={DATABASE_NAME}
-                    options={{ enableChangeListener: true }}
-                    useSuspense
-                  >
-                    <DrizzleProvider>
-                      <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        <InitialLayout />
-                        <StatusBar style="auto" hidden={true} />
-                      </ErrorBoundary>
-                    </DrizzleProvider>
-                  </SQLiteProvider>
-                </Suspense>
-              </ConvexProviderWithClerk>
+              <ConvexProviderWithClerk client={convex} useAuth={useAuth}>*/}
+        <Suspense fallback={<ActivityIndicator size="large" />}>
+          <SQLiteProvider
+            databaseName={DATABASE_NAME}
+            options={{ enableChangeListener: true }}
+            useSuspense
+          >
+            <DrizzleProvider>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <InitialLayout />
+                <StatusBar style="auto" hidden={true} />
+                <Toast />
+              </ErrorBoundary>
+            </DrizzleProvider>
+          </SQLiteProvider>
+        </Suspense>
+        {/*              </ConvexProviderWithClerk>
             </ClerkLoaded>
-          </ClerkProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </GluestackUIProvider>
+          </ClerkProvider>*/}
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

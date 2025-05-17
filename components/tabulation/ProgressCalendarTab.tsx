@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { VStack } from '../ui/vstack';
-import NavbarUser from '../navbars/NavbarUser';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { UserOrmPros } from '@/db/schema';
 import useSessionStore from '@/utils/store/sessionStore';
+import NavbarUser from '@/components/navbars/NavbarUser';
 
 const ProgressCalendarTab = () => {
   const drizzleDb = useDrizzleDb();
@@ -35,7 +35,7 @@ const ProgressCalendarTab = () => {
       isPending={isPending}
       isRefetching={isRefetching}
     >
-      <VStack>
+      <>
         <NavbarUser user={actualUser!} />
         <Calendar
           markingType={'multi-dot'}
@@ -51,7 +51,7 @@ const ProgressCalendarTab = () => {
             console.log('selected day', day);
           }}
         />
-      </VStack>
+      </>
     </QueryStateHandler>
   );
 };

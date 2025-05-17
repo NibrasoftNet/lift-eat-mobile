@@ -6,7 +6,7 @@ import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { UserOrmPros, users } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { UserProfileDefaultValuesProps } from '@/utils/validation/user/user-profile.validation';
-import UserProfileForm from '@/components/froms/UserProfileForm';
+import UserProfileForm from '@/components/forms/UserProfileForm';
 
 export default function EditUserProfile() {
   const { id } = useLocalSearchParams();

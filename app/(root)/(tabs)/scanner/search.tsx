@@ -16,9 +16,6 @@ import OpenFoodFactsService, {
   ProductResult,
   SearchParams,
 } from '@/utils/api/OpenFoodFactsService';
-import { useToast } from '@/components/ui/toast';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { FlashList } from '@shopify/flash-list';
 import OpenFoodSearchCard from '@/components/cards/OpenFoodSearchCard';
@@ -26,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { Colors } from '@/utils/constants/Colors';
 import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
+import Toast from 'react-native-toast-message';
 
 export default function SearchWithOpenFood() {
   const [searchQuery, setSearchQuery] = useState<string>('pasta');
@@ -33,7 +31,6 @@ export default function SearchWithOpenFood() {
     CuisineTypeEnum | undefined
   >(undefined);
   const router = useRouter();
-  const toast = useToast();
 
   const {
     data: searchResults,
@@ -72,37 +69,19 @@ export default function SearchWithOpenFood() {
         if (results && results.length > 0) {
           return results;
         } else {
-          toast.show({
-            placement: 'top',
-            render: ({ id }: { id: string }) => {
-              const toastId = 'toast-' + id;
-              return (
-                <MultiPurposeToast
-                  id={toastId}
-                  color={ToastTypeEnum.INFOS}
-                  title="Aucun résultat"
-                  description="Aucun produit trouvé avec ce terme de recherche"
-                />
-              );
-            },
+          Toast.show({
+            type: 'error',
+            text1: 'No Result',
+            text2: `0 Result found`,
           });
           return null;
         }
       } catch (error) {
         console.error('Error searching products:', error);
-        toast.show({
-          placement: 'top',
-          render: ({ id }: { id: string }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.ERROR}
-                title="Erreur de recherche"
-                description="Une erreur est survenue lors de la recherche"
-              />
-            );
-          },
+        Toast.show({
+          type: 'error',
+          text1: 'No Result',
+          text2: `0 Result found`,
         });
         return null;
       }
@@ -138,8 +117,8 @@ export default function SearchWithOpenFood() {
           className={`w-full h-0.5 bg-gray-100`}
         />
         {/* Champ de recherche */}
-        <Input variant="outline" className="bg-white/90 rounded-xl h-12 p-2">
-          <InputIcon as={Search} className="text-gray-400" />
+        <Input className="bg-white/90 rounded-xl h-12 p-2">
+          {/*<InputIcon as={Search} className="text-gray-400" />*/}
           <InputField
             placeholder="Rechercher un produit..."
             value={searchQuery}

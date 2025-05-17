@@ -4,8 +4,8 @@ import { Link, useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
-import { AddIcon, Icon } from '@/components/ui/icon';
-import { SoupIcon } from 'lucide-react-native';
+import { Icon } from '@/components/ui/icon';
+import { PlusIcon, SoupIcon } from 'lucide-react-native';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
@@ -45,7 +45,7 @@ export default function MyPlansScreen() {
         <Box className="flex-row justify-between items-center p-4 border-b border-primary-100">
           <Text className="text-2xl font-bold">Nutrition Plans</Text>
           <Link href="/plans/my-plans/create">
-            <Icon as={SoupIcon} className="w-8 h-8" />
+            <Icon as={SoupIcon} size={30} />
           </Link>
         </Box>
         <FlashList
@@ -65,8 +65,8 @@ export default function MyPlansScreen() {
           isPressed={false}
           onPress={() => router.push('/plans/my-plans/create')}
         >
-          <FabIcon as={AddIcon} />
-          <FabLabel>New Plan</FabLabel>
+          <FabIcon as={PlusIcon} />
+          <FabLabel>New</FabLabel>
         </Fab>
       </VStack>
     </QueryStateHandler>

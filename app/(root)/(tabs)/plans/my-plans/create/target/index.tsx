@@ -1,7 +1,7 @@
 import React from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
-import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
+import NutritionGoalForm from '@/components/forms/NutritionGoalForm';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';

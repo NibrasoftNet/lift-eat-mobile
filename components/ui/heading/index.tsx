@@ -1,8 +1,45 @@
 import React, { forwardRef, memo } from 'react';
 import { H1, H2, H3, H4, H5, H6 } from '@expo/html-elements';
-import { headingStyle } from './styles';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 import { cssInterop } from 'nativewind';
+import { tv, VariantProps } from 'tailwind-variants';
+
+export const headingStyle = tv({
+  base: `text-typography-900 font-bold font-heading tracking-sm my-0`,
+  variants: {
+    isTruncated: {
+      true: 'truncate',
+    },
+    bold: {
+      true: 'font-bold font-ubuntu-light',
+    },
+    underline: {
+      true: 'underline',
+    },
+    strikeThrough: {
+      true: 'line-through',
+    },
+    sub: {
+      true: 'text-xs',
+    },
+    italic: {
+      true: 'italic',
+    },
+    highlight: {
+      true: 'bg-yellow-500',
+    },
+    size: {
+      '5xl': 'text-6xl',
+      '4xl': 'text-5xl',
+      '3xl': 'text-4xl',
+      '2xl': 'text-3xl',
+      xl: 'text-2xl',
+      lg: 'text-xl',
+      md: 'text-lg',
+      sm: 'text-base',
+      xs: 'text-sm',
+    },
+  },
+});
 
 type IHeadingProps = VariantProps<typeof headingStyle> &
   React.ComponentPropsWithoutRef<typeof H1> & {
@@ -17,7 +54,7 @@ cssInterop(H5, { className: 'style' });
 cssInterop(H6, { className: 'style' });
 
 const MappedHeading = memo(
-  forwardRef<React.ElementRef<typeof H1>, IHeadingProps>(
+  forwardRef<React.ComponentRef<typeof H1>, IHeadingProps>(
     (
       {
         size,
@@ -176,7 +213,7 @@ const MappedHeading = memo(
 );
 
 const Heading = memo(
-  forwardRef<React.ElementRef<typeof H1>, IHeadingProps>(
+  forwardRef<React.ComponentRef<typeof H1>, IHeadingProps>(
     ({ className, size = 'lg', as: AsComp, ...props }, ref) => {
       const {
         isTruncated,

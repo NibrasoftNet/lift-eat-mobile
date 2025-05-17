@@ -1,7 +1,7 @@
 import React from 'react';
 import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 import { CalculateCaloriesIntakeDefaultValueProps } from '@/utils/validation/plan/calculate-calories-intake.validation';
-import CalculateCaloriesIntakeForm from '@/components/froms/CalculateCaloriesIntakeForm';
+import CalculateCaloriesIntakeForm from '@/components/forms/CalculateCaloriesIntakeForm';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { useQuery } from '@tanstack/react-query';

@@ -28,7 +28,7 @@ const CuisineTypeBox: React.FC<CuisineTypeBoxProps> = ({
         <>
           <Button
             onPress={() => handleCuisineSelect(undefined)}
-            className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
+            className={`bg-transparent p-2 rounded-full h-12 w-12 border-2 ${
               selectedCuisine === undefined
                 ? 'border-amber-500'
                 : 'border-gray-200'
@@ -39,10 +39,10 @@ const CuisineTypeBox: React.FC<CuisineTypeBoxProps> = ({
             </ButtonText>
           </Button>
           {cuisineOptions.map((cuisineType) => (
-            <VStack key={cuisineType.name} className="w-16 h-20 items-center">
+            <VStack key={cuisineType.name} className="w-12 h-20 items-center">
               <Button
                 onPress={() => handleCuisineSelect(cuisineType.name)}
-                className={`bg-transparent p-2 rounded-full h-16 w-16 border-2 ${
+                className={`bg-transparent p-2 rounded-full h-12 w-12 border-2 ${
                   selectedCuisine === cuisineType.name
                     ? 'border-amber-500'
                     : 'border-gray-200'
@@ -50,11 +50,11 @@ const CuisineTypeBox: React.FC<CuisineTypeBoxProps> = ({
               >
                 <Image
                   source={cuisineType.icon}
-                  className="h-14 w-14 object-contain rounded-full"
+                  className="h-12 w-12 object-contain rounded-full"
                   style={{ alignSelf: 'center' }}
                 />
               </Button>
-              <Text className="text-sm capitalize">{cuisineType.name}</Text>
+              <Text className="text-sm lowercase">{cuisineType.name}</Text>
             </VStack>
           ))}
         </>

@@ -2,7 +2,7 @@ import React from 'react';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation';
-import MealForm from '@/components/froms/MealForm';
+import MealForm from '@/components/forms/MealForm';
 import {
   CuisineTypeEnum,
   MealTypeEnum,

@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD `age` integer DEFAULT 20 NOT NULL;
