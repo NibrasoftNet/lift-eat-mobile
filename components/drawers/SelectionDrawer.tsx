@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useState, useMemo, useEffect, useCallback } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { RefreshControl, ActivityIndicator } from 'react-native';
 import { logger } from '@/utils/services/logging.service';
@@ -6,7 +13,6 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 /* Custom Providers */
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-/* Gluestack ui components */
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   Drawer,
@@ -43,7 +49,13 @@ interface SelectionDrawerProps<T extends SelectionItem> {
   fetchNextPage: () => Promise<any>;
   hasNextPage: boolean | undefined;
   setSearchTerm: (term: string | undefined) => void;
-  renderItem: ({ item, index }: { item: T; index: number }) => React.ReactElement;
+  renderItem: ({
+    item,
+    index,
+  }: {
+    item: T;
+    index: number;
+  }) => React.ReactElement;
   getItemType?: (item: T) => string; // Aide à l'optimisation en identifiant les types d'items différents
   searchPlaceholder?: string;
   onEndReachedThreshold?: number;
@@ -69,21 +81,26 @@ function SelectionDrawer<T extends SelectionItem>({
   hasNextPage,
   setSearchTerm,
   renderItem,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   onEndReachedThreshold = 0.5,
   estimatedItemSize = 300,
   additionalActions,
-  footerComponent
+  footerComponent,
 }: SelectionDrawerProps<T>) {
   // États locaux
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string | undefined>(undefined);
-  
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<
+    string | undefined
+  >(undefined);
+
   // Vérifier l'authentification de l'utilisateur
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   useEffect(() => {
     if (!userId) {
-      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing SelectionDrawer');
+      logger.warn(
+        LogCategory.AUTH,
+        'User not authenticated when accessing SelectionDrawer',
+      );
       setShowDrawer(false);
     }
   }, [userId, setShowDrawer]);
@@ -104,7 +121,10 @@ function SelectionDrawer<T extends SelectionItem>({
 
   // Gestionnaire de fin de liste atteinte
   const handleEndReached = useCallback(() => {
-    logger.debug(LogCategory.UI, `End of list reached, hasNextPage: ${hasNextPage}`);
+    logger.debug(
+      LogCategory.UI,
+      `End of list reached, hasNextPage: ${hasNextPage}`,
+    );
     if (hasNextPage) fetchNextPage();
   }, [hasNextPage, fetchNextPage]);
 
@@ -115,7 +135,11 @@ function SelectionDrawer<T extends SelectionItem>({
       size="lg"
       anchor="bottom"
     >
-      <DrawerBackdrop />
+      <DrawerBackdrop
+        onPress={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
       <DrawerContent className="bg-secondary-100 p-2 pb-0 relative">
         <DrawerHeader className="flex items-center justify-between w-full border-b border-secondary-300 p-2">
           <Heading size="xl" className="text-center font-semibold">
@@ -124,16 +148,14 @@ function SelectionDrawer<T extends SelectionItem>({
           <Button
             onPress={() => setShowDrawer(false)}
             className="bg-transparent w-12 h-12"
-            action="secondary"
           >
             <ButtonIcon as={CircleChevronDown} className="w-10 h-10" />
           </Button>
         </DrawerHeader>
         <DrawerBody className="pb-16">
-        {/* pb-16 pour faire de la place pour le footer fixe */}
+          {/* pb-16 pour faire de la place pour le footer fixe */}
           <VStack className="gap-2 flex-1">
             <Input
-              variant="outline"
               className="bg-white/90 rounded-xl h-12 p-1"
             >
               <InputIcon as={SearchIcon} className="text-gray-400" />
@@ -143,9 +165,9 @@ function SelectionDrawer<T extends SelectionItem>({
                 onChangeText={handleSearch}
               />
             </Input>
-            
+
             {additionalActions}
-            
+
             <QueryStateHandler
               data={data}
               isLoading={isLoading}
@@ -163,7 +185,7 @@ function SelectionDrawer<T extends SelectionItem>({
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={onEndReachedThreshold}
                 // Optimisations pour FlashList compatibles avec les types existants
-                estimatedListSize={{height: 500, width: 400}} // Estimation de la taille totale de la liste
+                estimatedListSize={{ height: 500, width: 400 }} // Estimation de la taille totale de la liste
                 ListFooterComponent={() =>
                   isFetchingNextPage ? (
                     <ActivityIndicator size="large" color="#000" />
@@ -173,8 +195,8 @@ function SelectionDrawer<T extends SelectionItem>({
                   )
                 }
                 refreshControl={
-                  <RefreshControl 
-                    refreshing={isRefetching && !isFetchingNextPage} 
+                  <RefreshControl
+                    refreshing={isRefetching && !isFetchingNextPage}
                     onRefresh={refetch}
                     colors={['#4F46E5']} // Couleur de chargement assortie au thème
                   />
@@ -187,10 +209,7 @@ function SelectionDrawer<T extends SelectionItem>({
           {footerComponent ? (
             footerComponent
           ) : (
-            <Button
-              onPress={() => setShowDrawer(false)}
-              className="w-full"
-            >
+            <Button onPress={() => setShowDrawer(false)} className="w-full">
               <ButtonText>Close</ButtonText>
             </Button>
           )}

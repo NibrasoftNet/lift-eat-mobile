@@ -36,6 +36,7 @@ import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { Colors } from '@/utils/constants/Colors';
 import Toast from 'react-native-toast-message';
+import { UIProvider } from '@/utils/providers/UiProvider';
 
 SplashScreen.preventAutoHideAsync();
 export const DATABASE_NAME = 'lift_eat_db';
@@ -52,9 +53,9 @@ const InitialLayout = () => {
     if (!user) {
       router.replace('/intro');
     } else if (user.id === 0) {
-      router.replace('/login');
+      router.replace('/analytics');
     } else {
-      router.replace('/register');
+      router.replace('/analytics');
     }
   }, []);
 
@@ -139,33 +140,35 @@ export default function ProjectLayout() {
   );
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <QueryClientProvider client={queryClient}>
-        {/*          <ClerkProvider
+    <UIProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <QueryClientProvider client={queryClient}>
+          {/*          <ClerkProvider
             tokenCache={tokenCache}
             publishableKey="pk_test_YW1hemluZy13ZXJld29sZi02NS5jbGVyay5hY2NvdW50cy5kZXYk"
           >
             <ClerkLoaded>
               <ConvexProviderWithClerk client={convex} useAuth={useAuth}>*/}
-        <Suspense fallback={<ActivityIndicator size="large" />}>
-          <SQLiteProvider
-            databaseName={DATABASE_NAME}
-            options={{ enableChangeListener: true }}
-            useSuspense
-          >
-            <DrizzleProvider>
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <InitialLayout />
-                <StatusBar style="auto" hidden={true} />
-                <Toast />
-              </ErrorBoundary>
-            </DrizzleProvider>
-          </SQLiteProvider>
-        </Suspense>
-        {/*              </ConvexProviderWithClerk>
+          <Suspense fallback={<ActivityIndicator size="large" />}>
+            <SQLiteProvider
+              databaseName={DATABASE_NAME}
+              options={{ enableChangeListener: true }}
+              useSuspense
+            >
+              <DrizzleProvider>
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <InitialLayout />
+                  <StatusBar style="auto" hidden={true} />
+                  <Toast />
+                </ErrorBoundary>
+              </DrizzleProvider>
+            </SQLiteProvider>
+          </Suspense>
+          {/*              </ConvexProviderWithClerk>
             </ClerkLoaded>
           </ClerkProvider>*/}
-      </QueryClientProvider>
-    </ThemeProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </UIProvider>
   );
 }

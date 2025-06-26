@@ -1,28 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
+import React, { useEffect, useContext } from 'react';
+import { Modal, View, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
   runOnJS,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { tv } from 'tailwind-variants';
 import { cn } from '@/utils/nativewind-utils/cn';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-type SheetHeight = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
-
-interface CustomBottomSheetProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  height: SheetHeight;
-  children: React.ReactNode;
-  onClose?: () => void;
-  className?: string;
-  overlayClassName?: string;
-  handleClassName?: string;
-}
+import { UIContext } from '@/utils/providers/UiProvider';
 
 const bottomSheet = tv({
   base: 'bg-white rounded-t-3xl shadow-lg pt-5 px-4',
@@ -41,7 +29,7 @@ const bottomSheet = tv({
   },
 });
 
-const BottomSheet: React.FC<CustomBottomSheetProps> = ({
+const BottomSheet = ({
   open,
   setOpen,
   height,
@@ -50,97 +38,108 @@ const BottomSheet: React.FC<CustomBottomSheetProps> = ({
   className,
   overlayClassName,
   handleClassName,
-}) => {
-  const translateY = useSharedValue(SCREEN_HEIGHT);
-  const active = useSharedValue(false);
+}: any) => {
+  const ui = useContext(UIContext);
+  const screenHeight = ui?.screenHeight ?? 800;
 
-  const heightPercentages = {
-    xs: SCREEN_HEIGHT * 0.16,
-    sm: SCREEN_HEIGHT * 0.25,
-    md: SCREEN_HEIGHT * 0.5,
-    lg: SCREEN_HEIGHT * 0.75,
-    xl: SCREEN_HEIGHT * 0.83,
-    full: SCREEN_HEIGHT,
+  const heightMap = {
+    xs: screenHeight * 0.16,
+    sm: screenHeight * 0.25,
+    md: screenHeight * 0.5,
+    lg: screenHeight * 0.75,
+    xl: screenHeight * 0.83,
+    full: screenHeight,
   };
-
-  const sheetHeight = heightPercentages[height];
+  // @ts-ignore
+  const sheetHeight = heightMap[height];
+  const translateY = useSharedValue(sheetHeight);
 
   useEffect(() => {
     if (open) {
-      active.value = true;
-      translateY.value = sheetHeight;
       translateY.value = withTiming(0, { duration: 300 });
     } else {
-      translateY.value = withTiming(sheetHeight, { duration: 300 }, () => {
-        runOnJS(setActive)(false);
-      });
+      translateY.value = sheetHeight;
     }
   }, [open, sheetHeight]);
 
-  const setActive = (isActive: boolean) => {
-    active.value = isActive;
-  };
-
   const handleClose = () => {
-    setOpen(false);
-    onClose?.();
+    translateY.value = withTiming(sheetHeight, {}, () => {
+      runOnJS(setOpen)(false);
+      onClose?.();
+    });
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const gesture = Gesture.Pan()
+    .onUpdate((e) => {
+      if (e.translationY > 0) {
+        translateY.value = e.translationY;
+      }
+    })
+    .onEnd((e) => {
+      if (e.translationY > sheetHeight * 0.4) {
+        translateY.value = withTiming(sheetHeight, {}, () => {
+          runOnJS(setOpen)(false);
+          runOnJS(onClose)?.();
+        });
+      } else {
+        translateY.value = withSpring(0);
+      }
+    });
 
-  const backdropStyle = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(active.value ? 0.5 : 0, { duration: 300 }),
-      display: active.value ? 'flex' : 'none',
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(open ? 0.5 : 0, { duration: 300 }),
+  }));
 
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+    <Modal visible={open} transparent animationType="none">
       <Animated.View
-        style={[styles.backdrop, backdropStyle]}
+        style={[StyleSheet.absoluteFillObject, overlayStyle]}
         className={cn('bg-black', overlayClassName)}
       >
         <TouchableOpacity
-          style={styles.backdropTouchable}
           activeOpacity={1}
+          style={StyleSheet.absoluteFillObject}
           onPress={handleClose}
         />
       </Animated.View>
 
-      <Animated.View
-        style={[styles.container, { height: sheetHeight }, animatedStyle]}
-        className={cn(bottomSheet({ height }), className)}
-      >
-        <View
-          className={cn(
-            'w-12 h-1 bg-gray-300 rounded-full self-center mb-4',
-            handleClassName,
-          )}
-        />
-        {children}
-      </Animated.View>
-    </View>
+      <GestureDetector gesture={gesture}>
+        <Animated.View
+          style={[
+            styles.container,
+            { height: sheetHeight, bottom: -1 },
+            animatedStyle,
+          ]}
+          className={cn(bottomSheet({ height }), className)}
+        >
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={handleClose}
+            className="w-full items-center pb-2"
+          >
+            <View
+              className={cn(
+                'w-12 h-1 bg-gray-300 rounded-full mb-2',
+                handleClassName,
+              )}
+            />
+          </TouchableOpacity>
+          {children}
+        </Animated.View>
+      </GestureDetector>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    height: SCREEN_HEIGHT,
-    zIndex: 9,
-  },
-  backdropTouchable: {
-    height: SCREEN_HEIGHT,
-  },
   container: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: -1,
     zIndex: 10,
   },
 });

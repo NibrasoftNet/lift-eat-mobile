@@ -49,7 +49,7 @@ export default function Intro() {
                   setStep(IntroStepEnum.TWO);
                 } else {
                   console.log('register');
-                  router.replace('/login');
+                  router.replace('/analytics');
                 }
               }}
             >

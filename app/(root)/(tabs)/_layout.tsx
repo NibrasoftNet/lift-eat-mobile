@@ -22,72 +22,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="assistant"
+        name="analytics"
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon as={MessageSquareText} className="w-8 h-8" color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="plans"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon as={Notebook} className="w-8 h-8" color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="meals"
-        options={{
-          tabBarIcon: () => (
-            <View
-              style={{
-                width: 65,
-                height: 65,
-                backgroundColor: Colors.secondary.background,
-                borderRadius: 35,
-                justifyContent: 'center',
-                alignItems: 'center',
-                position: 'absolute',
-                top: -40,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 5,
-              }}
-            >
-              <View
-                style={{
-                  width: 60,
-                  height: 60,
-                  backgroundColor: Colors.primary.background,
-                  borderRadius: 35,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  position: 'relative',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 5,
-                }}
-              >
-                <Icon as={Flame} size={40} color={Colors.secondary.icon} />
-              </View>
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="scanner"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon as={ScanQrCode} className="w-8 h-8" color={color} />
+            <Icon as={ChartNoAxesCombined} className="w-8 h-8" color={color} />
           ),
         }}
       />

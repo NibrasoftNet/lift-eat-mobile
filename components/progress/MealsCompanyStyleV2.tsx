@@ -13,11 +13,11 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
-import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
+import { DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
+import useProgressStore, {
+  MealWithProgress,
+} from '@/utils/store/progressStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { markMealAsConsumed } from '@/utils/services/progress.service';
-import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
@@ -138,12 +138,12 @@ const DraggableItem = ({
                     droppedOnMealType = 'snacks';
                   }
 
-                  console.log("Dropped at:", {
+                  console.log('Dropped at:', {
                     x: nativeEvent.absoluteX,
                     y: nativeEvent.absoluteY,
                     relativeY,
                     droppedOnRight,
-                    droppedOnMealType
+                    droppedOnMealType,
                   });
 
                   translateX.value = withSpring(0);
@@ -178,7 +178,6 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   onMealStatusChange,
 }) => {
   const drizzleDb = useDrizzleDb();
-  const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
 
   // Initialize empty lists
@@ -204,34 +203,38 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   // Déterminer le type de repas
   const determineMealType = (type: string | null): MealType => {
     if (!type) return 'snacks';
-    
+
     const lowerType = type.toLowerCase();
-    
+
     if (lowerType.includes('breakfast')) return 'breakfast';
     if (lowerType.includes('lunch')) return 'lunch';
     if (lowerType.includes('dinner')) return 'dinner';
-    
+
     return 'snacks';
   };
 
   // Populate lists on component mount
   useEffect(() => {
-    console.log("MealsCompanyStyleV2 - Initialisation avec", mealsWithProgress.length, "repas");
-    
+    console.log(
+      'MealsCompanyStyleV2 - Initialisation avec',
+      mealsWithProgress.length,
+      'repas',
+    );
+
     const available: MealList = {
       breakfast: [],
       lunch: [],
       dinner: [],
       snacks: [],
     };
-    
+
     const consumed: MealList = {
       breakfast: [],
       lunch: [],
       dinner: [],
       snacks: [],
     };
-    
+
     mealsWithProgress.forEach((meal) => {
       const mealType = determineMealType(meal.type);
       const mealItem: Item = {
@@ -245,14 +248,14 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
         progress: meal.progress,
         dailyPlanMealId: (meal as MealWithProgressExtended).dailyPlanMealId,
       };
-      
+
       if (meal.progress && meal.progress.consomme) {
         consumed[mealType].push(mealItem);
       } else {
         available[mealType].push(mealItem);
       }
     });
-    
+
     setLeftList(available);
     setRightList(consumed);
     setMealsWithProgress(mealsWithProgress);
@@ -337,44 +340,12 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
           if (!item.dailyPlanMealId) {
             throw new Error('Identifiant de repas quotidien manquant');
           }
-
-          // Call service to mark meal as consumed or not consumed
-          await markMealAsConsumed(
-            drizzleDb,
-            dailyProgress.id,
-            item.id,
-            item.dailyPlanMealId,
-            droppedOnRight // true if consumed, false if not consumed
-          );
         }
-
-        // Show success notification
-        toast.show({
-          placement: "top",
-          render: () => (
-            <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-              <Text style={styles.toastText}>
-                {droppedOnRight 
-                  ? 'Repas marqué comme consommé !' 
-                  : 'Repas remis dans la liste "à consommer"'}
-              </Text>
-            </Box>
-          )
-        });
 
         // Notify parent component to refresh data
         onMealStatusChange();
       } catch (error: any) {
-        toast.show({
-          placement: "top",
-          render: () => (
-            <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-              <Text style={styles.toastText}>
-                Erreur: {error.message || 'Une erreur est survenue'}
-              </Text>
-            </Box>
-          )
-        });
+        console.error(error);
       }
 
       setSelectedItems(new Set());
@@ -425,7 +396,9 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   if (mealsWithProgress.length === 0) {
     return (
       <View style={styles.noMealsContainer}>
-        <Text style={styles.noMealsText}>Aucun repas disponible pour cette date.</Text>
+        <Text style={styles.noMealsText}>
+          Aucun repas disponible pour cette date.
+        </Text>
       </View>
     );
   }
@@ -541,7 +514,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
 });
 
 export default MealsCompanyStyleV2;

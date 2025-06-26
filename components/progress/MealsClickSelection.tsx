@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
-import { MealOrmProps, DailyProgressOrmProps, DailyMealProgressOrmProps } from '@/db/schema';
-import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  MealOrmProps,
+  DailyProgressOrmProps,
+  DailyMealProgressOrmProps,
+} from '@/db/schema';
+import useProgressStore, {
+  MealWithProgress,
+} from '@/utils/store/progressStore';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
@@ -62,17 +74,14 @@ const MealItem = ({
   onSelect: (item: Item) => void;
 }) => {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={() => onSelect(item)}
-      style={[
-        styles.item,
-        isSelected && styles.selectedItem
-      ]}
+      style={[styles.item, isSelected && styles.selectedItem]}
     >
       <Text style={styles.itemText}>{item.name}</Text>
       <Text style={styles.mealTypeText}>{item.type}</Text>
       <Text style={styles.nutritionText}>
-        C: {item.carbs}g  P: {item.protein}g  L: {item.fat}g
+        C: {item.carbs}g P: {item.protein}g L: {item.fat}g
       </Text>
     </TouchableOpacity>
   );
@@ -82,7 +91,7 @@ const TargetArea = ({
   title,
   onSelect,
   isSelectionMode,
-  isEmpty = false
+  isEmpty = false,
 }: {
   title: string;
   onSelect: () => void;
@@ -90,16 +99,13 @@ const TargetArea = ({
   isEmpty?: boolean;
 }) => {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={onSelect}
-      style={[
-        styles.targetArea,
-        isSelectionMode && styles.activeTargetArea
-      ]}
+      style={[styles.targetArea, isSelectionMode && styles.activeTargetArea]}
       disabled={!isSelectionMode}
     >
       <Text style={styles.targetAreaText}>
-        {isEmpty ? "Aucun repas" : isSelectionMode ? "Déplacer ici" : title}
+        {isEmpty ? 'Aucun repas' : isSelectionMode ? 'Déplacer ici' : title}
       </Text>
     </TouchableOpacity>
   );
@@ -112,7 +118,6 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   onMealStatusChange,
 }) => {
   const drizzleDb = useDrizzleDb();
-  const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
 
   // Initialize empty lists
@@ -138,34 +143,38 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   // Déterminer le type de repas
   const determineMealType = (type: string | null): MealType => {
     if (!type) return 'snacks';
-    
+
     const lowerType = type.toLowerCase();
-    
+
     if (lowerType.includes('breakfast')) return 'breakfast';
     if (lowerType.includes('lunch')) return 'lunch';
     if (lowerType.includes('dinner')) return 'dinner';
-    
+
     return 'snacks';
   };
 
   // Populate lists on component mount
   useEffect(() => {
-    console.log("MealsClickSelection - Initialisation avec", mealsWithProgress.length, "repas");
-    
+    console.log(
+      'MealsClickSelection - Initialisation avec',
+      mealsWithProgress.length,
+      'repas',
+    );
+
     const available: MealList = {
       breakfast: [],
       lunch: [],
       dinner: [],
       snacks: [],
     };
-    
+
     const consumed: MealList = {
       breakfast: [],
       lunch: [],
       dinner: [],
       snacks: [],
     };
-    
+
     mealsWithProgress.forEach((meal) => {
       const mealType = determineMealType(meal.type);
       const mealItem: Item = {
@@ -179,14 +188,14 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         progress: meal.progress,
         dailyPlanMealId: (meal as MealWithProgressExtended).dailyPlanMealId,
       };
-      
+
       if (meal.progress && meal.progress.consomme) {
         consumed[mealType].push(mealItem);
       } else {
         available[mealType].push(mealItem);
       }
     });
-    
+
     setLeftList(available);
     setRightList(consumed);
     setMealsWithProgress(mealsWithProgress);
@@ -200,21 +209,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
       setSelectionMode(false);
       return;
     }
-    
+
     setSelectedItem(item);
     setSelectionMode(true);
-    
-    // Afficher un toast pour guider l'utilisateur
-    toast.show({
-      placement: "top",
-      render: () => (
-        <Box className="bg-blue-600 px-4 py-3 rounded-sm mb-5">
-          <Text style={styles.toastText}>
-            Sélectionnez maintenant l'emplacement de destination
-          </Text>
-        </Box>
-      )
-    });
   };
 
   // Gérer le déplacement d'un repas
@@ -222,20 +219,20 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
     if (!selectedItem || !selectionMode) {
       return;
     }
-    
+
     try {
       // Déterminer si le repas est déjà consommé
-      const isCurrentlyConsumed = Object.values(rightList).some(
-        items => items.some(item => item.id === selectedItem.id)
+      const isCurrentlyConsumed = Object.values(rightList).some((items) =>
+        items.some((item) => item.id === selectedItem.id),
       );
-      
+
       // Si l'état ne change pas, on annule l'opération
       if (isCurrentlyConsumed === toConsumed) {
         setSelectedItem(null);
         setSelectionMode(false);
         return;
       }
-      
+
       if (!dailyProgress) {
         throw new Error('Données de progression quotidienne manquantes');
       }
@@ -243,42 +240,49 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
       if (!selectedItem.dailyPlanMealId) {
         throw new Error('Identifiant de repas quotidien manquant');
       }
-      
+
       // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
-      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
-        dailyProgressId: dailyProgress.id,
-        mealId: selectedItem.id,
-        dailyPlanMealId: selectedItem.dailyPlanMealId,
-        consumed: toConsumed
-      });
-      
+      logger.info(
+        LogCategory.DATABASE,
+        'Marquage du repas comme consommé via MCP Server',
+        {
+          dailyProgressId: dailyProgress.id,
+          mealId: selectedItem.id,
+          dailyPlanMealId: selectedItem.dailyPlanMealId,
+          consumed: toConsumed,
+        },
+      );
+
       const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
         dailyProgress.id,
         selectedItem.id,
         selectedItem.dailyPlanMealId,
-        toConsumed
+        toConsumed,
       );
-      
+
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec du marquage du repas: ${result.error}`,
+        );
         throw new Error(result.error || 'Erreur lors du marquage du repas');
       }
-      
+
       // Mettre à jour les listes localement
       if (toConsumed) {
         // Supprimer de la liste des repas à consommer
-        setLeftList(prev => {
+        setLeftList((prev) => {
           const newList = { ...prev };
           for (const mealType of mealTypes) {
             newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
+              (item) => item.id !== selectedItem.id,
             );
           }
           return newList;
         });
-        
+
         // Ajouter à la liste des repas consommés
-        setRightList(prev => {
+        setRightList((prev) => {
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
@@ -292,29 +296,29 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             } as DailyMealProgressOrmProps,
             mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
           };
-          
+
           // Nous devons convertir le type d'enum de repas en clé MealList
           const mealKey = selectedItem.type.toLowerCase() as MealType;
           if (mealTypes.includes(mealKey)) {
             newList[mealKey] = [...newList[mealKey], updatedItem];
           }
-          
+
           return newList;
         });
       } else {
         // Supprimer de la liste des repas consommés
-        setRightList(prev => {
+        setRightList((prev) => {
           const newList = { ...prev };
           for (const mealType of mealTypes) {
             newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
+              (item) => item.id !== selectedItem.id,
             );
           }
           return newList;
         });
-        
+
         // Ajouter à la liste des repas à consommer
-        setLeftList(prev => {
+        setLeftList((prev) => {
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
@@ -328,44 +332,21 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             } as DailyMealProgressOrmProps,
             mealType: toMealType, // Ajout de la propriété mealType requise par le type Item
           };
-          
+
           // Nous devons convertir le type d'enum de repas en clé MealList
           const mealKey = selectedItem.type.toLowerCase() as MealType;
           if (mealTypes.includes(mealKey)) {
             newList[mealKey] = [...newList[mealKey], updatedItem];
           }
-          
+
           return newList;
         });
       }
-      
-      // Afficher un message de succès
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              {toConsumed 
-                ? 'Repas marqué comme consommé !' 
-                : 'Repas remis dans la liste "à consommer"'}
-            </Text>
-          </Box>
-        )
-      });
-      
+
       // Notifier le composant parent pour rafraîchir les données
       onMealStatusChange();
     } catch (error: any) {
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              Erreur: {error.message || 'Une erreur est survenue'}
-            </Text>
-          </Box>
-        )
-      });
+      console.error(error);
     } finally {
       // Réinitialiser l'état de sélection
       setSelectedItem(null);
@@ -375,19 +356,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
 
   const handleMealAction = async (
     selectedItem: MealWithProgressExtended,
-    toConsumed: boolean
+    toConsumed: boolean,
   ) => {
     if (!dailyProgress) {
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              Erreur: Aucune progression journalière disponible
-            </Text>
-          </Box>
-        )
-      });
       return;
     }
 
@@ -395,42 +366,49 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
       if (!selectedItem.dailyPlanMealId) {
         throw new Error('Identifiant de repas quotidien manquant');
       }
-      
+
       // Appeler directement le MCP Server pour marquer le repas comme consommé ou non
-      logger.info(LogCategory.DATABASE, 'Marquage du repas comme consommé via MCP Server', {
-        dailyProgressId: dailyProgress.id,
-        mealId: selectedItem.id,
-        dailyPlanMealId: selectedItem.dailyPlanMealId,
-        consumed: toConsumed
-      });
-      
+      logger.info(
+        LogCategory.DATABASE,
+        'Marquage du repas comme consommé via MCP Server',
+        {
+          dailyProgressId: dailyProgress.id,
+          mealId: selectedItem.id,
+          dailyPlanMealId: selectedItem.dailyPlanMealId,
+          consumed: toConsumed,
+        },
+      );
+
       const result = await sqliteMCPServer.markMealAsConsumedViaMCP(
         dailyProgress.id,
         selectedItem.id,
         selectedItem.dailyPlanMealId,
-        toConsumed
+        toConsumed,
       );
-      
+
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Échec du marquage du repas: ${result.error}`);
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec du marquage du repas: ${result.error}`,
+        );
         throw new Error(result.error || 'Erreur lors du marquage du repas');
       }
-      
+
       // Mettre à jour les listes localement
       if (toConsumed) {
         // Supprimer de la liste des repas à consommer
-        setLeftList(prev => {
+        setLeftList((prev) => {
           const newList = { ...prev };
           for (const mealType of mealTypes) {
             newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
+              (item) => item.id !== selectedItem.id,
             );
           }
           return newList;
         });
-        
+
         // Ajouter à la liste des repas consommés
-        setRightList(prev => {
+        setRightList((prev) => {
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
@@ -444,29 +422,29 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             } as DailyMealProgressOrmProps,
             mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
           };
-          
+
           // Nous devons convertir le type d'enum de repas en clé MealList
           const mealKey = selectedItem.type.toLowerCase() as MealType;
           if (mealTypes.includes(mealKey)) {
             newList[mealKey] = [...newList[mealKey], updatedItem];
           }
-          
+
           return newList;
         });
       } else {
         // Supprimer de la liste des repas consommés
-        setRightList(prev => {
+        setRightList((prev) => {
           const newList = { ...prev };
           for (const mealType of mealTypes) {
             newList[mealType] = newList[mealType].filter(
-              item => item.id !== selectedItem.id
+              (item) => item.id !== selectedItem.id,
             );
           }
           return newList;
         });
-        
+
         // Ajouter à la liste des repas à consommer
-        setLeftList(prev => {
+        setLeftList((prev) => {
           const newList = { ...prev };
           const updatedItem = {
             ...selectedItem,
@@ -480,44 +458,21 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             } as DailyMealProgressOrmProps,
             mealType: selectedItem.type.toLowerCase() as MealType, // Ajout de la propriété mealType requise par le type Item
           };
-          
+
           // Nous devons convertir le type d'enum de repas en clé MealList
           const mealKey = selectedItem.type.toLowerCase() as MealType;
           if (mealTypes.includes(mealKey)) {
             newList[mealKey] = [...newList[mealKey], updatedItem];
           }
-          
+
           return newList;
         });
       }
-      
-      // Afficher un message de succès
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              {toConsumed 
-                ? 'Repas marqué comme consommé !' 
-                : 'Repas remis dans la liste "à consommer"'}
-            </Text>
-          </Box>
-        )
-      });
-      
+
       // Notifier le composant parent pour rafraîchir les données
       onMealStatusChange();
     } catch (error: any) {
-      toast.show({
-        placement: "top",
-        render: () => (
-          <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
-            <Text style={styles.toastText}>
-              Erreur: {error.message || 'Une erreur est survenue'}
-            </Text>
-          </Box>
-        )
-      });
+      console.error(error);
     }
   };
 
@@ -530,10 +485,10 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             <Text style={styles.mealTypeHeader}>
               {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
             </Text>
-            
+
             {list[mealType].length === 0 ? (
-              <TargetArea 
-                title="Aucun repas" 
+              <TargetArea
+                title="Aucun repas"
                 onSelect={() => handleMoveItem(isConsumed, mealType)}
                 isSelectionMode={selectionMode}
                 isEmpty
@@ -548,15 +503,19 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
                     onSelect={handleItemSelect}
                   />
                 ))}
-                
+
                 {/* Zone cible pour déplacer un repas ici */}
-                {selectionMode && selectedItem && !list[mealType].some(item => item.id === selectedItem.id) && (
-                  <TargetArea 
-                    title="Déplacer ici" 
-                    onSelect={() => handleMoveItem(isConsumed, mealType)}
-                    isSelectionMode={selectionMode}
-                  />
-                )}
+                {selectionMode &&
+                  selectedItem &&
+                  !list[mealType].some(
+                    (item) => item.id === selectedItem.id,
+                  ) && (
+                    <TargetArea
+                      title="Déplacer ici"
+                      onSelect={() => handleMoveItem(isConsumed, mealType)}
+                      isSelectionMode={selectionMode}
+                    />
+                  )}
               </View>
             )}
           </View>
@@ -568,7 +527,9 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
   if (mealsWithProgress.length === 0) {
     return (
       <View style={styles.noMealsContainer}>
-        <Text style={styles.noMealsText}>Aucun repas disponible pour cette date.</Text>
+        <Text style={styles.noMealsText}>
+          Aucun repas disponible pour cette date.
+        </Text>
       </View>
     );
   }
@@ -579,14 +540,14 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         <Text style={styles.completionText}>
           {dailyProgress.pourcentageCompletion.toFixed(0)}% complété
         </Text>
-        
+
         {selectionMode && selectedItem && (
           <Text style={styles.selectionText}>
             Sélectionné: {selectedItem.name}
           </Text>
         )}
       </View>
-      
+
       <View style={styles.listsContainer}>
         {/* Liste des repas à consommer */}
         <View style={[styles.listColumn, styles.leftList]}>
@@ -595,7 +556,7 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
             {renderMealList(leftList, false)}
           </ScrollView>
         </View>
-        
+
         {/* Liste des repas consommés */}
         <View style={[styles.listColumn, styles.rightList]}>
           <Text style={styles.listTitle}>Consommés</Text>
@@ -727,7 +688,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
 });
 
 export default MealsClickSelection;
