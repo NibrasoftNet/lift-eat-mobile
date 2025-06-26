@@ -16,7 +16,6 @@ const MealTypeBox: React.FC<MealTypeBoxProps> = ({
   selectedMealType,
   handleMealTypeSelect,
 }) => {
-  console.log('meal', selectedMealType);
 
   // Render regular meal type box
   return (

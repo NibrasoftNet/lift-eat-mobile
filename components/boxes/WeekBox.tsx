@@ -1,8 +1,9 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, memo, useEffect } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  runOnUI,
 } from 'react-native-reanimated';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { HStack } from '../ui/hstack';
@@ -17,31 +18,52 @@ interface WeekBoxProps {
   setSelectedWeek: Dispatch<SetStateAction<number>>;
 }
 
-const WeekBox: React.FC<WeekBoxProps> = ({
+const WeekBox: React.FC<WeekBoxProps> = memo(({ 
   selectedWeek,
   durationWeeks,
   setSelectedWeek,
 }) => {
-  const weekAnimation = useSharedValue(selectedWeek);
+  // Initialiser avec 0 pour éviter l'assignation pendant le rendu
+  const weekAnimation = useSharedValue(0);
+  
+  // Mettre à jour la valeur initiale après le premier rendu
+  useEffect(() => {
+    runOnUI(() => {
+      weekAnimation.value = selectedWeek;
+    })();
+  }, []); // Exécuter seulement au montage
 
   // Handle week changes with animation
   const handleWeekChange = (direction: 'left' | 'right') => {
     if (direction === 'left' && selectedWeek > 1) {
       setSelectedWeek((prev) => prev - 1);
-      weekAnimation.value = withSpring(selectedWeek - 1); // Animate to previous week
+      // Mettre à jour l'animation sur le thread UI
+      runOnUI(() => {
+        weekAnimation.value = withSpring(selectedWeek - 1);
+      })();
     } else if (direction === 'right' && selectedWeek < durationWeeks) {
       setSelectedWeek((prev) => prev + 1);
-      weekAnimation.value = withSpring(selectedWeek + 1); // Animate to next week
+      // Mettre à jour l'animation sur le thread UI
+      runOnUI(() => {
+        weekAnimation.value = withSpring(selectedWeek + 1);
+      })();
     }
   };
+  
+  // Mettre à jour l'animation lorsque selectedWeek change par une autre source
+  useEffect(() => {
+    runOnUI(() => {
+      weekAnimation.value = withSpring(selectedWeek);
+    })();
+  }, [selectedWeek]);
 
   // Animated style for the week number
   const animatedWeekStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { scale: withSpring(weekAnimation.value === selectedWeek ? 1.2 : 1) },
+        { scale: withSpring(1.2) }, // Toujours animer vers la même échelle pour simplifier
       ],
-      opacity: withSpring(weekAnimation.value === selectedWeek ? 1 : 0.8),
+      opacity: withSpring(1), // Toujours pleine opacité
     };
   });
 
@@ -81,6 +103,9 @@ const WeekBox: React.FC<WeekBoxProps> = ({
       </Button>
     </HStack>
   );
-};
+});
+
+// Ajouter un displayName pour faciliter le débogage
+WeekBox.displayName = 'WeekBox';
 
 export default WeekBox;

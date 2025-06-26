@@ -1,0 +1,388 @@
+import { z } from 'zod';
+import { 
+  MealTypeEnum, 
+  CuisineTypeEnum, 
+  MealUnitEnum 
+} from '@/utils/enum/meal.enum';
+import { GoalEnum } from '@/utils/enum/user-details.enum';
+import { logger } from '@/utils/services/logging.service'; 
+import { LogCategory } from '@/utils/enum/logging.enum';
+
+/**
+ * Schéma de validation pour un ingrédient dans une réponse IA
+ */
+export const iaIngredientSchema = z.object({
+  name: z.string({
+    required_error: "Le nom de l'ingrédient est requis",
+    invalid_type_error: "Le nom doit être une chaîne de caractères",
+  }).min(1, "Le nom de l'ingrédient est requis"),
+  unit: z.nativeEnum(MealUnitEnum, {
+    errorMap: () => ({ message: "L'unité n'est pas valide" }),
+  }).default(MealUnitEnum.GRAMMES),
+  quantity: z.number().positive("La quantité doit être positive").default(100),
+  calories: z.number().nonnegative("Les calories ne peuvent pas être négatives").default(0),
+  carbs: z.number().nonnegative("Les glucides ne peuvent pas être négatifs").default(0),
+  protein: z.number().nonnegative("Les protéines ne peuvent pas être négatives").default(0),
+  fat: z.number().nonnegative("Les lipides ne peuvent pas être négatifs").default(0),
+});
+
+/**
+ * Type inféré pour un ingrédient validé
+ */
+export type IaIngredientType = z.infer<typeof iaIngredientSchema>;
+
+/**
+ * Schéma de validation pour un repas dans une réponse IA
+ */
+export const iaMealSchema = z.object({
+  name: z.string({
+    required_error: "Le nom du repas est requis",
+    invalid_type_error: "Le nom doit être une chaîne de caractères",
+  }).min(1, "Le nom du repas est requis"),
+  type: z.nativeEnum(MealTypeEnum, {
+    errorMap: () => ({ message: "Le type de repas n'est pas valide" }),
+  }).default(MealTypeEnum.BREAKFAST),
+  description: z.string().optional().default(""),
+  cuisine: z.nativeEnum(CuisineTypeEnum, {
+    errorMap: () => ({ message: "Le type de cuisine n'est pas valide" }),
+  }).default(CuisineTypeEnum.GENERAL),
+  calories: z.number().nonnegative("Les calories ne peuvent pas être négatives").default(0),
+  carbs: z.number().nonnegative("Les glucides ne peuvent pas être négatifs").default(0),
+  protein: z.number().nonnegative("Les protéines ne peuvent pas être négatives").default(0),
+  fat: z.number().nonnegative("Les lipides ne peuvent pas être négatifs").default(0),
+  unit: z.nativeEnum(MealUnitEnum, {
+    errorMap: () => ({ message: "L'unité n'est pas valide" }),
+  }).default(MealUnitEnum.GRAMMES),
+  ingredients: z.array(iaIngredientSchema).optional().default([])
+});
+
+/**
+ * Type inféré pour un repas validé
+ */
+export type IaMealType = z.infer<typeof iaMealSchema>;
+
+/**
+ * Schéma de validation pour un plan nutritionnel dans une réponse IA
+ */
+export const iaPlanSchema = z.object({
+  name: z.string({
+    required_error: "Le nom du plan est requis",
+    invalid_type_error: "Le nom doit être une chaîne de caractères",
+  }).min(1, "Le nom du plan est requis"),
+  goal: z.nativeEnum(GoalEnum, {
+    errorMap: () => ({ message: "L'objectif n'est pas valide" }),
+  }),
+  calories: z.number().nonnegative("Les calories ne peuvent pas être négatives").default(0),
+  carbs: z.number().nonnegative("Les glucides ne peuvent pas être négatifs").default(0),
+  protein: z.number().nonnegative("Les protéines ne peuvent pas être négatives").default(0),
+  fat: z.number().nonnegative("Les lipides ne peuvent pas être négatifs").default(0),
+  meals: z.array(iaMealSchema).min(1, "Au moins un repas est requis"),
+});
+
+/**
+ * Type inféré pour un plan validé
+ */
+export type IaPlanType = z.infer<typeof iaPlanSchema>;
+
+// Fonction d'aide pour normaliser les types de cuisine textuel vers l'énumération
+function normalizeCuisineType(cuisine: string): CuisineTypeEnum {
+  if (!cuisine) return CuisineTypeEnum.GENERAL;
+  
+  // Convertir en majuscules sans accents et espaces pour la comparaison
+  const normalized = cuisine.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s/g, "");
+  
+  // Table de correspondance pour les noms en français/anglais
+  const cuisineMap: Record<string, CuisineTypeEnum> = {
+    "FRANCAISE": CuisineTypeEnum.FRENCH,
+    "FRENCH": CuisineTypeEnum.FRENCH,
+    "ITALIENNE": CuisineTypeEnum.ITALIAN,
+    "ITALIAN": CuisineTypeEnum.ITALIAN,
+    "CHINOISE": CuisineTypeEnum.CHINESE,
+    "CHINESE": CuisineTypeEnum.CHINESE,
+    "INDIENNE": CuisineTypeEnum.INDIAN,
+    "INDIAN": CuisineTypeEnum.INDIAN,
+    "JAPONAISE": CuisineTypeEnum.JAPANESE,
+    "JAPANESE": CuisineTypeEnum.JAPANESE,
+    "MEXICAINE": CuisineTypeEnum.MEXICAN,
+    "MEXICAN": CuisineTypeEnum.MEXICAN,
+    "AMERICAINE": CuisineTypeEnum.AMERICAN,
+    "AMERICAN": CuisineTypeEnum.AMERICAN,
+    "EUROPEENNE": CuisineTypeEnum.EUROPEAN,
+    "EUROPEAN": CuisineTypeEnum.EUROPEAN,
+    "AFRICAINE": CuisineTypeEnum.AFRICAN,
+    "AFRICAN": CuisineTypeEnum.AFRICAN,
+    "CARIBENNE": CuisineTypeEnum.CARIBBEAN,
+    "CARIBBEAN": CuisineTypeEnum.CARIBBEAN,
+    "ASIATIQUE": CuisineTypeEnum.ASIAN,
+    "ASIAN": CuisineTypeEnum.ASIAN,
+    "TUNISIENNE": CuisineTypeEnum.TUNISIAN,
+    "TUNISIAN": CuisineTypeEnum.TUNISIAN,
+    "QATARIE": CuisineTypeEnum.QATARI,
+    "QATARI": CuisineTypeEnum.QATARI,
+    "GENERALE": CuisineTypeEnum.GENERAL,
+    "GENERAL": CuisineTypeEnum.GENERAL
+  };
+  
+  // Rechercher une correspondance exacte
+  if (normalized in cuisineMap) {
+    return cuisineMap[normalized];
+  }
+  
+  // Si pas de correspondance exacte, tenter une correspondance partielle
+  for (const [key, value] of Object.entries(cuisineMap)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      return value;
+    }
+  }
+  
+  logger.debug(LogCategory.IA, `normalizeCuisineType: Cuisine non reconnue "${cuisine}", utilisation de GENERAL par défaut`);
+  return CuisineTypeEnum.GENERAL;
+}
+
+// Fonction d'aide pour normaliser les unités de mesure textuelles vers l'énumération
+function normalizeMealUnit(unit: string): MealUnitEnum {
+  if (!unit) return MealUnitEnum.GRAMMES;
+  
+  // Convertir en majuscules sans accents et espaces pour la comparaison
+  const normalized = unit.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s/g, "");
+  
+  // Table de correspondance pour les noms d'unités courants
+  const unitMap: Record<string, MealUnitEnum> = {
+    "G": MealUnitEnum.GRAMMES,
+    "GRAMME": MealUnitEnum.GRAMMES,
+    "GRAMMES": MealUnitEnum.GRAMMES,
+    "GR": MealUnitEnum.GRAMMES,
+    "GRAM": MealUnitEnum.GRAMMES,
+    "GRAMS": MealUnitEnum.GRAMMES,
+    "KG": MealUnitEnum.KILOGRAMMES,
+    "KILOGRAMME": MealUnitEnum.KILOGRAMMES,
+    "KILOGRAMMES": MealUnitEnum.KILOGRAMMES,
+    "KILO": MealUnitEnum.KILOGRAMMES,
+    "KILOS": MealUnitEnum.KILOGRAMMES,
+    "ML": MealUnitEnum.MILLILITRES,
+    "MILLILITRE": MealUnitEnum.MILLILITRES,
+    "MILLILITRES": MealUnitEnum.MILLILITRES,
+    "L": MealUnitEnum.LITRES,
+    "LITRE": MealUnitEnum.LITRES,
+    "LITRES": MealUnitEnum.LITRES,
+    "PIECE": MealUnitEnum.PIECES,
+    "PIECES": MealUnitEnum.PIECES,
+    "PORTION": MealUnitEnum.PORTION,
+    "PORTIONS": MealUnitEnum.PORTION,
+    "CUILLERE": MealUnitEnum.CUILLERES_A_SOUPE,
+    "CUILLERES": MealUnitEnum.CUILLERES_A_SOUPE,
+    "CUILLEREASOUPE": MealUnitEnum.CUILLERES_A_SOUPE,
+    "CUILLERESASOUPE": MealUnitEnum.CUILLERES_A_SOUPE,
+    "TBSP": MealUnitEnum.CUILLERES_A_SOUPE,
+    "TABLESPOON": MealUnitEnum.CUILLERES_A_SOUPE,
+    "TABLESPOONS": MealUnitEnum.CUILLERES_A_SOUPE,
+    "CS": MealUnitEnum.CUILLERES_A_SOUPE,
+    "CUILLERESCAFE": MealUnitEnum.CUILLERES_A_CAFE,
+    "CUILLERECAFE": MealUnitEnum.CUILLERES_A_CAFE,
+    "CUILLEREACAFE": MealUnitEnum.CUILLERES_A_CAFE,
+    "CUILLERESACAFE": MealUnitEnum.CUILLERES_A_CAFE,
+    "TSP": MealUnitEnum.CUILLERES_A_CAFE,
+    "TEASPOON": MealUnitEnum.CUILLERES_A_CAFE,
+    "TEASPOONS": MealUnitEnum.CUILLERES_A_CAFE,
+    "TASSE": MealUnitEnum.TASSES,
+    "TASSES": MealUnitEnum.TASSES,
+    "CUP": MealUnitEnum.TASSES,
+    "CUPS": MealUnitEnum.TASSES,
+    "SERVING": MealUnitEnum.SERVING,
+    "SERVINGS": MealUnitEnum.SERVING,
+    "PLATE": MealUnitEnum.PLATE,
+    "PLATES": MealUnitEnum.PLATE,
+    "BOWL": MealUnitEnum.BOWL,
+    "BOWLS": MealUnitEnum.BOWL
+  };
+  
+  // Rechercher une correspondance exacte
+  if (normalized in unitMap) {
+    return unitMap[normalized];
+  }
+  
+  // Si pas de correspondance exacte, tenter une correspondance partielle
+  for (const [key, value] of Object.entries(unitMap)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      return value;
+    }
+  }
+  
+  logger.debug(LogCategory.IA, `normalizeMealUnit: Unité non reconnue "${unit}", utilisation de GRAMMES par défaut`);
+  return MealUnitEnum.GRAMMES;
+}
+
+/**
+ * Fonction pour valider les données d'ingrédient
+ * @param data Données JSON d'ingrédient à valider
+ * @returns Résultat de validation avec données typées ou erreurs
+ */
+export const validateIngredient = (data: string) => {
+  try {
+    const jsonData = JSON.parse(data);
+    const result = iaIngredientSchema.safeParse(jsonData);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data,
+      };
+    } else {
+      // Formatage des erreurs de validation
+      const errorMessages = result.error.errors
+        .map(({ path, message }) => `${path.join('.')}: ${message}`)
+        .join('; ');
+      
+      return {
+        success: false,
+        errors: result.error,
+        message: `Validation échouée: ${errorMessages}`
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Erreur de parsing JSON: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+};
+
+/**
+ * Fonction pour valider les données de repas
+ * @param data Données JSON de repas à valider
+ * @returns Résultat de validation avec données typées ou erreurs
+ */
+export const validateMeal = (data: string) => {
+  try {
+    let jsonData;
+    let parseFailed = false;
+    // Ajouter un log pour voir les données brutes reçues
+    logger.debug(LogCategory.IA, `validateMeal: données brutes reçues: ${data.substring(0, 200)}...`);
+    
+    try {
+      jsonData = JSON.parse(data);
+    } catch (parseError) {
+      parseFailed = true;
+      // Ajouter un log pour tracer l'erreur initiale de parsing
+      logger.debug(LogCategory.IA, `validateMeal: erreur de parsing initial: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+      
+      // Tentative de nettoyer les données JSON mal formatées
+      // Certains modèles d'IA peuvent inclure des backticks ou des commentaires dans le JSON
+      const cleanedData = data
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .replace(/\/\/.*/g, '') // Supprime les commentaires
+        .trim();
+      
+      logger.debug(LogCategory.IA, `validateMeal: JSON nettoyé: ${cleanedData.substring(0, 200)}...`);
+      
+      try {
+        jsonData = JSON.parse(cleanedData);
+        parseFailed = false;
+      } catch (secondParseError) {
+        logger.error(LogCategory.IA, `validateMeal: échec de parsing même après nettoyage: ${secondParseError instanceof Error ? secondParseError.message : String(secondParseError)}`);
+        return {
+          success: false,
+          message: `Erreur de parsing JSON: ${secondParseError instanceof Error ? secondParseError.message : String(secondParseError)}\nDonnées: ${data.substring(0, 100)}...`
+        };
+      }
+    }
+
+    // Validation minimale pour les champs essentiels
+    if (!jsonData.name) {
+      logger.debug(LogCategory.IA, `validateMeal: Validation échouée - nom du repas manquant`);
+      return {
+        success: false,
+        message: "Le repas doit avoir un nom"
+      };
+    }
+
+    // Journaliser les propriétés disponibles
+    logger.debug(LogCategory.IA, `validateMeal: Propriétés disponibles dans le JSON: ${Object.keys(jsonData).join(', ')}`);
+
+    // Conversion et normalisation des types avec vérification d'existence
+    const normalizedData = {
+      name: String(jsonData.name),
+      type: jsonData.type || MealTypeEnum.DINNER,
+      description: jsonData.description || "",
+      cuisine: normalizeCuisineType(jsonData.cuisine),
+      calories: Number(jsonData.calories || 0),
+      carbs: Number(jsonData.carbs || 0),
+      protein: Number(jsonData.protein || 0),
+      fat: Number(jsonData.fat || 0),
+      unit: normalizeMealUnit(jsonData.unit),
+      ingredients: Array.isArray(jsonData.ingredients) 
+        ? jsonData.ingredients.map((ing: any) => ({
+            name: String(ing?.name || ""),
+            quantity: Number(ing?.quantity || 100),
+            unit: normalizeMealUnit(ing?.unit),
+            calories: Number(ing?.calories || 0),
+            carbs: Number(ing?.carbs || 0),
+            protein: Number(ing?.protein || 0),
+            fat: Number(ing?.fat || 0)
+          }))
+        : []
+    };
+
+    // Utilisation du schema Zod pour une validation finale mais avec des valeurs par défaut
+    const result = iaMealSchema.safeParse(normalizedData);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data,
+      };
+    } else {
+      // Formatage des erreurs de validation
+      const errorMessages = result.error.errors
+        .map(({ path, message }) => `${path.join('.')}: ${message}`)
+        .join('; ');
+      
+      return {
+        success: false,
+        errors: result.error,
+        message: `Validation échouée: ${errorMessages}`
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Erreur lors de la validation: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+};
+
+/**
+ * Fonction pour valider les données de plan
+ * @param data Données JSON de plan à valider
+ * @returns Résultat de validation avec données typées ou erreurs
+ */
+export const validatePlan = (data: string) => {
+  try {
+    const jsonData = JSON.parse(data);
+    const result = iaPlanSchema.safeParse(jsonData);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data,
+      };
+    } else {
+      // Formatage des erreurs de validation
+      const errorMessages = result.error.errors
+        .map(({ path, message }) => `${path.join('.')}: ${message}`)
+        .join('; ');
+      
+      return {
+        success: false,
+        errors: result.error,
+        message: `Validation échouée: ${errorMessages}`
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Erreur de parsing JSON: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+};

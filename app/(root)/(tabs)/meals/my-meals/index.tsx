@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Text } from '@/components/ui/text';
@@ -10,7 +10,6 @@ import MealCard from '@/components/cards/MealCard';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
-import { getMealsList } from '@/utils/services/meal.service';
 import { MealOrmProps } from '@/db/schema';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import { PlusIcon, SearchIcon, SoupIcon } from 'lucide-react-native';
@@ -22,6 +21,12 @@ import { Colors } from '@/utils/constants/Colors';
 import { Card } from '@/components/ui/card';
 import MealTypeBox from '@/components/boxes/MealTypeBox';
 import CuisineTypeBox from '@/components/boxes/CuisineTypeBox';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { logger } from '@/utils/services/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { DataType } from '@/utils/helpers/queryInvalidation';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
+import { monitorObjectExistence } from '@/utils/helpers/logging-interceptor';
 
 export default function MyMealsScreen() {
   const router = useRouter();
@@ -37,24 +42,78 @@ export default function MyMealsScreen() {
     CuisineTypeEnum | undefined
   >(undefined);
 
+  // Fonction de requête optimisée et avec une meilleure gestion des erreurs
+  const queryFn = useCallback(async () => {
+    logger.info(LogCategory.DATABASE, `Getting meals list via MCP Server`, {
+      cuisine: selectedCuisine,
+      mealType: selectedMealType,
+      search: searchMealName
+    });
+    
+    // Convertir les énumérations en chaînes de caractères si nécessaire
+    const cuisineStr = selectedCuisine ? String(selectedCuisine) : undefined;
+    const mealTypeStr = selectedMealType ? String(selectedMealType) : undefined;
+    
+    // Récupérer l'ID utilisateur de manière standardisée
+    const userId = getCurrentUserIdSync();
+    if (!userId) {
+      logger.error(LogCategory.AUTH, "No user ID available for meals list query");
+      return [];
+    }
+    
+    try {
+      const result = await sqliteMCPServer.getMealsListViaMCP(
+        userId, 
+        cuisineStr, 
+        mealTypeStr, 
+        searchMealName || undefined
+      );
+      
+      if (!result || !result.success) {
+        logger.error(LogCategory.DATABASE, `Failed to get meals list via MCP Server: ${result?.error || 'Unknown error'}`);
+        return [];
+      }
+      
+      if (!result.meals) {
+        logger.warn(LogCategory.DATABASE, `No meals returned from MCP server`);
+        return [];
+      }
+      
+      if (!Array.isArray(result.meals)) {
+        logger.error(LogCategory.DATABASE, `Invalid meals data returned: meals is not an array`);
+        return [];
+      }
+      
+      // Valider chaque repas pour éviter les "meal undefined"
+      const validMeals = result.meals.filter(meal => {
+        if (!meal || typeof meal !== 'object' || meal === null) {
+          logger.error(LogCategory.DATABASE, `Invalid meal object found in meals list`);
+          monitorObjectExistence('meal', meal, 'MyMealsScreen.queryFn');
+          return false;
+        }
+        return true;
+      });
+      
+      logger.info(LogCategory.DATABASE, `Retrieved ${validMeals.length} valid meals for user ${userId}`);
+      return validMeals;
+    } catch (error) {
+      logger.error(LogCategory.DATABASE, `Error fetching meals list: ${error}`);
+      return [];
+    }
+  }, [selectedCuisine, selectedMealType, searchMealName]);
+
   const {
-    data: myMealsList,
+    data: meals,
+    isLoading,
     isPending,
     isFetching,
-    isLoading,
     isRefetching,
     refetch,
-  } = useQuery({
-    queryKey: [`my-meals-${selectedCuisine}-${selectedMealType}`],
-    queryFn: async () => {
-      const meals = await getMealsList(
-        drizzleDb,
-        selectedCuisine,
-        selectedMealType,
-        searchMealName,
-      );
-      return meals ?? null;
-    },
+  } = useQuery<MealOrmProps[]>({
+    queryKey: [DataType.MEALS_LIST, selectedCuisine, selectedMealType, searchMealName],
+    queryFn,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 
   const handleCuisineSelect = async (cuisine: CuisineTypeEnum | undefined) => {
@@ -84,7 +143,10 @@ export default function MyMealsScreen() {
   // Create a handler for pull-to-refresh
   const onRefresh = React.useCallback(async () => {
     await refetch();
-  }, []);
+  }, [refetch]);
+
+  // Vérifier que les repas sont valides avant le rendu
+  const validMeals = Array.isArray(meals) ? meals : [];
 
   return (
     <VStack className="flex-1 p-2">
@@ -110,16 +172,16 @@ export default function MyMealsScreen() {
         />
       </Input>
       <QueryStateHandler<MealOrmProps>
-        data={myMealsList}
+        data={validMeals}
         isLoading={isLoading}
         isFetching={isFetching}
         isPending={isPending}
         isRefetching={isRefetching}
       >
         <FlashList
-          data={myMealsList}
+          data={validMeals}
           renderItem={({ item, index }) => (
-            <MealCard item={item} index={index} />
+            item ? <MealCard item={item} index={index} /> : null
           )}
           ListEmptyComponent={
             <VStack className="w-full h-full items-center justify-center">
@@ -137,8 +199,8 @@ export default function MyMealsScreen() {
               tintColor={Colors.tertiary.tint}
             />
           }
-          keyExtractor={(item) => String(item.id)}
-          estimatedItemSize={20}
+          keyExtractor={(item) => String(item?.id || Math.random().toString())}
+          estimatedItemSize={300}
           contentContainerStyle={{ padding: 16 }}
         />
       </QueryStateHandler>

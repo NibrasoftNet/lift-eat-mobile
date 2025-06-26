@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { Link, useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
@@ -14,6 +14,7 @@ import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 import PlanCard from '@/components/cards/PlanCard';
 import { getPlansList } from '@/utils/services/plan.service';
 import { VStack } from '@/components/ui/vstack';
+import { RefreshControl } from 'react-native';
 
 export default function MyPlansScreen() {
   const router = useRouter();
@@ -25,13 +26,20 @@ export default function MyPlansScreen() {
     isFetching,
     isRefetching,
     isLoading,
-  } = useQuery({
-    queryKey: ['my-plans'],
+    refetch
+  } = useQuery<PlanOrmProps[]>({
+    queryKey: ['plans-list'], // Utiliser une clé standard pour le système d'invalidation
     queryFn: async () => {
       const plans = await getPlansList(drizzleDb);
-      return plans ?? null;
+      return plans ?? [];
     },
   });
+  
+  // Gestionnaire pour le pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    // Déclencher une actualisation des données
+    await refetch();
+  }, [refetch]);
 
   return (
     <QueryStateHandler<PlanOrmProps>
@@ -53,6 +61,14 @@ export default function MyPlansScreen() {
           renderItem={({ item, index }) => (
             <PlanCard item={item} index={index} />
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={onRefresh}
+              colors={['#10b981', '#0ea5e9']} // Couleurs primaire et secondaire selon le design de l'app
+              tintColor={'#10b981'}
+            />
+          }
           keyExtractor={(item) => String(item.id)}
           estimatedItemSize={200}
           contentContainerStyle={{ padding: 16 }}
