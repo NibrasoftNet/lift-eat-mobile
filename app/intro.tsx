@@ -7,8 +7,8 @@ import { IntroCard } from '@/components/cards/IntroCard';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ImageBackground } from 'react-native';
-import { Icon } from '@/components/ui/icon';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react-native';
+import { Colors } from '@/utils/constants/Colors';
 
 export enum IntroStepEnum {
   'ONE' = 'ONE',
@@ -33,29 +33,33 @@ export default function Intro() {
           <HStack className="w-full justify-between">
             {step === IntroStepEnum.TWO && (
               <Button
-                className="bg-blue-500 w-40"
+                className="bg-primary-500 w-40"
                 onPress={() => setStep(IntroStepEnum.ONE)}
               >
-                <Icon as={ChevronsLeft} className="w-10 h-10 text-white" />
-                <ButtonText size="md" className="font-ubuntu">
+                <ChevronsLeft size={30} color={Colors.light.icon} />
+                <ButtonText size="md" className="font-ubuntu text-white">
                   Previous
                 </ButtonText>
               </Button>
             )}
             <Button
-              className={`w-40 ${step === IntroStepEnum.ONE ? 'bg-primary-500' : 'bg-tertiary-500'}`}
+              className={` w-40 ${step === IntroStepEnum.ONE ? 'bg-primary-500' : 'bg-tertiary-500'}`}
               onPress={() => {
                 if (step === IntroStepEnum.ONE) {
                   setStep(IntroStepEnum.TWO);
                 } else {
-                  router.replace('/register');
+                  console.log('register');
+                  router.replace('/analytics');
                 }
               }}
             >
-              <ButtonText size="md" className="font-ubuntu font-semibold">
+              <ButtonText
+                size="md"
+                className="font-ubuntu font-semibold text-white"
+              >
                 {step === IntroStepEnum.ONE ? 'Next' : 'Start'}
               </ButtonText>
-              <Icon as={ChevronsRight} className="w-10 h-10 text-white" />
+              <ChevronsRight size={30} color={Colors.light.icon} />
             </Button>
           </HStack>
           {step === IntroStepEnum.ONE ? (
@@ -74,17 +78,3 @@ export default function Intro() {
     </Animated.View>
   );
 }
-/*
-[
-  "expo-font",
-  {
-    "fonts": [
-      "./assets/fonts/Rubik-Bold.ttf",
-      "./assets/fonts/Rubik-ExtraBold.ttf",
-      "./assets/fonts/Rubik-Light.ttf",
-      "./assets/fonts/Rubik-Medium.ttf",
-      "./assets/fonts/Rubik-Regular.ttf",
-      "./assets/fonts/Rubik-SemiBold.ttf"
-    ]
-  }
-]*/

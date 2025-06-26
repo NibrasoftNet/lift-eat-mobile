@@ -15,24 +15,69 @@ import sqliteMCPServer from '@/utils/mcp/sqlite-server';
  * @param userId - User ID to get details for.
  * @returns The user details.
  */
+export const findOrCreateUser = async (
+  drizzleDb: ExpoSQLiteDatabase<typeof schema>,
+  email: string,
+) => {
+  try {
+    const userData = {
+      email,
+      name: 'Khalil Zantour',
+      gender: GenderEnum.MALE,
+    };
+
+    // Check if user already exists
+    const existingUser = drizzleDb
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .get();
+
+    if (existingUser) {
+      return existingUser; // Return existing user
+    }
+
+    // Insert the new user
+    await drizzleDb.insert(users).values(userData);
+
+    // Return the newly inserted user
+    return drizzleDb.select().from(users).where(eq(users.email, email)).get();
+  } catch (error) {
+    console.error('Error updating user:', error); // Debugging log
+    throw error; // Ensure the error is thrown so React Query can catch it
+  }
+};
+
 export const getUserDetails = async (userId: number) => {
   const startTime = logger.startPerformanceLog('getUserDetails');
   try {
-    logger.info(LogCategory.DATABASE, 'Getting user details via MCP Server', { userId });
+    logger.info(LogCategory.DATABASE, 'Getting user details via MCP Server', {
+      userId,
+    });
 
     const result = await sqliteMCPServer.getUserDetailsViaMCP(userId);
 
     if (!result.success) {
-      throw new Error(result.error || `Failed to get user details for ${userId} via MCP Server`);
+      throw new Error(
+        result.error ||
+          `Failed to get user details for ${userId} via MCP Server`,
+      );
     }
 
-    logger.debug(LogCategory.DATABASE, 'User details retrieved via MCP Server', {
-      userId,
-    });
-    
+    logger.debug(
+      LogCategory.DATABASE,
+      'User details retrieved via MCP Server',
+      {
+        userId,
+      },
+    );
+
     return result.user;
   } catch (error) {
-    logger.error(LogCategory.DATABASE, 'Failed to get user details', { userId, error });
+    logger.error(LogCategory.DATABASE, 'Failed to get user details', {
+      userId,
+      error,
+    });
     throw error;
   } finally {
     logger.endPerformanceLog('getUserDetails', startTime);

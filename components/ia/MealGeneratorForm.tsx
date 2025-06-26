@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 import { ChevronDown, Plus, Delete } from 'lucide-react-native';
-import { useToast } from '@/components/ui/toast';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { MealTypeEnum, MealTypeArray } from '@/utils/enum/meal.enum';
 import { CuisineTypeEnum, CuisineTypeArray } from '@/utils/enum/meal.enum';
@@ -16,17 +21,20 @@ interface MealGeneratorFormProps {
   onMealGenerated?: (meal: IaMealType) => void;
 }
 
-const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }) => {
+const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({
+  onMealGenerated,
+}) => {
   const [loading, setLoading] = useState(false);
   const [showMealTypeModal, setShowMealTypeModal] = useState(false);
   const [showCuisineTypeModal, setShowCuisineTypeModal] = useState(false);
   const [ingredients, setIngredients] = useState<string[]>(['']);
   const [mealType, setMealType] = useState<string>(MealTypeEnum.BREAKFAST);
-  const [cuisineType, setCuisineType] = useState<string>(CuisineTypeEnum.GENERAL);
+  const [cuisineType, setCuisineType] = useState<string>(
+    CuisineTypeEnum.GENERAL,
+  );
   const [specificRequirements, setSpecificRequirements] = useState('');
   const [generatedMeal, setGeneratedMeal] = useState<IaMealType | null>(null);
   const [aiResponse, setAiResponse] = useState<string>('');
-  const toast = useToast();
 
   const toggleMealType = (value: string) => {
     setMealType(value);
@@ -63,19 +71,11 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
       setAiResponse('');
 
       // Filtrer les ingrédients vides
-      const validIngredients = ingredients.filter(ingredient => ingredient.trim() !== '');
-      
+      const validIngredients = ingredients.filter(
+        (ingredient) => ingredient.trim() !== '',
+      );
+
       if (validIngredients.length === 0) {
-        toast.show({
-          render: ({ id }) => (
-            <MultiPurposeToast
-              id={id}
-              color={ToastTypeEnum.ERROR}
-              title="Ingrédients requis"
-              description="Veuillez spécifier au moins un ingrédient."
-            />
-          ),
-        });
         return;
       }
 
@@ -89,49 +89,20 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
       }
 
       const result = await iaService.generateMeal(validIngredients, mealType);
-      
+
       setAiResponse(result.text);
-      
+
       if (result.success && result.meal) {
         setGeneratedMeal(result.meal);
-        
+
         if (onMealGenerated) {
           onMealGenerated(result.meal);
         }
-        
-        toast.show({
-          render: ({ id }) => (
-            <MultiPurposeToast
-              id={id}
-              color={ToastTypeEnum.SUCCESS}
-              title="Repas généré"
-              description="Votre repas a été généré avec succès et ajouté à votre collection."
-            />
-          ),
-        });
       } else {
-        toast.show({
-          render: ({ id }) => (
-            <MultiPurposeToast
-              id={id}
-              color={ToastTypeEnum.ERROR}
-              title="Repas généré partiellement"
-              description="L'IA a généré une réponse mais n'a pas pu créer un repas structuré. Vérifiez la réponse pour plus de détails."
-            />
-          ),
-        });
+        console.error('esle');
       }
     } catch (error) {
-      toast.show({
-        render: ({ id }) => (
-          <MultiPurposeToast
-            id={id}
-            color={ToastTypeEnum.ERROR}
-            title="Erreur"
-            description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
-          />
-        ),
-      });
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -141,22 +112,28 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
     <ThemedView style={styles.container}>
       <ThemedText style={styles.title}>Générateur de Repas IA</ThemedText>
       <ThemedText style={styles.subtitle}>
-        Laissez l'IA vous proposer un repas équilibré basé sur vos ingrédients disponibles
+        Laissez l'IA vous proposer un repas équilibré basé sur vos ingrédients
+        disponibles
       </ThemedText>
 
       <View style={styles.formControl}>
         <ThemedText style={styles.label}>Type de repas</ThemedText>
         <View style={styles.selectContainer}>
-          <TouchableOpacity onPress={() => setShowMealTypeModal(true)} style={styles.select}>
-            <ThemedText>{mealType || "Sélectionnez un type de repas"}</ThemedText>
+          <TouchableOpacity
+            onPress={() => setShowMealTypeModal(true)}
+            style={styles.select}
+          >
+            <ThemedText>
+              {mealType || 'Sélectionnez un type de repas'}
+            </ThemedText>
             <ChevronDown size={18} color="#666" />
           </TouchableOpacity>
-          
+
           {showMealTypeModal && (
             <View style={styles.optionsContainer}>
               {MealTypeArray.map((type) => (
-                <TouchableOpacity 
-                  key={type} 
+                <TouchableOpacity
+                  key={type}
                   style={styles.option}
                   onPress={() => {
                     toggleMealType(type);
@@ -174,16 +151,21 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
       <View style={styles.formControl}>
         <ThemedText style={styles.label}>Cuisine</ThemedText>
         <View style={styles.selectContainer}>
-          <TouchableOpacity onPress={() => setShowCuisineTypeModal(true)} style={styles.select}>
-            <ThemedText>{cuisineType || "Sélectionnez un type de cuisine"}</ThemedText>
+          <TouchableOpacity
+            onPress={() => setShowCuisineTypeModal(true)}
+            style={styles.select}
+          >
+            <ThemedText>
+              {cuisineType || 'Sélectionnez un type de cuisine'}
+            </ThemedText>
             <ChevronDown size={18} color="#666" />
           </TouchableOpacity>
-          
+
           {showCuisineTypeModal && (
             <View style={styles.optionsContainer}>
               {CuisineTypeArray.map((type) => (
-                <TouchableOpacity 
-                  key={type} 
+                <TouchableOpacity
+                  key={type}
                   style={styles.option}
                   onPress={() => {
                     toggleCuisineType(type);
@@ -208,7 +190,7 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
               value={ingredient}
               onChangeText={(text) => updateIngredient(text, index)}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.button}
               onPress={() => removeIngredient(index)}
               disabled={ingredients.length === 1}
@@ -217,17 +199,21 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
             </TouchableOpacity>
           </View>
         ))}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, styles.addIngredientButton]}
-          onPress={addIngredient} 
+          onPress={addIngredient}
         >
-          <Plus size={18} color="#fff" style={{marginRight: 8}} />
-          <ThemedText style={styles.buttonText}>Ajouter un ingrédient</ThemedText>
+          <Plus size={18} color="#fff" style={{ marginRight: 8 }} />
+          <ThemedText style={styles.buttonText}>
+            Ajouter un ingrédient
+          </ThemedText>
         </TouchableOpacity>
       </View>
 
       <View style={styles.formControl}>
-        <ThemedText style={styles.label}>Indications spécifiques (optionnel)</ThemedText>
+        <ThemedText style={styles.label}>
+          Indications spécifiques (optionnel)
+        </ThemedText>
         <TextInput
           style={styles.textInput}
           placeholder="Ex: utiliser des légumes de saison, 30g de protéines..."
@@ -236,9 +222,9 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
         />
       </View>
 
-      <TouchableOpacity 
-        style={[styles.button, loading ? styles.buttonDisabled : {}]} 
-        onPress={generateMeal} 
+      <TouchableOpacity
+        style={[styles.button, loading ? styles.buttonDisabled : {}]}
+        onPress={generateMeal}
         disabled={loading}
       >
         {loading ? (
@@ -255,7 +241,9 @@ const MealGeneratorForm: React.FC<MealGeneratorFormProps> = ({ onMealGenerated }
         </View>
       )}
 
-      {generatedMeal && <MealPreview meal={generatedMeal} style={styles.mealPreview} />}
+      {generatedMeal && (
+        <MealPreview meal={generatedMeal} style={styles.mealPreview} />
+      )}
     </ThemedView>
   );
 };
@@ -370,7 +358,7 @@ const styles = StyleSheet.create({
   },
   mealPreview: {
     marginTop: 24,
-  }
+  },
 });
 
 export default MealGeneratorForm;

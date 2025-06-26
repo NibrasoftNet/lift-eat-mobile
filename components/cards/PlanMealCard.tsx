@@ -12,8 +12,6 @@ import {
   AvatarImage,
 } from '@/components/ui/avatar';
 import MealOptionsModal from '../modals/MealOptionsModal';
-import { useToast } from '@/components/ui/toast';
-import { Toast, ToastTitle } from '@/components/ui/toast';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/logging.service';
@@ -30,50 +28,59 @@ interface PlanMealCardProps {
   dailyPlanId?: number | null;
 }
 
-const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzleDb, dailyPlanId }) => {
+const PlanMealCard: React.FC<PlanMealCardProps> = ({
+  meal,
+  onMealDeleted,
+  drizzleDb,
+  dailyPlanId,
+}) => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [currentQuantity, setCurrentQuantity] = useState<number>(meal.quantity);
-  const toast = useToast();
   const queryClient = useQueryClient();
-  
+
   useEffect(() => {
     // Si on a un dailyPlanId, on récupère la quantité actuelle du repas dans le plan
     const fetchMealQuantity = async () => {
       if (drizzleDb && dailyPlanId && meal.id) {
         try {
-          const quantity = await getMealQuantityInPlan(drizzleDb, dailyPlanId, meal.id);
+          const quantity = await getMealQuantityInPlan(
+            drizzleDb,
+            dailyPlanId,
+            meal.id,
+          );
           setCurrentQuantity(quantity);
         } catch (error) {
           console.error('Error fetching meal quantity:', error);
         }
       }
     };
-    
+
     fetchMealQuantity();
   }, [drizzleDb, dailyPlanId, meal.id]);
   const handleRemoveMealFromPlan = async () => {
     try {
       if (meal.id && dailyPlanId) {
-        logger.info(LogCategory.DATABASE, `Removing meal ${meal.id} from plan ${dailyPlanId} via MCP Server`);
-        
+        logger.info(
+          LogCategory.DATABASE,
+          `Removing meal ${meal.id} from plan ${dailyPlanId} via MCP Server`,
+        );
+
         // Utiliser notre nouvelle fonction qui retire le repas du plan sans le supprimer complètement
-        const result = await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, meal.id);
-        
+        const result = await sqliteMCPServer.removeMealFromDailyPlanViaMCP(
+          dailyPlanId,
+          meal.id,
+        );
+
         if (!result.success) {
-          logger.error(LogCategory.DATABASE, `Failed to remove meal ${meal.id} from plan ${dailyPlanId}: ${result.error}`);
+          logger.error(
+            LogCategory.DATABASE,
+            `Failed to remove meal ${meal.id} from plan ${dailyPlanId}: ${result.error}`,
+          );
           throw new Error(result.error || `Failed to remove meal from plan`);
         }
-        
+
         // Invalider uniquement le cache du plan, pas celui des repas car on garde le repas en base
-        invalidateCache(queryClient, DataType.PLAN);
-        
-        toast.show({
-          render: ({ id }) => (
-            <Toast nativeID={id} action="success" variant="solid">
-              <ToastTitle>Repas retiré du plan avec succès</ToastTitle>
-            </Toast>
-          ),
-        });
+        await invalidateCache(queryClient, DataType.PLAN);
 
         // Callback après suppression si fourni
         if (onMealDeleted) {
@@ -82,29 +89,19 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
       }
     } catch (error) {
       // Gérer l'erreur
-      toast.show({
-        render: ({ id }) => (
-          <Toast nativeID={id} action="error" variant="solid">
-            <ToastTitle>Erreur lors du retrait du repas du plan</ToastTitle>
-          </Toast>
-        ),
-      });
       console.error('Error removing meal from plan:', error);
     }
   };
 
   return (
     <>
-      <Pressable 
+      <Pressable
         className="flex w-full rounded-lg bg-secondary-300 shadow-xl p-3 border border-secondary-500"
         onPress={() => {}}
         onLongPress={() => setShowOptionsModal(true)}
       >
         <HStack className="justify-between items-center">
           <Avatar>
-            <AvatarFallbackText>
-              {meal.name?.slice(0, 2).toUpperCase()}
-            </AvatarFallbackText>
             {meal.image ? (
               <AvatarImage
                 className="border-2 border-tertiary-500 w-16 h-16 shadow-xl"
@@ -113,9 +110,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({ meal, onMealDeleted, drizzl
                 }}
               />
             ) : (
-              <AvatarFallbackText>
-                <Icon as={HandPlatter} size="lg" className="stroke-white" />
-              </AvatarFallbackText>
+              <Icon as={HandPlatter} size={50} className="stroke-white" />
             )}
           </Avatar>
           <VStack>

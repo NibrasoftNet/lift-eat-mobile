@@ -1,5 +1,4 @@
 import { VStack } from '@/components/ui/vstack';
-import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { HStack } from '../ui/hstack';
 import Animated, { SlideInLeft } from 'react-native-reanimated';
@@ -16,9 +15,9 @@ export const IntroCard = ({ title, description }: IntroCardProps) => {
     >
       <HStack className="bg-transparent rounded-lg">
         <VStack className="mb-6">
-          <Heading className="text-3xl text-tertiary-500 text-center mb-2 ">
+          <Text className="text-3xl text-tertiary-500 text-center mb-2 ">
             {title}
-          </Heading>
+          </Text>
           <Text className="font-ubuntu-medium text-lg text-tertiary-500 text-center">
             {description}
           </Text>

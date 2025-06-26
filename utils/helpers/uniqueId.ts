@@ -15,13 +15,13 @@ export enum ItemType {
   DAILY_PLAN_MEAL = 'daily-plan-meal',
   USER = 'user',
   PROGRESS = 'progress',
-  GENERAL = 'item'
+  GENERAL = 'item',
 }
 
 /**
  * Crée un identifiant unique et stable pour un élément dans une liste,
  * particulièrement utile pour les props keyExtractor des composants FlashList/FlatList
- * 
+ *
  * @param type Type d'élément
  * @param id Identifiant numérique ou string existant
  * @param pageParam Paramètre de page (pour la pagination)
@@ -32,29 +32,29 @@ export function createStableId(
   type: ItemType,
   id: number | string,
   pageParam?: number | string,
-  index?: number
+  index?: number,
 ): string {
   // Format: `${type}-${id}-page${pageParam}-index${index}`
   const base = `${type}-${id}`;
-  
+
   if (pageParam !== undefined && index !== undefined) {
     return `${base}-page${pageParam}-index${index}`;
   }
-  
+
   if (pageParam !== undefined) {
     return `${base}-page${pageParam}`;
   }
-  
+
   if (index !== undefined) {
     return `${base}-index${index}`;
   }
-  
+
   return base;
 }
 
 /**
  * Génère un ID transitoire unique pour les nouveaux éléments qui n'ont pas encore d'ID de base de données
- * 
+ *
  * @param type Type d'élément
  * @returns Un identifiant unique sous forme de chaîne
  */
@@ -72,7 +72,7 @@ export interface WithUniqueId {
 
 /**
  * Génère un identifiant unique pour un toast basé sur son ID et un préfixe
- * 
+ *
  * @param id ID du toast (généralement fourni par la fonction render du toast)
  * @param prefix Préfixe optionnel
  * @returns ID pour le toast

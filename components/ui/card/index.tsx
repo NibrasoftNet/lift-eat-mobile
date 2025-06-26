@@ -1,21 +1,44 @@
 import React from 'react';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 import { View, ViewProps } from 'react-native';
-import { cardStyle } from './styles';
+import { tv, VariantProps } from 'tailwind-variants';
+import { cn } from '@/utils/nativewind-utils/cn';
 
-type ICardProps = ViewProps &
-  VariantProps<typeof cardStyle> & { className?: string };
+// Define your card styles with tailwind-variants
+const cardStyle = tv({
+  base: 'rounded-lg bg-white dark:bg-gray-800',
+  variants: {
+    variant: {
+      borderless: 'p-2',
+      elevated: 'border border-gray-200 dark:border-gray-700 p-2',
+      outline: 'border border-gray-200 dark:border-gray-700 p-2',
+      filled: 'bg-gray-100 dark:bg-gray-700 p-2',
+    },
+    size: {
+      sm: 'p-3',
+      md: 'p-4',
+      lg: 'p-6',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+    variant: 'borderless',
+  },
+});
 
-const Card = React.forwardRef<React.ElementRef<typeof View>, ICardProps>(
-  ({ className, size = 'md', variant = 'elevated', ...props }, ref) => {
-    return (
-      <View
-        className={cardStyle({ size, variant, class: className })}
-        {...props}
-        ref={ref}
-      />
-    );
-  }
+type CardProps = ViewProps &
+  VariantProps<typeof cardStyle> & {
+    className?: string;
+    children?: React.ReactNode;
+  };
+
+const Card = React.forwardRef<View, CardProps>(
+  ({ className, size, variant, ...props }, ref) => {
+    // First get the class string from cardStyle
+    const cardClasses = cardStyle({ size, variant });
+
+    // Then merge with additional classes using cn
+    return <View ref={ref} className={cn(cardClasses, className)} {...props} />;
+  },
 );
 
 Card.displayName = 'Card';

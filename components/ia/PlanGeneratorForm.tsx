@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
-import { useToast } from '@/components/ui/toast';
-import MultiPurposeToast from '@/components/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { MealTypeEnum, CuisineTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
+import {
+  MealTypeEnum,
+  CuisineTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
 import { IaPlanType } from '@/utils/validation/ia/ia.schemas';
 import iaService from '@/utils/services/ia/ia.service';
 import { ThemedView } from '@/components/ThemedView';
@@ -40,7 +50,9 @@ const commonAllergies = [
   { label: 'Soja', value: 'soy' },
 ];
 
-const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }) => {
+const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({
+  onPlanGenerated,
+}) => {
   const [loading, setLoading] = useState(false);
   const [goal, setGoal] = useState<string>(GoalEnum.MAINTAIN);
   const [mealCount, setMealCount] = useState<string>('3');
@@ -49,11 +61,12 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
   const [specificRequirements, setSpecificRequirements] = useState('');
   const [generatedPlan, setGeneratedPlan] = useState<IaPlanType | null>(null);
   const [aiResponse, setAiResponse] = useState<string>('');
-  const toast = useToast();
 
   const toggleCuisine = (value: string) => {
     if (selectedCuisines.includes(value)) {
-      setSelectedCuisines(selectedCuisines.filter(cuisine => cuisine !== value));
+      setSelectedCuisines(
+        selectedCuisines.filter((cuisine) => cuisine !== value),
+      );
     } else {
       setSelectedCuisines([...selectedCuisines, value]);
     }
@@ -61,7 +74,9 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
 
   const toggleAllergy = (value: string) => {
     if (selectedAllergies.includes(value)) {
-      setSelectedAllergies(selectedAllergies.filter(allergy => allergy !== value));
+      setSelectedAllergies(
+        selectedAllergies.filter((allergy) => allergy !== value),
+      );
     } else {
       setSelectedAllergies([...selectedAllergies, value]);
     }
@@ -85,54 +100,41 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
         protein: 120,
         carbs: 200,
         fat: 70,
-        meals: [{
-          name: 'Petit déjeuner équilibré', // id omis car pas dans le type attendu
-          type: 'BREAKFAST' as MealTypeEnum,
-          cuisine: (selectedCuisines[0] || 'ITALIAN') as CuisineTypeEnum,
-          calories: 450,
-          protein: 25,
-          carbs: 40,
-          fat: 20,
-          description: 'Un petit déjeuner riche en protéines pour bien commencer la journée',
-          unit: MealUnitEnum.GRAMMES, // Utilisation de la valeur correcte de l'enum
-          ingredients: []  
-        }]
+        meals: [
+          {
+            name: 'Petit déjeuner équilibré', // id omis car pas dans le type attendu
+            type: 'BREAKFAST' as MealTypeEnum,
+            cuisine: (selectedCuisines[0] || 'ITALIAN') as CuisineTypeEnum,
+            calories: 450,
+            protein: 25,
+            carbs: 40,
+            fat: 20,
+            description:
+              'Un petit déjeuner riche en protéines pour bien commencer la journée',
+            unit: MealUnitEnum.GRAMMES, // Utilisation de la valeur correcte de l'enum
+            ingredients: [],
+          },
+        ],
       };
-      
+
       // Simuler un délai de réponse de l'IA
       setTimeout(() => {
-        setAiResponse('Voici votre plan nutritionnel personnalisé basé sur vos préférences. Ce plan est conçu pour vous aider à atteindre votre objectif de ' + goal.toLowerCase() + '.');
+        setAiResponse(
+          'Voici votre plan nutritionnel personnalisé basé sur vos préférences. Ce plan est conçu pour vous aider à atteindre votre objectif de ' +
+            goal.toLowerCase() +
+            '.',
+        );
         setGeneratedPlan(mockPlan);
-        
+
         if (onPlanGenerated) {
           onPlanGenerated(mockPlan);
         }
-        
-        toast.show({
-          render: ({ id }) => (
-            <MultiPurposeToast
-              id={id}
-              color={ToastTypeEnum.SUCCESS}
-              title="Plan généré"
-              description="Votre plan nutritionnel a été généré avec succès et ajouté à votre collection."
-            />
-          ),
-        });
         setLoading(false);
       }, 2000);
-      
+
       // Note: Nous ne simulons pas l'échec du cas pour cette démonstration
     } catch (error) {
-      toast.show({
-        render: ({ id }) => (
-          <MultiPurposeToast
-            id={id}
-            color={ToastTypeEnum.ERROR}
-            title="Erreur"
-            description={`Une erreur est survenue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`}
-          />
-        ),
-      });
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -141,42 +143,64 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
   return (
     <ThemedView style={styles.container}>
       <ScrollView>
-        <ThemedText style={styles.title}>Générateur de Plan Nutritionnel</ThemedText>
+        <ThemedText style={styles.title}>
+          Générateur de Plan Nutritionnel
+        </ThemedText>
         <ThemedText style={styles.subtitle}>
-          Laissez l'IA créer un plan nutritionnel personnalisé selon vos objectifs
+          Laissez l'IA créer un plan nutritionnel personnalisé selon vos
+          objectifs
         </ThemedText>
 
         <View style={styles.formControl}>
           <ThemedText style={styles.label}>Objectif</ThemedText>
           <View style={styles.radioGroup}>
-            <TouchableOpacity 
-              style={styles.radioOption} 
+            <TouchableOpacity
+              style={styles.radioOption}
               onPress={() => setGoal('LOSE_WEIGHT')}
             >
-              <View style={[styles.radioButton, goal === 'LOSE_WEIGHT' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  goal === 'LOSE_WEIGHT' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {goal === 'LOSE_WEIGHT' && <View style={styles.radioInner} />}
               </View>
               <ThemedText style={styles.radioLabel}>Perdre du poids</ThemedText>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.radioOption} 
+
+            <TouchableOpacity
+              style={styles.radioOption}
               onPress={() => setGoal('MAINTAIN')}
             >
-              <View style={[styles.radioButton, goal === 'MAINTAIN' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  goal === 'MAINTAIN' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {goal === 'MAINTAIN' && <View style={styles.radioInner} />}
               </View>
-              <ThemedText style={styles.radioLabel}>Maintenir mon poids</ThemedText>
+              <ThemedText style={styles.radioLabel}>
+                Maintenir mon poids
+              </ThemedText>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.radioOption} 
+
+            <TouchableOpacity
+              style={styles.radioOption}
               onPress={() => setGoal('GAIN_MUSCLE')}
             >
-              <View style={[styles.radioButton, goal === 'GAIN_MUSCLE' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  goal === 'GAIN_MUSCLE' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {goal === 'GAIN_MUSCLE' && <View style={styles.radioInner} />}
               </View>
-              <ThemedText style={styles.radioLabel}>Prendre du muscle</ThemedText>
+              <ThemedText style={styles.radioLabel}>
+                Prendre du muscle
+              </ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -184,31 +208,46 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
         <View style={styles.formControl}>
           <ThemedText style={styles.label}>Nombre de repas par jour</ThemedText>
           <View style={styles.radioGroupHorizontal}>
-            <TouchableOpacity 
-              style={styles.radioOptionHorizontal} 
+            <TouchableOpacity
+              style={styles.radioOptionHorizontal}
               onPress={() => setMealCount('3')}
             >
-              <View style={[styles.radioButton, mealCount === '3' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  mealCount === '3' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {mealCount === '3' && <View style={styles.radioInner} />}
               </View>
               <ThemedText style={styles.radioLabel}>3</ThemedText>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.radioOptionHorizontal} 
+
+            <TouchableOpacity
+              style={styles.radioOptionHorizontal}
               onPress={() => setMealCount('4')}
             >
-              <View style={[styles.radioButton, mealCount === '4' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  mealCount === '4' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {mealCount === '4' && <View style={styles.radioInner} />}
               </View>
               <ThemedText style={styles.radioLabel}>4</ThemedText>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.radioOptionHorizontal} 
+
+            <TouchableOpacity
+              style={styles.radioOptionHorizontal}
               onPress={() => setMealCount('5')}
             >
-              <View style={[styles.radioButton, mealCount === '5' ? styles.radioButtonSelected : {}]}>
+              <View
+                style={[
+                  styles.radioButton,
+                  mealCount === '5' ? styles.radioButtonSelected : {},
+                ]}
+              >
                 {mealCount === '5' && <View style={styles.radioInner} />}
               </View>
               <ThemedText style={styles.radioLabel}>5</ThemedText>
@@ -225,17 +264,30 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
                 style={styles.checkbox}
                 onPress={() => toggleCuisine(cuisine.value)}
               >
-                <View style={[styles.checkboxIcon, selectedCuisines.includes(cuisine.value) ? styles.checkboxSelected : {}]}>
-                  {selectedCuisines.includes(cuisine.value) && <Check size={14} color="#FFF" />}
+                <View
+                  style={[
+                    styles.checkboxIcon,
+                    selectedCuisines.includes(cuisine.value)
+                      ? styles.checkboxSelected
+                      : {},
+                  ]}
+                >
+                  {selectedCuisines.includes(cuisine.value) && (
+                    <Check size={14} color="#FFF" />
+                  )}
                 </View>
-                <ThemedText style={styles.checkboxLabel}>{cuisine.label}</ThemedText>
+                <ThemedText style={styles.checkboxLabel}>
+                  {cuisine.label}
+                </ThemedText>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
         <View style={styles.formControl}>
-          <ThemedText style={styles.label}>Allergies et intolérances</ThemedText>
+          <ThemedText style={styles.label}>
+            Allergies et intolérances
+          </ThemedText>
           <View style={styles.checkboxGrid}>
             {commonAllergies.map((allergy) => (
               <TouchableOpacity
@@ -243,17 +295,30 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
                 style={styles.checkbox}
                 onPress={() => toggleAllergy(allergy.value)}
               >
-                <View style={[styles.checkboxIcon, selectedAllergies.includes(allergy.value) ? styles.checkboxSelected : {}]}>
-                  {selectedAllergies.includes(allergy.value) && <Check size={14} color="#FFF" />}
+                <View
+                  style={[
+                    styles.checkboxIcon,
+                    selectedAllergies.includes(allergy.value)
+                      ? styles.checkboxSelected
+                      : {},
+                  ]}
+                >
+                  {selectedAllergies.includes(allergy.value) && (
+                    <Check size={14} color="#FFF" />
+                  )}
                 </View>
-                <ThemedText style={styles.checkboxLabel}>{allergy.label}</ThemedText>
+                <ThemedText style={styles.checkboxLabel}>
+                  {allergy.label}
+                </ThemedText>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
         <View style={styles.formControl}>
-          <ThemedText style={styles.label}>Exigences spécifiques (optionnel)</ThemedText>
+          <ThemedText style={styles.label}>
+            Exigences spécifiques (optionnel)
+          </ThemedText>
           <TextInput
             style={styles.textInput}
             placeholder="Ex: végétarien, riche en protéines..."
@@ -262,9 +327,9 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
           />
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, loading ? styles.buttonDisabled : {}]} 
-          onPress={generatePlan} 
+        <TouchableOpacity
+          style={[styles.button, loading ? styles.buttonDisabled : {}]}
+          onPress={generatePlan}
           disabled={loading}
         >
           {loading ? (
@@ -276,12 +341,16 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
 
         {aiResponse && (
           <View style={styles.responseBox}>
-            <ThemedText style={styles.responseTitle}>Réponse de l'IA:</ThemedText>
+            <ThemedText style={styles.responseTitle}>
+              Réponse de l'IA:
+            </ThemedText>
             <ThemedText style={styles.responseText}>{aiResponse}</ThemedText>
           </View>
         )}
 
-        {generatedPlan && <PlanPreview plan={generatedPlan} style={styles.planPreview} />}
+        {generatedPlan && (
+          <PlanPreview plan={generatedPlan} style={styles.planPreview} />
+        )}
       </ScrollView>
     </ThemedView>
   );
@@ -415,7 +484,7 @@ const styles = StyleSheet.create({
   },
   planPreview: {
     marginTop: 24,
-  }
+  },
 });
 
 export default PlanGeneratorForm;

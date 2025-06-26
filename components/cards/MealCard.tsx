@@ -1,161 +1,107 @@
-import React, { useState, useEffect, memo, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Pressable } from '../ui/pressable';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
-import { EditIcon, Icon, ThreeDotsIcon, TrashIcon } from '../ui/icon';
+import { Icon } from '../ui/icon';
 import {
+  EditIcon,
+  EllipsisVerticalIcon,
   HandPlatter,
   SquareSigma,
+  TrashIcon,
   UtensilsCrossedIcon,
   Weight,
 } from 'lucide-react-native';
 import { MealOrmProps } from '@/db/schema';
 import { useRouter } from 'expo-router';
 import { Card } from '../ui/card';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Avatar, AvatarFallbackText, AvatarImage } from '../ui/avatar';
-import { Menu, MenuItem, MenuItemLabel } from '../ui/menu';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { Avatar, AvatarImage } from '../ui/avatar';
+import { Menu, MenuItem, MenuItemLabel, MenuSeparator } from '../ui/menu';
 import { Button, ButtonIcon } from '../ui/button';
 import NutritionBox from '../boxes/NutritionBox';
 import { Divider } from '../ui/divider';
 import MacrosDetailsBox from '../boxes/MacrosDetailsBox';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
-import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
-import { LogCategory } from '@/utils/enum/logging.enum';
-import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import MultiPurposeToast from '../MultiPurposeToast';
-import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { useToast } from '../ui/toast';
+import { deleteMeal } from '@/utils/services/meal.service';
 import { useDrizzleDb } from '@/utils/providers/DrizzleProvider';
-import DeletionModal from '@/components/modals/DeletionModal';
-import OptionsDrawer from '@/components/drawers/OptionsDrawer';
+import Toast from 'react-native-toast-message';
+import OptionsBottomSheet from '@/components/sheets/OptionsBottomSheet';
+import DeletionModal from '../modals/DeletionModal';
 
 const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
   item,
   index,
 }) => {
   const router = useRouter();
-  const toast = useToast();
   const drizzleDb = useDrizzleDb();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
   const handleMealCardPress = (meal: MealOrmProps) => {
-    // Remplacer le console.log par un log approprié
-    logger.info(LogCategory.USER, `User viewing meal details: ${meal.name}`, { mealId: meal.id });
+    console.log(meal.name);
     router.push(`/meals/my-meals/details/${meal.id}`);
   };
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async () => {
-      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} via MCP Server`);
-      
-      // Récupérer l'ID utilisateur de manière centralisée
-      const userId = getCurrentUserIdSync();
-      if (!userId) {
-        logger.error(LogCategory.AUTH, 'Authentication required to delete a meal');
-        throw new Error('You must be logged in to delete a meal');
-      }
-      
-      // Le handler deleteMealViaMCP vérifie déjà si le repas existe et si l'utilisateur est son créateur
-      // en comparant l'ID utilisateur passé en paramètre avec l'ID du créateur du repas
-      logger.info(LogCategory.DATABASE, `Attempting to delete meal ${item.id} for user ${userId}`);
-      
-      // Vérifier que l'item a bien été créé par l'utilisateur connecté
-      if (item.creatorId !== userId) {
-        logger.warn(LogCategory.AUTH, `User ${userId} attempted to delete meal ${item.id} owned by user ${item.creatorId}`);
-        throw new Error('You can only delete your own meals');
-      }
-      const result = await sqliteMCPServer.deleteMealViaMCP(item.id, userId);
-      
-      if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to delete meal: ${result.error}`);
-        throw new Error(result.error || `Failed to delete meal ${item.id} via MCP Server`);
-      }
-      
-      return result;
-    },
+    mutationFn: async () => await deleteMeal(drizzleDb, item.id),
     onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Meal Deleted Successfully`}
-              description={`The meal has been permanently removed from your collection`}
-            />
-          );
-        },
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Success user login 👋',
       });
-      
-      // Utiliser la méthode standardisée pour invalider le cache
-      invalidateCache(queryClient, DataType.MEAL, {
-        id: item.id,
-        invalidateRelated: true
+      await queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey.some((key) => key?.toString().startsWith('my-meals')),
       });
-      
       setShowModal(false);
     },
     onError: (error: any) => {
       // Show error toast
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Could Not Delete Meal`}
-              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
-            />
-          );
-        },
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `${error.toString()}`,
       });
     },
   });
 
   const handleMealDelete = async () => {
-    try {
-      await mutateAsync();
-    } catch (error) {
-      // Erreur déjà gérée par onError
-      logger.error(LogCategory.USER, `Error in meal deletion handler: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    await mutateAsync();
   };
-
   return (
     <>
-      <Animated.View entering={FadeIn.delay(index * 100).duration(300)} className="mb-4 rounded-xl overflow-hidden" key={`meal-${item.id}`}>
+      <Animated.View
+        entering={FadeInUp.delay(index * 100)}
+        className="mb-4 rounded-xl overflow-hidden"
+      >
         <Pressable
           onPress={() => handleMealCardPress(item)}
           onLongPress={() => setShowOptionsDrawer(true)}
         >
           {({ pressed }) => (
             <Card
-              className={`items-center gap-2 ${pressed && 'bg-secondary-500'}`}
+              className={`bg-tertiary-100 w-full p-2 items-center gap-2 ${pressed && 'bg-secondary-500'}`}
             >
               <HStack className="w-full h-4 items-center justify-end">
                 <Menu
-                  placement="right top"
+                  placement="top right"
                   offset={5}
                   disabledKeys={['Settings']}
                   trigger={({ ...triggerProps }) => {
                     return (
                       <Button
-                        action="secondary"
                         {...triggerProps}
                         className="bg-transparent m-0 p-0"
                       >
-                        <ButtonIcon as={ThreeDotsIcon} className="w-8 h-8" />
+                        <ButtonIcon
+                          as={EllipsisVerticalIcon}
+                          className="w-8 h-8"
+                        />
                       </Button>
                     );
                   }}
@@ -167,24 +113,22 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                       router.push(`/meals/my-meals/edit/${item.id}`)
                     }
                   >
-                    <Icon as={EditIcon} size="sm" className="mr-2" />
-                    <MenuItemLabel size="sm">Edit</MenuItemLabel>
+                    <Icon as={EditIcon} size={30} className="mr-2" />
+                    <MenuItemLabel>Edit</MenuItemLabel>
                   </MenuItem>
+                  <MenuSeparator />
                   <MenuItem
                     key="Delete Plan"
                     textValue="Delete Plan"
                     onPress={() => setShowModal(true)}
                   >
-                    <Icon as={TrashIcon} size="sm" className="mr-2" />
-                    <MenuItemLabel size="sm">Delete</MenuItemLabel>
+                    <Icon as={TrashIcon} size={30} className="mr-2" />
+                    <MenuItemLabel>Delete</MenuItemLabel>
                   </MenuItem>
                 </Menu>
               </HStack>
               <Box className="h-28 w-full items-center justify-center">
                 <Avatar className="border-2 border-tertiary-500 w-36 h-36 shadow-xl">
-                  <AvatarFallbackText>
-                    {item.name?.slice(0, 2).toUpperCase()}
-                  </AvatarFallbackText>
                   {item.image ? (
                     <AvatarImage
                       className="border-2 border-tertiary-500 w-36 h-36 shadow-xl"
@@ -193,7 +137,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                       }}
                     />
                   ) : (
-                    <Icon as={HandPlatter} size="lg" className="stroke-white" />
+                    <Icon as={HandPlatter} size={30} className="stroke-white" />
                   )}
                 </Avatar>
               </Box>
@@ -219,7 +163,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                 </HStack>
                 <HStack className="items-center justify-center w-full">
                   <HStack className="gap-2 items-center">
-                    <Icon as={SquareSigma} size="md" />
+                    <Icon as={SquareSigma} size={30} />
                     <Text>Serving:</Text>
                     <Text>{item.quantity}</Text>
                   </HStack>
@@ -228,7 +172,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
                     className={`w-0.5 h-14 bg-gray-100 mx-3`}
                   />
                   <HStack className="gap-2 items-center">
-                    <Icon as={Weight} size="md" />
+                    <Icon as={Weight} size={30} />
                     <Text>Unit:</Text>
                     <Text>{item.unit}</Text>
                   </HStack>
@@ -244,7 +188,7 @@ const MealCard: React.FC<{ item: MealOrmProps; index: number }> = ({
           )}
         </Pressable>
       </Animated.View>
-      <OptionsDrawer
+      <OptionsBottomSheet
         showOptionDrawer={showOptionDrawer}
         setShowOptionsDrawer={setShowOptionsDrawer}
         disableEdit={false}

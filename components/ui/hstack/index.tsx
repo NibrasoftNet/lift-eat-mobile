@@ -1,21 +1,42 @@
 import React from 'react';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
-import { View } from 'react-native';
-import type { ViewProps } from 'react-native';
-import { hstackStyle } from './styles';
+import { View, ViewProps } from 'react-native';
+import { tv, VariantProps } from 'tailwind-variants';
 
-type IHStackProps = ViewProps & VariantProps<typeof hstackStyle>;
+// First define the style variants
+const hstackStyle = tv({
+  base: 'flex-row',
+  variants: {
+    space: {
+      xs: 'gap-1',
+      sm: 'gap-2',
+      md: 'gap-3',
+      lg: 'gap-4',
+      xl: 'gap-5',
+      '2xl': 'gap-6',
+      '3xl': 'gap-7',
+      '4xl': 'gap-8',
+    },
+    reversed: {
+      true: 'flex-row-reverse',
+    },
+  },
+  defaultVariants: {
+    space: 'md',
+  },
+});
 
-const HStack = React.forwardRef<React.ElementRef<typeof View>, IHStackProps>(
+type HStackProps = ViewProps & VariantProps<typeof hstackStyle>;
+
+const HStack = React.forwardRef<View, HStackProps>(
   ({ className, space, reversed, ...props }, ref) => {
     return (
       <View
-        className={hstackStyle({ space, reversed, class: className })}
-        {...props}
         ref={ref}
+        className={hstackStyle({ space, reversed, className })}
+        {...props}
       />
     );
-  }
+  },
 );
 
 HStack.displayName = 'HStack';

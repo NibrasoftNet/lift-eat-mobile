@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "lift-eat",
+    "name": "lift&eat",
     "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -31,7 +31,9 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-asset"
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

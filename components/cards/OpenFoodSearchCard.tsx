@@ -12,13 +12,6 @@ import { Pressable } from '@/components/ui/pressable';
 import React, { useState } from 'react';
 import { ProductResult } from '@/utils/api/OpenFoodFactsService';
 import NutritionBox from '@/components/boxes/NutritionBox';
-import {
-  Actionsheet,
-  ActionsheetBackdrop,
-  ActionsheetContent,
-  ActionsheetDragIndicator,
-  ActionsheetDragIndicatorWrapper,
-} from '@/components/ui/actionsheet';
 import { Icon } from '@/components/ui/icon';
 import { UtensilsCrossedIcon } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
@@ -39,9 +32,9 @@ const OpenFoodSearchCard: React.FC<{
               {product.image ? (
                 <AvatarImage source={product.image} className="w-full h-full" />
               ) : (
-                <AvatarFallbackText>
-                  {product.name.slice(0, 2).toUpperCase()}
-                </AvatarFallbackText>
+                <AvatarFallbackText
+                  text={product.name.slice(0, 2).toUpperCase()}
+                />
               )}
             </Avatar>
             <VStack className="flex-1">
@@ -93,7 +86,7 @@ const OpenFoodSearchCard: React.FC<{
         </Card>
       </Pressable>
       {/* Actionsheet for selecting image source */}
-      <Actionsheet
+      {/*      <Actionsheet
         isOpen={isActionSheetOpen}
         onClose={() => setIsActionSheetOpen(false)}
       >
@@ -102,7 +95,7 @@ const OpenFoodSearchCard: React.FC<{
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
-          {/* Horizontal layout with icons */}
+           Horizontal layout with icons 
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
@@ -167,7 +160,7 @@ const OpenFoodSearchCard: React.FC<{
             />
           </ScrollView>
         </ActionsheetContent>
-      </Actionsheet>
+      </Actionsheet>*/}
     </>
   );
 };
