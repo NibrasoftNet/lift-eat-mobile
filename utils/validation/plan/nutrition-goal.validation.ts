@@ -14,6 +14,7 @@ export const nutritionGoalSchema = z.object({
     GoalEnum.MAINTAIN,
     GoalEnum.WEIGHT_LOSS,
   ]),
+  name: z.string().optional(), // Champ optionnel pour le nom personnalisé du plan
 });
 
 export type NutritionGoalSchemaFormData = z.infer<
@@ -25,4 +26,5 @@ export type NutritionGoalDefaultValueProps = {
   targetWeight: number;
   durationWeeks:1,
   goalUnit: GoalEnum;
+  name?: string; // Propriété optionnelle pour le nom du plan
 };

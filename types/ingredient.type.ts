@@ -8,4 +8,5 @@ export type IngredientWithStandardProps = {
   protein: number;
   ingredientStandardId: number;
   ingredientsStandard: IngredientStandardOrmProps;
+  unit?: string;
 };

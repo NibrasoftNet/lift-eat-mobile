@@ -1,4 +1,5 @@
 import { UserOrmPros } from '@/db/schema';
+import { NutritionAdviceType, NutritionAdviceProps, NutritionAdviceCreateProps, NutritionAdviceFeedbackProps } from '@/types/nutrition-advice.type';
 
 /**
  * Interface pour les paramètres de requête de contexte utilisateur
@@ -29,6 +30,7 @@ export interface GetUserPreferencesParams {
 export interface GetUserPreferencesResult {
   success: boolean;
   preferences?: {
+    // Informations de base
     gender?: string;
     age?: number;
     weight?: number;
@@ -36,13 +38,30 @@ export interface GetUserPreferencesResult {
     height?: number;
     heightUnit?: string;
     physicalActivity?: string;
+    
+    // Restrictions et allergies
+    dietaryRestrictions?: string[];
+    allergies?: string[];
+    
+    // Objectifs nutritionnels - ancienne structure (conservée pour rétrocompatibilité)
     goal?: string;
     goalWeight?: number;
-    dietaryRestrictions?: string[];
     calorieTarget?: number;
     proteinTarget?: number;
     carbsTarget?: number;
     fatTarget?: number;
+    
+    // Nouvelle structure pour les objectifs nutritionnels
+    nutritionGoals?: {
+      goal?: string;
+      targetWeight?: number;
+      dailyCalories?: number;
+      macroRatios?: {
+        protein?: number;
+        carbs?: number;
+        fat?: number;
+      };
+    };
   };
   error?: string;
 }
@@ -108,5 +127,53 @@ export interface GetUserActivityHistoryResult {
     totalCalories: number;
     calorieTarget: number;
   }>;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de sauvegarde d'un conseil nutritionnel
+ * Utilise NutritionAdviceCreateProps défini dans le type global
+ */
+export interface SaveNutritionAdviceParams extends NutritionAdviceCreateProps {}
+
+/**
+ * Interface pour les résultats de sauvegarde d'un conseil nutritionnel
+ */
+export interface SaveNutritionAdviceResult {
+  success: boolean;
+  adviceId?: number;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de mise à jour du feedback sur un conseil
+ * Utilise NutritionAdviceFeedbackProps défini dans le type global
+ */
+export interface UpdateAdviceFeedbackParams extends NutritionAdviceFeedbackProps {}
+
+/**
+ * Interface pour les résultats de mise à jour du feedback
+ */
+export interface UpdateAdviceFeedbackResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Interface pour les paramètres de récupération des conseils nutritionnels
+ * Basé sur NutritionAdviceFilterProps défini dans le type global
+ */
+export interface GetNutritionAdviceParams {
+  userId: number;
+  limit?: number;
+  type?: NutritionAdviceType | string;
+}
+
+/**
+ * Interface pour les résultats de récupération des conseils nutritionnels
+ */
+export interface GetNutritionAdviceResult {
+  success: boolean;
+  adviceList?: NutritionAdviceProps[];
   error?: string;
 }

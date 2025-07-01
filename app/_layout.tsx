@@ -4,83 +4,70 @@ import {
   ThemeProvider,
 } from '@react-navigation/native';
 import '@/global.css';
+
 import { useFonts } from 'expo-font';
 import ErrorBoundary from 'react-native-error-boundary';
-import { Stack, useRouter } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { configureReanimated } from '@/utils/config/reanimated-config';
 import { useOnlineManager } from '@/hooks/useOnlineManager';
 import { useAppState } from '@/hooks/useAppState';
-
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
-import { ActivityIndicator, GestureResponderEvent } from 'react-native';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+// Le fichier logging-interceptor.ts a été supprimé
+import { ActivityIndicator, GestureResponderEvent, View } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
+import MCPProvider from '@/utils/providers/MCPProvider';
+import UserContextProvider from '@/utils/providers/UserContextProvider';
 import useSessionStore from '@/utils/store/sessionStore';
 import '@/i18n';
-import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
+import Box from '@/components-new/ui/atoms/base/Box';
+import Button from '@/components-new/ui/atoms/inputs/Button';
+import Text from '@/components-new/ui/atoms/base/Text';
+import Icon from '@/components-new/ui/atoms/display/Icon';
 import { CloudAlert } from 'lucide-react-native';
+import { ThemeProvider as AppThemeProvider } from '@/utils/providers/ThemeProvider';
 import { tokenCache } from '@/cache';
-import { ConvexReactClient } from 'convex/react';
-import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import { Colors } from '@/utils/constants/Colors';
-import Toast from 'react-native-toast-message';
-import { UIProvider } from '@/utils/providers/UiProvider';
+import { setQueryClient } from '@/utils/helpers/queryClient';
+import { prefetchEssentialData } from '@/utils/helpers/prefetchData';
 
-SplashScreen.preventAutoHideAsync();
+// Configurer Reanimated pour désactiver les avertissements du mode strict
+configureReanimated();
+
+// Empêcher la disparition automatique du SplashScreen
+try {
+  SplashScreen.preventAutoHideAsync();
+  logger.info(LogCategory.UI, 'SplashScreen.preventAutoHideAsync appelé avec succès');
+} catch (error) {
+  logger.error(LogCategory.UI, 'Erreur lors de preventAutoHideAsync', error);
+}
 export const DATABASE_NAME = 'lift_eat_db';
 
-// Init convex client
-/* const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
-  unsavedChangesWarning: false,
-}); */
-
-const InitialLayout = () => {
-  const router = useRouter();
-  const { user } = useSessionStore();
-  useEffect(() => {
-    if (!user) {
-      router.replace('/intro');
-    } else if (user.id === 0) {
-      router.replace('/analytics');
-    } else {
-      router.replace('/analytics');
-    }
-  }, []);
-
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'none',
-        orientation: 'portrait',
-        navigationBarHidden: true,
-        statusBarHidden: true,
-      }}
-    >
-      <Stack.Screen name="(root)" options={{ headerShown: false }} />
-      <Stack.Screen name="intro" options={{ headerShown: false }} />
-      <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-    </Stack>
-  );
-};
+// Temporarily commented out for Convex branch work
+// const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+//   unsavedChangesWarning: false,
+// });
 
 export default function ProjectLayout() {
   const colorScheme = useColorScheme();
+  const [isDbReady, setIsDbReady] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
   const expoDb = openDatabaseSync(DATABASE_NAME);
   const db = drizzle(expoDb);
-  const { success, error } = useMigrations(db, migrations);
+  const { success, error: migrationError } = useMigrations(db, migrations);
   const [loaded] = useFonts({
     'Ubuntu-Regular': require('../assets/fonts/Ubuntu-Regular.ttf'),
     'Ubuntu-Bold': require('../assets/fonts/Ubuntu-Bold.ttf'),
@@ -93,33 +80,125 @@ export default function ProjectLayout() {
   });
 
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: 2 } },
+    defaultOptions: { 
+      queries: { 
+        retry: 2,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 30, // 30 minutes
+      } 
+    },
   });
-  // Enable Tanstack query dev tools
-  useReactQueryDevTools(queryClient);
+
+  setQueryClient(queryClient);
 
   // Use the custom hooks
   useOnlineManager();
   useAppState();
 
+  // Ancienne configuration de logs supprimée
   useEffect(() => {
-    if (error) {
-      console.log('errr', error);
-    }
-    if (success) {
-      addDummyData(db);
-    }
-  }, [success]);
+    logger.info(LogCategory.APP, 'Application démarrée');
+  }, []);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    const initDb = async () => {
+      try {
+        logger.info(LogCategory.DATABASE, 'Initialisation de la base de données');
+        
+        if (migrationError) {
+          logger.error(LogCategory.DATABASE, 'Erreur de migration détectée', migrationError);
+          throw migrationError;
+        }
+        
+        if (success) {
+          logger.info(LogCategory.DATABASE, 'Migrations réussies, ajout des données de test');
+          try {
+            await addDummyData(db);
+            logger.info(LogCategory.DATABASE, 'Données de test ajoutées avec succès');
+            setIsDbReady(true);
+          } catch (dummyDataErr) {
+            logger.error(LogCategory.DATABASE, 'Erreur lors de l\'ajout des données de test', dummyDataErr);
+            // On continue même si les données de test échouent
+            setIsDbReady(true);
+          }
+        }
+      } catch (err) {
+        logger.error(LogCategory.DATABASE, 'Erreur d\'initialisation de la base de données', err);
+        setError(err instanceof Error ? err : new Error('Database initialization failed'));
+      }
+      
+      // Le préchargement des données essentielles sera géré par le MCPProvider
+      // après confirmation que le MCP Server est complètement initialisé
+    };
 
-  if (!loaded) {
-    console.log('Font not loaded');
-    return null;
+    initDb();
+  }, [success, migrationError]);
+
+  useEffect(() => {
+    const hideSplash = async () => {
+      try {
+        if (loaded && isDbReady) {
+          logger.info(LogCategory.UI, 'Conditions remplies pour masquer le SplashScreen');
+          await SplashScreen.hideAsync();
+          logger.info(LogCategory.UI, 'SplashScreen masqué avec succès');
+        } else {
+          logger.info(LogCategory.UI, 'En attente pour masquer le SplashScreen', { fontsLoaded: loaded, dbReady: isDbReady });
+        }
+      } catch (err) {
+        logger.error(LogCategory.UI, 'Erreur lors du masquage du SplashScreen', err);
+        // Force hide after timeout in case of error
+        setTimeout(() => {
+          try {
+            SplashScreen.hideAsync();
+            logger.info(LogCategory.UI, 'SplashScreen masqué après délai d\'attente');
+          } catch (timeoutErr) {
+            logger.error(LogCategory.UI, 'Échec du masquage forcé du SplashScreen', timeoutErr);
+          }
+        }, 5000);
+      }
+    };
+
+    hideSplash();
+  }, [loaded, isDbReady]);
+
+  // Vérification de l'état du chargement
+  if (!loaded || !isDbReady) {
+    logger.info(LogCategory.UI, 'Affichage du chargement', { fontsLoaded: loaded, dbReady: isDbReady });
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={{ marginTop: 20 }}>Chargement de l'application...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    logger.error(LogCategory.UI, 'Affichage de l\'écran d\'erreur d\'initialisation', { errorMessage: error.message });
+    return (
+      <Box flex={1} alignItems="center" justifyContent="center" p={16}>
+        <Icon as={CloudAlert} size={40} color="#EF4444" />
+        <Text>Une erreur est survenue lors de l'initialisation:</Text>
+        <Text>{error.message}</Text>
+        <Button 
+          style={{ marginTop: 20 }} 
+          onPress={() => {
+            logger.info(LogCategory.UI, 'Tentative de réinitialisation de l\'application');
+            setIsDbReady(false);
+            setTimeout(() => {
+              try {
+                // Tenter de réinitialiser l'application
+                setError(null);
+                setIsDbReady(true);
+              } catch (resetErr) {
+                logger.error(LogCategory.UI, 'Échec de la réinitialisation', resetErr);
+              }
+            }, 1000);
+          }}
+        >
+          Réessayer
+        </Button>
+      </Box>
+    );
   }
 
   const ErrorFallback = ({
@@ -128,47 +207,66 @@ export default function ProjectLayout() {
   }: {
     error: Error;
     resetError: (event: GestureResponderEvent) => void;
-  }) => (
-    <VStack className="size-full items-center justify-center gap-4 p-4">
-      <CloudAlert size={30} color={Colors.red.icon} />
-      <Text>Oops! Something went wrong:</Text>
+  }) => {
+    // Log l'erreur dans le boundary d'erreur
+    logger.error(LogCategory.UI, 'ErrorBoundary a capturé une erreur', { error: error.message, stack: error.stack });
+    return (
+    <Box flex={1} alignItems="center" justifyContent="center" p={16}>
+      <Icon as={CloudAlert} size={40} color="#EF4444" />
+      <Text>Une erreur est survenue:</Text>
       <Text>{error.toString()}</Text>
-      <Button className="w-full mt-10 mx-2" onPress={resetError}>
-        <ButtonText>Reset</ButtonText>
+      <Button style={{ width: '100%', marginTop: 40, marginHorizontal: 8 }} onPress={() => resetError({} as GestureResponderEvent)}>
+        Réessayer
       </Button>
-    </VStack>
+    </Box>
   );
+  }
 
+  // Journaliser le démarrage complet de l'application
+  logger.info(LogCategory.UI, 'Application complètement chargée et prête');
+  
   return (
-    <UIProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      
+        <AppThemeProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
-          {/*          <ClerkProvider
+          {/* Temporarily commented out for Convex branch work */}
+          {/* <ClerkProvider
             tokenCache={tokenCache}
-            publishableKey="pk_test_YW1hemluZy13ZXJld29sZi02NS5jbGVyay5hY2NvdW50cy5kZXYk"
+            publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
           >
             <ClerkLoaded>
-              <ConvexProviderWithClerk client={convex} useAuth={useAuth}>*/}
-          <Suspense fallback={<ActivityIndicator size="large" />}>
-            <SQLiteProvider
-              databaseName={DATABASE_NAME}
-              options={{ enableChangeListener: true }}
-              useSuspense
-            >
-              <DrizzleProvider>
-                <ErrorBoundary FallbackComponent={ErrorFallback}>
-                  <InitialLayout />
-                  <StatusBar style="auto" hidden={true} />
-                  <Toast />
-                </ErrorBoundary>
-              </DrizzleProvider>
-            </SQLiteProvider>
-          </Suspense>
-          {/*              </ConvexProviderWithClerk>
+              <ConvexProviderWithClerk client={convex} useAuth={useAuth}> */}
+                <Suspense fallback={
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                }>
+                  <SQLiteProvider
+                    databaseName={DATABASE_NAME}
+                    options={{ enableChangeListener: true }}
+                    useSuspense
+                  >
+                    <DrizzleProvider>
+                      <MCPProvider>
+                        <UserContextProvider>
+                          <ErrorBoundary FallbackComponent={ErrorFallback}>
+                            <Slot />
+                            <StatusBar style="auto" hidden={true} />
+                          </ErrorBoundary>
+                        </UserContextProvider>
+                      </MCPProvider>
+                    </DrizzleProvider>
+                  </SQLiteProvider>
+                </Suspense>
+              {/* </ConvexProviderWithClerk>
             </ClerkLoaded>
-          </ClerkProvider>*/}
+          </ClerkProvider> */}
         </QueryClientProvider>
       </ThemeProvider>
-    </UIProvider>
+      </AppThemeProvider>
+    
+    </GestureHandlerRootView>
   );
 }

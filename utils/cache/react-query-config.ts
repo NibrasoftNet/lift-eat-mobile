@@ -1,22 +1,22 @@
 import { DataType } from '@/utils/enum/cache.enum';
 import { QueryClient } from '@tanstack/react-query';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
- * Configuration standardisu00e9e pour React Query
- * Ce fichier centralise les paramu00e8tres de cache pour assurer
- * une utilisation cohu00e9rente dans toute l'application
+ * Configuration standardisée pour React Query
+ * Ce fichier centralise les paramètres de cache pour assurer
+ * une utilisation cohérente dans toute l'application
  */
 
-// Du00e9finition des paramu00e8tres de cache par type de donnu00e9es
+// Définition des paramètres de cache par type de données
 interface CacheConfig {
-  staleTime: number;  // Du00e9lai avant qu'une donnu00e9e soit considu00e9ru00e9e pu00e9rimu00e9e (en ms)
-  gcTime: number;     // Du00e9lai avant qu'une donnu00e9e inutilisu00e9e soit supprimiu00e9e du cache (garbage collection)
-  retry: number;      // Nombre de tentatives en cas d'u00e9chec
+  staleTime: number;  // Durée avant qu'une donnée soit considérée comme périmée (en ms)
+  gcTime: number;     // Durée avant qu'une donnée inutilisée soit supprimée du cache (garbage collection)
+  retry: number;      // Nombre de tentatives en cas d'échec
 }
 
-// Configuration par type de donnu00e9es
+// Configuration par type de données
 export const cacheConfig: Record<DataType, CacheConfig> = {
   [DataType.MEALS_LIST]: {
     staleTime: 5 * 60 * 1000,  // 5 minutes
@@ -44,7 +44,7 @@ export const cacheConfig: Record<DataType, CacheConfig> = {
     retry: 2
   },
   [DataType.INGREDIENTS_LIST]: {
-    staleTime: 60 * 60 * 1000, // 1 heure (donnu00e9es rarement modifiu00e9es)
+    staleTime: 60 * 60 * 1000, // 1 heure (données rarement modifiées)
     gcTime: 2 * 60 * 60 * 1000, // 2 heures
     retry: 2
   },
@@ -66,27 +66,27 @@ export const cacheConfig: Record<DataType, CacheConfig> = {
 };
 
 /**
- * Ru00e9cupu00e8re la configuration du cache pour un type de donnu00e9es spu00e9cifique
+ * Récupère la configuration du cache pour un type de données spécifique
  */
 export function getCacheConfig(dataType: DataType): CacheConfig {
   return cacheConfig[dataType] || {
-    staleTime: 5 * 60 * 1000, // Valeurs par du00e9faut
+    staleTime: 5 * 60 * 1000, // Valeurs par défaut
     gcTime: 10 * 60 * 1000,
     retry: 2
   };
 }
 
 /**
- * Construction standardisu00e9e des clu00e9s de requu00eate
- * Assure une cohu00e9rence dans la structure des clu00e9s utilisu00e9es
+ * Construction standardisée des clés de requête
+ * Assure une cohérence dans la structure des clés utilisées
  */
 export function buildQueryKey(dataType: DataType, ...args: any[]): any[] {
   return [dataType, ...args.filter(arg => arg !== undefined)];
 }
 
 /**
- * Fonction centralisu00e9e pour invalider le cache
- * u00c9vite les invalidations multiples et fournit une API cohu00e9rente
+ * Fonction centralisée pour invalider le cache
+ * Évite les invalidations multiples et fournit une API cohérente
  */
 export function invalidateQueries(queryClient: QueryClient, dataType: DataType, options?: {
   exact?: boolean;
@@ -95,21 +95,21 @@ export function invalidateQueries(queryClient: QueryClient, dataType: DataType, 
 }) {
   const { exact = false, invalidateRelated = false, notifyId } = options || {};
   
-  // Logger l'invalidation pour le du00e9bogage
+  // Logger l'invalidation pour le débogage
   logger.info(LogCategory.CACHE, `Invalidating React Query cache for ${dataType}`, { 
     exact, 
     invalidateRelated,
     notifyId 
   });
   
-  // Invalider le type de donnu00e9es principal
+  // Invalider le type de données principal
   queryClient.invalidateQueries({ 
     queryKey: exact ? [dataType] : [dataType],
     exact,
-    refetchType: 'active' // Ne rafrau00eechit que les requu00eates actuellement observu00e9es
+    refetchType: 'active' // Ne rafraichit que les requêtes actuellement observées
   });
   
-  // Invalider les types de donnu00e9es liu00e9s si nu00e9cessaire
+  // Invalider les types de données liées si nécessaire
   if (invalidateRelated) {
     const relatedTypes = getRelatedDataTypes(dataType);
     
@@ -125,7 +125,7 @@ export function invalidateQueries(queryClient: QueryClient, dataType: DataType, 
 }
 
 /**
- * Ru00e9cupu00e8re les types de donnu00e9es liu00e9s pour l'invalidation en cascade
+ * Récupère les types de données liés pour l'invalidation en cascade
  */
 function getRelatedDataTypes(dataType: DataType): DataType[] {
   switch (dataType) {
@@ -145,14 +145,14 @@ function getRelatedDataTypes(dataType: DataType): DataType[] {
 }
 
 /**
- * Configuration par du00e9faut du QueryClient pour l'application
+ * Configuration par défaut du QueryClient pour l'application
  */
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutes par du00e9faut
-        gcTime: 10 * 60 * 1000,   // 10 minutes par du00e9faut
+        staleTime: 5 * 60 * 1000, // 5 minutes par défaut
+        gcTime: 10 * 60 * 1000,   // 10 minutes par défaut
         retry: 2,
         refetchOnWindowFocus: false,
       },

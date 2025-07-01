@@ -1,7 +1,9 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import useSessionStore from '@/utils/store/sessionStore';
 
 // Définition de l'interface utilisateur basée sur le schéma
 export interface User {
@@ -17,6 +19,7 @@ export interface User {
   physicalActivity?: string;
   profileImage?: Buffer | null;
   score?: number;
+  clerkId?: string; // Ajout du champ clerkId pour l'authentification avec Clerk
 }
 
 // Interface du contexte
@@ -27,16 +30,18 @@ interface UserContextType {
   setCurrentUser: (user: User) => void;
   refreshUser: (userId: number) => Promise<void>;
   logout: () => void;
+  
 }
 
 // Création du contexte avec valeurs par défaut
-const UserContext = createContext<UserContextType>({
+export const UserContext = createContext<UserContextType>({
   currentUser: null,
   isLoading: false,
   error: null,
   setCurrentUser: () => {},
   refreshUser: async () => {},
-  logout: () => {}
+  logout: () => {},
+
 });
 
 /**
@@ -47,6 +52,50 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Charger l'utilisateur depuis AsyncStorage au démarrage
+  useEffect(() => {
+    const loadUserFromStorage = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Récupérer l'ID utilisateur depuis AsyncStorage
+        const userId = await AsyncStorage.getItem('userId');
+        
+        logger.info(LogCategory.USER, `Tentative de chargement de l'utilisateur depuis le stockage`, {
+          storedUserId: userId || 'aucun'
+        });
+        
+        if (userId) {
+          // Convertir l'ID en nombre et charger l'utilisateur
+          const numericId = parseInt(userId, 10);
+          
+          if (!isNaN(numericId)) {
+            logger.info(LogCategory.USER, `Chargement des données utilisateur pour l'ID: ${numericId}`);
+
+            // Mettre à jour immédiatement le sessionStore avec l'ID pour que les services synchrones puissent l'utiliser
+            const { setUser } = useSessionStore.getState();
+            setUser({ id: numericId, email: '' });
+
+            await refreshUser(numericId);
+          } else {
+            logger.warn(LogCategory.USER, `ID utilisateur invalide dans AsyncStorage: ${userId}`);
+          }
+        } else {
+          logger.info(LogCategory.USER, `Aucun ID utilisateur trouvé dans AsyncStorage`);
+        }
+      } catch (err: any) {
+        const errorMessage = `Erreur lors du chargement de l'utilisateur: ${err.message}`;
+        logger.error(LogCategory.USER, errorMessage);
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadUserFromStorage();
+  }, []);
+
 
   /**
    * Rafraîchit les données de l'utilisateur depuis le serveur MCP
@@ -64,6 +113,11 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
       
       if (response.success && response.user) {
         setCurrentUser(response.user as User);
+
+        // Mettre à jour le sessionStore avec les infos complètes de l'utilisateur (non persistées)
+        const { setUser } = useSessionStore.getState();
+        setUser({ id: response.user.id, email: response.user.email });
+
         logger.info(LogCategory.USER, `User data refreshed successfully: ${response.user.name}`);
       } else {
         throw new Error(response.error || 'Failed to fetch user details');
@@ -72,6 +126,14 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage = `Error refreshing user: ${err.message}`;
       logger.error(LogCategory.USER, errorMessage);
       setError(errorMessage);
+      
+      // Si l'utilisateur n'est pas trouvé, supprimer son ID d'AsyncStorage
+      if (err.message && err.message.includes('not found')) {
+        logger.warn(LogCategory.USER, `Suppression de l'ID utilisateur ${userId} d'AsyncStorage car il n'existe plus`);
+        AsyncStorage.removeItem('userId').catch(storageErr => {
+          logger.error(LogCategory.USER, `Erreur lors de la suppression de l'ID utilisateur d'AsyncStorage: ${storageErr.message}`);
+        });
+      }
       // Ne pas effacer l'utilisateur actuel en cas d'erreur de rafraîchissement
     } finally {
       setIsLoading(false);
@@ -84,7 +146,11 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setCurrentUser(null);
     logger.info(LogCategory.USER, 'User logged out');
+    
+    // Note: La déconnexion de Clerk doit être gérée séparément dans les composants qui utilisent Clerk
   };
+
+  // Note: La synchronisation avec Clerk doit être gérée dans les composants enfants du ClerkProvider
 
   // Valeur du contexte à fournir aux composants enfants
   const contextValue: UserContextType = {
@@ -93,7 +159,8 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
     error,
     setCurrentUser,
     refreshUser,
-    logout
+    logout,
+
   };
 
   return (

@@ -1,16 +1,16 @@
 import useSessionStore from '../store/sessionStore';
-import { logger } from '../services/logging.service';
-import { LogCategory } from '../enum/logging.enum';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import sqliteMCPServer from '../mcp/sqlite-server';
 
 /**
  * Méthode centralisée pour récupérer l'ID de l'utilisateur courant
  * Cette fonction essaie d'abord d'obtenir l'ID depuis le store de session
  * Si aucun utilisateur n'est trouvé dans la session, elle tente de récupérer un utilisateur par défaut via le MCP Server
- * @param fallbackToDefault Si true, tente de récupérer un utilisateur par défaut si aucun n'est trouvé en session (défaut: true)
+ * @param fallbackToDefault Si true, tente de récupérer un utilisateur par défaut si aucun n'est trouvé en session (défaut: false)
  * @returns L'ID de l'utilisateur ou null si aucun utilisateur n'est trouvé
  */
-export async function getCurrentUserId(fallbackToDefault: boolean = true): Promise<number | null> {
+export async function getCurrentUserId(fallbackToDefault: boolean = false): Promise<number | null> {
   try {
     // 1. Tenter d'obtenir l'ID depuis le store de session
     const { user } = useSessionStore.getState();

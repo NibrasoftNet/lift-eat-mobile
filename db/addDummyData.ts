@@ -21,89 +21,121 @@ import {
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { eq, sql } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
+import { ingredientImages } from '@/db/ingredientImages';
 
-// Static image paths using require()
-const images = {
-  BREAKFAST: require('../assets/images/seed/caesar_salad.jpg'),
-  LUNCH: require('../assets/images/seed/kouskousi.jpg'),
-  DINNER: require('../assets/images/seed/suchi_bowl.jpg'),
+// Static image paths mapped by MealTypeEnum using require()
+const images: Record<MealTypeEnum, number> = {
+  [MealTypeEnum.BREAKFAST]: require('../assets/images/seed/caesar_salad.jpg'),
+  [MealTypeEnum.LUNCH]: require('../assets/images/seed/kouskousi.jpg'),
+  [MealTypeEnum.DINNER]: require('../assets/images/seed/suchi_bowl.jpg'),
+  // Default snack image
+  [MealTypeEnum.SNACK]: require('../assets/images/seed/almonds.jpg'),
 };
 
-// Function to load a static asset and return Base64
-async function getImageBuffer(assetModule: number): Promise<any | null> {
+// Utility to detect already encoded base64 image strings
+function isBase64Image(str: string): boolean {
+  return /^data:image\/(png|jpe?g);base64,/.test(str);
+}
+
+// Function to load a static asset OR absolute/remote URI and return Base64
+async function getImageBuffer(assetOrUri: number | string): Promise<any | null> {
   try {
     const startTime = performance.now();
-    logger.debug(LogCategory.DATABASE, `Chargement de l'asset`, { assetModule });
-    
-    const asset = Asset.fromModule(assetModule);
+    let asset: Asset;
+
+    if (typeof assetOrUri === 'number') {
+      asset = Asset.fromModule(assetOrUri);
+    } else {
+      // Accept absolute / remote URI or relative path previously resolved by metro
+      asset = Asset.fromURI(assetOrUri);
+    }
+
     await asset.downloadAsync(); // Ensure it's downloaded
 
     if (!asset.localUri) {
-      logger.error(LogCategory.DATABASE, `Échec de chargement de l'asset`, { assetModule });
-      // Retourner une chaîne vide au lieu de null pour éviter les erreurs
+      logger.error(LogCategory.DATABASE, `Échec de chargement de l'asset`, { assetOrUri });
       return "";
     }
 
-    // Read file as binary data
-    const fileUri = asset.localUri;
-    try {
-      const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      
-      const duration = performance.now() - startTime;
-      logger.debug(LogCategory.PERFORMANCE, `Asset chargé en ${duration.toFixed(2)}ms`, { assetModule });
-      return base64Data;
-    } catch (readError) {
-      logger.error(LogCategory.DATABASE, `Erreur de lecture du fichier`, { fileUri, error: readError });
-      // Retourner une chaîne vide au lieu de null pour éviter les erreurs
-      return "";
-    }
+    const base64Data = await FileSystem.readAsStringAsync(asset.localUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    const duration = performance.now() - startTime;
+    logger.debug(LogCategory.PERFORMANCE, `Asset chargé en ${duration.toFixed(2)}ms`, { assetOrUri });
+    return base64Data;
   } catch (error) {
-    logger.error(LogCategory.DATABASE, `Erreur générale de chargement d'asset`, { assetModule, error });
-    // Retourner une chaîne vide au lieu de null pour éviter les erreurs
+    logger.error(LogCategory.DATABASE, `Erreur générale de chargement d'asset`, { assetOrUri, error });
     return "";
   }
 }
 
-// Function to prepare meals with images
+// Function to prepare users with images
 async function prepareUserWithImages() {
   return await Promise.all(
     usersSeed.map(async (user) => {
-      // @ts-ignore
       if (!user.profileImage) {
-        // @ts-ignore
         const imageBuffer = await getImageBuffer(
           require('../assets/images/logo_no_bg.png'),
         );
         return {
           ...user,
-          profileImage:
-            `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
+          profileImage: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
         };
       }
+
+      // If profileImage provided as asset module number, convert once
+      if (typeof user.profileImage === 'number') {
+        const imageBuffer = await getImageBuffer(user.profileImage);
+        return {
+          ...user,
+          profileImage: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
+        };
+      }
+
       return user;
     }),
   );
 }
 
+// Function to prepare ingredient standards with images
 async function prepareIngredientStandardWithImages() {
   return await Promise.all(
     ingredientsStandardSeed.map(async (ingStandard) => {
-      // @ts-ignore
-      if (!ingStandard.image) {
-        // @ts-ignore
-        const imageBuffer = await getImageBuffer(
-          require('../assets/images/seed/salmon.jpg'),
-        );
-        return {
-          ...ingStandard,
-          image: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
-        };
+      // Skip if already base64 encoded or buffer
+      if (ingStandard.image && typeof ingStandard.image === 'string' && isBase64Image(ingStandard.image as unknown as string)) {
+        return ingStandard;
       }
-      return ingStandard;
+
+      try {
+        let buffer: string | null = null;
+
+        if (typeof ingStandard.image === 'number') {
+          buffer = await getImageBuffer(ingStandard.image);
+        } else if (typeof ingStandard.image === 'string' && ingStandard.image) {
+          const assetId = ingredientImages[ingStandard.image as string];
+          if (assetId) {
+            buffer = await getImageBuffer(assetId);
+          } else {
+            // Absolute or remote URI
+            buffer = await getImageBuffer(ingStandard.image);
+          }
+        }
+
+        if (buffer) {
+          return {
+            ...ingStandard,
+            image: `data:image/jpeg;base64,${buffer}` as unknown as Buffer,
+          };
+        }
+      } catch (error) {
+        logger.error(LogCategory.DATABASE, 'Erreur de chargement image ingrédient', { ingStandard, error });
+      }
+
+      return { ...ingStandard, image: null };
     }),
   );
 }
@@ -112,18 +144,52 @@ async function prepareIngredientStandardWithImages() {
 async function prepareMealsWithImages() {
   return await Promise.all(
     mealsSeed.map(async (meal) => {
-      // @ts-ignore
-      if (!meal.image && images[meal.type]) {
-        // @ts-ignore
-        const imageBuffer = await getImageBuffer(images[meal.type]);
-        return {
-          ...meal,
-          image: `data:image/jpeg;base64,${imageBuffer}` as unknown as Buffer,
-        };
+      // If already base64 encoded, leave untouched
+      if (meal.image && typeof meal.image === 'string' && isBase64Image(meal.image)) {
+        return meal;
       }
+
+      try {
+        let buffer: string | null = null;
+
+        if (meal.image && typeof meal.image === 'number') {
+          buffer = await getImageBuffer(meal.image);
+        } else if (meal.image && typeof meal.image === 'string') {
+          // Handle as URI (local file path or remote URL)
+          buffer = await getImageBuffer(meal.image);
+        } else if (images[meal.type]) {
+          buffer = await getImageBuffer(images[meal.type]);
+        }
+
+        if (buffer) {
+          return {
+            ...meal,
+            image: `data:image/jpeg;base64,${buffer}` as unknown as Buffer,
+          };
+        }
+      } catch (error) {
+        logger.error(LogCategory.DATABASE, 'Erreur chargement image repas', { meal, error });
+      }
+
       return meal;
     }),
   );
+}
+
+// Helper to chunk inserts to avoid SQLite parameter limits
+async function chunkInsert<T>(
+  db: ExpoSQLiteDatabase,
+  table: any,
+  values: T[],
+  chunkSize = 200,
+): Promise<{ id: number | null }[]> {
+  const ids: { id: number | null }[] = [];
+  for (let i = 0; i < values.length; i += chunkSize) {
+    const slice = values.slice(i, i + chunkSize);
+    const inserted = await db.insert(table).values(slice as any).returning({ id: table.id });
+    ids.push(...inserted);
+  }
+  return ids;
 }
 
 // Function to add dummy data
@@ -250,10 +316,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
     logger.info(LogCategory.DATABASE, 'Préparation des ingrédients standards terminée');
 
     // Insert Ingredient Standards
-    ingredientStandardIds = await db
-      .insert(ingredientsStandard)
-      .values(ingredientStandardWithImages)
-      .returning({ id: ingredientsStandard.id });
+    ingredientStandardIds = await chunkInsert(db, ingredientsStandard, ingredientStandardWithImages);
     logger.info(LogCategory.DATABASE, 'Insertion des ingrédients standards réussie', { count: ingredientStandardIds.length });
   } catch (error) {
     logger.error(LogCategory.DATABASE, 'Erreur lors de l\'insertion des ingrédients standards', error);
@@ -268,7 +331,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
     // S'assurer que usersIds[0] existe, sinon utiliser une valeur de secours
     const creatorId = usersIds[0]?.id || 1;
     
-    const mealsWithCreator = mealsWithImages.map((meal) => ({
+    const mealsWithCreator = mealsWithImages.map((meal: any) => ({
       ...meal,
       creatorId, // Adding creatorId to each object
     }));
@@ -334,7 +397,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   let planIds: { id: number | null }[] = [{ id: 1 }]; // Valeur par défaut
   try {
     // Création des plans avec référence utilisateur
-    const plansWithUser = planSeed.map(planItem => ({
+    const plansWithUser = planSeed.map((planItem: any) => ({
       ...planItem,
       userId: usersIds[0]?.id || 1 // Référence à l'utilisateur créé précédemment
     }));
@@ -353,7 +416,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
   let dailyPlanIds: { id: number | null }[] = [];
   try {
     // Insert Daily Plan
-    const dailyPlansWithPlanId = dailyPlanSeed.map((dailyPlan) => ({
+    const dailyPlansWithPlanId = dailyPlanSeed.map((dailyPlan: any) => ({
       ...dailyPlan,
       planId: planIds[0]?.id || 1, // Add planId to each dailyPlan
     }));
@@ -389,6 +452,7 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
           dailyPlanMealsWithIds.push({
             dailyPlanId: dailyPlanId.id,
             mealId: meal.id,
+            mealType: null, // Adding this back to fix the type error
             quantity: 1,
             calories: 0,
             carbs: 0,

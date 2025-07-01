@@ -1,4 +1,4 @@
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 // Import gérer différemment pour éviter le cycle d'importation
 import { GEMINI_API_KEY, GEMINI_API_BASE_URL } from '@/utils/constants/Config';
@@ -7,6 +7,8 @@ import { buildEnrichedPrompt, PromptTypeEnum, determinePromptType } from './prom
 import { DetectedAction, detectDatabaseAction, cleanResponseText } from './responseParser';
 import { processDatabaseAction } from './iaActions';
 import { IaIngredientType, IaMealType, IaPlanType } from '@/utils/validation/ia/ia.schemas';
+import { GoalEnum } from '@/utils/enum/user-details.enum';
+import { MealUnitEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 
 /**
  * Service central pour l'intelligence artificielle
@@ -58,7 +60,8 @@ export class IAService {
       // Tenter de récupérer l'utilisateur depuis la base de données
       logger.debug(LogCategory.IA, `IAService: Current user ID may be stale, attempting to refresh from database`);
       
-      // Utiliser la méthode findOrCreateUser qui retourne toujours un utilisateur
+      // Utiliser directement la méthode MCP findOrCreateUserViaMCP (migration partielle)
+      // Celle-ci garantit qu'on a toujours un utilisateur
       const result = await sqliteMCPServer.findOrCreateUserViaMCP('test1@test.com');
       
       if (result.success && result.user) {
@@ -84,6 +87,45 @@ export class IAService {
   }
 
   /**
+   * Récupère le contexte utilisateur actuel pour l'affichage
+   * @returns Le contexte utilisateur au format texte avec les restrictions alimentaires et allergies
+   */
+  public async getUserContext(): Promise<string> {
+    try {
+      if (!this.currentUserId) {
+        return "Impossible de récupérer le contexte de l'utilisateur: aucun utilisateur identifié";
+      }
+      
+      // Récupérer le contexte utilisateur complet avec restrictions alimentaires et allergies
+      const contextResult = await sqliteMCPServer.getUserContextViaMCP(this.currentUserId);
+      
+      // Vérifier si la récupération a réussi
+      if (!contextResult.success) {
+        return `Erreur lors de la récupération du contexte: ${contextResult.error || 'Raison inconnue'}`;
+      }
+      
+      // Utiliser le contexte complet
+      const contextString = contextResult.context || '';
+      
+      if (!contextString) {
+        return "Aucun contexte utilisateur disponible";
+      }
+      
+      // Formater le contexte pour l'affichage
+      let formattedContext = "Contexte Utilisateur:\n";
+      formattedContext += "--------------------\n";
+      formattedContext += `Id: ${this.currentUserId}\n`;
+      formattedContext += contextString.replace(/\n/g, '\n');
+      formattedContext += "\n--------------------";
+      
+      return formattedContext;
+    } catch (error: any) {
+      logger.error(LogCategory.IA, `Erreur lors de la récupération du contexte utilisateur: ${error.message}`);
+      return `Erreur lors de la récupération du contexte utilisateur: ${error.message}`;
+    }
+  }
+
+  /**
    * Génère une réponse de l'IA et traite les actions détectées
    * @param prompt Requête utilisateur
    * @returns Texte de réponse nettoyé
@@ -98,63 +140,70 @@ export class IAService {
   }> {
     try {
       const userId = await this.ensureCurrentUserId();
-
-      // 1. Déterminer le type de prompt et l'enrichir avec le contexte utilisateur
-      logger.info(LogCategory.IA, `IAService: Processing prompt: "${prompt.substring(0, 50)}..."`);
+      
+      // Déterminer le type de prompt pour un enrichissement approprié
       const promptType = determinePromptType(prompt);
+      
+      // Construire un prompt enrichi en utilisant le système MCP pour le contexte utilisateur
       const enrichedPrompt = await buildEnrichedPrompt(userId, prompt, promptType);
-
-      // 2. Envoyer le prompt enrichi directement à l'API Gemini plutôt que passer par geminiService
-      logger.info(LogCategory.IA, `IAService: Sending enriched prompt to Gemini (type: ${promptType})`);
-      const responseText = await this.directGeminiRequest(enrichedPrompt);
-
-      // 3. Analyser la réponse pour détecter les actions
-      const detectedAction = detectDatabaseAction(responseText);
-      let actionResult = undefined;
-
-      // 4. Exécuter l'action détectée si valide
-      if (detectedAction.type !== 'NONE') {
-        logger.info(LogCategory.IA, `IAService: Detected ${detectedAction.type} action`);
+      
+      // Log du prompt envoyé à l'IA
+      logger.info(LogCategory.IA, `IA Chat - Prompt envoyé:`, { 
+        userId,
+        promptType,
+        userPrompt: prompt.substring(0, 200) + (prompt.length > 200 ? '...' : '')
+      });
+      logger.debug(LogCategory.IA, `IA Chat - Prompt enrichi complet:`, { 
+        enrichedPrompt: enrichedPrompt.substring(0, 500) + (enrichedPrompt.length > 500 ? '...' : '') 
+      });
+      
+      // Appeler l'API Gemini avec le prompt enrichi
+      const rawResponse = await this.directGeminiRequest(enrichedPrompt);
+      
+      // Log de la réponse brute de l'IA
+      logger.info(LogCategory.IA, `IA Chat - Réponse reçue:`, { 
+        responseLength: rawResponse.length,
+        responseSample: rawResponse.substring(0, 200) + (rawResponse.length > 200 ? '...' : '')
+      });
+      
+      // Nettoyer et analyser la réponse
+      const text = cleanResponseText(rawResponse);
+      
+      // Détecter les actions potentielles dans la réponse de l'IA
+      const detectedAction = detectDatabaseAction(rawResponse);
+      
+      if (detectedAction) {
+        logger.info(LogCategory.IA, `Action détectée: ${detectedAction.type}`);
+        
         try {
-          if (detectedAction.isValid && userId !== null) {
-            await processDatabaseAction(detectedAction, userId);
-            actionResult = {
+          // Traiter l'action détectée en utilisant les méthodes MCP appropriées
+          await processDatabaseAction(detectedAction, userId);
+          
+          return {
+            text,
+            action: {
               type: detectedAction.type,
               success: true
-            };
-          } else {
-            logger.warn(LogCategory.IA, `IAService: Invalid action or no user ID: ${detectedAction.type}`);
-            actionResult = {
+            }
+          };
+        } catch (error) {
+          logger.error(LogCategory.IA, `Erreur lors du traitement de l'action: ${error instanceof Error ? error.message : String(error)}`);
+          return {
+            text,
+            action: {
               type: detectedAction.type,
               success: false,
-              message: !detectedAction.isValid ? "Action invalide" : "ID utilisateur non défini"
-            };
-          }
-        } catch (error) {
-          actionResult = {
-            type: detectedAction.type,
-            success: false,
-            message: error instanceof Error ? error.message : String(error)
+              message: error instanceof Error ? error.message : String(error)
+            }
           };
-          logger.error(LogCategory.IA, `IAService: Error processing action: ${actionResult.message}`);
         }
       }
-
-      // 5. Retourner la réponse nettoyée (sans les balises d'action)
-      const cleanedResponse = cleanResponseText(responseText);
-      return {
-        text: cleanedResponse,
-        action: actionResult
-      };
+      
+      return { text };
     } catch (error) {
-      logger.error(LogCategory.IA, `IAService: Error generating response: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(LogCategory.IA, `IAService.generateResponse error: ${error instanceof Error ? error.message : String(error)}`);
       return {
-        text: "Désolé, une erreur s'est produite lors du traitement de votre demande.",
-        action: {
-          type: "ERROR",
-          success: false,
-          message: error instanceof Error ? error.message : String(error)
-        }
+        text: `Je suis désolé, mais j'ai rencontré un problème en traitant votre demande. Erreur: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -163,6 +212,7 @@ export class IAService {
    * Génère un plan nutritionnel personnalisé basé sur les préférences utilisateur
    * @param goal Objectif du plan nutritionnel
    * @param preferences Préférences additionnelles (optionnel)
+   * @returns Texte de réponse et plan généré si disponible
    */
   public async generateNutritionPlan(
     goal: string,
@@ -175,62 +225,124 @@ export class IAService {
   ): Promise<{ text: string; plan?: IaPlanType; success: boolean }> {
     try {
       const userId = await this.ensureCurrentUserId();
-
-      // Construire un prompt spécifique pour la génération de plan
-      let planPrompt = `Génère un plan nutritionnel hebdomadaire pour ${goal}.`;
       
+      // Construire le prompt pour la génération du plan
+      let prompt = `Génère un plan nutritionnel pour l'objectif suivant: ${goal}.`;
+      
+      // Ajouter les préférences spécifiques si fournies
       if (preferences) {
         if (preferences.mealCount) {
-          planPrompt += ` Avec ${preferences.mealCount} repas par jour.`;
+          prompt += ` Inclure ${preferences.mealCount} repas par jour.`;
         }
+        
         if (preferences.cuisinePreferences && preferences.cuisinePreferences.length > 0) {
-          planPrompt += ` Privilégie les cuisines: ${preferences.cuisinePreferences.join(', ')}.`;
+          prompt += ` Préférences culinaires: ${preferences.cuisinePreferences.join(', ')}.`;
         }
+        
         if (preferences.allergies && preferences.allergies.length > 0) {
-          planPrompt += ` Évite les allergènes: ${preferences.allergies.join(', ')}.`;
+          prompt += ` Allergies à éviter: ${preferences.allergies.join(', ')}.`;
         }
+        
         if (preferences.specificRequirements) {
-          planPrompt += ` Avec ces exigences spécifiques: ${preferences.specificRequirements}.`;
+          prompt += ` Exigences spécifiques: ${preferences.specificRequirements}.`;
         }
       }
       
-      // Utiliser notre service pour générer la réponse
-      const response = await this.generateResponse(planPrompt);
+      // Enrichir le prompt avec le contexte utilisateur
+      const enrichedPrompt = await buildEnrichedPrompt(
+        userId, 
+        prompt, 
+        PromptTypeEnum.NUTRITION_PLAN_GENERATION // Type de prompt spécifique
+      );
       
-      // Vérifier si une action de plan a été détectée
-      if (response.action?.type === 'ADD_PLAN' && response.action.success) {
-        // Récupérer le plan récemment créé
-        const userPlansData = await sqliteMCPServer.getUserActivePlans(userId);
+      // Log du prompt pour le plan nutritionnel
+      logger.info(LogCategory.IA, `IA Plan - Prompt envoyé:`, { 
+        userId,
+        goal,
+        preferences: JSON.stringify(preferences),
+        promptLength: enrichedPrompt.length
+      });
+      logger.debug(LogCategory.IA, `IA Plan - Prompt enrichi complet:`, { 
+        enrichedPrompt: enrichedPrompt.substring(0, 500) + (enrichedPrompt.length > 500 ? '...' : '') 
+      });
+      
+      // Appeler directement l'API Gemini
+      const rawResponse = await this.directGeminiRequest(enrichedPrompt);
+      
+      // Log de la réponse de l'IA pour le plan
+      logger.info(LogCategory.IA, `IA Plan - Réponse reçue:`, { 
+        responseLength: rawResponse.length,
+        responseSample: rawResponse.substring(0, 200) + (rawResponse.length > 200 ? '...' : '')
+      });
+      
+      // Nettoyer la réponse pour l'affichage
+      const text = cleanResponseText(rawResponse);
+      
+      // Extraire les données potentielles de plan/repas du texte
+      const detectedAction = detectDatabaseAction(rawResponse);
+      logger.debug(LogCategory.IA, `IAService: Action détectée dans generateNutritionPlan: ${detectedAction?.type}`);
+      
+      // Même si un repas est détecté, le traiter comme un plan si c'est cohérent 
+      // Créer un plan indépendamment du type de données détecté
+      if (detectedAction && detectedAction.isValid && detectedAction.parsedData) {
+        // Forcer la création d'un plan au lieu d'un repas
+        const planData: any = {
+          name: detectedAction.parsedData.name,
+          description: 'description' in detectedAction.parsedData ? detectedAction.parsedData.description : '',
+          goal: goal as GoalEnum,
+          durationWeeks: 'durationWeeks' in detectedAction.parsedData ? detectedAction.parsedData.durationWeeks : 4,
+          calories: detectedAction.parsedData.calories || 2000,
+          carbs: detectedAction.parsedData.carbs || 45,
+          protein: detectedAction.parsedData.protein || 30,
+          fat: detectedAction.parsedData.fat || 25,
+          type: 'IA',
+          initialWeight: 70,
+          targetWeight: 70,
+          generatedByAI: true
+        };
         
-        // Vérifier si nous avons des plans ou un tableau vide
-        if (Array.isArray(userPlansData)) {
-          // C'est un tableau vide, aucun plan actif
-          return {
-            text: response.text,
-            success: true
-          };
-        }
+        logger.debug(LogCategory.IA, `IAService: Création forcée d'un plan: ${JSON.stringify(planData)}`);
         
-        // Nous avons des plans, utiliser le plan courant s'il existe, sinon le premier plan de la liste
-        const planToUse = userPlansData.currentPlan || (userPlansData.plans.length > 0 ? userPlansData.plans[0] : null);
-        
-        if (planToUse) {
-          return {
-            text: response.text,
-            plan: planToUse as unknown as IaPlanType,
-            success: true
-          };
+        // Appeler directement la méthode MCP pour créer un plan
+        try {
+          const result = await sqliteMCPServer.addPlanViaMCP(planData, userId);
+          
+          if (result.success) {
+            logger.info(LogCategory.IA, `IAService: Plan nutritionnel créé avec succès (ID: ${result.planId})`);
+            
+            // Formater le plan pour le retourner
+            const formattedPlan: IaPlanType = {
+              name: planData.name,
+              goal: planData.goal,
+              calories: planData.calories,
+              carbs: planData.carbs, 
+              protein: planData.protein,
+              fat: planData.fat,
+              meals: [] // Champ obligatoire mais vide car pas disponible à ce stade
+            };
+            
+            return {
+              text,
+              plan: formattedPlan,
+              success: true
+            };
+          } else {
+            logger.error(LogCategory.IA, `IAService: Échec de création du plan: ${result.error}`);
+          }
+        } catch (error) {
+          logger.error(LogCategory.IA, `IAService: Erreur lors de l'appel à addPlanViaMCP: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
       
+      // Si on arrive ici, la création du plan a échoué
       return {
-        text: response.text,
-        success: response.action?.success || false
+        text,
+        success: false
       };
     } catch (error) {
       logger.error(LogCategory.IA, `IAService: Error generating nutrition plan: ${error instanceof Error ? error.message : String(error)}`);
       return {
-        text: `Désolé, une erreur s'est produite lors de la génération du plan: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Désolé, une erreur s'est produite lors de la génération du plan nutritionnel: ${error instanceof Error ? error.message : String(error)}`,
         success: false
       };
     }
@@ -240,67 +352,95 @@ export class IAService {
    * Génère un repas personnalisé basé sur les ingrédients disponibles
    * @param ingredients Liste d'ingrédients disponibles
    * @param mealType Type de repas désiré
+   * @returns Texte de réponse et repas généré si disponible
    */
   public async generateMeal(
-    ingredients: string[],
-    mealType: string
+    meal: IaMealType
   ): Promise<{ text: string; meal?: IaMealType; success: boolean }> {
     try {
-      // S'assurer que nous avons un ID utilisateur, avec fallback si nécessaire
       const userId = await this.ensureCurrentUserId();
-
-      // Loguer l'ID utilisateur et les ingrédients pour aider au débogage
-      logger.info(LogCategory.IA, `IAService: Génération de repas pour l'utilisateur ${userId}`);
-      logger.info(LogCategory.IA, `IAService: Ingrédients: ${ingredients.join(', ')}`);
-      logger.info(LogCategory.IA, `IAService: Type de repas: ${mealType}`);
-
-      // Construire un prompt spécifique pour la génération de repas avec instructions précises pour le format JSON
-      const mealPrompt = `Génère un ${mealType} avec ces ingrédients: ${ingredients.join(', ')}. 
-\nIMPORTANT: Tu dois générer une réponse au format JSON dans des balises <ADD_MEAL>...</ADD_MEAL>. 
-\nLe JSON doit contenir: 
-- name: nom du repas
-- type: type de repas (doit être BREAKFAST, LUNCH, DINNER ou SNACK)
-- description: description du repas
-- cuisine: type de cuisine (doit être GENERAL, AFRICAN, EUROPEAN, ASIAN, CARIBBEAN, TUNISIAN, QATARI, AMERICAN, CHINESE, FRENCH, INDIAN, ITALIAN, JAPANESE ou MEXICAN)
-- calories: nombre de calories
-- carbs: grammes de glucides
-- protein: grammes de protéines
-- fat: grammes de lipides
-- unit: unité de mesure (doit être GRAMMES, KILOGRAMMES, MILLILITRES, LITRES, PIECES, PORTION, CUILLERES_A_SOUPE, CUILLERES_A_CAFE, TASSES, SERVING, PLATE ou BOWL)
-- ingredients: tableau d'ingrédients, chacun avec name, quantity, unit, calories, carbs, protein, fat
-\nEssaie d'utiliser exactement les valeurs d'énumération indiquées et pas d'autres termes.`;
       
-      // Utiliser notre service pour générer la réponse
-      const response = await this.generateResponse(mealPrompt);
+      // Extraire les informations du repas
+      const { type: mealType, cuisine, ingredients, description } = meal;
       
-      // Vérifier si une action de repas a été détectée
-      if (response.action?.type === 'ADD_MEAL') {
-        logger.info(LogCategory.IA, 'IAService: Action ADD_MEAL détectée, vérification de la réussite');
-        
-        // Vérifier si l'action a été exécutée avec succès
-        if (response.action.success) {
-          // Récupérer le repas récemment créé
-          const userMeals = await sqliteMCPServer.getUserFavoriteMeals(userId, 1);
+      // Construire un prompt détaillé pour la génération du repas
+      let ingredientsText = ingredients.map(ing => 
+        `${ing.name} (${ing.quantity}${ing.unit.toLowerCase()})`
+      ).join(', ');
+      
+      let prompt = `Génère un repas de type ${mealType}`;
+      
+      if (cuisine && cuisine !== 'GENERAL') {
+        prompt += ` de cuisine ${cuisine.toLowerCase()}`;
+      }
+      
+      prompt += ` avec les ingrédients suivants et leurs quantités: ${ingredientsText}.`;
+      
+      if (description && description.trim()) {
+        prompt += ` Exigences spécifiques: ${description.trim()}.`;
+      }
+      
+      // Ajouter des instructions pour prendre en compte les quantités dans les calculs nutritionnels
+      prompt += ` Calcule les valeurs nutritionnelles (calories, protéines, glucides, lipides) en fonction des quantités spécifiées pour chaque ingrédient.`;
+      
+      // Utiliser la méthode generateResponse qui utilise déjà l'architecture MCP
+      const response = await this.generateResponse(prompt);
+      
+      // Vérifier si une action de type ADD_MEAL a été détectée et réussie
+      if (response.action && response.action.type === 'ADD_MEAL' && response.action.success) {
+        try {
+          logger.info(LogCategory.IA, `IAService: Repas généré avec succès via IA`);
           
-          // getUserFavoriteMeals retourne directement un tableau
-          if (userMeals && userMeals.length > 0) {
-            const latestMeal = userMeals[0];
-            logger.info(LogCategory.IA, `IAService: Repas récupéré avec succès: ${latestMeal.name}`);
+          // Récupérer les repas récents de l'utilisateur via MCP
+          // Cette méthode existe dans les handlers mais utilise la méthode directe disponible
+          const userMealsResult = await sqliteMCPServer.getUserFavoriteMeals(userId, 5);
+          
+          // Vérifier que userMealsResult contient des repas
+          if (userMealsResult && Array.isArray(userMealsResult) && userMealsResult.length > 0) {
+            // Le premier repas est probablement celui qui vient d'être créé
+            const latestMeal = userMealsResult[0];
+            
+            // Convertir au format IaMealType attendu par l'interface
+            const formattedMeal: IaMealType = {
+              name: latestMeal.name,
+              type: latestMeal.type,
+              cuisine: latestMeal.cuisine || CuisineTypeEnum.GENERAL,
+              description: latestMeal.description || '',
+              instructions: latestMeal.instructions || '', // Ajout de la propriété instructions manquante
+              quantity: latestMeal.quantity || 100, // Ajout de la propriété quantity manquante
+              calories: latestMeal.calories || 0,
+              carbs: latestMeal.carbs || 0,
+              protein: latestMeal.protein || 0,
+              fat: latestMeal.fat || 0,
+              unit: MealUnitEnum.GRAMMES,
+              ingredients: latestMeal.ingredients?.map((ing: any) => ({
+                name: ing.name,
+                quantity: ing.quantity || 0,
+                unit: ing.unit || MealUnitEnum.GRAMMES,
+                calories: ing.calories || 0,
+                carbs: ing.carbs || 0,
+                protein: ing.protein || 0,
+                fat: ing.fat || 0
+              })) || []
+            };
+            
+            logger.info(LogCategory.IA, `IAService: Repas récupéré avec succès: ${formattedMeal.name}`);
+            
             return {
               text: response.text,
-              meal: latestMeal as unknown as IaMealType,
+              meal: formattedMeal,
               success: true
             };
           } else {
             logger.warn(LogCategory.IA, 'IAService: Repas créé mais aucun repas récent trouvé');
           }
-        } else {
-          logger.warn(LogCategory.IA, `IAService: Action ADD_MEAL déclenchée mais non réussie: ${JSON.stringify(response.action)}`);
+        } catch (error) {
+          logger.warn(LogCategory.IA, `Erreur lors de la récupération du repas: ${error instanceof Error ? error.message : String(error)}`);
+          // Continuer sans repas mais avec succès car l'IA a répondu
         }
-      } else {
-        logger.warn(LogCategory.IA, 'IAService: Aucune action ADD_MEAL détectée dans la réponse');
       }
       
+      // Si aucun repas n'a été créé ou s'il y a eu une erreur
       return {
         text: response.text,
         success: response.action?.success || false
@@ -316,6 +456,7 @@ export class IAService {
 
   /**
    * Analyse les habitudes alimentaires de l'utilisateur et fournit des recommandations
+   * @returns Texte de réponse et statut de l'opération
    */
   public async analyzeNutritionHabits(): Promise<{ text: string; success: boolean }> {
     try {
@@ -324,8 +465,18 @@ export class IAService {
       // Construire un prompt pour l'analyse
       const analysisPrompt = `Analyse mes habitudes alimentaires récentes et fais-moi des recommandations pour améliorer mon alimentation.`;
       
-      // Utiliser notre service pour générer la réponse
+      // Utiliser generateResponse qui utilise déjà l'architecture MCP et gère le contexte utilisateur
       const response = await this.generateResponse(analysisPrompt);
+      
+      // Obtenir les données d'historique via MCP (si disponibles dans le futur)
+      try {
+        // Cette méthode existe dans les handlers mais n'est pas encore exposée
+        await sqliteMCPServer.getUserActivityHistoryViaMCP(userId);
+        logger.info(LogCategory.IA, `IAService: Historique nutritionnel récupéré pour l'utilisateur ${userId}`);
+      } catch (error) {
+        // En cas d'erreur, ne pas bloquer la fonctionnalité
+        logger.warn(LogCategory.IA, `IAService: Impossible de récupérer l'historique pour l'utilisateur ${userId}: ${error instanceof Error ? error.message : String(error)}`);
+      }
       
       return {
         text: response.text,

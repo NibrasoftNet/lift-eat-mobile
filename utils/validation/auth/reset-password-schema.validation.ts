@@ -1,24 +1,13 @@
 import * as z from 'zod';
 import { passwordSchema } from '@/utils/validation/auth/password-schema.validation';
+import { UpdatePasswordData as UpdatePasswordDataInterface } from '@/utils/interfaces/auth.interface';
 
-export const resetForgotPasswordSchema = z
-  .object({
-    newPassword: passwordSchema,
-    confirmNewPassword: z.string(),
-  })
-  .refine(
-    (values) => {
-      return values.newPassword === values.confirmNewPassword;
-    },
-    {
-      message: '2 mots de passe differents!',
-      path: ['confirmNewPassword'],
-    },
-  );
+export const resetPasswordSchema = z.object({
+  password: passwordSchema,
+  token: z.string(),
+});
 
-export type ResetPasswordFormData = z.infer<typeof resetForgotPasswordSchema>;
+// Ensure this matches the interface from auth.interface.ts
+export type ResetPasswordFormData = UpdatePasswordDataInterface;
 
-export type ResetPasswordDefaultValueProps = {
-  newPassword: string;
-  confirmNewPassword: string;
-};
+export type ResetPasswordDefaultValuesProps = UpdatePasswordDataInterface;

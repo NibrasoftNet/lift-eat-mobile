@@ -45,4 +45,6 @@ export interface DeleteIngredientParams {
 export interface DeleteIngredientResult {
   success: boolean;
   error?: string;
+  usedInMeals?: boolean;
+  mealIds?: number[];
 }

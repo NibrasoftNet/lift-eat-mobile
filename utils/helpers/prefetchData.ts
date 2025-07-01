@@ -1,9 +1,9 @@
 import { QueryClient } from '@tanstack/react-query';
 import { DataType } from './queryInvalidation';
 import { getCacheConfig } from './cacheConfig';
-import { logger } from '../services/logging.service';
-import { LogCategory } from '../enum/logging.enum';
-import sqliteMCPServer from '../mcp/sqlite-server';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { getCurrentUserId } from './userContext';
 
 /**
@@ -74,7 +74,21 @@ export async function prefetchEssentialData(
       }
       
       const startTime = Date.now();
+      
+      // N'exécuter la tâche que s'il y a un utilisateur en session
+      const { hasUserInSession } = await Promise.resolve(require('./userContext'));
+      const hasUser = hasUserInSession();
+      if (!hasUser) {
+        if (verbose) {
+          logger.debug(LogCategory.CACHE, `Tâche ignorée (pas d'utilisateur): ${name}`);
+        }
+        completedTasks++;
+        onProgress?.(completedTasks, totalTasks);
+        continue;
+      }
+      
       await task(queryClient);
+      
       const duration = Date.now() - startTime;
       
       completedTasks++;

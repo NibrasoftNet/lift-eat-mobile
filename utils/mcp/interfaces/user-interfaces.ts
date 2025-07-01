@@ -1,5 +1,12 @@
 import { UserOrmPros } from '@/db/schema';
 
+// Interface pour les préférences d'interface utilisateur
+export interface UIPreferences {
+  language?: string;
+  theme?: string;
+  notifications?: boolean;
+}
+
 // Interface pour updateUserPreferencesViaMCP
 export interface UpdateUserPreferencesParams {
   userId: number;
@@ -12,6 +19,24 @@ export interface UpdateUserPreferencesParams {
     heightUnit: string;
     physicalActivity: string;
   }>;
+}
+
+// Interface pour les objectifs nutritionnels
+export interface NutritionGoalsProps {
+  goal?: string; // WEIGHT_LOSS, MAINTAIN, GAIN_MUSCLE
+  targetWeight?: number;
+  dailyCalories?: number;
+  proteinPercentage?: number;
+  carbsPercentage?: number;
+  fatPercentage?: number;
+}
+
+// Interface pour updateUserNutritionPreferencesViaMCP
+export interface UpdateUserNutritionPreferencesParams {
+  userId: number;
+  dietaryRestrictions?: string[];
+  allergies?: string[];
+  nutritionGoals?: NutritionGoalsProps;
 }
 
 export interface UpdateUserPreferencesResult {
@@ -62,5 +87,16 @@ export interface GetDefaultUserParams {
 export interface GetDefaultUserResult {
   success: boolean;
   user?: UserOrmPros;
+  error?: string;
+}
+
+// Interface pour generateUserContextViaMCP
+export interface GenerateUserContextParams {
+  userId: number;
+}
+
+export interface GenerateUserContextResult {
+  success: boolean;
+  context?: string;
   error?: string;
 }

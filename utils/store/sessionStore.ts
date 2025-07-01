@@ -25,7 +25,9 @@ const useSessionStore = create<SessionState>()(
     }),
     {
       name: 'session-storage',
-      storage: createJSONStorage(() => AsyncStorage), // Using AsyncStorage
+      storage: createJSONStorage(() => AsyncStorage),
+      // Ne persister que le token et l'expiration pour éviter de conserver un ancien utilisateur
+      partialize: (state) => ({ token: state.token, tokenExpire: state.tokenExpire }),
     },
   ),
 );

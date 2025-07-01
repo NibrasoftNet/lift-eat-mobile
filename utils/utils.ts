@@ -16,32 +16,42 @@ import * as ImagePicker from 'expo-image-picker';
 import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 
 export const getImageFromPicker = async (source: 'camera' | 'gallery') => {
-  // Request permissions
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') {
-    alert('Sorry, we need camera roll permissions to make this work!');
-    return;
-  }
+  try {
+    // Request permissions - différentes selon la source
+    if (source === 'camera') {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Nous avons besoin de permissions pour accéder à votre appareil photo');
+        return null;
+      }
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Nous avons besoin de permissions pour accéder à votre bibliothèque d\'images');
+        return null;
+      }
+    }
 
-  // Open the image picker based on the selected source
-  let result;
-  if (source === 'camera') {
-    result = await ImagePicker.launchCameraAsync({
+    // Paramètres communs pour les deux sources
+    const options = {
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-      base64: true,
-    });
-  } else if (source === 'gallery') {
-    result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-      base64: true,
-    });
+      aspect: [4, 3] as [number, number], // Type assertion pour satisfaire le typage
+      quality: 0.8, // Légèrement réduit pour des performances améliorées
+      base64: false, // Nous utilisons l'URI, pas besoin de base64 qui alourdit
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // On utilise toujours cette API pour le moment
+    };
+
+    // Ouvrir le sélecteur selon la source choisie
+    if (source === 'camera') {
+      return await ImagePicker.launchCameraAsync(options);
+    } else {
+      return await ImagePicker.launchImageLibraryAsync(options);
+    }
+  } catch (error) {
+    console.error('Erreur lors de la sélection de l\'image:', error);
+    alert('Une erreur est survenue lors de la sélection de l\'image');
+    return null;
   }
-  return result;
 };
 
 export const GetGoalIcons: Record<GoalEnum, ImageSourcePropType> = {

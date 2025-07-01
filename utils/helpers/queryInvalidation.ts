@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
-import { logger } from '../services/logging.service';
-import { LogCategory } from '../enum/logging.enum';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Types de données pour lesquels on peut invalider le cache
@@ -29,7 +29,7 @@ const CACHE_KEY_PATTERNS: Record<DataType, string[]> = {
   [DataType.PLAN]: ['plan-', 'current-plan'],
   [DataType.PLANS_LIST]: ['plans', 'my-plans', 'plans-list'],
   [DataType.DAILY_PLAN]: ['daily-plan-', 'day-plan-'],
-  [DataType.MEAL]: ['meal-', 'meal:'],
+  [DataType.MEAL]: ['meal-', 'meal:', 'meal', 'meal-details'],
   [DataType.MEALS_LIST]: ['meals', 'my-meals', 'meals-list', 'meal:mealsList'],
   [DataType.PROGRESS]: ['progress-', 'daily-progress-'],
   [DataType.PROGRESS_LIST]: ['progress-days', 'progressDays', 'progress-list'],

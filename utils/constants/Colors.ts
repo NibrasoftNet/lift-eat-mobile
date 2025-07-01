@@ -3,7 +3,7 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 // Define the colors
-const primaryColor = '#068cd5'; // Hex equivalent of your RGB '51 97 162'
+const primaryColor = '#3361A2'; // Hex equivalent of your RGB '51 97 162'
 const secondaryColor = '#6B7280'; // Neutral gray (Tailwind's "gray-500")
 const tertiaryColor = '#FF9F00'; // Hex for RGB 255 159 0
 
@@ -30,12 +30,12 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
   primary: {
-    text: '#FFFFFF',
-    background: primaryColor,
-    tint: '#7F9FD1',
-    icon: '#FFFFFF',
-    tabIconDefault: '#9CA3AF',
-    tabIconSelected: primaryColor,
+    text: '#FFFFFF', // White text (optimal contrast)
+    background: primaryColor, // Your exact navy (RGB 51,97,162)
+    tint: '#7F9FD1', // Lighter navy tint (RGB ~127,159,209)
+    icon: '#FFFFFF', // White icons
+    tabIconDefault: '#9CA3AF', // gray-400 for inactive tabs
+    tabIconSelected: primaryColor, // Navy for active tab
   },
   secondary: {
     text: '#FFFFFF', // White text for contrast on mid-gray
@@ -60,7 +60,6 @@ export const Colors = {
   red: {
     light: '#FEE2E2',
     background: '#D60404',
-    icon: '#D60404',
   },
   amber: {
     light: '#FEE2E2',
