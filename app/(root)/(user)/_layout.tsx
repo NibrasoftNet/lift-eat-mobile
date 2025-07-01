@@ -1,26 +1,9 @@
-import { Stack } from 'expo-router';
-import React from 'react';
+import { View, Text } from 'react-native';
 
-export default function UserPreferenceLayout() {
+export default function Progress() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'none',
-        orientation: 'portrait',
-        navigationBarHidden: true,
-        statusBarHidden: true,
-      }}
-    >
-      <Stack.Screen name="preference" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="details"
-        options={{ headerShown: false, animation: 'slide_from_left' }}
-      />
-      <Stack.Screen
-        name="profile/[id]"
-        options={{ headerShown: false, animation: 'slide_from_left' }}
-      />
-    </Stack>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>En cours de développement</Text>
+    </View>
   );
 }

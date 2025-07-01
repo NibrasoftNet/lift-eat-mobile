@@ -7,7 +7,7 @@ import '@/global.css';
 
 import { useFonts } from 'expo-font';
 import ErrorBoundary from 'react-native-error-boundary';
-import { Slot, Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ import { useReactQueryDevTools } from '@dev-plugins/react-query';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 // Le fichier logging-interceptor.ts a été supprimé
-import { ActivityIndicator, GestureResponderEvent, View } from 'react-native';
+import { ActivityIndicator, GestureResponderEvent, View, Text as RNText, StyleSheet } from 'react-native';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
@@ -165,9 +165,9 @@ export default function ProjectLayout() {
   if (!loaded || !isDbReady) {
     logger.info(LogCategory.UI, 'Affichage du chargement', { fontsLoaded: loaded, dbReady: isDbReady });
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={{ marginTop: 20 }}>Chargement de l'application...</Text>
+        <RNText style={styles.loadingText}>Chargement de l'application...</RNText>
       </View>
     );
   }
@@ -175,29 +175,12 @@ export default function ProjectLayout() {
   if (error) {
     logger.error(LogCategory.UI, 'Affichage de l\'écran d\'erreur d\'initialisation', { errorMessage: error.message });
     return (
-      <Box flex={1} alignItems="center" justifyContent="center" p={16}>
-        <Icon as={CloudAlert} size={40} color="#EF4444" />
-        <Text>Une erreur est survenue lors de l'initialisation:</Text>
-        <Text>{error.message}</Text>
-        <Button 
-          style={{ marginTop: 20 }} 
-          onPress={() => {
-            logger.info(LogCategory.UI, 'Tentative de réinitialisation de l\'application');
-            setIsDbReady(false);
-            setTimeout(() => {
-              try {
-                // Tenter de réinitialiser l'application
-                setError(null);
-                setIsDbReady(true);
-              } catch (resetErr) {
-                logger.error(LogCategory.UI, 'Échec de la réinitialisation', resetErr);
-              }
-            }, 1000);
-          }}
-        >
-          Réessayer
-        </Button>
-      </Box>
+      <View style={styles.errorContainer}>
+        <RNText style={styles.errorTitle}>
+          Une erreur est survenue lors de l'initialisation:
+        </RNText>
+        <RNText style={styles.errorMessage}>{error.message}</RNText>
+      </View>
     );
   }
 
@@ -207,28 +190,26 @@ export default function ProjectLayout() {
   }: {
     error: Error;
     resetError: (event: GestureResponderEvent) => void;
-  }) => {
-    // Log l'erreur dans le boundary d'erreur
-    logger.error(LogCategory.UI, 'ErrorBoundary a capturé une erreur', { error: error.message, stack: error.stack });
-    return (
+  }) => (
     <Box flex={1} alignItems="center" justifyContent="center" p={16}>
       <Icon as={CloudAlert} size={40} color="#EF4444" />
       <Text>Une erreur est survenue:</Text>
       <Text>{error.toString()}</Text>
-      <Button style={{ width: '100%', marginTop: 40, marginHorizontal: 8 }} onPress={() => resetError({} as GestureResponderEvent)}>
+      <Button
+        style={{ width: '100%', marginTop: 40, marginHorizontal: 8 }}
+        onPress={() => resetError({} as GestureResponderEvent)}
+      >
         Réessayer
       </Button>
     </Box>
   );
-  }
 
   // Journaliser le démarrage complet de l'application
   logger.info(LogCategory.UI, 'Application complètement chargée et prête');
   
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      
-        <AppThemeProvider>
+    <GestureHandlerRootView style={styles.flex1}>
+      <AppThemeProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
           {/* Temporarily commented out for Convex branch work */}
@@ -239,7 +220,7 @@ export default function ProjectLayout() {
             <ClerkLoaded>
               <ConvexProviderWithClerk client={convex} useAuth={useAuth}> */}
                 <Suspense fallback={
-                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={styles.center}>
                     <ActivityIndicator size="large" color="#0000ff" />
                   </View>
                 }>
@@ -270,3 +251,12 @@ export default function ProjectLayout() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 20 },
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
+  errorTitle: { fontSize: 18, color: '#EF4444', marginBottom: 8 },
+  errorMessage: { textAlign: 'center', marginBottom: 16 },
+});

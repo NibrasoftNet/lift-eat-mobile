@@ -2,10 +2,12 @@ import { Redirect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
+import { useAppTheme } from '@/utils/providers/ThemeProvider';
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+  const theme = useAppTheme();
 
   useEffect(() => {
     async function checkOnboardingStatus() {
@@ -27,8 +29,8 @@ export default function Index() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <ActivityIndicator size="large" color="#81A540" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <ActivityIndicator size="large" color={theme.color('successLighter')} />
       </View>
     );
   }

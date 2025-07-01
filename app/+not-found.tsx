@@ -9,6 +9,7 @@ export default function NotFoundScreen() {
   const theme = useAppTheme();
   
   // Styles dynamiques basés sur le thème
+  const successColor = theme.color('successLighter');
   const dynamicStyles = {
     container: {
       backgroundColor: theme.colors.background,
@@ -23,7 +24,7 @@ export default function NotFoundScreen() {
       color: theme.colors.blueGrey,
     },
     buttonText: {
-      color: '#FFFFFF',
+      color: theme.colors.background,
     }
   };
   
@@ -36,15 +37,15 @@ export default function NotFoundScreen() {
       <View style={[styles.container, dynamicStyles.container]}>
         <View style={styles.contentContainer}>
           {/* Élément visuel 404 */}
-          <View style={styles.visualContainer}>
+          <View style={[styles.visualContainer, { borderColor: successColor }]}>
             <Text
               variant="h1"
               bold
-              style={styles.errorCode}
+              style={[styles.errorCode, { color: successColor }]}
             >
               404
             </Text>
-            <View style={styles.visualLine} />
+            <View style={[styles.visualLine, { backgroundColor: successColor }]} />
           </View>
           
           {/* Texte principal */}
@@ -69,7 +70,7 @@ export default function NotFoundScreen() {
             onPress={() => router.back()}
           >
             <View style={styles.buttonContent}>
-              <ArrowLeft size={20} color="#FFFFFF" />
+              <ArrowLeft size={20} color={theme.colors.background} />
               <Text 
                 variant="button" 
                 semibold

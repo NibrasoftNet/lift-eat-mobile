@@ -1,25 +1,9 @@
-import React from 'react';
-import UserGenderActivityForm from '../../../../components/froms/UserGenderActivityForm';
-import { UserGenderActivityDefaultValueProps } from '@/utils/validation/user/user-gender-activity.validation';
-import {
-  GenderEnum,
-  PhysicalActivityEnum,
-} from '@/utils/enum/user-gender-activity.enum';
-import { useGlobalSearchParams } from 'expo-router';
+import { View, Text } from 'react-native';
 
-export default function CreatePreference() {
-  const userId = useGlobalSearchParams<{ userId: string }>();
-
-  const defaultGenderActivityValues: UserGenderActivityDefaultValueProps = {
-    id: Number(userId),
-    age: 20,
-    gender: GenderEnum.MALE,
-    physicalActivity: PhysicalActivityEnum.LOW,
-  };
+export default function Progress() {
   return (
-    <UserGenderActivityForm
-      defaultValues={defaultGenderActivityValues}
-      operation="update"
-    />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>En cours de développement</Text>
+    </View>
   );
 }

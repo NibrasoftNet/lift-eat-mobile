@@ -1,14 +1,16 @@
-import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import Box from '@/components-new/ui/atoms/base/Box';
+import Button from '@/components-new/ui/atoms/inputs/Button';
+import Text from '@/components-new/ui/atoms/base/Text';
 import React, { useState } from 'react';
 import { introBackground } from '@/utils/constants/images';
-import { HStack } from '@/components/ui/hstack';
-import { IntroCard } from '@/components/cards/IntroCard';
+
+import IntroCard from '@/components-new/ui/molecules/display/IntroCard';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ImageBackground } from 'react-native';
-import { Icon } from '@/components/ui/icon';
+import Icon from '@/components-new/ui/atoms/display/Icon';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react-native';
+import { useAppTheme } from '@/utils/providers/ThemeProvider';
 
 export enum IntroStepEnum {
   'ONE' = 'ONE',
@@ -18,6 +20,7 @@ export enum IntroStepEnum {
 export default function Intro() {
   const [step, setStep] = useState<IntroStepEnum>(IntroStepEnum.ONE);
   const router = useRouter();
+  const theme = useAppTheme();
 
   return (
     <Animated.View
@@ -29,35 +32,35 @@ export default function Intro() {
         className="size-full object-cover"
         blurRadius={0}
       >
-        <VStack className="size-full items-center justify-between p-4">
-          <HStack className="w-full justify-between">
+        <Box flex={1} column justifyContent="space-between" alignItems="center" p={16}>
+          <Box row justifyContent="space-between" alignItems="center" style={{ width: '100%' }}>
             {step === IntroStepEnum.TWO && (
               <Button
-                className="bg-blue-500 w-40"
+                color={theme.color('secondary')}
                 onPress={() => setStep(IntroStepEnum.ONE)}
+                leftIcon={<Icon as={ChevronsLeft} size={24} color="#FFFFFF" />}
               >
-                <Icon as={ChevronsLeft} className="w-10 h-10 text-white" />
-                <ButtonText size="md" className="font-ubuntu">
+                <Text variant="button" color="#FFFFFF">
                   Previous
-                </ButtonText>
+                </Text>
               </Button>
             )}
             <Button
-              className={`w-40 ${step === IntroStepEnum.ONE ? 'bg-primary-500' : 'bg-tertiary-500'}`}
+              color={step === IntroStepEnum.ONE ? theme.color('secondary') : theme.color('violet')}
               onPress={() => {
                 if (step === IntroStepEnum.ONE) {
                   setStep(IntroStepEnum.TWO);
                 } else {
-                  router.replace('/register');
+                  router.replace('../(auth)/register');
                 }
               }}
+              rightIcon={<Icon as={ChevronsRight} size={24} color="#FFFFFF" />}
             >
-              <ButtonText size="md" className="font-ubuntu font-semibold">
+              <Text variant="button" color="#FFFFFF" semibold>
                 {step === IntroStepEnum.ONE ? 'Next' : 'Start'}
-              </ButtonText>
-              <Icon as={ChevronsRight} className="w-10 h-10 text-white" />
+              </Text>
             </Button>
-          </HStack>
+          </Box>
           {step === IntroStepEnum.ONE ? (
             <IntroCard
               title="Better Eating plans"
@@ -69,7 +72,7 @@ export default function Intro() {
               description="We provide better workout plans"
             />
           )}
-        </VStack>
+        </Box>
       </ImageBackground>
     </Animated.View>
   );

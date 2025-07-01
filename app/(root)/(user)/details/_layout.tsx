@@ -1,33 +1,9 @@
-import { Stack } from 'expo-router';
-import React from 'react';
+import { View, Text } from 'react-native';
 
-export default function UserDetailsLayout() {
+export default function Progress() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'none',
-        orientation: 'portrait',
-        navigationBarHidden: true,
-        statusBarHidden: true,
-      }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          animation: 'slide_from_bottom',
-          animationDuration: 1000,
-        }}
-      />
-      <Stack.Screen
-        name="edit/[id]"
-        options={{
-          presentation: 'modal',
-          headerShown: false,
-          headerShadowVisible: false,
-        }}
-      />
-    </Stack>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>En cours de développement</Text>
+    </View>
   );
 }
