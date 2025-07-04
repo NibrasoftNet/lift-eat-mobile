@@ -3,6 +3,7 @@ import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Text } from '../../atoms/base';
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
+import { useTranslation } from 'react-i18next';
 
 // Icons pour chaque type de repas
 import { CalendarRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/CalendarRegularBoldIcon';
@@ -10,15 +11,9 @@ import { CoffeeRegularBoldIcon } from '../../../../assets/icons/figma/regular-bo
 import { CategoryRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/CategoryRegularBoldIcon';
 import { ChocolateDrinkRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/ChocolateDrinkRegularBoldIcon';
 
-// Map des labels pour chaque type de repas
-const MEAL_TYPE_LABELS: Record<MealTypeEnum, string> = {
-  [MealTypeEnum.BREAKFAST]: 'Petit-déjeuner',
-  [MealTypeEnum.LUNCH]: 'Déjeuner',
-  [MealTypeEnum.DINNER]: 'Dîner',
-  [MealTypeEnum.SNACK]: 'Collation',
-};
 
-// Map des icônes pour chaque type de repas
+
+// Icônes associées à chaque type de repas
 const MEAL_TYPE_ICONS: Record<MealTypeEnum, React.ComponentType<any>> = {
   [MealTypeEnum.BREAKFAST]: CoffeeRegularBoldIcon,
   [MealTypeEnum.LUNCH]: CategoryRegularBoldIcon,
@@ -43,6 +38,7 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
   onMealTypeSelect,
 }) => {
   const theme = useAppTheme();
+  const { t } = useTranslation();
   
   // Liste des types de repas
   const mealTypes = Object.values(MealTypeEnum);
@@ -54,7 +50,7 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
         color={theme.color('primary')} 
         style={styles.title}
       >
-        Type de repas
+        {t('meal.filters.mealType')}
       </Text>
       
       <ScrollView 
@@ -78,7 +74,7 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
             variant="caption" 
             color={!selectedMealType ? theme.color('background') : theme.color('blueGrey')}
           >
-            Tous
+            {t('common.all')}
           </Text>
         </TouchableOpacity>
         
@@ -113,7 +109,7 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
                 variant="caption" 
                 color={isSelected ? theme.color('background') : theme.color('blueGrey')}
               >
-                {MEAL_TYPE_LABELS[mealType]}
+                {t(`meal.form.mealType.${mealType.toLowerCase()}`)}
               </Text>
             </TouchableOpacity>
           );

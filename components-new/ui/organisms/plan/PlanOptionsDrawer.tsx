@@ -9,7 +9,7 @@ import {
 import type { ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
-import { Icon } from '@/components/ui/icon';
+import Icon from '@/components-new/ui/atoms/display/Icon';
 import {
   CircleX,
   Eye,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Icon } from '@/components/ui/icon';
+import Icon from '@/components-new/ui/atoms/display/Icon';
 import { Globe, Pencil, Trash2 } from 'lucide-react-native';
 
 export interface MenuItemPlanProps {

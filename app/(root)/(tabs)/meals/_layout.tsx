@@ -1,4 +1,5 @@
 import React from 'react';
+import { Colors } from '@/utils/constants/Colors';
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -25,8 +26,8 @@ export default function MealsLayout() {
           padding: 0,
           margin: 10,
         },
-        tabBarActiveTintColor: 'orange',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: Colors.primary.tabIconSelected,
+        tabBarInactiveTintColor: Colors.grey,
       }}
     >
       {/* Mine Tab */}

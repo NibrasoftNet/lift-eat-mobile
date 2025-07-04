@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import { useTheme } from '@/themeNew';
 
-import { SearchIcon } from '@/components/ui/icon';
+import { SearchRegularBoldIcon } from '@/assets/icons/figma/regular-bold/SearchRegularBoldIcon';
 
 export interface SearchPlanNewProps {
   /** Valeur actuelle du champ */
@@ -33,7 +33,7 @@ const SearchPlanNew: React.FC<SearchPlanNewProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <SearchIcon width={20} height={20} stroke={theme.color('blueGrey')} style={styles.icon} />
+      <SearchRegularBoldIcon size={20} color={theme.color('blueGrey')} style={styles.icon} />
       <TextInput
         style={styles.input}
         placeholder={placeholder}

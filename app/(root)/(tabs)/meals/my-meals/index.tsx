@@ -1,3 +1,7 @@
+import MealsScreen from '@/components-new/screens/meals/MealsScreen';
+export default MealsScreen;
+
+// --- Legacy implementation (kept for reference) ---
 /**
  * Écran des Repas (MealsNew) - Version améliorée
  * Conforme au design Figma de l'écran Meals
@@ -63,7 +67,7 @@ interface FilterOption {
  * MealsScreen - Écran principal pour afficher et gérer les repas
  * Version améliorée conforme au design Figma
  */
-export default function MealsNewScreen() {
+function MealsNewScreenLegacy() {
   // Utiliser le thème de l'application pour les styles
   const theme = useAppTheme();
   const { t } = useTranslation();

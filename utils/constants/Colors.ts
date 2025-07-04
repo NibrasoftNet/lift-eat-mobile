@@ -35,7 +35,7 @@ export const Colors = {
     tint: '#7F9FD1', // Lighter navy tint (RGB ~127,159,209)
     icon: '#FFFFFF', // White icons
     tabIconDefault: '#9CA3AF', // gray-400 for inactive tabs
-    tabIconSelected: primaryColor, // Navy for active tab
+    tabIconSelected: '#A4C73B', // Navy for active tab
   },
   secondary: {
     text: '#FFFFFF', // White text for contrast on mid-gray

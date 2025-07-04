@@ -31,6 +31,7 @@ import { eq, and, like, inArray, or, desc, SQL } from 'drizzle-orm';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
+import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { nutritionCoreService } from '@/utils/services/core/nutrition-core.service';
 import { STANDARD_WEIGHT } from '@/utils/constants/CookingConstants';
 
@@ -41,7 +42,7 @@ import { STANDARD_WEIGHT } from '@/utils/constants/CookingConstants';
  * @returns Résultat de l'opération avec la liste des repas
  */
 export async function handleGetMealsList(db: any, params: GetMealsListParams): Promise<GetMealsListResult> {
-  const { userId, type, search, limit = 20, filter } = params;
+  const { userId, type, search, limit = 20, filter, cuisine } = params;
   
   try {
     if (!db) throw new Error("Database not initialized");
@@ -70,6 +71,10 @@ export async function handleGetMealsList(db: any, params: GetMealsListParams): P
 
     if (type) {
       conditions.push(eq(meals.type, type));
+    }
+
+    if (cuisine) {
+      conditions.push(eq(meals.cuisine, cuisine));
     }
 
     if (search && search.trim().length > 0) {

@@ -42,6 +42,7 @@ import huilesEtCorpsGras from './Huiles-et-corps-gras';
 import grainesOleagineuses from './Graines-oléagineuses';
 import fruitsEtJusDeFruits from './Fruits-et-jus-de-fruits';
 import condimentsEtSauces from './Condiments-et-sauces';
+import { i } from '@clerk/clerk-react/dist/useAuth-DN6TRwS8';
 
 export const usersSeed: Omit<UserOrmPros, 'id' | 'createdAt' | 'updatedAt'>[] =
   [
@@ -129,7 +130,8 @@ export const mealsSeed: Omit<MealOrmProps, 'id' | 'createdAt' | 'updatedAt' | 'c
     type: MealTypeEnum.LUNCH,
     quantity: 200,
     unit: MealUnitEnum.GRAMMES,
-    image: null
+    image: null,
+    isFavorite: false,
   },
   {
     name: "Couscous aux légumes",
@@ -142,7 +144,8 @@ export const mealsSeed: Omit<MealOrmProps, 'id' | 'createdAt' | 'updatedAt' | 'c
     type: MealTypeEnum.DINNER,
     quantity: 300,
     unit: MealUnitEnum.GRAMMES,
-    image: null
+    image: null,
+    isFavorite: false,
   },
   {
     name: "Sushi Bowl",
@@ -155,7 +158,8 @@ export const mealsSeed: Omit<MealOrmProps, 'id' | 'createdAt' | 'updatedAt' | 'c
     type: MealTypeEnum.DINNER,
     quantity: 250,
     unit: MealUnitEnum.GRAMMES,
-    image: null
+    image: null,
+    isFavorite: false,
   },
   {
     name: "Omelette protéinée",
@@ -168,7 +172,8 @@ export const mealsSeed: Omit<MealOrmProps, 'id' | 'createdAt' | 'updatedAt' | 'c
     type: MealTypeEnum.BREAKFAST,
     quantity: 150,
     unit: MealUnitEnum.GRAMMES,
-    image: null
+    image: null,
+    isFavorite: false,
   },
   {
     name: "Smoothie protéiné aux fruits rouges",
@@ -181,7 +186,8 @@ export const mealsSeed: Omit<MealOrmProps, 'id' | 'createdAt' | 'updatedAt' | 'c
     type: MealTypeEnum.SNACK,
     quantity: 300,
     unit: MealUnitEnum.MILLILITRES,
-    image: null
+    image: null,
+    isFavorite: false,
   }
 ];
 

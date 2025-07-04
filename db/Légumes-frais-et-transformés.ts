@@ -354,7 +354,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 18.91,
     fat: 0.47,
     protein: 4.32,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentrée.jpg',
+    image: '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentree.jpg',
   },
 
   {

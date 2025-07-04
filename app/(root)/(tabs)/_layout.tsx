@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors } from '@/utils/constants/Colors';
 import { useUserContext } from '@/utils/providers/UserContextProvider';
 import { CommonActions } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 // Import des icônes SVG Figma curved-light-border (format qui fonctionne bien avec les onglets)
 import { HomeCurvedLightBorderIcon } from '@/assets/icons/figma/curved-light-border/HomeCurvedLightBorderIcon';
@@ -15,6 +16,7 @@ import { DocumentCurvedLightBorderIcon } from '@/assets/icons/figma/curved-light
 
 export default function TabLayout() {
   const { currentUser, refreshUser } = useUserContext();
+  const { t } = useTranslation();
   const [userId, setUserId] = useState<number | null>(null);
   
   // Récupération de l'ID utilisateur au chargement - une seule fois
@@ -79,11 +81,11 @@ export default function TabLayout() {
       <Tabs
         initialRouteName="meals"
         screenOptions={{
-          tabBarActiveTintColor: Colors.primary.background,
+          tabBarActiveTintColor: Colors.primary.tabIconSelected,
           headerShown: false,
           tabBarStyle: {
-            paddingTop: 10,
-            paddingBottom: 10,
+            paddingTop: 5,
+            paddingBottom: 5,
             height: 60,
           },
         }}
@@ -94,7 +96,7 @@ export default function TabLayout() {
           options={{
             tabBarLabel: ({ focused, color }) => (
               <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>
-                Assistant
+                {t('tab.assistant')}
               </Text>
             ),
             tabBarIcon: ({ focused, color }) => (
@@ -110,7 +112,7 @@ export default function TabLayout() {
           options={{
             tabBarLabel: ({ focused, color }) => (
               <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>
-                Plans
+                {t('tab.plans')}
               </Text>
             ),
             tabBarIcon: ({ focused, color }) => (
@@ -126,7 +128,7 @@ export default function TabLayout() {
           options={{
             tabBarLabel: ({ focused, color }) => (
               <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>
-                Meals
+                {t('tab.meals')}
               </Text>
             ),
             tabBarIcon: ({ focused, color }) => (
@@ -142,7 +144,7 @@ export default function TabLayout() {
           options={{
             tabBarLabel: ({ focused, color }) => (
               <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>
-                Progress
+                {t('tab.progress')}
               </Text>
             ),
             tabBarIcon: ({ focused, color }) => (
@@ -158,7 +160,7 @@ export default function TabLayout() {
           options={{
             tabBarLabel: ({ focused, color }) => (
               <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>
-                Analytics
+                {t('tab.analytics')}
               </Text>
             ),
             tabBarIcon: ({ focused, color }) => (

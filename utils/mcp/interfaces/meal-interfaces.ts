@@ -1,4 +1,5 @@
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
+import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { MealOrmProps } from '@/db/schema';
 
 // Enum for meal list filters
@@ -12,6 +13,7 @@ export enum MealListFilter {
 export interface GetMealsListParams {
   userId: number;
   type?: MealTypeEnum;
+  cuisine?: CuisineTypeEnum;
   search?: string;
   limit?: number;
   page?: number;

@@ -12,7 +12,8 @@
     "ingredient": "Ingrédient",
     "kcal": "kcal",
     "protein": "Protéines",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "all": "Tous"
   },
   "home": {
     "title": "Accueil",
@@ -252,6 +253,13 @@
         "defaultError": "Une erreur est survenue"
       }
     }
+  },
+  "tab": {
+    "assistant": "Assistant",
+    "plans": "Plans",
+    "meals": "Repas",
+    "progress": "Progrès",
+    "analytics": "Analyse"
   },
   "profile": {
     "toast": {

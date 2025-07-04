@@ -1,5 +1,6 @@
 import { MealOrmProps } from '@/db/schema';
-import { GetMealsListParams } from '@/utils/mcp/interfaces/meal-interfaces';
+import { GetMealsListParams, MealListFilter } from '@/utils/mcp/interfaces/meal-interfaces';
+import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/common/logging.service';
@@ -15,7 +16,7 @@ export const mealService = {
   /**
    * Récupère la liste des repas avec filtrage pour la page d'index
    */
-    async getMealsList(filters: Omit<GetMealsListParams, 'userId'>): Promise<{ success: boolean; meals: any[]; totalCount: number; pageInfo?: { currentPage: number; totalPages: number }; error?: string }> {
+    async getMealsList(filters: GetMealsListParams & { cuisineType?: CuisineTypeEnum; cuisine?: CuisineTypeEnum }): Promise<{ success: boolean; meals: any[]; totalCount: number; pageInfo?: { currentPage: number; totalPages: number }; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
       if (!userId) {
@@ -26,7 +27,14 @@ export const mealService = {
       logger.info(LogCategory.DATABASE, 'Getting meals list via MCP Server', { userId, filters });
       
       // Appel MCP pour récupérer la liste des repas
-      const result = await sqliteMCPServer.getMealsListViaMCP({ ...filters, userId });
+      // Transform filters to match MCP API expectations
+      const mcpFilters = {
+        ...filters,
+        cuisine: filters.cuisineType || (filters as any).cuisine || undefined, // Convert cuisineType to cuisine
+        cuisineType: undefined, // Remove cuisineType to avoid conflicts
+      } as GetMealsListParams;
+      
+      const result = await sqliteMCPServer.getMealsListViaMCP({ ...mcpFilters, userId });
       
       if (!result.success) {
         logger.error(LogCategory.DATABASE, `Failed to get meals list: ${result.error}`);

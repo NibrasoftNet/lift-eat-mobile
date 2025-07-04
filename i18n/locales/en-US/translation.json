@@ -12,7 +12,8 @@
     "ingredient": "Ingredient",
     "kcal": "kcal",
     "protein": "Protein",
-    "search": "Search"
+    "search": "Search",
+    "all": "All"
   },
   "home": {
     "title": "Home",
@@ -356,6 +357,13 @@
     "descriptionPlaceholder": "e.g. Salad, Sandwich, etc.",
     "submitCreate": "Create meal",
     "submitUpdate": "Save changes"
+  },
+  "tab": {
+    "assistant": "Assistant",
+    "plans": "Plans",
+    "meals": "Meals",
+    "progress": "Progress",
+    "analytics": "Analytics"
   },
   "profile": {
     "toast": {
