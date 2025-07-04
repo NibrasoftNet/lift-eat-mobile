@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { ThemeInterface } from '@/themeNew';
@@ -23,6 +24,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
   onPress,
   isActive = false,
 }) => {
+  const { t } = useTranslation();
   const theme = useAppTheme();
   const isDark = theme.isDark;
   const styles = React.useMemo(() => createStyles(), []);
@@ -32,7 +34,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
       style={styles.container}
       onPress={onPress}
       activeOpacity={0.7}
-      accessibilityLabel="Filtrer les repas"
+      accessibilityLabel={t('meal.filterButton.accessibility')}
     >
       {/* Lignes horizontales représentant l'icône de filtre */}
       <View style={[styles.line, styles.shortLine]} />

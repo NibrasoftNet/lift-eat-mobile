@@ -12,13 +12,13 @@ Ce document répertorie l’ensemble des fichiers (écrans, composants et ressou
 - [x] `(root)/(tabs)/meals/search.tsx` – Recherche de produits Open Food Facts
 - [x] `(root)/(tabs)/meals/my-meals/_layout.tsx` – Layout de la sous-section "mes repas"
 - [x] `(root)/(tabs)/meals/my-meals/index.tsx` – Liste des repas de l’utilisateur
-- [ ] `(root)/(tabs)/meals/my-meals/create-v2.tsx` – Création d’un repas (nouvelle UI)
-- [ ] `(root)/(tabs)/meals/my-meals/details/[id].tsx` – Détails d’un repas
-- [ ] `(root)/(tabs)/meals/my-meals/edit/[id].tsx` – Édition d’un repas
-- [ ] `(root)/(tabs)/meals/scanner/_layout.tsx` – Layout du scanner de codes-barres
-- [ ] `(root)/(tabs)/meals/scanner/index.tsx` – Vue caméra – scan en temps réel
-- [ ] `(root)/(tabs)/meals/scanner/history.tsx` – Historique des scans
-- [ ] `(root)/(tabs)/meals/scanner/product/[code].tsx` – Fiche produit scanné
+- [x] `(root)/(tabs)/meals/my-meals/create-v2.tsx` – Création d’un repas (nouvelle UI)
+- [x] `(root)/(tabs)/meals/my-meals/details/[id].tsx` – Détails d’un repas
+- [x] `(root)/(tabs)/meals/my-meals/edit/[id].tsx` – Édition d’un repas
+- [x] `(root)/(tabs)/meals/scanner/_layout.tsx` – Layout du scanner de codes-barres
+- [x] `(root)/(tabs)/meals/scanner/index.tsx` – Vue caméra – scan en temps réel
+- [x] `(root)/(tabs)/meals/scanner/history.tsx` – Historique des scans
+- [x] `(root)/(tabs)/meals/scanner/product/[code].tsx` – Fiche produit scanné
 
 ---
 
@@ -33,8 +33,8 @@ Ce document répertorie l’ensemble des fichiers (écrans, composants et ressou
 
 ### Molecules
 
-- `SearchBarWithScanner`
-- `FilterButton`
+- `SearchBarWithScanner` ✅
+- `FilterButton` ✅
 - `CreateMealButton`
 - `MealListItem`
 - `SegmentedTabButtons`
@@ -52,7 +52,7 @@ Ce document répertorie l’ensemble des fichiers (écrans, composants et ressou
 - `IngredientListDrawer`
 - `IngredientsList`
 - `CameraViewScanner`
-- `ScanResultCard`
+- `ScanResultCard` ✅
 - `OpenFoodSearchCard`
 - `MealHeader`
 - `MealsList`
@@ -65,7 +65,7 @@ Ce document répertorie l’ensemble des fichiers (écrans, composants et ressou
 - `CloseSquareRegularBoldIcon`
 - `PlusRegularBoldIcon`
 - `DeleteRegularBoldIcon`
-- `ArrowRightRegularBoldIcon`
+- `ArrowRightRegularBoldIcon` 
 - `ArrowDownRegularBoldIcon`
 - `ArrowLeftRegularBoldIcon`
 

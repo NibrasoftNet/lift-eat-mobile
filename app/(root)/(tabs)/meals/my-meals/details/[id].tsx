@@ -188,7 +188,7 @@ const handleEditMeal = () => {
     return (
       <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.errorText, { color: theme.colors.error }]}>
-          {t('meal.error.loading')},
+          {t('meal.error.loading')}
         </Text>
       </View>
     );
@@ -228,8 +228,8 @@ const handleEditMeal = () => {
       
       {/* Type de repas et cuisine */}
       <GeneralInfoSection
-        mealType={meal?.type || 'Non spécifié'}
-        cuisineType={meal?.cuisine || 'Non spécifié'}
+        mealType={meal?.type || t('common.notSpecified')}
+        cuisineType={meal?.cuisine || t('common.notSpecified')}
         isDarkMode={isDarkMode}
       />
       
@@ -249,7 +249,7 @@ const handleEditMeal = () => {
       {/* Instructions de préparation (utilise le champ description) */}
       <InstructionsSection
         instructions={meal?.description || ''}
-        title="Instructions de préparation"
+        title={t('meal.details.instructionsTitle')}
         isDarkMode={isDarkMode}
       />
     </ScrollView>

@@ -92,7 +92,7 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
             <MultiPurposeToast
               id={toastId}
               color={op.data?.alreadyExists ? ToastTypeEnum.INFOS : ToastTypeEnum.SUCCESS}
-              title={op.data?.alreadyExists ? 'Déjà présent' : 'Ajouté !'}
+              title={t(op.data?.alreadyExists ? 'meal.scanResultCard.toastTitle.alreadyExists' : 'meal.scanResultCard.toastTitle.added')}
               description={op.message || ''}
             />
           );
@@ -107,8 +107,8 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
           <MultiPurposeToast
             id={`toast-${id}`}
             color={ToastTypeEnum.ERROR}
-            title={'Erreur'}
-            description={e instanceof Error ? e.message : 'Une erreur est survenue'}
+            title={t('meal.scanResultCard.toastTitle.error')}
+            description={e instanceof Error ? e.message : t('meal.scanResultCard.toastDescription.defaultError')}
           />
         ),
       });
