@@ -12,5 +12,5 @@ export type UserProfileDefaultValuesProps = {
   id: number;
   name: string;
   email: string;
-  profileImage?: Buffer<ArrayBufferLike>;
+  profileImage?: Buffer;
 };

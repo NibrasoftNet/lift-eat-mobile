@@ -10,11 +10,13 @@ import {
 } from '../interfaces/ingredient-interfaces';
 import {
   ingredientsStandard,
+  mealIngredients,
   IngredientStandardOrmProps
 } from '@/db/schema';
-import { eq, like } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { eq, like, desc } from 'drizzle-orm';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { Buffer } from 'buffer';
 
 /**
  * Handler pour la méthode addIngredientViaMCP
@@ -43,6 +45,23 @@ export async function handleAddIngredient(db: any, params: AddIngredientParams):
     }
     
     // Créer un nouvel ingrédient avec les données fournies
+    // ---- Log image details before DB insert ----
+    try {
+      const img = ingredientData.image as any;
+      console.log("Type of image:", typeof img);
+      console.log("Is Buffer:", img instanceof Buffer);
+      console.log("Image length:", img ? img.length : 'null/undefined');
+      console.log("Image preview:", img?.slice?.(0, 20));
+      logger.debug(
+        LogCategory.DATABASE,
+        `[IMG] before-insert type=${typeof img} buffer=${img instanceof Buffer} len=${img?.length ?? 0}`
+      );
+    } catch (e) {
+      logger.warn(
+        LogCategory.DATABASE,
+        `Failed to log image info before insert: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
     const result = await db
       .insert(ingredientsStandard)
       .values({
@@ -53,6 +72,7 @@ export async function handleAddIngredient(db: any, params: AddIngredientParams):
         carbs: ingredientData.carbs || 0,
         protein: ingredientData.protein || 0,
         fat: ingredientData.fat || 0,
+        image: ingredientData.image || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
@@ -63,6 +83,31 @@ export async function handleAddIngredient(db: any, params: AddIngredientParams):
     }
     
     const ingredientId = result[0].id;
+
+    // ---- Verify stored image in DB ----
+    try {
+      const storedRows = await db
+        .select({ image: ingredientsStandard.image })
+        .from(ingredientsStandard)
+        .where(eq(ingredientsStandard.id, ingredientId))
+        .limit(1);
+
+      if (storedRows.length > 0) {
+        const storedImg = storedRows[0].image as any;
+        console.log("Stored image length in DB:", storedImg ? storedImg.length : 'null/undefined');
+        logger.debug(
+          LogCategory.DATABASE,
+          `[IMG] after-insert storedLen=${storedImg?.length ?? 0}`
+        );
+      } else {
+        logger.warn(LogCategory.DATABASE, `No rows found for ingredient ID ${ingredientId} after insert.`);
+      }
+    } catch (e) {
+      logger.warn(
+        LogCategory.DATABASE,
+        `Failed to fetch image after insert: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
     logger.info(LogCategory.DATABASE, `Created new ingredient "${ingredientData.name}" with ID ${ingredientId}`);
     
     return { success: true, ingredientId, alreadyExists: false };
@@ -99,6 +144,9 @@ export async function handleGetIngredientsList(db: any, params: GetIngredientsLi
       const searchPattern = `%${search.trim().toLowerCase()}%`;
       query = query.where(like(ingredientsStandard.name, searchPattern));
     }
+    
+    // Trier par date de création la plus récente afin que les nouveaux ingrédients apparaissent en premier
+    query = query.orderBy(desc(ingredientsStandard.createdAt));
     
     // Limiter le nombre de résultats
     query = query.limit(limit);
@@ -189,11 +237,28 @@ export async function handleDeleteIngredient(db: any, params: DeleteIngredientPa
       return { success: false, error: `Ingredient with ID ${ingredientId} not found` };
     }
     
-    // Utiliser une transaction pour supprimer l'ingrédient et ses références
+    // Vérifier si l'ingrédient est référencé dans des repas
+    const mealReferences = await db
+      .select({ id: mealIngredients.id, mealId: mealIngredients.mealId })
+      .from(mealIngredients)
+      .where(eq(mealIngredients.ingredientStandardId, ingredientId));
+    
+    if (mealReferences.length > 0) {
+      const mealIds = mealReferences.map((ref: { mealId: number }) => ref.mealId).join(', ');
+      logger.warn(
+        LogCategory.DATABASE, 
+        `Cannot delete ingredient: Ingredient with ID ${ingredientId} is used in ${mealReferences.length} meal(s) (IDs: ${mealIds})`
+      );
+      return { 
+        success: false, 
+        error: `Cannot delete ingredient: it is used in ${mealReferences.length} meal(s). Please remove it from these meals first.`,
+        usedInMeals: true,
+        mealIds: mealReferences.map((ref: { mealId: number }) => ref.mealId)
+      };
+    }
+    
+    // Utiliser une transaction pour supprimer l'ingrédient 
     return await db.transaction(async (tx: typeof db) => {
-      // Supprimer les références dans les repas (liaison mealIngredients)
-      // Note: Cette partie pourrait nécessiter une implémentation selon la structure de la base de données
-      
       // Supprimer l'ingrédient
       await tx
         .delete(ingredientsStandard)

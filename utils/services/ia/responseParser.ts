@@ -9,7 +9,12 @@ import {
   IaMealType,
   IaPlanType
 } from '@/utils/validation/ia/ia.schemas';
-import { logger } from '@/utils/services/logging.service';
+import { 
+  validateIngredientWithRecovery,
+  validateMealWithRecovery,
+  validatePlanWithRecovery
+} from './responseValidation';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
 export interface DetectedAction {
@@ -18,6 +23,8 @@ export interface DetectedAction {
   isValid: boolean;
   validationMessage?: string;
   parsedData?: IaMealType | IaPlanType | IaIngredientType;
+  hadRecovery?: boolean;         // Indique si une récupération a été effectuée
+  recoveryActions?: string[];    // Actions de récupération effectuées
 }
 
 /**
@@ -73,50 +80,95 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
     const mealAction = detectActionWithTolerance(responseText, ACTION_TAGS.MEAL);
     if (mealAction) {
       logger.debug(LogCategory.IA, `detectDatabaseAction: Action repas détectée, contenu: ${mealAction.data.substring(0, 100)}...`);
-      const validationResult = validateMeal(mealAction.data);
+      
+      // Vérifier si le context indique qu'on attendait un plan plutôt qu'un repas
+      // Si la réponse contient des mots-clés associés aux plans nutritionnels
+      if (responseText.toLowerCase().includes('plan nutritionnel') || 
+          responseText.toLowerCase().includes('plan alimentaire') ||
+          responseText.toLowerCase().includes('nutrition plan') ||
+          responseText.toLowerCase().includes('durationweeks')) {
+            
+        // Tenter de valider comme un plan plutôt qu'un repas avec validation renforcée
+        const validationResult = validatePlanWithRecovery(mealAction.data);
+        if (validationResult.success) {
+          logger.debug(LogCategory.IA, `detectDatabaseAction: Données de repas reconnues comme plan: success=${validationResult.success}`);
+          if (validationResult.hadRecovery) {
+            logger.info(LogCategory.IA, `Récupération pour le plan: ${validationResult.recoveryActions?.join(', ')}`);
+          }
+          return {
+            type: 'ADD_PLAN',
+            data: mealAction.data,
+            isValid: validationResult.success,
+            validationMessage: validationResult.message,
+            parsedData: validationResult.data,
+            hadRecovery: validationResult.hadRecovery,
+            recoveryActions: validationResult.recoveryActions
+          };
+        }
+      }
+      
+      // Sinon, continuer avec la validation de repas renforcée
+      const validationResult = validateMealWithRecovery(mealAction.data);
       logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation repas: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      if (validationResult.hadRecovery) {
+        logger.info(LogCategory.IA, `Récupération pour le repas: ${validationResult.recoveryActions?.join(', ')}`);
+      }
       
       return {
         type: 'ADD_MEAL',
         data: mealAction.data,
         isValid: validationResult.success,
         validationMessage: validationResult.message,
-        parsedData: validationResult.data
+        parsedData: validationResult.data,
+        hadRecovery: validationResult.hadRecovery,
+        recoveryActions: validationResult.recoveryActions
       };
     }
-    
+
     // Vérifier l'ajout de plan (avec tolérance)
     const planAction = detectActionWithTolerance(responseText, ACTION_TAGS.PLAN);
     if (planAction) {
       logger.debug(LogCategory.IA, `detectDatabaseAction: Action plan détectée, contenu: ${planAction.data.substring(0, 100)}...`);
-      const validationResult = validatePlan(planAction.data);
+      
+      const validationResult = validatePlanWithRecovery(planAction.data);
       logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation plan: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      if (validationResult.hadRecovery) {
+        logger.info(LogCategory.IA, `Récupération pour le plan: ${validationResult.recoveryActions?.join(', ')}`);
+      }
       
       return {
         type: 'ADD_PLAN',
         data: planAction.data,
         isValid: validationResult.success,
         validationMessage: validationResult.message,
-        parsedData: validationResult.data
+        parsedData: validationResult.data,
+        hadRecovery: validationResult.hadRecovery,
+        recoveryActions: validationResult.recoveryActions
       };
     }
-    
+
     // Vérifier l'ajout d'ingrédient (avec tolérance)
     const ingredientAction = detectActionWithTolerance(responseText, ACTION_TAGS.INGREDIENT);
     if (ingredientAction) {
       logger.debug(LogCategory.IA, `detectDatabaseAction: Action ingrédient détectée, contenu: ${ingredientAction.data.substring(0, 100)}...`);
-      const validationResult = validateIngredient(ingredientAction.data);
+      
+      const validationResult = validateIngredientWithRecovery(ingredientAction.data);
       logger.debug(LogCategory.IA, `detectDatabaseAction: Résultat validation ingrédient: success=${validationResult.success}, message=${validationResult.message || 'aucun'}`);
+      if (validationResult.hadRecovery) {
+        logger.info(LogCategory.IA, `Récupération pour l'ingrédient: ${validationResult.recoveryActions?.join(', ')}`);
+      }
       
       return {
         type: 'ADD_INGREDIENT',
         data: ingredientAction.data,
         isValid: validationResult.success,
         validationMessage: validationResult.message,
-        parsedData: validationResult.data
+        parsedData: validationResult.data,
+        hadRecovery: validationResult.hadRecovery,
+        recoveryActions: validationResult.recoveryActions
       };
     }
-    
+
     // Vérifier la présence d'un plan nutritionnel
     const nutritionPlanAction = detectActionWithTolerance(responseText, ACTION_TAGS.NUTRITION_PLAN);
     if (nutritionPlanAction) {
@@ -126,7 +178,7 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
         isValid: true
       };
     }
-    
+
     // Vérifier la présence d'une recommandation de repas
     const mealRecommendationAction = detectActionWithTolerance(responseText, ACTION_TAGS.MEAL_RECOMMENDATION);
     if (mealRecommendationAction) {
@@ -136,7 +188,7 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
         isValid: true
       };
     }
-    
+
     // Vérifier la présence d'une analyse de progrès
     const progressAnalysisAction = detectActionWithTolerance(responseText, ACTION_TAGS.PROGRESS_ANALYSIS);
     if (progressAnalysisAction) {
@@ -146,7 +198,7 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
         isValid: true
       };
     }
-    
+
     // Vérifier la présence de conseils nutritionnels
     const nutritionAdviceAction = detectActionWithTolerance(responseText, ACTION_TAGS.NUTRITION_ADVICE);
     if (nutritionAdviceAction) {
@@ -157,12 +209,13 @@ export function detectDatabaseAction(responseText: string): DetectedAction {
       };
     }
   } catch (error) {
-    logger.error(LogCategory.IA, `detectDatabaseAction: Erreur lors de la détection de l'action: ${error instanceof Error ? error.message : String(error)}`);
-    return { 
-      type: 'NONE', 
-      data: '', 
+    logger.error(LogCategory.IA, `detectDatabaseAction: Erreur: ${error instanceof Error ? error.message : String(error)}`);
+    
+    return {
+      type: 'NONE',
+      data: '',
       isValid: false,
-      validationMessage: 'Erreur lors de la détection de l\'action: ' + (error instanceof Error ? error.message : String(error))
+      validationMessage: `Erreur lors de la détection: ${error instanceof Error ? error.message : String(error)}`
     };
   }
   

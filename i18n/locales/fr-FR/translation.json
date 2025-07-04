@@ -1,14 +1,274 @@
 {
   "language": "Language",
+  "common": {
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "carbs": "Glucides",
+    "clear": "Effacer",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "details": "Détails",
+    "fat": "Lipides",
+    "ingredient": "Ingrédient",
+    "kcal": "kcal",
+    "protein": "Protéines",
+    "search": "Rechercher",
+    "all": "Tous"
+  },
   "home": {
-    "title": "Acceuil",
+    "title": "Accueil",
     "welcome": "Bienvenue",
-    "subtitle": "Exemple i18n App!",
-    "description": "Il s'agit d'un exemple d'application React Native montrant comment implémenter l'internationalisation (i18n) à l'aide de React-i18next. L'application permet aux utilisateurs de basculer entre différentes langues pour une expérience plus localisée.",
-    "exploringLanguages": "Decouvrir les langue",
+    "subtitle": "Exemple d'application i18n !",
+    "description": "Cette application React Native est un exemple de mise en œuvre de l'internationalisation (i18n) avec react-i18next. Elle permet aux utilisateurs de basculer entre différentes langues pour une expérience plus localisée.",
+    "exploringLanguages": "Explorer les langues",
     "exploringLanguagesDescription": "Cliquez sur les drapeaux des pays pour explorer le contenu de l'application dans différentes langues.",
-    "learnMore": "Vous voulez en savoir plus ?",
-    "repositoryLinkText": "Dépôt de projet sur GitHub",
+    "learnMore": "Voulez-vous en savoir plus ?",
+    "repositoryLinkText": "Dépôt du projet sur GitHub",
     "articlesLinkText": "Plus d'articles"
+  },
+  "meal": {
+    "tabs": {
+      "myMeals": "Mes repas",
+      "scanner": "Scanner",
+      "search": "Recherche",
+      "recent": "Récent",
+      "favorites": "Favoris",
+      "personal": "Personnel"
+    },
+    "filters": {
+      "mealType": "Type de repas",
+      "cuisine": "Cuisine",
+      "reset": "Réinitialiser les filtres"
+    },
+    "title": "Repas",
+    "loadingMeals": "Chargement des repas...",
+    "myMeals": {
+      "loading": "Chargement des repas..."
+    },
+    "noMeals": "Aucun repas disponible.",
+    "emptyHint": "Ajoutez un repas en appuyant sur le bouton +",
+    "delete": {
+      "confirm": "Supprimer ce repas ?",
+      "message": "Cette action est irréversible.",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "title": "Supprimer le repas"
+    },
+    "error": {
+      "title": "Erreur",
+      "delete": "Impossible de supprimer le repas. Veuillez réessayer.",
+      "loading": "Impossible de charger les détails du repas.",
+      "notFound": "Repas non trouvé",
+      "generic": "Une erreur est survenue"
+    },
+    "create": {
+      "error": {
+        "ingredients": "Ingrédients manquants",
+        "ingredientsDescription": "Veuillez ajouter au moins un ingrédient",
+        "auth": "Authentification requise",
+        "authDescription": "Veuillez vous connecter pour continuer"
+      },
+      "success": {
+        "title": "Repas créé",
+        "message": "Votre repas a été ajouté avec succès"
+      }
+    },
+    "details": {
+      "noName": "Repas sans nom",
+      "notSpecified": "Non spécifié"
+    },
+    "search": {
+      "title": "Recherche d'aliments",
+      "placeholder": "Rechercher des aliments ou ingrédients",
+      "country": {
+        "title": "Pays",
+        "france": "France",
+        "usa": "États-Unis",
+        "uk": "Royaume-Uni"
+      },
+      "selectCountry": "Sélectionner un pays",
+      "button": "Rechercher",
+      "noResults": "Aucun résultat trouvé",
+      "loading": "Chargement...",
+      "error": "Une erreur est survenue"
+    },
+    "scanner": {
+      "title": "Scanner un code-barres",
+      "error": "Connexion requise",
+      "scanError": "Erreur lors du scan du code-barres",
+      "scanning": "Scan en cours...",
+    "overlayInstruction": "Positionnez le code-barres dans le cadre pour le scanner",
+      "history": {
+        "title": "Historique de scan",
+        "loadError": "Erreur lors du chargement de l'historique"
+      },
+      "productDetails": {
+        "nutriScore": "Nutri-Score",
+        "brands": "Marques",
+        "categories": "Catégories",
+        "sugars": "Sucres",
+        "allergens": "Allergènes",
+        "barcode": "Code-barres",
+        "nutritionFacts": "Informations nutritionnelles (pour 100g)"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "Créer un repas",
+        "update": "Modifier le repas"
+      },
+      "mealType": {
+        "title": "Type de repas",
+        "breakfast": "Petit-déjeuner",
+        "lunch": "Déjeuner",
+        "dinner": "Dîner",
+        "snack": "Collation"
+      },
+      "cuisine": {
+        "title": "Cuisine",
+        "french": "Française",
+        "italian": "Italienne",
+        "american": "Américaine",
+        "other": "Autre",
+        "general": "Général",
+        "african": "Africain",
+        "european": "Européen",
+        "asian": "Asiatique",
+        "tunisian": "Tunisien",
+        "chinese": "Chinois",
+        "japanese": "Japonais",
+        "mexican": "Mexicain"
+      },
+      "units": {
+        "title": "Unités",
+        "grams": "Grammes",
+        "milliliters": "Millilitres",
+        "pieces": "Pièces"
+      },
+      "save": "Enregistrer le repas",
+      "cancel": "Annuler",
+      "nameLabel": "Nom",
+        "namePlaceholder": "ex. Salade, Omelette",
+        "descriptionLabel": "Préparation",
+        "descriptionPlaceholder": "ex. Salade, Sandwich, etc.",
+        "selectType": "Sélectionner le type",
+        "selectCuisine": "Sélectionner la cuisine",
+        "addIngredients": "Ajouter des ingrédients",
+        "submit": {
+          "create": "Créer le repas",
+          "update": "Enregistrer les changements"
+        },
+        "validation": {
+          "name": {
+            "required": "Le nom est requis",
+            "min": "Le nom doit contenir au moins 3 caractères",
+            "max": "Le nom doit contenir au plus 50 caractères"
+          },
+          "description": {
+            "required": "La description est requise",
+            "min": "La description doit contenir au moins 3 caractères"
+          },
+          "quantity": {
+            "min": "La quantité doit être au moins 1"
+          }
+        },
+        "image": {
+        "selectTitle": "Sélectionner une image",
+        "selectMessage": "Choisir la source",
+        "gallery": "Galerie",
+        "camera": "Caméra",
+        "unsupported": "Format non supporté"
+      },
+      "permission": {
+        "title": "Permission",
+        "galleryRequired": "L'accès à la galerie est requis",
+        "cameraRequired": "L'accès à la caméra est requis"
+      },
+      "alert": {
+        "authTitle": "Authentification",
+        "authMessage": "Veuillez vous connecter pour continuer",
+        "ingredientsTitle": "Ingrédients manquants",
+        "ingredientsMessage": "Veuillez ajouter au moins un ingrédient",
+        "successTitle": "Succès",
+        "created": "Repas créé",
+        "updated": "Repas mis à jour",
+        "errorTitle": "Erreur",
+        "failed": "Échec"
+      },
+      "header": {
+        "createTitle": "Créer un repas",
+        "editTitle": "Modifier le repas"
+      },
+      "label": {
+        "name": "Nom",
+        "description": "Préparation"
+      },
+      "placeholder": {
+        "name": "ex. Salade, Omelette",
+        "description": "ex. Salade, Sandwich, etc."
+      },
+      "dropdown": {
+        "type": "Type",
+        "cuisine": "Cuisine"
+      },
+      "button": {
+        "close": "Fermer",
+        "addIngredient": "Ingrédient"
+      }
+    },
+    "ingredients": {
+      "title": "Ingrédients",
+      "add": "Ajouter",
+      "remove": "Retirer",
+      "quantity": "Quantité",
+      "unit": "Unité"
+    },
+    "nutrition": {
+      "calories": "Calories",
+      "protein": "Protéines",
+      "carbs": "Glucides",
+      "fat": "Lipides",
+      "fiber": "Fibres",
+      "sugar": "Sucres"
+    },
+    "ingredientListDrawer": {
+      "modalTitle": "Définir la quantité (g)",
+      "modalSaveText": "Enregistrer"
+    },
+    "ingredientSelector": {
+      "emptyStateText": "Aucun ingrédient trouvé pour \"{searchQuery}\"",
+      "searchInstructions": "Entrez au moins 3 caractères pour commencer la recherche"
+    },
+    "ingredientsList": {
+      "title": "Ingrédients",
+      "emptyText": "Aucun ingrédient dans ce repas"
+    },
+    "scanResultCard": {
+      "toastTitle": {
+        "alreadyExists": "Déjà présent",
+        "added": "Ajouté !",
+        "error": "Erreur"
+      },
+      "toastDescription": {
+        "defaultError": "Une erreur est survenue"
+      }
+    }
+  },
+  "tab": {
+    "assistant": "Assistant",
+    "plans": "Plans",
+    "meals": "Repas",
+    "progress": "Progrès",
+    "analytics": "Analyse"
+  },
+  "profile": {
+    "toast": {
+      "updatedTitle": "Profil mis à jour",
+      "updatedDescription": "Votre profil a été mis à jour avec succès",
+      "updateErrorTitle": "Échec de la mise à jour du profil",
+      "updateErrorDescription": "Une erreur inattendue est survenue",
+      "imageErrorTitle": "Échec de la sélection de l'image",
+      "imageErrorDescription": "Impossible de sélectionner l'image. Veuillez réessayer."
+    }
   }
 }

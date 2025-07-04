@@ -13,7 +13,7 @@ import breackfast from '@/assets/images/meals/breakfast.png';
 import lunch from '@/assets/images/meals/lunch.png';
 import snacks from '@/assets/images/meals/snacks.png';
 import dinner from '@/assets/images/meals/dinner.png';
-import all from '@/assets/images/all.png';
+import all from '../../assets/images/all.png';
 
 export {
   introBackground,

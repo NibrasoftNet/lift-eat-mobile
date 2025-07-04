@@ -1,8 +1,34 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'media',
-  content: ['app/**/*.{tsx,jsx,ts,js}', 'components/**/*.{tsx,jsx,ts,js}'],
+  content: ['app/**/*.{tsx,jsx,ts,js}', 'components/**/*.{tsx,jsx,ts,js}', 'components-new/**/*.{tsx,jsx,ts,js}'],
   presets: [require('nativewind/preset')],
+  plugins: [
+    // Plugin personnalisé pour les ombres et effets
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.shadow-lift-soft': {
+          boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+        },
+        '.shadow-lift-medium': {
+          boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15)',
+        },
+        '.shadow-lift-hard': {
+          boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)',
+        },
+        '.blur-lift-bg': {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        },
+        '.text-gradient-primary': {
+          backgroundClip: 'text',
+          backgroundImage: 'linear-gradient(45deg, #A1CE50, #99FFCC)',
+          color: 'transparent',
+        },
+      };
+      addUtilities(newUtilities);
+    },
+  ],
   safelist: [
     {
       pattern:
@@ -12,6 +38,49 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Nouvelles couleurs du thème
+        liftGreen: '#A1CE50', // Nouvelle couleur verte primaire
+        liftBlue: '#1A96F0',
+        liftAccent: '#00A9F1',
+        liftInfo: '#00BCD3',
+        liftSuccess: '#009689',
+        liftSuccessLight: '#4AAF57',
+        liftSuccessLighter: '#A4C73B',
+        liftWarning: '#CDDC4C',
+        liftWarningLight: '#FFEB4F',
+        liftWarningDark: '#FFC02D',
+        liftOrange: '#FF981F',
+        liftError: '#FF5726',
+        liftBrown: '#7A5548',
+        liftBlueGrey: '#607D8A',
+        liftPaleYellow: '#FFFFCC',
+        liftPaleOrange: '#FFCC99',
+        liftPaleMauve: '#AA9499',
+        liftPaleRed: '#C6A4A4',
+        liftLightRed: '#FF9899',
+        liftLightPink: '#FFCCCC',
+        liftPink: '#FF99CC',
+        liftLilac: '#FFCCFF',
+        liftViolet: '#CC99FF',
+        liftLightBlue: '#CCCCFF',
+        liftBlue: '#99CCFF',
+        liftTeal: '#99C5C4',
+        liftCyan: '#CCFFFF',
+        liftMint: '#99FFCC',
+        liftGreen: '#CCFFCC',
+        liftLime: '#CCFF99',
+        liftBackground: '#F7FBF1',
+        liftBackgroundAlt: '#EDF2FF',
+        liftBackgroundPurple: '#F5F3FF',
+        liftBackgroundGreen: '#EBF8F3',
+        liftBackgroundOrange: '#FFF3F0',
+        liftBackgroundRed: '#FFEFED',
+        liftBackgroundTeal: '#EDF7F6',
+        liftBackgroundBrown: '#F8F3F1',
+        liftBackgroundYellow: '#FFFCEB',
+        liftBackgroundGrey: '#F6F6F6',
+        
+        // Structure originale pour compatibilité
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
           50: 'rgb(var(--color-primary-50)/<alpha-value>)',
@@ -167,7 +236,38 @@ module.exports = {
           error: 'rgb(var(--color-indicator-error)/<alpha-value>)',
         },
       },
+      // Espacements basés sur theme/spacing.ts
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '12px',
+        lg: '16px',
+        xl: '20px',
+        '2xl': '24px',
+        '3xl': '28px',
+        '4xl': '32px',
+        '5xl': '40px',
+      },
+      
+      // Rayons de bordure basés sur theme/radii.ts
+      borderRadius: {
+        none: '0',
+        sm: '4px',
+        md: '8px',
+        lg: '12px',
+        xl: '16px',
+        '2xl': '24px',
+        round: '9999px',
+      },
+      
+      // Configuration des polices selon theme/typography-*.ts
       fontFamily: {
+        // Nouvelles polices du thème
+        urbanist: ['Urbanist', 'sans-serif'],
+        playfair: ['Playfair Display', 'serif'],
+        robotoFlex: ['Roboto Flex', 'sans-serif'],
+        
+        // Pour compatibilité avec le code existant
         heading: undefined,
         body: undefined,
         mono: undefined,
@@ -200,5 +300,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  // Plugin généré par la configuration Tailwind ci-dessus
 };

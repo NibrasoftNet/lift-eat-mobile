@@ -8,15 +8,29 @@ import {
   ValidateUserExistsParams,
   ValidateUserExistsResult,
   GetDefaultUserParams,
-  GetDefaultUserResult
+  GetDefaultUserResult,
+  GenerateUserContextParams,
+  GenerateUserContextResult,
+  UpdateUserNutritionPreferencesParams
 } from '../interfaces/user-interfaces';
 import {
   users,
-  UserOrmPros
+  UserOrmPros,
+  userDietaryRestrictions,
+  userAllergies,
+  userNutritionGoals
 } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { logger } from '@/utils/services/logging.service';
+import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+
+/**
+ * Type de retour pour la mise à jour des préférences nutritionnelles
+ */
+export interface UpdateUserNutritionPreferencesResult {
+  success: boolean;
+  error?: string;
+}
 
 /**
  * Handler pour la méthode updateUserPreferencesViaMCP
@@ -98,6 +112,87 @@ export async function handleUpdateUserPreferences(db: any, params: UpdateUserPre
  * @param params Paramètres pour la récupération des détails utilisateur
  * @returns Résultat de l'opération avec les détails utilisateur
  */
+/**
+ * Handler pour mettre à jour les préférences nutritionnelles d'un utilisateur
+ * (restrictions alimentaires, allergies, objectifs nutritionnels)
+ * @param db Instance de la base de données
+ * @param params Paramètres contenant les préférences nutritionnelles
+ * @returns Résultat de l'opération
+ */
+export async function handleUpdateUserNutritionPreferences(
+  db: any,
+  params: UpdateUserNutritionPreferencesParams
+): Promise<UpdateUserNutritionPreferencesResult> {
+  const { userId, dietaryRestrictions, allergies, nutritionGoals } = params;
+  
+  try {
+    if (!db) throw new Error("Database not initialized");
+
+    logger.info(LogCategory.DATABASE, `Updating nutrition preferences for user ${userId} via MCP Handler`);
+    
+    // 1. Mettre à jour les restrictions alimentaires
+    if (dietaryRestrictions && dietaryRestrictions.length >= 0) {
+      // Supprimer les anciennes entrées
+      await db.delete(userDietaryRestrictions)
+        .where(eq(userDietaryRestrictions.userId, userId));
+      
+      // Ajouter les nouvelles entrées
+      if (dietaryRestrictions.length > 0) {
+        for (const restriction of dietaryRestrictions) {
+          await db.insert(userDietaryRestrictions).values({
+            userId: userId,
+            restriction: restriction
+          });
+        }
+      }
+    }
+    
+    // 2. Mettre à jour les allergies
+    if (allergies && allergies.length >= 0) {
+      // Supprimer les anciennes entrées
+      await db.delete(userAllergies)
+        .where(eq(userAllergies.userId, userId));
+      
+      // Ajouter les nouvelles entrées
+      if (allergies.length > 0) {
+        for (const allergy of allergies) {
+          await db.insert(userAllergies).values({
+            userId: userId,
+            allergy: allergy
+          });
+        }
+      }
+    }
+    
+    // 3. Mettre à jour les objectifs nutritionnels
+    if (nutritionGoals) {
+      // Supprimer l'entrée existante s'il y en a une
+      await db.delete(userNutritionGoals)
+        .where(eq(userNutritionGoals.userId, userId));
+      
+      // Ajouter la nouvelle entrée
+      await db.insert(userNutritionGoals).values({
+        userId: userId,
+        goal: nutritionGoals.goal || 'MAINTAIN',
+        targetWeight: nutritionGoals.targetWeight,
+        dailyCalories: nutritionGoals.dailyCalories,
+        proteinPercentage: nutritionGoals.proteinPercentage,
+        carbsPercentage: nutritionGoals.carbsPercentage,
+        fatPercentage: nutritionGoals.fatPercentage
+      });
+    }
+    
+    logger.info(LogCategory.DATABASE, `Successfully updated nutrition preferences for user ${userId} via MCP Handler`);
+    return { success: true };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleUpdateUserNutritionPreferences: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}
+
 export async function handleGetUserDetails(db: any, params: GetUserDetailsParams): Promise<GetUserDetailsResult> {
   const { userId, requestingUserId } = params;
   
@@ -269,6 +364,61 @@ export async function handleGetDefaultUser(db: any, params: GetDefaultUserParams
     };
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Error in handleGetDefaultUser: ${error instanceof Error ? error.message : String(error)}`);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+}
+
+/**
+ * Handler pour la méthode generateUserContextViaMCP
+ * @param db Instance de la base de données
+ * @param params Paramètres pour la génération du contexte utilisateur
+ * @returns Résultat de l'opération avec le contexte utilisateur formaté
+ */
+export async function handleGenerateUserContext(db: any, params: GenerateUserContextParams): Promise<GenerateUserContextResult> {
+  const { userId } = params;
+  
+  try {
+    if (!db) throw new Error("Database not initialized");
+    
+    logger.info(LogCategory.DATABASE, `Generating user context for user ${userId} via MCP Server`);
+    
+    // Récupérer les détails de l'utilisateur
+    const userDetails = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (userDetails.length === 0) {
+      logger.warn(LogCategory.DATABASE, `User with ID ${userId} not found`);
+      return { success: false, error: `User with ID ${userId} not found` };
+    }
+    
+    const user = userDetails[0];
+    
+    // Construire le contexte utilisateur
+    const contextElements = [
+      `USER_ID: ${user.id}`,
+      `NAME: ${user.name || 'Unknown'}`,
+      `GENDER: ${user.gender || 'Unknown'}`,
+      `AGE: ${user.age || 'Unknown'}`,
+      `WEIGHT: ${user.weight || 'Unknown'} ${user.weightUnit || 'kg'}`,
+      `HEIGHT: ${user.height || 'Unknown'} ${user.heightUnit || 'cm'}`,
+      `PHYSICAL_ACTIVITY: ${user.physicalActivity || 'Unknown'}`
+    ];
+    
+    // Ajouter d'autres informations conditionnelles si disponibles
+    if (user.goal) contextElements.push(`GOAL: ${user.goal}`);
+    
+    const formattedContext = contextElements.join('\n');
+    
+    logger.info(LogCategory.DATABASE, `Successfully generated context for user ${userId} via MCP Server`);
+    return { success: true, context: formattedContext };
+  } catch (error) {
+    logger.error(LogCategory.DATABASE, `Error in handleGenerateUserContext: ${error instanceof Error ? error.message : String(error)}`);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : String(error) 

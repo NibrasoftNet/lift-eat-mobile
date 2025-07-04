@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `clerk_id` text;

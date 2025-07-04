@@ -15,9 +15,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
           data.username ||
           `${data.external_accounts[0].first_name}${data.external_accounts[0].last_name}`,
       });
-
       break;
     case 'user.deleted':
+      // Ajouter la logique de suppression si nécessaire
       break;
     default:
       break;
@@ -26,7 +26,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 });
 
 http.route({
-  path: '/clerk-users-webhook',
+  path: '/clerk',
   method: 'POST',
   handler: handleClerkWebhook,
 });

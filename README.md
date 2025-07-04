@@ -1,50 +1,70 @@
-# Welcome to your Expo app 👋
+# Architecture des Services de Lift-Eat-Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ce dossier contient l'ensemble des services qui composent l'architecture MCP (Model-Controller-Persistence) de l'application Lift-Eat-Mobile.
 
-## Get started
+## Structure des Dossiers
 
-1. Install dependencies
+L'organisation des services est structurée comme suit:
 
-   ```bash
-   npm install
-   ```
+### `/core`
+Services métier principaux qui implémentent la logique business centrale de l'application.
+- `auth.service.ts` - Authentification et gestion des sessions
+- `user.service.ts` - Gestion des utilisateurs (profils, préférences)
+- `nutrition.service.ts` - Calculs nutritionnels et gestion des objectifs
+- `meal.service.ts` - Gestion des repas et ingrédients
+- `plan.service.ts` - Gestion des plans nutritionnels
+- `progress.service.ts` - Suivi des progrès et statistiques
 
-2. Start the app
+### `/pages`
+Services d'orchestration qui font l'interface entre l'UI et les services métier.
+- `*-pages.service.ts` - Orchestrent les appels entre UI et services business
 
-   ```bash
-    npx expo start
-   ```
+### `/forms`
+Services de validation et préparation des données de formulaires.
+- `form-*.service.ts` - Validation et préparation des données avant persistance
 
-In the output, you'll find options to open the app in a
+### `/ui`
+Services liés aux composants d'interface utilisateur.
+- `ui-drawer.service.ts` - Gestion des tiroirs (drawers)
+- `ui-deletion-modal.service.ts` - Gestion des modales de confirmation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### `/common`
+Services utilitaires et partagés.
+- `logging.service.ts` - Journalisation centralisée
+- Autres utilitaires communs
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Architecture MCP
 
-## Get a fresh project
+L'architecture MCP (Model-Controller-Persistence) centralise l'accès aux données via des handlers spécifiques:
 
-When you're ready, run:
+1. **UI (Composants)** - Interface utilisateur, ne contient aucune logique métier
+2. **Pages Services** - Orchestrent les appels entre UI et services métier
+3. **Core Services** - Implémentent la logique métier et appellent le MCP Server
+4. **MCP Server** - Point d'accès unique à la base de données via des handlers
 
-```bash
-npm run reset-project
+### Flux des Données
+```
+Composant UI → Service Pages → Service Core → MCP Server → Base de données
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Conventions de Nommage
 
-## Learn more
+- Services métier: `feature.service.ts` (ex: `user.service.ts`)
+- Services pages: `feature-pages.service.ts` (ex: `user-pages.service.ts`)
+- Services formulaires: `form-feature.service.ts` (ex: `form-user-details.service.ts`)
+- Services UI: `ui-feature.service.ts` (ex: `ui-drawer.service.ts`)
 
-To learn more about developing your project with Expo, look at the following resources:
+## Bonnes Pratiques:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+1. **Séparation des Responsabilités**:
+   - Les composants UI ne doivent JAMAIS accéder directement à la base de données
+   - Toute logique métier doit être dans les services `/core`
+   - Les services de pages ne font qu'orchestrer
 
-## Join the community
+2. **Gestion des Erreurs**:
+   - Tous les services retournent un type `OperationResult<T>`
+   - La journalisation est centralisée via `logging.service.ts`
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. **Invalidation du Cache**:
+   - L'invalidation du cache utilise React Query
+   - Les méthodes d'invalidation sont exposées via les services de pages

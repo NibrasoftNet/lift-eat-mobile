@@ -10,14 +10,18 @@ import {
   GenderTypeArray,
   PhysicalActivityEnum,
   PhysicalActivityTypeArray,
-} from '@/utils/enum/user-gender-activity.enum';
+} from '../utils/enum/user-gender-activity.enum';
 import {
   GoalEnum,
   GoalTypeArray,
   HeightUnitEnum,
   WeightUnitEnum,
   WeightUnitTypeArray,
-} from '@/utils/enum/user-details.enum';
+  DietaryRestrictionEnum,
+  DietaryRestrictionTypeArray,
+  AllergyEnum,
+  AllergyTypeArray,
+} from '../utils/enum/user-details.enum';
 import {
   CuisineTypeArray,
   CuisineTypeEnum,
@@ -25,7 +29,7 @@ import {
   MealTypeEnum,
   MealUnitArray,
   MealUnitEnum,
-} from '@/utils/enum/meal.enum';
+} from '../utils/enum/meal.enum';
 import {
   DailyPlanGeneratedWithEnum,
   DailyPlanGeneratedWithUnitArray,
@@ -35,7 +39,7 @@ import {
   PlanGeneratedWithEnum,
   ProviderEnum,
   RoleEnum,
-} from '@/utils/enum/general.enum';
+} from '../utils/enum/general.enum';
 import { sql } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
@@ -69,6 +73,7 @@ export const users = sqliteTable('users', {
     .notNull()
     .default(HeightUnitEnum.CM),
   profileImage: blob('profile_image', { mode: 'buffer' }), // BLOB column for user profile image
+  clerkId: text('clerk_id'), // ID externe Clerk pour l'authentification
   physicalActivity: text('physical_activity', {
     enum: PhysicalActivityTypeArray,
   })
@@ -87,20 +92,47 @@ export const ingredientsStandard = sqliteTable('ingredients_standard', {
     enum: MealUnitArray,
   }).default(MealUnitEnum.GRAMMES),
   quantity: real('quantity').notNull().default(1),
-  calories: real('calories').notNull().default(17),
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
-  image: blob('image', { mode: 'buffer' }), // BLOB column for ingredient image
+  image: blob('image', { mode: 'buffer' }), // Binary image data
+});
+
+// Ingredient Suggestions Table for storing missing ingredient suggestions
+export const ingredientSuggestions = sqliteTable('ingredient_suggestions', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  unit: text('unit', {
+    enum: MealUnitArray,
+  }).default(MealUnitEnum.GRAMMES),
+  quantity: real('quantity').notNull().default(100),
+  suggested_calories: real('suggested_calories').default(0),
+  suggested_carbs: real('suggested_carbs').default(0),
+  suggested_fat: real('suggested_fat').default(0),
+  suggested_protein: real('suggested_protein').default(0),
+  suggestion_source: text('suggestion_source').default('ia'),
+  status: text('status', {
+    enum: ['pending', 'accepted', 'rejected']
+  }).default('pending'),
+  // Foreign key to users table
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
 });
 
 // Ingredients Table (Each ingredient belongs to only ONE meal)
+// NOTE: Toutes les valeurs nutritionnelles (calories, carbs, fat, protein) sont standardisées à 100g
+// de l'ingrédient pour permettre des calculs proportionnels cohérents.
 export const mealIngredients = sqliteTable('meal_ingredients', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   quantity: real('quantity').notNull().default(1),
-  calories: real('calories').notNull().default(17),
+  // Valeurs nutritionnelles standardisées à 100g
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
@@ -115,6 +147,8 @@ export const mealIngredients = sqliteTable('meal_ingredients', {
 });
 
 // Meals table (independent meal)
+// NOTE: Toutes les valeurs nutritionnelles des repas sont standardisées à 100g 
+// pour permettre des comparaisons cohérentes et des calculs proportionnels.
 export const meals = sqliteTable('meals', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
@@ -137,11 +171,13 @@ export const meals = sqliteTable('meals', {
     .notNull()
     .default(MealUnitEnum.GRAMMES),
   quantity: real('quantity').notNull().default(1),
-  calories: real('calories').notNull().default(17),
+  // Valeurs nutritionnelles standardisées pour 100g
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
-  image: blob('image', { mode: 'buffer' }), // BLOB column for ingredient image
+  image: blob('image', { mode: 'buffer' }), // Binary image data
+  isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
   // Foreign key to users table
   creatorId: integer('creator_id')
     .references(() => users.id) // References the id column in users
@@ -149,12 +185,15 @@ export const meals = sqliteTable('meals', {
 });
 
 // Daily Plans table (independent plans)
+// NOTE: Les valeurs nutritionnelles représentent le total journalier du plan, pas une valeur à 100g
+// La normalisation à 100g n'est pas pertinente pour des plans journaliers complets
 export const dailyPlan = sqliteTable('daily_plan', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
   week: integer('week').notNull().default(1),
-  calories: real('calories').notNull().default(17),
+  // Valeurs nutritionnelles totales pour la journée (pas standardisées)
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
@@ -175,6 +214,8 @@ export const dailyPlan = sqliteTable('daily_plan', {
 });
 
 // Junction Table for Many-to-Many Relationship between dailyPlan and meals
+// Cette table stocke les instances spécifiques de repas dans un plan journalier,
+// avec leurs quantités et valeurs nutritionnelles calculées proportionnellement
 export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
@@ -187,9 +228,15 @@ export const dailyPlanMeals = sqliteTable('daily_plan_meals', {
   mealId: integer('meal_id')
     .references(() => meals.id) // References the id column in meals
     .notNull(),
+  // Type de repas spécifique à cette relation (peut être différent du type par défaut du repas)
+  mealType: text('meal_type', {
+    enum: MealTypeArray,
+  }),
   // Quantity in grams
   quantity: real('quantity').notNull().default(10),
-  // Calculated nutritional values for this specific meal-plan relation
+  // Valeurs nutritionnelles calculées pour la quantité spécifique de ce repas
+  // Ces valeurs sont dérivées des valeurs standardisées à 100g du repas associé
+  // multipliées par le facteur de proportion (quantity/100)
   calories: real('calories'),
   carbs: real('carbs'),
   fat: real('fat'),
@@ -218,7 +265,7 @@ export const plan = sqliteTable('plan', {
   current: integer({ mode: 'boolean' }).notNull().default(false),
   completed: integer({ mode: 'boolean' }).notNull().default(false),
   durationWeeks: integer('duration_weeks').notNull().default(1),
-  calories: real('calories').notNull().default(17),
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),
   protein: real('protein').notNull().default(1),
@@ -265,7 +312,7 @@ export const dailyProgress = sqliteTable('daily_progress', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   date: text('date').notNull(), // Format ISO
   pourcentageCompletion: real('pourcentage_completion').notNull().default(0),
-  calories: real('calories').notNull().default(0),
+  calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(0),
   fat: real('fat').notNull().default(0),
   protein: real('protein').notNull().default(0),
@@ -304,6 +351,81 @@ export const dailyMealProgress = sqliteTable('daily_meal_progress', {
     .notNull(),
 });
 
+// Table pour stocker les conseils nutritionnels générés par l'IA
+export const nutritionAdvice = sqliteTable('nutrition_advice', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  type: text('type').notNull().default('GENERAL'),  // GENERAL, MEAL_SPECIFIC, PLAN_SPECIFIC
+  context: text('context'),  // Contexte associé (ex: macros ciblées, repas référencé)
+  liked: integer({ mode: 'boolean' }),  // Notation utilisateur (null si pas de feedback)
+  applied: integer({ mode: 'boolean' }).default(false),  // Si l'utilisateur a appliqué le conseil
+  // Références (optionnelles)
+  planId: integer('plan_id').references(() => plan.id),
+  mealId: integer('meal_id').references(() => meals.id),
+  // Foreign key to users table
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+});
+
+// Scan History Table to store recent scanned products
+export const scanHistory = sqliteTable('scan_history', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  barcode: text('barcode').notNull(),
+  name: text('name').notNull(),
+  scannedAt: text('scanned_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+});
+
 // Types pour les nouvelles tables
 export type DailyProgressOrmProps = typeof dailyProgress.$inferSelect;
+export type ScanHistoryOrmProps = typeof scanHistory.$inferSelect;
 export type DailyMealProgressOrmProps = typeof dailyMealProgress.$inferSelect;
+export type NutritionAdviceOrmProps = typeof nutritionAdvice.$inferSelect;
+
+// Type pour les suggestions d'ingrédients
+export type IngredientSuggestionsOrmProps = typeof ingredientSuggestions.$inferSelect;
+
+// Table des restrictions alimentaires des utilisateurs
+export const userDietaryRestrictions = sqliteTable('user_dietary_restrictions', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  restriction: text('restriction', { enum: DietaryRestrictionTypeArray }).notNull(),
+});
+
+// Table des allergies des utilisateurs
+export const userAllergies = sqliteTable('user_allergies', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  allergy: text('allergy', { enum: AllergyTypeArray }).notNull(),
+});
+
+// Table des objectifs nutritionnels détaillés des utilisateurs
+export const userNutritionGoals = sqliteTable('user_nutrition_goals', {
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  goal: text('goal', { enum: GoalTypeArray }).notNull().default(GoalEnum.MAINTAIN),
+  targetWeight: real('target_weight'),
+  dailyCalories: integer('daily_calories'),
+  proteinPercentage: integer('protein_percentage'),
+  carbsPercentage: integer('carbs_percentage'),
+  fatPercentage: integer('fat_percentage'),
+});
+
+// Types pour les nouvelles tables
+export type UserDietaryRestrictionsOrmProps = typeof userDietaryRestrictions.$inferSelect;
+export type UserAllergiesOrmProps = typeof userAllergies.$inferSelect;
+export type UserNutritionGoalsOrmProps = typeof userNutritionGoals.$inferSelect;

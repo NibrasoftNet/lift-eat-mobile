@@ -1,8 +1,8 @@
-import { generateUserContext } from '../user-context.service';
-
 /**
  * Types de prompts que l'IA peut générer
  */
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+
 export enum PromptTypeEnum {
   ADD_MEAL_PLAN_INGREDIENT = 'ADD_MEAL_PLAN_INGREDIENT',
   GENERAL_QUESTION = 'GENERAL_QUESTION',
@@ -25,8 +25,17 @@ export async function buildEnrichedPrompt(
   promptType: PromptTypeEnum
 ): Promise<string> {
   try {
-    // Récupérer le contexte utilisateur
-    const userContext = await generateUserContext(userId);
+    // Récupérer le contexte utilisateur complet avec la méthode MCP
+    const userContextResult = await sqliteMCPServer.getUserContextViaMCP(userId);
+    
+    // Vérifier si la récupération a réussi
+    if (!userContextResult.success) {
+      console.error('Erreur lors de la récupération du contexte utilisateur:', userContextResult.error);
+      return `USER QUESTION: ${userPrompt}\n\nINSTRUCTIONS: Répondez de manière simple et concise à cette question.`;
+    }
+    
+    // Récupérer le contexte utilisateur complet avec restrictions alimentaires et allergies
+    const userContext = userContextResult.context || '';
     
     // Construire le prompt en fonction du type
     switch (promptType) {
@@ -149,14 +158,22 @@ Vous êtes l'Assistant Lift-Eat spécialisé dans la création de plans nutritio
 Basez vos recommandations sur les informations contextuelles fournies, notamment:
 - Le genre, l'âge, le poids et la taille de l'utilisateur
 - Son niveau d'activité physique
-- Ses objectifs (perte de poids, prise de muscle, maintien)
-- Ses préférences alimentaires et restrictions
+- Ses objectifs nutritionnels détaillés (perte de poids, prise de muscle, maintien)
+- Son poids cible et ses besoins caloriques
+- Sa répartition de macronutriments préférée (protéines, glucides, lipides)
+- Ses restrictions alimentaires spécifiques (végétarien, végétalien, sans gluten, etc.)
+- Ses allergies alimentaires (noix, produits laitiers, œufs, etc.)
+- Ses repas favoris et habitudes alimentaires actuelles
+
+PORTEZ UNE ATTENTION PARTICULIÈRE aux restrictions et allergies mentionnées dans le contexte utilisateur. 
+Ne proposez JAMAIS d'aliments incompatibles avec les restrictions ou pouvant causer des réactions allergiques.
 
 Créez un plan nutritionnel détaillé qui:
-1. Est aligné sur les objectifs et contraintes de l'utilisateur
-2. Inclut des repas variés et équilibrés
-3. Précise les macronutriments (protéines, glucides, lipides) pour chaque repas
-4. Propose un planning alimentaire hebdomadaire
+1. Est parfaitement adapté aux objectifs et contraintes nutritionnelles de l'utilisateur
+2. Respecte strictement ses restrictions alimentaires et allergies
+3. Inclut des repas variés et équilibrés
+4. Précise les macronutriments (protéines, glucides, lipides) pour chaque repas
+5. Propose un planning alimentaire hebdomadaire cohérent avec son niveau d'activité
 
 Si vous décidez de créer un plan, incluez également le format JSON suivant à la fin de votre réponse:
 
@@ -185,19 +202,25 @@ ${userContext}
 USER QUESTION: ${userPrompt}
 
 INSTRUCTIONS:
-Vous êtes l'Assistant Lift-Eat spécialisé dans la recommandation de repas équilibrés et savoureux.
+Vous êtes l'Assistant Lift-Eat spécialisé dans la recommandation de repas équilibrés et savoureux, parfaitement adaptés aux besoins spécifiques de l'utilisateur.
 
-Basez vos recommandations sur les informations contextuelles fournies, notamment:
-- Le profil nutritionnel de l'utilisateur
-- Ses préférences culinaires
-- Les repas qu'il apprécie déjà
+Basez vos recommandations sur les informations contextuelles fournies, en tenant compte DE TOUS les éléments suivants:
+- Le profil nutritionnel complet de l'utilisateur (sexe, âge, poids, taille, niveau d'activité)
+- Ses objectifs nutritionnels détaillés et répartition de macronutriments souhaitée
+- Ses restrictions alimentaires spécifiques (végétarien, végétalien, sans gluten, etc.)
+- Ses allergies alimentaires (noix, produits laitiers, œufs, fruits de mer, soja, etc.)
+- Ses préférences culinaires et cuisines favorites
+- Les repas qu'il apprécie déjà et a créés dans l'application
 - Son plan nutritionnel actuel (s'il en a un)
 
+SECURITE ALIMENTAIRE: Vous avez la responsabilité de vérifier que CHAQUE ingrédient suggéré est compatible avec les restrictions alimentaires et ne présente AUCUN risque d'allergie pour l'utilisateur.
+
 Proposez des repas qui:
-1. Correspondent aux besoins caloriques et nutritionnels de l'utilisateur
-2. Sont variés et équilibrés
-3. Sont faciles à préparer (sauf demande contraire)
-4. Détaillent les ingrédients et quantités nécessaires
+1. Correspondent précisément aux besoins caloriques et objectifs macro-nutritionnels de l'utilisateur
+2. Ne contiennent AUCUN ingrédient faisant partie de ses restrictions alimentaires ou allergies
+3. Sont variés, équilibrés et savoureux
+4. Sont faciles à préparer (sauf demande contraire)
+5. Détaillent les ingrédients et quantités nécessaires de façon précise
 
 Si vous suggérez un repas spécifique, incluez également le format JSON suivant à la fin de votre réponse:
 

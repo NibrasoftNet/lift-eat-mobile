@@ -1,12 +1,23 @@
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
+import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 import { MealOrmProps } from '@/db/schema';
+
+// Enum for meal list filters
+export enum MealListFilter {
+  RECENT = 'recent',
+  FAVORITES = 'favorites',
+  PERSONAL = 'personal',
+}
 
 // Interface pour getMealsListViaMCP
 export interface GetMealsListParams {
   userId: number;
   type?: MealTypeEnum;
+  cuisine?: CuisineTypeEnum;
   search?: string;
   limit?: number;
+  page?: number;
+  filter?: MealListFilter;
 }
 
 export interface GetMealsListResult {
@@ -31,12 +42,14 @@ export interface GetMealDetailsResult {
 export interface CreateMealParams {
   data: Omit<MealOrmProps, 'id'>;
   userId: number;
+  ingredients?: any[]; // Liste optionnelle d'ingrédients à associer au repas
 }
 
 export interface CreateMealResult {
   success: boolean;
   mealId?: number;
   error?: string;
+  missingIngredients?: any[]; // Liste des ingrédients qui n'existent pas dans la base de données
 }
 
 // Interface pour updateMealViaMCP
@@ -68,6 +81,7 @@ export interface AddMealToDailyPlanParams {
   dailyPlanId: number;
   mealId: number;
   quantity: number;
+  mealType?: MealTypeEnum;
 }
 
 export interface AddMealToDailyPlanResult {

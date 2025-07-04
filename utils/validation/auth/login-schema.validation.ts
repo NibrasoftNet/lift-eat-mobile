@@ -1,5 +1,6 @@
 import * as z from 'zod';
 import { passwordSchema } from './password-schema.validation';
+import { LoginFormData as LoginFormDataInterface } from '@/utils/interfaces/auth.interface';
 
 export const loginSchema = z.object({
   email: z
@@ -11,9 +12,7 @@ export const loginSchema = z.object({
   password: passwordSchema,
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+// Ensure this matches the interface from auth.interface.ts
+export type LoginFormData = LoginFormDataInterface;
 
-export type LoginDefaultValuesProps = {
-  email: string;
-  password: string;
-};
+export type LoginDefaultValuesProps = LoginFormDataInterface;

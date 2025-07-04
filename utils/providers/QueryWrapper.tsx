@@ -1,8 +1,8 @@
-import { Card } from '@/components/ui/card';
-import Spinner from '@/components/ui/spinner';
-import { VStack } from '@/components/ui/vstack';
-import { Text } from '@/components/ui/text';
-import { Heading } from '@/components/ui/heading';
+import { View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
+
+import Text from '@/components-new/ui/atoms/base/Text';
+
 import { Link } from 'expo-router';
 import React from 'react';
 
@@ -32,28 +32,24 @@ export const QueryStateHandler = <T,>({
       isFetchedAfterMount
     ) {
       return (
-        <VStack className="flex-1 w-full h-full items-center justify-center gap-2">
-          <Spinner />
-          <Text size="md">Please Wait</Text>
-        </VStack>
+        <View className="flex-1 w-full items-center justify-center gap-2">
+          <ActivityIndicator size="large" color="#4F46E5" />
+          <Text variant="body" className="text-primary-500">Please wait…</Text>
+        </View>
       );
     }
     return (
-      <VStack className="flex-1 w-full h-full items-center justify-center">
-        <Card
-          size="md"
-          variant="elevated"
-          className="m-3 items-center justify-center"
-        >
-          <Heading size="md" className="mb-1">
+      <View className="flex-1 w-full items-center justify-center">
+        <View className="m-3 p-6 rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg items-center justify-center">
+          <Text variant="h2" className="mb-1">
             Data Not Found
-          </Heading>
-          <Text size="sm">No result has been found</Text>
-          <Link href="/login">
-            <Text size="sm">Back to login</Text>
+          </Text>
+          <Text variant="body" className="text-gray-500 dark:text-gray-400">No result has been found</Text>
+          <Link href="/intro">
+            <Text variant="body" className="text-primary-500 underline">Back to login</Text>
           </Link>
-        </Card>
-      </VStack>
+        </View>
+      </View>
     );
   }
   if (data) {

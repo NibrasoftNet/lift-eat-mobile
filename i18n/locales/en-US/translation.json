@@ -1,5 +1,20 @@
 {
   "language": "Language",
+  "common": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "carbs": "Carbs",
+    "clear": "Clear",
+    "close": "Close",
+    "delete": "Delete",
+    "details": "Details",
+    "fat": "Fat",
+    "ingredient": "Ingredient",
+    "kcal": "kcal",
+    "protein": "Protein",
+    "search": "Search",
+    "all": "All"
+  },
   "home": {
     "title": "Home",
     "welcome": "Welcome",
@@ -10,5 +25,354 @@
     "learnMore": "Want to Learn More?",
     "repositoryLinkText": "Project repository on GitHub",
     "articlesLinkText": "More articles"
+  },
+  "meal": {
+    "tabs": {
+      "myMeals": "My Meals",
+      "scanner": "Scanner",
+      "search": "Search",
+      "recent": "Recent",
+      "favorites": "Favorites",
+      "personal": "Personal"
+    },
+    "filters": {
+      "mealType": "Meal Type",
+      "cuisine": "Cuisine",
+      "reset": "Reset Filters"
+    },
+    "title": "Meals",
+    "myMeals": {
+      "loading": "Loading meals..."
+    },
+    "loadingMeals": "Loading meals...",
+    "noMeals": "No meals available.",
+    "emptyHint": "Add a meal by clicking the + button",
+    "delete": {
+      "title": "Delete Meal",
+      "confirm": "Delete this meal?",
+      "message": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "details": {
+      "notSpecified": "Not specified",
+      "noName": "Meal without name"
+    },
+    "create": {
+      "error": {
+        "ingredients": "Missing ingredients",
+        "ingredientsDescription": "Please add at least one ingredient",
+        "auth": "Authentication required",
+        "authDescription": "Please log in to continue"
+      },
+      "success": {
+        "title": "Meal created",
+        "message": "Your meal has been added successfully"
+      }
+    },
+    "search": {
+      "title": "Search for Food",
+      "placeholder": "Search food or ingredients",
+      "country": {
+        "title": "Country",
+        "france": "France",
+        "usa": "United States",
+        "uk": "United Kingdom"
+      },
+      "selectCountry": "Select country",
+      "button": "Search",
+      "noResults": "No results found",
+      "loading": "Loading...",
+      "error": "An error occurred"
+    },
+    "scanner": {
+      "title": "Scan a product",
+      "error": "User not logged in.",
+      "scanError": "Failed to scan the barcode. Please try again.",
+      "scanning": "Scanning...",
+    "overlayInstruction": "Position the barcode inside the frame to scan",
+      "history": {
+        "title": "Scan History",
+        "loadError": "Error loading scan history"
+      },
+      "productDetails": {
+        "nutriScore": "Nutri-Score",
+        "brands": "Brands",
+        "categories": "Categories",
+        "sugars": "Sugars",
+        "allergens": "Allergens",
+        "barcode": "Barcode",
+        "nutritionFacts": "Nutrition Facts (per 100g)"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "Create Meal",
+        "update": "Edit Meal"
+      },
+            "add": "Add Ingredient",
+
+      "mealType": {
+        "title": "Meal Type",
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "snack": "Snack"
+      },
+      "cuisine": {
+        "title": "Cuisine",
+        "french": "French",
+        "italian": "Italian",
+        "american": "American",
+        "other": "Other",
+        "general": "General",
+        "african": "African",
+        "european": "European",
+        "asian": "Asian",
+        "tunisian": "Tunisian",
+        "chinese": "Chinese",
+        "japanese": "Japanese",
+        "mexican": "Mexican"
+      },
+      "units": {
+        "title": "Units",
+        "grams": "Grams",
+        "milliliters": "Milliliters",
+        "pieces": "Pieces"
+      },
+      "save": "Save Meal",
+      "cancel": "Cancel",
+      "nameLabel": "Name",
+        "namePlaceholder": "e.g. Salad, Omelette",
+        "descriptionLabel": "Preparation",
+        "descriptionPlaceholder": "e.g. Salad, Sandwich, etc.",
+        "selectType": "Select type",
+        "selectCuisine": "Select cuisine",
+        "addIngredients": "Add Ingredients",
+        "submit": {
+          "create": "Create meal",
+          "update": "Save changes"
+        },
+        "validation": {
+          "name": {
+            "required": "Name is required",
+            "min": "Name must be at least 3 characters",
+            "max": "Name must be at most 50 characters"
+          },
+          "description": {
+            "required": "Description is required",
+            "min": "Description must be at least 3 characters"
+          },
+          "quantity": {
+            "min": "Quantity must be at least 1"
+          }
+        },
+        "image": {
+        "selectTitle": "Select image",
+        "selectMessage": "Choose source",
+        "gallery": "Gallery",
+        "camera": "Camera",
+        "unsupported": "Unsupported format"
+      },
+      "permission": {
+        "title": "Permission",
+        "galleryRequired": "Gallery access is required",
+        "cameraRequired": "Camera access is required"
+      },
+      "alert": {
+        "authTitle": "Authentication",
+        "authMessage": "Please log in to continue",
+        "ingredientsTitle": "Missing ingredients",
+        "ingredientsMessage": "Please add at least one ingredient",
+        "successTitle": "Success",
+        "created": "Meal created",
+        "updated": "Meal updated",
+        "errorTitle": "Error",
+        "failed": "Failed"
+      },
+      "header": {
+        "createTitle": "Create Meal",
+        "editTitle": "Edit Meal"
+      },
+      "label": {
+        "name": "Name",
+        "description": "Preparation"
+      },
+      "placeholder": {
+        "name": "e.g. Salad, Omelette",
+        "description": "e.g. Salad, Sandwich, etc."
+      },
+      "dropdown": {
+        "type": "Type",
+        "cuisine": "Cuisine"
+      },
+      "button": {
+        "close": "Close",
+        "addIngredient": "Ingredient"
+      }
+    },
+    "ingredients": {
+      "title": "Ingredients",
+      "add": "Add Ingredient",
+      "remove": "Remove",
+      "quantity": "Quantity",
+      "unit": "Unit"
+    },
+    "nutrition": {
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "fat": "Fat",
+      "fiber": "Fiber",
+      "sugar": "Sugar"
+    },
+    "error": {
+      "title": "Error",
+      "delete": "Unable to delete meal. Please try again.",
+      "loading": "Unable to load meal details.",
+      "notFound": "Meal not found",
+      "generic": "An error occurred"
+    },
+
+    "ingredientListDrawer": {
+      "modalTitle": "Set quantity (g)",
+      "modalSaveText": "Save"
+    },
+    "ingredientSelector": {
+      "emptyStateText": "No ingredient found for \"{searchQuery}\"",
+      "searchInstructions": "Enter at least 3 characters to start searching"
+    },
+    "ingredientsList": {
+      "title": "Ingredients",
+      "emptyText": "No ingredients in this meal"
+    },
+    "scanResultCard": {
+      "toastTitle": {
+        "alreadyExists": "Already present",
+        "added": "Added!",
+        "error": "Error"
+      },
+      "toastDescription": {
+        "defaultError": "An error occurred"
+      }
+    }
+  },
+  "delete": {
+    "confirm": "Delete this meal?",
+    "message": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "title": "Delete Meal"
+  },
+  "error": {
+    "title": "Error",
+    "delete": "Unable to delete meal. Please try again.",
+    "loading": "Unable to load meal details.",
+    "notFound": "Meal not found",
+    "generic": "An error occurred"
+  },
+  "create": {
+    "error": {
+      "ingredients": "Missing ingredients",
+      "ingredientsDescription": "Please add at least one ingredient",
+      "auth": "Authentication required",
+      "authDescription": "Please log in to continue"
+    },
+    "success": {
+      "title": "Meal created",
+      "message": "Your meal has been added successfully"
+    }
+  },
+  "details": {
+    "noName": "Meal without name",
+    "notSpecified": "Not specified"
+  },
+  "search": {
+    "title": "Search for Food",
+    "placeholder": "Search food or ingredients",
+    "country": {
+      "title": "Country",
+      "france": "France",
+      "usa": "United States",
+      "uk": "United Kingdom"
+    },
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "scanner": {
+    "title": "Scan Barcode",
+    "error": "Connection required",
+    "scanError": "Error during scan",
+    "scanning": "Scanning...",
+    "overlayInstruction": "Position the barcode inside the frame to scan",
+    "history": {
+      "title": "Scan History"
+    }
+  },
+  "form": {
+    "title": "Create Meal",
+    "mealType": {
+      "title": "Meal Type",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "cuisine": {
+      "title": "Cuisine",
+      "french": "French",
+      "italian": "Italian",
+      "american": "American",
+      "other": "Other"
+    },
+    "units": {
+      "title": "Units",
+      "grams": "Grams",
+      "milliliters": "Milliliters",
+      "pieces": "Pieces"
+    },
+    "save": "Save Meal",
+    "cancel": "Annuler"
+  },
+  "ingredients": {
+    "title": "Ingredients",
+    "add": "Add Ingredient",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "unit": "Unit"
+  },
+  "nutrition": {
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbohydrates",
+    "fat": "Fat",
+    "fiber": "Fiber",
+    "sugar": "Sugar"
+  },
+  "mealFormNew": {
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Salad, Omelette",
+    "descriptionLabel": "Preparation",
+    "descriptionPlaceholder": "e.g. Salad, Sandwich, etc.",
+    "submitCreate": "Create meal",
+    "submitUpdate": "Save changes"
+  },
+  "tab": {
+    "assistant": "Assistant",
+    "plans": "Plans",
+    "meals": "Meals",
+    "progress": "Progress",
+    "analytics": "Analytics"
+  },
+  "profile": {
+    "toast": {
+      "updatedTitle": "Profile Updated",
+      "updatedDescription": "Your profile has been successfully updated",
+      "updateErrorTitle": "Profile Update Failed",
+      "updateErrorDescription": "An unexpected error occurred",
+      "imageErrorTitle": "Image Selection Failed",
+      "imageErrorDescription": "Could not select image. Please try again."
+    }
   }
 }

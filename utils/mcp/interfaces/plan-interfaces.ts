@@ -1,5 +1,6 @@
 import { NutritionGoalSchemaFormData } from '@/utils/validation/plan/nutrition-goal.validation';
 import { PlanOrmProps, DailyPlanOrmProps } from '@/db/schema';
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 // Interfaces pour createPlanViaMCP
 export interface CreatePlanParams {
@@ -105,12 +106,21 @@ export interface AddMealToDailyPlanParams {
   dailyPlanId: number;
   mealId: number;
   quantity?: number;
+  mealType?: MealTypeEnum; // Type de repas spécifique (petit-déjeuner, déjeuner, dîner...)
 }
 
 export interface AddMealToDailyPlanResult {
   success: boolean;
   error?: string;
 }
+
+// Interface pour removeMealFromDailyPlanViaMCP
+export interface RemoveMealFromDailyPlanParams {
+  dailyPlanId: number;
+  mealId: number;
+}
+
+export interface RemoveMealFromDailyPlanResult extends BasicResult {}
 
 // Interface pour getMealQuantityInPlanViaMCP
 export interface GetMealQuantityInPlanParams {
@@ -153,4 +163,36 @@ export interface GetCurrentPlanResult {
   success: boolean;
   plan?: PlanOrmProps | null;
   error?: string;
+}
+
+// Interface pour getDailyPlanNutritionViaMCP
+import { NutritionProgress } from '@/utils/interfaces/nutrition-progress.interface';
+
+export interface GetDailyPlanNutritionParams {
+  dailyPlanId: number;
+  userId: number; // ID de l'utilisateur pour sécurité
+}
+
+export interface GetDailyPlanProgressParams {
+  dailyPlanId: number;
+  userId: number;
+}
+
+export interface GetDailyPlanProgressResult {
+  success: boolean;
+  error?: string;
+  progress?: NutritionProgress;
+}
+
+export interface GetDailyPlanNutritionResult {
+  success: boolean;
+  error?: string;
+  nutrition?: {
+    calories: number;
+    carbs: number;
+    protein: number;
+    fat: number;
+    totalWeight: number;
+  };
+  progress?: NutritionProgress;
 }
