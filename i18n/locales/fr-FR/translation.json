@@ -13,7 +13,8 @@
     "kcal": "kcal",
     "protein": "Protéines",
     "search": "Rechercher",
-    "all": "Tous"
+    "all": "Tous",
+    "notSpecified": "Non spécifié"
   },
   "home": {
     "title": "Accueil",
@@ -75,6 +76,7 @@
     },
     "details": {
       "noName": "Repas sans nom",
+      "instructionsTitle": "Instructions de préparation",
       "notSpecified": "Non spécifié"
     },
     "search": {
@@ -92,10 +94,15 @@
       "loading": "Chargement...",
       "error": "Une erreur est survenue"
     },
-    "scanner": {
+    "filterButton": {
+        "accessibility": "Filtrer les repas"
+      },
+      "scanner": {
       "title": "Scanner un code-barres",
       "error": "Connexion requise",
       "scanError": "Erreur lors du scan du code-barres",
+        "noNutrition": "Aucune information nutritionnelle disponible pour ce produit.",
+        "accessibility": "Scanner un code-barres avec OpenFoodFacts",
       "scanning": "Scan en cours...",
     "overlayInstruction": "Positionnez le code-barres dans le cadre pour le scanner",
       "history": {

@@ -13,7 +13,8 @@
     "kcal": "kcal",
     "protein": "Protein",
     "search": "Search",
-    "all": "All"
+    "all": "All",
+    "notSpecified": "Not specified"
   },
   "home": {
     "title": "Home",
@@ -56,6 +57,7 @@
     },
     "details": {
       "notSpecified": "Not specified",
+      "instructionsTitle": "Preparation Instructions",
       "noName": "Meal without name"
     },
     "create": {
@@ -85,10 +87,33 @@
       "loading": "Loading...",
       "error": "An error occurred"
     },
+    "filterButton": {
+      "accessibility": "Filter meals"
+    },
+    "meal": {
+      "search": {
+        "placeholder": "Search food or ingredients"
+      },
+      "scanner": {
+        "accessibility": "Scan a barcode with OpenFoodFacts"
+      },
+      "filterButton": {
+        "accessibility": "Filter meals"
+      },
+      "form": {
+        "submit": {
+          "create": "Create meal",
+          "update": "Save changes"
+        }
+      }
+    },
+
     "scanner": {
       "title": "Scan a product",
       "error": "User not logged in.",
       "scanError": "Failed to scan the barcode. Please try again.",
+        "noNutrition": "No nutritional information available for this product.",
+        "accessibility": "Scan a barcode with OpenFoodFacts",
       "scanning": "Scanning...",
     "overlayInstruction": "Position the barcode inside the frame to scan",
       "history": {

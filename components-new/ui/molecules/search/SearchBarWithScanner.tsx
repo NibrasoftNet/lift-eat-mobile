@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { ThemeInterface } from '@/themeNew';
@@ -31,11 +32,12 @@ interface SearchBarWithScannerProps {
  */
 const SearchBarWithScanner: React.FC<SearchBarWithScannerProps> = ({
   value = '',
-  placeholder = 'Search',
+  placeholder = undefined,
   onChangeText,
   onScanPress,
 
 }) => {
+  const { t } = useTranslation();
   const theme = useAppTheme();
   const isDark = theme.isDark;
   const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
@@ -52,7 +54,7 @@ const SearchBarWithScanner: React.FC<SearchBarWithScannerProps> = ({
         style={[styles.input, { color: isDark? '#FFFFFF':'#212121' }]}
         value={value}
         onChangeText={onChangeText}
-        placeholder={placeholder}
+        placeholder={placeholder || t('meal.search.placeholder')}
         placeholderTextColor={isDark? '#A1A1A1':'#757575'}
       />
 
@@ -61,7 +63,7 @@ const SearchBarWithScanner: React.FC<SearchBarWithScannerProps> = ({
         style={styles.actionButton}
         onPress={onScanPress}
         activeOpacity={0.7}
-        accessibilityLabel="Scanner un code-barres avec OpenFoodFacts"
+        accessibilityLabel={t('meal.scanner.accessibility')}
       >
         <ScanRegularBoldIcon width={22} height={22} color={isDark? '#CDCDCD':'#757575'} />
       </TouchableOpacity>
