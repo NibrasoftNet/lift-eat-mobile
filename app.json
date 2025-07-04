@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "lift-eat",
-    "slug": "liftandeat",
+    "name": "lift&eat",
+    "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.jpg",
@@ -41,7 +41,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "7c6f7cf4-6d0c-4c49-8b67-4ce35d890b12"
+        "projectId": "581cddfa-2371-4db1-a11c-0a98f258f6e5"
       }
     }
   }

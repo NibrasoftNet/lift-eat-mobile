@@ -75,3 +75,18 @@ export const CountryConfig: Record<CountryTypeEnum, { url: string; code: string 
   [CountryTypeEnum.GERMANY]: { url: 'https://de.openfoodfacts.org', code: 'de' },
   [CountryTypeEnum.UK]: { url: 'https://uk.openfoodfacts.org', code: 'uk' },
 }
+
+/**
+ * Libellés français pour l'affichage des pays dans l'interface (FR)
+ */
+export const CountryLabelMap: Record<CountryTypeEnum, string> = {
+  [CountryTypeEnum.TUNISIA]: 'Tunisie',
+  [CountryTypeEnum.FRANCE]: 'France',
+  [CountryTypeEnum.MOROCCO]: 'Maroc',
+  [CountryTypeEnum.ALGERIA]: 'Algérie',
+  [CountryTypeEnum.EGYPT]: 'Égypte',
+  [CountryTypeEnum.SPAIN]: 'Espagne',
+  [CountryTypeEnum.ITALY]: 'Italie',
+  [CountryTypeEnum.GERMANY]: 'Allemagne',
+  [CountryTypeEnum.UK]: 'Royaume-Uni',
+};

@@ -17,7 +17,7 @@ import { SearchRegularBoldIcon } from '@/assets/icons/figma/regular-bold/SearchR
 import { CloseSquareRegularBoldIcon } from '@/assets/icons/figma/regular-bold/CloseSquareRegularBoldIcon';
 
 // Enums & Services
-import { CountryTypeEnum } from '@/utils/enum/meal.enum';
+import { CountryTypeEnum, CountryLabelMap } from '@/utils/enum/meal.enum';
 import OpenFoodFactsService, { ProductResult } from '@/utils/api/OpenFoodFactsService';
 
 
@@ -26,7 +26,7 @@ import Divider from '@/components-new/ui/atoms/layout/Divider';
 
 // Build dropdown options from CountryTypeEnum
 const countryOptions = Object.values(CountryTypeEnum).map((value) => ({
-  label: value.charAt(0).toUpperCase() + value.slice(1),
+  label: CountryLabelMap[value],
   value,
 }));
 
