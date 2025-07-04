@@ -1,0 +1,1174 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. Tous droits réservés.
+
+Installez la dernière version de PowerShell pour de nouvelles fonctionnalités et améliorations ! https://aka.ms/PSWindows
+
+PS C:\Users\jawis\OneDrive\Desktop\lift> npx expo start --clear
+env: load .env.local
+env: export CONVEX_DEPLOYMENT EXPO_PUBLIC_CONVEX_URL CONVEX_SITE_URL EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY
+Starting project at C:\Users\jawis\OneDrive\Desktop\lift
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █▄▄████▀ ▄ █▄█▄▀ ▄█▄█▄█ ▄▄▄▄▄ █
+█ █   █ █ ▀█ ▄▄▄▄▀▀ ▄▀████ █▄██ █   █ █
+█ █▄▄▄█ █▄ ▄▄▀▄▀██▀▀ ▄▀ █▄  ▄▄█ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄▀▄▀▄▀ █▄▀▄▀▄█ ▀ █▄█ █▄▄▄▄▄▄▄█
+█ ▄▄▄█▀▄▀ ████▄▄▀ ▄█▀█▀█▀▄█▄█  █▀▄  █▄█
+█▀ ▀▀█▀▄ █▀▄▀▀▀  █▄ ▀▄██▄▀  █▄▄▄▄▄ ▀███
+██ ▀▀▀▄▄ █▄█ █▀██▄▄   ███▀  ▀▀▄ ▀  ▄ ▀█
+█▄▄▄▀█ ▄▀█▀██ ▀▄▀███ ▀▀▀█▀▄▄▀▄█▀▀ ██ ██
+██▄█▀ ▀▄█▄▄█▄▀▀███████▄█▀▀▄█▀▄█▀▀█  ▄ █
+█ █▀█ █▄ █▄█▄ ██▀▀▀▀█ ██▀▀██  ▄▀ ▄ █▀▄█
+██▀▀ ▀▀▄██▀▀▄  ▀ █▄█ ▄▀█  █▄▄ ██▄▄▀█▀██
+█▀▄▀ ▄█▄ ▄  ▄▄▄██ █▀█ ▄ ▄▀▀▀██▀▄▀▀ ▀███
+█▄▄█▀▄▄▄██ ▄▀ █ ▄▀▀█ ▀██▄   ▀▀  ▄   █▀█
+█▀▄ ▀▀█▄█▀ █ █▄▀▄ ██ █▀▀▀▀█▄▀▀▄▀ ███ ▀█
+██████▄▄█▀▀▄█▄█ ▄▀▀▀██▄█   ▀█ ▄▄▄ ▀ █▀█
+█ ▄▄▄▄▄ ██ █▀█  ▄▄▀▄█ ██▀▀█ ▀ █▄█  █▄ █
+█ █   █ █▀ ███▄▄██▄█▀▄▀█▀▄▀█▀     ██▄ █
+█ █▄▄▄█ █ ▄ ▀▀▀ █▀▄█▀█▄    ▀ █ ▄▄▄ ▀███
+█▄▄▄▄▄▄▄█▄▄█▄████▄▄▄█▄██▄█▄███▄▄██▄▄▄▄█
+
+› Metro waiting on exp+liftandeat://expo-development-client/?url=http%3A%2F%2F192.168.19.59%3A8081
+› Scan the QR code above to open the project in a development build. Learn more: https://expo.fyi/start
+
+› Web is waiting on http://localhost:8081
+
+› Using development build
+› Press s │ switch to Expo Go
+
+› Press a │ open Android
+› Press w │ open web
+
+› Press j │ open debugger
+› Press r │ reload app
+› Press m │ toggle menu
+› shift+m │ more tools
+› Press o │ open project code in your editor
+
+› Press ? │ show all commands
+
+Logs for your project will appear below. Press Ctrl+C to exit.
+› Switching to --go
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █▄▄▄ ▀▀ ██▄▀▀ █ ▄▄▄▄▄ █
+█ █   █ ██▄▀ █ ▄▄▀▀  ██ █   █ █
+█ █▄▄▄█ ██▀▄ ▄  █▄▀▀▄▄█ █▄▄▄█ █
+█▄▄▄▄▄▄▄█ ▀▄█ ▀ █▄█ █ █▄▄▄▄▄▄▄█
+█▄ ▀ ▄█▄▀█▄▀█▄█  ▄▄▄▀ ▀▄█▀█▀▀▄█
+█ ▀█▀██▄▄█▄██▄▄▀ ▄ ▄████▀ █▄█▀█
+█▀▀█▀█ ▄▀▀▄ █▀▄ ▀ ▀ █▀  █▀▀█▀ █
+█▀▄▀ █ ▄ █ ██▀▀ ▄▄▄█▄▄▄▀▀█▄ █ █
+█ █▀█▄▀▄█ ▀▀ ▄██▀█▄█▀█▄█ ▀▀▀▀██
+█  █ ▄▀▄▄▄█▀▀▄ ▄ ▀██▄▄█▀▄▀▀▀█▄█
+█▄▄█▄▄▄▄█ ▄▀▄▀ █▀ ▄▀█ ▄▄▄  ▄▄██
+█ ▄▄▄▄▄ ██▄█ ▀ █ ▄ █▄ █▄█ ▄█▀██
+█ █   █ █ ▄ ▄▄ ▀▀ ▀█▄ ▄▄ ▄▀▀█ █
+█ █▄▄▄█ █▀   ▄▄█▄ █  ▄█▀▀ █▀▄ █
+█▄▄▄▄▄▄▄█▄▄▄███▄▄▄███▄██▄█▄████
+
+› Choose an app to open your project at http://192.168.19.59:8081/_expo/loading
+› Metro waiting on exp://192.168.19.59:8081
+› Scan the QR code above with Expo Go (Android) or the Camera app (iOS)
+
+› Web is waiting on http://localhost:8081
+
+› Using Expo Go
+› Press s │ switch to development build
+
+› Press a │ open Android
+› Press w │ open web
+
+› Press j │ open debugger
+› Press r │ reload app
+› Press m │ toggle menu
+› shift+m │ more tools
+› Press o │ open project code in your editor
+
+› Press ? │ show all commands
+
+Android Bundled 118250ms node_modules\expo-router\entry.js (5641 modules)
+ (NOBRIDGE) LOG  Bridgeless mode is enabled
+ INFO
+ 💡 JavaScript logs will be removed from Metro in React Native 0.77! Please use React Native DevTools as your default tool. Tip: Type j in the terminal to open (requires Google Chrome or Microsoft Edge).
+ (NOBRIDGE) WARN  Require cycle: utils\mcp\sqlite-server.ts -> utils\mcp\handlers\meal-handlers.ts -> utils\services\core\nutrition-core.service.ts -> utils\mcp\sqlite-server.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle. [Component Stack]
+ (NOBRIDGE) WARN  Require cycle: utils\mcp\sqlite-server.ts -> utils\mcp\handlers\meal-handlers.ts -> utils\services\core\nutrition-core.service.ts -> utils\helpers\userContext.ts -> utils\mcp\sqlite-server.ts
+
+Require cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle. [Component Stack]
+ (NOBRIDGE) INFO  [2025-07-02T15:51:50.080Z][ANDROID][INFO][IA] [IA:IaProviderFactory:constructor] IaProviderFactory initialisée
+Data: {
+  "defaultProvider": "gemini",
+  "_timestamp": "2025-07-02T15:51:50.079Z"
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:51:51.553Z][ANDROID][INFO][INTEGRATION] Scanner service initialized
+ (NOBRIDGE) LOG  [Reanimated] Warning: Warnings have been suppressed for better console readability
+ (NOBRIDGE) INFO  [2025-07-02T15:51:59.827Z][ANDROID][INFO][UI] SplashScreen.preventAutoHideAsync appelé avec succès
+ (NOBRIDGE) INFO  [2025-07-02T15:52:00.776Z][ANDROID][INFO][UI] Affichage du chargement
+Data: {
+  "fontsLoaded": false,
+  "dbReady": false
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.048Z][ANDROID][INFO][APP] Application démarrée
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.052Z][ANDROID][INFO][DATABASE] Initialisation de la base de données
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.055Z][ANDROID][INFO][UI] En attente pour masquer le SplashScreen
+Data: {
+  "fontsLoaded": false,
+  "dbReady": false
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.256Z][ANDROID][INFO][UI] Affichage du chargement
+Data: {
+  "fontsLoaded": false,
+  "dbReady": false
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.301Z][ANDROID][INFO][DATABASE] Initialisation de la base de données
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.302Z][ANDROID][INFO][DATABASE] Migrations réussies, ajout des données de test
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.319Z][ANDROID][INFO][DATABASE] Début du chargement des données seed
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.352Z][ANDROID][INFO][DATABASE] État actuel des tables
+Data: {
+  "mealsCount": 0,
+  "plansCount": 0,
+  "ingredientsCount": 0
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.353Z][ANDROID][INFO][DATABASE] Les tables sont vides, chargement des données seed...
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.372Z][ANDROID][DEBUG][DATABASE] Table dailyPlanMeals vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.379Z][ANDROID][DEBUG][DATABASE] Table dailyPlan vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.387Z][ANDROID][DEBUG][DATABASE] Table plan vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.401Z][ANDROID][DEBUG][DATABASE] Table mealIngredients vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.413Z][ANDROID][DEBUG][DATABASE] Table meals vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.424Z][ANDROID][DEBUG][DATABASE] Table ingredientsStandard vidée
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.435Z][ANDROID][DEBUG][DATABASE] Table users vidée
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.437Z][ANDROID][INFO][DATABASE] Insertion des nouvelles données seed...
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.453Z][ANDROID][INFO][UI] Affichage du chargement
+Data: {
+  "fontsLoaded": true,
+  "dbReady": false
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.458Z][ANDROID][INFO][UI] En attente pour masquer le SplashScreen
+Data: {
+  "fontsLoaded": true,
+  "dbReady": false
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.549Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 104.89ms
+Data: {
+  "assetOrUri": 18
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.563Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 113.62ms
+Data: {
+  "assetOrUri": 18
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:01.577Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 127.55ms
+Data: {
+  "assetOrUri": 18
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.591Z][ANDROID][INFO][DATABASE] Préparation des utilisateurs terminée
+ (NOBRIDGE) INFO  [2025-07-02T15:52:01.675Z][ANDROID][INFO][DATABASE] Insertion des utilisateurs réussie
+Data: {
+  "count": 3
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.713Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1033.85ms
+Data: {
+  "assetOrUri": 78
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.717Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1032.90ms
+Data: {
+  "assetOrUri": 79
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.723Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1033.81ms
+Data: {
+  "assetOrUri": 101
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.744Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1047.08ms
+Data: {
+  "assetOrUri": 81
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.745Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1028.38ms
+Data: {
+  "assetOrUri": 88
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.746Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1053.43ms
+Data: {
+  "assetOrUri": 80
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.748Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1047.04ms
+Data: {
+  "assetOrUri": 82
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.753Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1028.69ms
+Data: {
+  "assetOrUri": 97
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.772Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1020.77ms
+Data: {
+  "assetOrUri": 92
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.778Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1015.94ms
+Data: {
+  "assetOrUri": 95
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.784Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1025.72ms
+Data: {
+  "assetOrUri": 94
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.801Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1080.18ms
+Data: {
+  "assetOrUri": 96
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.802Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1088.94ms
+Data: {
+  "assetOrUri": 87
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.803Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1026.33ms
+Data: {
+  "assetOrUri": 86
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.806Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 892.86ms
+Data: {
+  "assetOrUri": 247
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.809Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1103.88ms
+Data: {
+  "assetOrUri": 85
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.813Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 872.04ms
+Data: {
+  "assetOrUri": 252
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.817Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 920.31ms
+Data: {
+  "assetOrUri": 245
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.822Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1056.33ms
+Data: {
+  "assetOrUri": 99
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.826Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 900.36ms
+Data: {
+  "assetOrUri": 248
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.829Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 929.15ms
+Data: {
+  "assetOrUri": 244
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.833Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 958.82ms
+Data: {
+  "assetOrUri": 254
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.841Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1097.95ms
+Data: {
+  "assetOrUri": 90
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.846Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 956.35ms
+Data: {
+  "assetOrUri": 241
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.849Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 846.85ms
+Data: {
+  "assetOrUri": 231
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.851Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 868.21ms
+Data: {
+  "assetOrUri": 224
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.860Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 902.02ms
+Data: {
+  "assetOrUri": 288
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.873Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1077.53ms
+Data: {
+  "assetOrUri": 273
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.902Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1118.04ms
+Data: {
+  "assetOrUri": 276
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.903Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 890.22ms
+Data: {
+  "assetOrUri": 229
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.904Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 877.22ms
+Data: {
+  "assetOrUri": 235
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.905Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 870.79ms
+Data: {
+  "assetOrUri": 237
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.905Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 895.70ms
+Data: {
+  "assetOrUri": 228
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.916Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 983.03ms
+Data: {
+  "assetOrUri": 250
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.917Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1177.90ms
+Data: {
+  "assetOrUri": 89
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.923Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1176.59ms
+Data: {
+  "assetOrUri": 91
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.931Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1161.50ms
+Data: {
+  "assetOrUri": 98
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.935Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1026.29ms
+Data: {
+  "assetOrUri": 246
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.938Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 993.80ms
+Data: {
+  "assetOrUri": 253
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.955Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1246.25ms
+Data: {
+  "assetOrUri": 84
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.987Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 931.96ms
+Data: {
+  "assetOrUri": 212
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.988Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1095.38ms
+Data: {
+  "assetOrUri": 242
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.989Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1052.27ms
+Data: {
+  "assetOrUri": 251
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.990Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1159.52ms
+Data: {
+  "assetOrUri": 263
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.991Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1150.41ms
+Data: {
+  "assetOrUri": 266
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.992Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1114.12ms
+Data: {
+  "assetOrUri": 255
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:02.998Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1191.38ms
+Data: {
+  "assetOrUri": 274
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.003Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1132.01ms
+Data: {
+  "assetOrUri": 267
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.006Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 961.56ms
+Data: {
+  "assetOrUri": 240
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.451Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1648.33ms
+Data: {
+  "assetOrUri": 272
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.458Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1571.94ms
+Data: {
+  "assetOrUri": 257
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.474Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1719.66ms
+Data: {
+  "assetOrUri": 93
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.481Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1660.82ms
+Data: {
+  "assetOrUri": 260
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.557Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1628.16ms
+Data: {
+  "assetOrUri": 249
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.559Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1538.89ms
+Data: {
+  "assetOrUri": 233
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.560Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1598.90ms
+Data: {
+  "assetOrUri": 220
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.571Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1519.31ms
+Data: {
+  "assetOrUri": 218
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.574Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1609.33ms
+Data: {
+  "assetOrUri": 219
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.578Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1476.76ms
+Data: {
+  "assetOrUri": 184
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.583Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1474.79ms
+Data: {
+  "assetOrUri": 194
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.586Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1776.46ms
+Data: {
+  "assetOrUri": 277
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.592Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1554.67ms
+Data: {
+  "assetOrUri": 238
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.600Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1495.09ms
+Data: {
+  "assetOrUri": 185
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.604Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1722.54ms
+Data: {
+  "assetOrUri": 256
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.613Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1778.61ms
+Data: {
+  "assetOrUri": 264
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.621Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1797.34ms
+Data: {
+  "assetOrUri": 261
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.626Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1845.81ms
+Data: {
+  "assetOrUri": 83
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.631Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1542.24ms
+Data: {
+  "assetOrUri": 181
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.652Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1593.90ms
+Data: {
+  "assetOrUri": 213
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.656Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1676.81ms
+Data: {
+  "assetOrUri": 223
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.660Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1540.10ms
+Data: {
+  "assetOrUri": 188
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.664Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1688.56ms
+Data: {
+  "assetOrUri": 222
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.670Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1802.50ms
+Data: {
+  "assetOrUri": 270
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.766Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1966.74ms
+Data: {
+  "assetOrUri": 275
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.775Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1662.94ms
+Data: {
+  "assetOrUri": 193
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.790Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1711.43ms
+Data: {
+  "assetOrUri": 215
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.809Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1633.98ms
+Data: {
+  "assetOrUri": 198
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.869Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1787.73ms
+Data: {
+  "assetOrUri": 216
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.873Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1609.93ms
+Data: {
+  "assetOrUri": 167
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.902Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1709.67ms
+Data: {
+  "assetOrUri": 202
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.904Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1779.90ms
+Data: {
+  "assetOrUri": 187
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.915Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1798.55ms
+Data: {
+  "assetOrUri": 186
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.920Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2015.38ms
+Data: {
+  "assetOrUri": 243
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.926Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2098.93ms
+Data: {
+  "assetOrUri": 262
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.937Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1685.58ms
+Data: {
+  "assetOrUri": 164
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.946Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1871.14ms
+Data: {
+  "assetOrUri": 214
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.948Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1672.98ms
+Data: {
+  "assetOrUri": 171
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.954Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1868.40ms
+Data: {
+  "assetOrUri": 180
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.957Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1686.61ms
+Data: {
+  "assetOrUri": 168
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.960Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1704.44ms
+Data: {
+  "assetOrUri": 165
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.967Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1744.72ms
+Data: {
+  "assetOrUri": 209
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.986Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1726.55ms
+Data: {
+  "assetOrUri": 169
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.987Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1894.28ms
+Data: {
+  "assetOrUri": 182
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.988Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1721.29ms
+Data: {
+  "assetOrUri": 170
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.990Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1857.15ms
+Data: {
+  "assetOrUri": 190
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:03.991Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1862.47ms
+Data: {
+  "assetOrUri": 189
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.075Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1905.04ms
+Data: {
+  "assetOrUri": 197
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.080Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1922.47ms
+Data: {
+  "assetOrUri": 192
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.084Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1946.66ms
+Data: {
+  "assetOrUri": 191
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.097Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1935.18ms
+Data: {
+  "assetOrUri": 195
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.119Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2021.85ms
+Data: {
+  "assetOrUri": 183
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.120Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1830.84ms
+Data: {
+  "assetOrUri": 174
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.175Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1977.91ms
+Data: {
+  "assetOrUri": 203
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.179Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2000.11ms
+Data: {
+  "assetOrUri": 199
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.182Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1889.64ms
+Data: {
+  "assetOrUri": 175
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.185Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1883.63ms
+Data: {
+  "assetOrUri": 177
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.187Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1890.48ms
+Data: {
+  "assetOrUri": 176
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.269Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2421.06ms
+Data: {
+  "assetOrUri": 268
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.274Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2060.33ms
+Data: {
+  "assetOrUri": 207
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.281Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2092.99ms
+Data: {
+  "assetOrUri": 201
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.286Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1957.41ms
+Data: {
+  "assetOrUri": 156
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.289Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1984.08ms
+Data: {
+  "assetOrUri": 179
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.292Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1967.35ms
+Data: {
+  "assetOrUri": 155
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.295Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 1985.44ms
+Data: {
+  "assetOrUri": 178
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.372Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2534.40ms
+Data: {
+  "assetOrUri": 265
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.584Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2577.87ms
+Data: {
+  "assetOrUri": 227
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.593Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2367.01ms
+Data: {
+  "assetOrUri": 210
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.601Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2784.57ms
+Data: {
+  "assetOrUri": 259
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.604Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2252.13ms
+Data: {
+  "assetOrUri": 162
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.606Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2258.13ms
+Data: {
+  "assetOrUri": 157
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.610Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2251.15ms
+Data: {
+  "assetOrUri": 137
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.789Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2433.77ms
+Data: {
+  "assetOrUri": 163
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.798Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2551.41ms
+Data: {
+  "assetOrUri": 211
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.806Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2439.23ms
+Data: {
+  "assetOrUri": 139
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.810Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2591.83ms
+Data: {
+  "assetOrUri": 208
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.814Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2604.59ms
+Data: {
+  "assetOrUri": 206
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.843Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2458.42ms
+Data: {
+  "assetOrUri": 143
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.877Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2434.39ms
+Data: {
+  "assetOrUri": 153
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.881Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2599.30ms
+Data: {
+  "assetOrUri": 172
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.908Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2485.54ms
+Data: {
+  "assetOrUri": 151
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.915Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2499.81ms
+Data: {
+  "assetOrUri": 150
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.920Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2525.70ms
+Data: {
+  "assetOrUri": 144
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.927Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2500.70ms
+Data: {
+  "assetOrUri": 147
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.930Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2460.69ms
+Data: {
+  "assetOrUri": 111
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.935Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2455.52ms
+Data: {
+  "assetOrUri": 110
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:04.997Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2659.98ms
+Data: {
+  "assetOrUri": 159
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.093Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2642.03ms
+Data: {
+  "assetOrUri": 102
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.101Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3101.30ms
+Data: {
+  "assetOrUri": 226
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.196Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2762.10ms
+Data: {
+  "assetOrUri": 149
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.219Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3405.66ms
+Data: {
+  "assetOrUri": 258
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.226Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2947.30ms
+Data: {
+  "assetOrUri": 166
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.229Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2888.49ms
+Data: {
+  "assetOrUri": 160
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.236Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2806.26ms
+Data: {
+  "assetOrUri": 148
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.241Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3217.03ms
+Data: {
+  "assetOrUri": 234
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.243Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2910.65ms
+Data: {
+  "assetOrUri": 158
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.248Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2714.31ms
+Data: {
+  "assetOrUri": 122
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.252Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2812.81ms
+Data: {
+  "assetOrUri": 152
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.295Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2840.84ms
+Data: {
+  "assetOrUri": 103
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.311Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3025.04ms
+Data: {
+  "assetOrUri": 173
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.416Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2969.04ms
+Data: {
+  "assetOrUri": 154
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.428Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3065.08ms
+Data: {
+  "assetOrUri": 138
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.497Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2955.99ms
+Data: {
+  "assetOrUri": 125
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.507Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3555.50ms
+Data: {
+  "assetOrUri": 287
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.509Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2993.36ms
+Data: {
+  "assetOrUri": 118
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.516Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3051.08ms
+Data: {
+  "assetOrUri": 106
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.530Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3054.04ms
+Data: {
+  "assetOrUri": 109
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.537Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2988.25ms
+Data: {
+  "assetOrUri": 126
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.545Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3173.30ms
+Data: {
+  "assetOrUri": 140
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.550Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3161.72ms
+Data: {
+  "assetOrUri": 145
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.559Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3148.10ms
+Data: {
+  "assetOrUri": 146
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.599Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3061.12ms
+Data: {
+  "assetOrUri": 123
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.601Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3256.57ms
+Data: {
+  "assetOrUri": 161
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.603Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3130.12ms
+Data: {
+  "assetOrUri": 108
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.612Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3007.87ms
+Data: {
+  "assetOrUri": 54
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.616Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3431.83ms
+Data: {
+  "assetOrUri": 200
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.621Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 2994.10ms
+Data: {
+  "assetOrUri": 60
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.625Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3042.97ms
+Data: {
+  "assetOrUri": 131
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.632Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3001.06ms
+Data: {
+  "assetOrUri": 61
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.636Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3035.88ms
+Data: {
+  "assetOrUri": 55
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.646Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3147.57ms
+Data: {
+  "assetOrUri": 113
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.648Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3024.92ms
+Data: {
+  "assetOrUri": 59
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.676Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3295.25ms
+Data: {
+  "assetOrUri": 142
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.691Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3160.40ms
+Data: {
+  "assetOrUri": 112
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.729Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3184.37ms
+Data: {
+  "assetOrUri": 124
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.734Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3137.16ms
+Data: {
+  "assetOrUri": 136
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.740Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3278.10ms
+Data: {
+  "assetOrUri": 105
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.747Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3100.40ms
+Data: {
+  "assetOrUri": 65
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.754Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3377.96ms
+Data: {
+  "assetOrUri": 141
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.758Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3091.14ms
+Data: {
+  "assetOrUri": 67
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.761Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3098.23ms
+Data: {
+  "assetOrUri": 66
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.764Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3094.00ms
+Data: {
+  "assetOrUri": 68
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.806Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3600.40ms
+Data: {
+  "assetOrUri": 205
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.875Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3189.49ms
+Data: {
+  "assetOrUri": 72
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.877Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3188.18ms
+Data: {
+  "assetOrUri": 76
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.881Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3200.13ms
+Data: {
+  "assetOrUri": 71
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.884Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3188.13ms
+Data: {
+  "assetOrUri": 75
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:05.904Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3395.50ms
+Data: {
+  "assetOrUri": 115
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.017Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3490.04ms
+Data: {
+  "assetOrUri": 120
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.024Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3471.14ms
+Data: {
+  "assetOrUri": 127
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.115Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3422.06ms
+Data: {
+  "assetOrUri": 74
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.324Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3819.11ms
+Data: {
+  "assetOrUri": 121
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.328Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4332.51ms
+Data: {
+  "assetOrUri": 225
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.334Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3831.81ms
+Data: {
+  "assetOrUri": 107
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.340Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4139.22ms
+Data: {
+  "assetOrUri": 204
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.359Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4496.58ms
+Data: {
+  "assetOrUri": 269
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.360Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3741.30ms
+Data: {
+  "assetOrUri": 58
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.361Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3775.09ms
+Data: {
+  "assetOrUri": 132
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.366Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3727.07ms
+Data: {
+  "assetOrUri": 63
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.370Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3761.84ms
+Data: {
+  "assetOrUri": 56
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.374Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3696.56ms
+Data: {
+  "assetOrUri": 70
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.377Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4603.98ms
+Data: {
+  "assetOrUri": 100
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.380Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3706.28ms
+Data: {
+  "assetOrUri": 69
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.384Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3741.82ms
+Data: {
+  "assetOrUri": 64
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.386Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3686.40ms
+Data: {
+  "assetOrUri": 73
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.392Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4419.98ms
+Data: {
+  "assetOrUri": 221
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.395Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3805.68ms
+Data: {
+  "assetOrUri": 133
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.411Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3776.49ms
+Data: {
+  "assetOrUri": 77
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.412Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3918.01ms
+Data: {
+  "assetOrUri": 114
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.413Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3889.94ms
+Data: {
+  "assetOrUri": 119
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.418Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4470.37ms
+Data: {
+  "assetOrUri": 286
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.582Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 3988.97ms
+Data: {
+  "assetOrUri": 135
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.766Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4246.67ms
+Data: {
+  "assetOrUri": 117
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.806Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4227.51ms
+Data: {
+  "assetOrUri": 134
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.835Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4222.92ms
+Data: {
+  "assetOrUri": 62
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.842Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4873.59ms
+Data: {
+  "assetOrUri": 232
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:06.873Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4360.33ms
+Data: {
+  "assetOrUri": 116
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:07.281Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 4721.04ms
+Data: {
+  "assetOrUri": 129
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:07.783Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 5616.71ms
+Data: {
+  "assetOrUri": 196
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:07.830Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 5875.45ms
+Data: {
+  "assetOrUri": 289
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:07.893Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 5851.95ms
+Data: {
+  "assetOrUri": 239
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:08.200Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 6183.80ms
+Data: {
+  "assetOrUri": 230
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:08.224Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 6193.41ms
+Data: {
+  "assetOrUri": 236
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:08.410Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 5951.94ms
+Data: {
+  "assetOrUri": 104
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:09.481Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 6905.52ms
+Data: {
+  "assetOrUri": 130
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:09.569Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 7012.84ms
+Data: {
+  "assetOrUri": 128
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:09.572Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 7523.48ms
+Data: {
+  "assetOrUri": 217
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:10.029Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 8183.94ms
+Data: {
+  "assetOrUri": 271
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:10.589Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 7973.90ms
+Data: {
+  "assetOrUri": 57
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:10.591Z][ANDROID][INFO][DATABASE] Préparation des ingrédients standards terminée
+ (NOBRIDGE) INFO  [2025-07-02T15:52:12.478Z][ANDROID][INFO][DATABASE] Insertion des ingrédients standards réussie
+Data: {
+  "count": 228
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:12.510Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 27.39ms
+Data: {
+  "assetOrUri": 285
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:12.551Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 56.08ms
+Data: {
+  "assetOrUri": 278
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:12.577Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 90.51ms
+Data: {
+  "assetOrUri": 293
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:12.584Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 92.98ms
+Data: {
+  "assetOrUri": 293
+}
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:12.712Z][ANDROID][DEBUG][PERFORMANCE] Asset chargé en 221.05ms
+Data: {
+  "assetOrUri": 282
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:12.754Z][ANDROID][INFO][DATABASE] Préparation des repas terminée
+ (NOBRIDGE) INFO  [2025-07-02T15:52:12.852Z][ANDROID][INFO][DATABASE] Insertion des repas réussie
+Data: {
+  "count": 5
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.148Z][ANDROID][INFO][DATABASE] Insertion des ingrédients de repas réussie
+Data: {
+  "count": 228
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.163Z][ANDROID][INFO][DATABASE] Insertion des plans réussie
+Data: {
+  "count": 1
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.180Z][ANDROID][INFO][DATABASE] Insertion des plans quotidiens réussie
+Data: {
+  "count": 7
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.236Z][ANDROID][INFO][DATABASE] Insertion des repas de plans quotidiens réussie
+Data: {
+  "count": 35
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.272Z][ANDROID][INFO][DATABASE] Initialisation de la base de données terminée en 11952.53ms
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.273Z][ANDROID][INFO][DATABASE] Données de test ajoutées avec succès
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.279Z][ANDROID][INFO][UI] Application complètement chargée et prête
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.393Z][ANDROID][INFO][UI] Conditions remplies pour masquer le SplashScreen
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.395Z][ANDROID][INFO][UI] SplashScreen masqué avec succès
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.439Z][ANDROID][INFO][DATABASE] Initializing Drizzle ORM
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.503Z][ANDROID][INFO][DATABASE] Vérification de l'accès à la base de données
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.566Z][ANDROID][INFO][DATABASE] Table users accessible
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.571Z][ANDROID][INFO][DATABASE] Table meals accessible
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.576Z][ANDROID][INFO][DATABASE] Table dailyProgress accessible
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.580Z][ANDROID][INFO][DATABASE] Table dailyMealProgress accessible
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.581Z][ANDROID][INFO][DATABASE] Base de données initialisée avec succès
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.711Z][ANDROID][INFO][DATABASE] Initialisation du MCP Server avec la base de données
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.715Z][ANDROID][INFO][DATABASE] MCP Server database initialized successfully
+ (NOBRIDGE) LOG  SQLite MCP Server initialized successfully
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.735Z][ANDROID][INFO][DATABASE] MCP Server initialisé avec succès
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.736Z][ANDROID][INFO][APP] Démarrage du préchargement des données essentielles
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.741Z][ANDROID][INFO][CACHE] Démarrage du préchargement des données (4 tâches)
+Data: {
+  "totalTasks": 4,
+  "silentErrors": true,
+  "verbose": true
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.742Z][ANDROID][INFO][CACHE] Préchargement de: Utilisateur courant (priorité: high)
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.744Z][ANDROID][DEBUG][CACHE] Tâche ignorée (pas d'utilisateur): Utilisateur courant
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.744Z][ANDROID][DEBUG][CACHE] Préchargement: 1/4 tâches terminées
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.745Z][ANDROID][INFO][CACHE] Préchargement de: Plan actuel (priorité: high)
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.746Z][ANDROID][DEBUG][CACHE] Tâche ignorée (pas d'utilisateur): Plan actuel
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.746Z][ANDROID][DEBUG][CACHE] Préchargement: 2/4 tâches terminées
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.746Z][ANDROID][INFO][CACHE] Préchargement de: Repas récents (priorité: medium)
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.747Z][ANDROID][DEBUG][CACHE] Tâche ignorée (pas d'utilisateur): Repas récents
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.747Z][ANDROID][DEBUG][CACHE] Préchargement: 3/4 tâches terminées
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.748Z][ANDROID][INFO][CACHE] Préchargement de: Ingrédients standards (priorité: low)
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.749Z][ANDROID][DEBUG][CACHE] Tâche ignorée (pas d'utilisateur): Ingrédients standards
+ (NOBRIDGE) DEBUG  [2025-07-02T15:52:13.750Z][ANDROID][DEBUG][CACHE] Préchargement: 4/4 tâches terminées
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.750Z][ANDROID][INFO][CACHE] Préchargement terminé: 4/4 tâches complétées
+Data: {
+  "success": true
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.751Z][ANDROID][INFO][APP] Préchargement des données essentielles terminé
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.755Z][ANDROID][INFO][USER] Tentative de chargement de l'utilisateur depuis le stockage
+Data: {
+  "storedUserId": "aucun"
+}
+ (NOBRIDGE) INFO  [2025-07-02T15:52:13.756Z][ANDROID][INFO][USER] Aucun ID utilisateur trouvé dans AsyncStorage
+ (NOBRIDGE) WARN  Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview [Component Stack]

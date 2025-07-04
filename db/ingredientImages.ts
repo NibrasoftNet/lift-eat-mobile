@@ -158,7 +158,7 @@ export const ingredientImages: Record<string, number> = {
   '../assets/images/seed/Légumes-frais-et-transformés/Poireau__Cru.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Poireau__Cru.jpg'),
   '../assets/images/seed/Légumes-frais-et-transformés/Poivron_Vert__Cru.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Poivron_Vert__Cru.jpg'),
   '../assets/images/seed/Légumes-frais-et-transformés/Radis__Cru.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Radis__Cru.jpg'),
-  '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentrée.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentrée.jpg'),
+  '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentree.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentree.jpg'),
   '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Crue.jpg': require('../assets/images/seed/Légumes-frais-et-transformés/Tomate__Crue.jpg'),
   '../assets/images/seed/Légumes-secs/Fenugrec__Graines_Entières.jpg': require('../assets/images/seed/Légumes-secs/Fenugrec__Graines_Entières.jpg'),
   '../assets/images/seed/Légumes-secs/Fève_Sèche__Crue.jpg': require('../assets/images/seed/Légumes-secs/Fève_Sèche__Crue.jpg'),

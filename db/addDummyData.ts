@@ -65,7 +65,7 @@ async function getImageBuffer(assetOrUri: number | string): Promise<any | null> 
     });
 
     const duration = performance.now() - startTime;
-    logger.debug(LogCategory.PERFORMANCE, `Asset chargé en ${duration.toFixed(2)}ms`, { assetOrUri });
+   // logger.debug(LogCategory.PERFORMANCE, `Asset chargé en ${duration.toFixed(2)}ms`, { assetOrUri });
     return base64Data;
   } catch (error) {
     logger.error(LogCategory.DATABASE, `Erreur générale de chargement d'asset`, { assetOrUri, error });

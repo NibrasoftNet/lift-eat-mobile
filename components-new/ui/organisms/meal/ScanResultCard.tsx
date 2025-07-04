@@ -5,7 +5,7 @@ import { useTheme } from '@/themeNew';
 import CircularNutritionProgress from '@/components-new/ui/molecules/tracking/CircularNutritionProgress';
 
 import scanPagesService from '@/utils/services/pages/scan-pages.service';
-import { useToast } from '@/components-new/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import MultiPurposeToast from '@/components-new/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
 

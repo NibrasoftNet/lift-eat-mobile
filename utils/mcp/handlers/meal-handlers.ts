@@ -706,16 +706,28 @@ export async function handleUpdateMeal(db: any, params: UpdateMealParams): Promi
         normalizedMacros.totalProtein  = +normalizedMacros.totalProtein.toFixed(2);
       }
 
-      // Préparer les données pour la mise à jour (inclut macros recalculés)
-      const updateData = {
+      // Préparer les données pour la mise à jour
+      // Ne pas écraser les macros nutritionnelles existantes si elles ne sont pas
+      // fournies ou recalculées. Cela évite de remettre les valeurs à 0 lors
+      // d'une simple mise à jour (ex. changement de favori).
+      const updateData: any = {
         ...data,
-        calories: normalizedMacros.totalCalories,
-        carbs: normalizedMacros.totalCarbs,
-        fat: normalizedMacros.totalFats,
-        protein: normalizedMacros.totalProtein,
-        quantity: STANDARD_WEIGHT,
         updatedAt: new Date().toISOString(),
       };
+
+      // Si des ingrédients sont fournis, nous recalculons et remplaçons toujours
+      // les valeurs nutritionnelles ainsi que la quantité de référence.
+      if (ingredients && ingredients.length > 0) {
+        updateData.calories = normalizedMacros.totalCalories;
+        updateData.carbs    = normalizedMacros.totalCarbs;
+        updateData.fat      = normalizedMacros.totalFats;
+        updateData.protein  = normalizedMacros.totalProtein;
+        updateData.quantity = STANDARD_WEIGHT;
+      }
+      // Si aucune liste d'ingrédients n'est transmise, nous ne modifions les
+      // macros que si elles sont explicitement présentes dans les données.
+      // Sinon, elles restent inchangées dans la base de données.
+
       
       // Si nous avons reçu une imageUri (string), la convertir et l'assigner au champ image (blob)
       if (hasImageUri) {

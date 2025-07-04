@@ -4,7 +4,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as schema from '@/db/schema';
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 import { View, ActivityIndicator } from 'react-native';
-import Text from '@/components-new/ui/atoms/base/Text';
+import { Text } from '@/components/ui/text';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 

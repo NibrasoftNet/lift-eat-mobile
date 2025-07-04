@@ -1,9 +1,10 @@
-import Box from '@/components-new/ui/atoms/base/Box';
-import Text from '@/components-new/ui/atoms/base/Text';
-import React from 'react';
-import { ActivityIndicator } from 'react-native';
-import { useAppTheme } from '@/utils/providers/ThemeProvider';
+import { Card } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { VStack } from '@/components/ui/vstack';
+import { Text } from '@/components/ui/text';
+import { Heading } from '@/components/ui/heading';
 import { Link } from 'expo-router';
+import React from 'react';
 
 export const QueryStateHandler = <T,>({
   isLoading,
@@ -22,7 +23,6 @@ export const QueryStateHandler = <T,>({
   data: T | T[] | undefined | null;
   children: React.ReactNode;
 }) => {
-  const theme = useAppTheme();
   if (data === null || data === undefined) {
     if (
       isPending ||
@@ -32,22 +32,28 @@ export const QueryStateHandler = <T,>({
       isFetchedAfterMount
     ) {
       return (
-        <Box flex={1} justifyContent="center" alignItems="center" px={16}>
-          <ActivityIndicator size="large" color={theme.color('secondary')} />
-          <Text variant="body" mt={8}>Please Wait</Text>
-        </Box>
+        <VStack className="flex-1 w-full h-full items-center justify-center gap-2">
+          <Spinner />
+          <Text size="md">Please Wait</Text>
+        </VStack>
       );
     }
     return (
-      <Box flex={1} justifyContent="center" alignItems="center" px={16}>
-        <Box bg={theme.colors.background} px={24} py={32} rounded="lg" shadow="md" alignItems="center">
-          <Text variant="h3" mb={4}>Data Not Found</Text>
-          <Text variant="body" mb={12}>No result has been found</Text>
-          <Link href="/loginNew">
-            <Text variant="button" color={theme.color('secondary')}>Back to login</Text>
+      <VStack className="flex-1 w-full h-full items-center justify-center">
+        <Card
+          size="md"
+          variant="elevated"
+          className="m-3 items-center justify-center"
+        >
+          <Heading size="md" className="mb-1">
+            Data Not Found
+          </Heading>
+          <Text size="sm">No result has been found</Text>
+          <Link href="/login">
+            <Text size="sm">Back to login</Text>
           </Link>
-        </Box>
-      </Box>
+        </Card>
+      </VStack>
     );
   }
   if (data) {

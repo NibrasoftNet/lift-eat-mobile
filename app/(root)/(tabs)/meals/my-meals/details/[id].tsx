@@ -50,6 +50,13 @@ const MealDetailsScreen = () => {
   
   // Extraction des données du repas depuis le résultat de l'API
   const meal = mealData?.data?.meal;
+
+  // Synchroniser l'état local favori avec les données récupérées
+  React.useEffect(() => {
+    if (meal?.isFavorite !== undefined && meal?.isFavorite !== null) {
+      setIsFavorite(meal.isFavorite);
+    }
+  }, [meal?.isFavorite]);
   const ingredients = mealData?.data?.ingredients || [];
 
   // Refetch meal data when screen regains focus (e.g., after editing)
