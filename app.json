@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "lift&eat",
-    "slug": "liftandeat",
+    "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.jpg",
