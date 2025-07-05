@@ -45,7 +45,7 @@ const AppLogo: React.FC<AppLogoProps> = ({
   logoStyle,
   textStyle,
   // Contenu
-  logoSource = require('@/assets/images/logo.jpg'), // Utilise le logo par défaut de l'application
+  logoSource = require('@/assets/images/logo.png'), // Utilise le logo par défaut de l'application
   appName = 'Lift', // Nom par défaut de l'application
 }) => {
   const appTheme = useAppTheme();
