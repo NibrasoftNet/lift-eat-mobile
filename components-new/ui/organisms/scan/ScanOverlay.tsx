@@ -108,6 +108,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: '#A4C73B',
     padding: 12,
     borderRadius: 8,
+    opacity: 0.6,
   },
   scanTextContent: {
     color: theme.colors.textInverse,

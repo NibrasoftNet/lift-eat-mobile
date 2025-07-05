@@ -2,25 +2,33 @@
   "expo": {
     "name": "lift&eat",
     "slug": "fitness",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "splash": {
       "image": "./assets/images/auth/login_background.png",
       "resizeMode": "cover",
-      "backgroundColor": "#21273F"
+      "backgroundColor": "#F7FBF1"
     },
     "scheme": "lift-and-eat",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "android": {
+      "package": "com.nibrasoftnet.liftandeat",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "ios": {
       "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png"
-      },
-      "package": "com.nibrasoftnet.liftandeat"
     },
     "web": {
       "bundler": "metro",
@@ -32,8 +40,9 @@
       "expo-sqlite",
       "expo-localization",
       "expo-asset",
-      "expo-secure-store"
-    ],
+      "expo-secure-store",
+      "expo-camera",
+      "expo-av"    ],
     "experiments": {
       "typedRoutes": true
     },
