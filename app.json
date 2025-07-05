@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Lift & Eat",
-    "slug": "lift-eat",
+    "name": "lift&eat",
+    "slug": "fitness",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -15,7 +15,6 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.nibrasoftnet.liftandeat",
-      "versionCode": 2,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
