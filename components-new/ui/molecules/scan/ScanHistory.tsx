@@ -9,20 +9,22 @@ import { GetScanHistoryResult } from '@/utils/mcp/interfaces/scan-history-interf
 import { ScanHistoryItem, ScanHistoryProps } from '@/types/scanhistory.types';
 import { useTranslation } from 'react-i18next';
 
-
-
 /**
  * Composant ScanHistory — liste l'historique des scans récents
  * Se limite à l'affichage, délègue la logique (stockage) au service pages ou store.
  */
-const ScanHistory: React.FC<ScanHistoryProps> = ({ userId, onSelect, onClear }) => {
+const ScanHistory: React.FC<ScanHistoryProps> = ({
+  userId,
+  onSelect,
+  onClear,
+}) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const [data, setData] = useState<OperationResult<GetScanHistoryResult>>({
     success: false,
-    error: t('common.loading')
+    error: t('common.loading'),
   });
 
   useEffect(() => {
@@ -34,7 +36,7 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ userId, onSelect, onClear }) 
         console.error('Error fetching scan history:', error);
         setData({
           success: false,
-          error: t('scanner.history.loadError')
+          error: t('scanner.history.loadError'),
         });
       }
     };
@@ -62,7 +64,9 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ userId, onSelect, onClear }) 
             onPress={() => onSelect?.(item)}
           >
             <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemDate}>{new Date(item.scannedAt).toLocaleDateString()}</Text>
+            <Text style={styles.itemDate}>
+              {new Date(item.scannedAt).toLocaleDateString()}
+            </Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id.toString()}

@@ -11,7 +11,7 @@ describe('NutritionsChart', () => {
       carbs: 150,
       protein: 80,
       fat: 50,
-      unit: 'g'
+      unit: 'g',
     };
 
     const goalValues = {
@@ -19,17 +19,17 @@ describe('NutritionsChart', () => {
       carbs: 200,
       protein: 100,
       fat: 70,
-      unit: 'g'
+      unit: 'g',
     };
 
     console.log('Test Case 1 - En dessous des objectifs:');
     console.log('Current:', currentValues);
     console.log('Goals:', goalValues);
     console.log('Expected percentages:', {
-      calories: (1500/2000) * 100,
-      carbs: (150/200) * 100,
-      protein: (80/100) * 100,
-      fat: (50/70) * 100
+      calories: (1500 / 2000) * 100,
+      carbs: (150 / 200) * 100,
+      protein: (80 / 100) * 100,
+      fat: (50 / 70) * 100,
     });
 
     render(
@@ -37,7 +37,7 @@ describe('NutritionsChart', () => {
         currentValues={currentValues}
         goalValues={goalValues}
         displayMode={NutritionDisplayMode.FULL}
-      />
+      />,
     );
   });
 
@@ -48,7 +48,7 @@ describe('NutritionsChart', () => {
       carbs: 200,
       protein: 100,
       fat: 70,
-      unit: 'g'
+      unit: 'g',
     };
 
     console.log('Test Case 2 - Égal aux objectifs:');
@@ -57,7 +57,7 @@ describe('NutritionsChart', () => {
       calories: 100,
       carbs: 100,
       protein: 100,
-      fat: 100
+      fat: 100,
     });
 
     render(
@@ -65,7 +65,7 @@ describe('NutritionsChart', () => {
         currentValues={values}
         goalValues={values}
         displayMode={NutritionDisplayMode.FULL}
-      />
+      />,
     );
   });
 
@@ -76,7 +76,7 @@ describe('NutritionsChart', () => {
       carbs: 250,
       protein: 120,
       fat: 90,
-      unit: 'g'
+      unit: 'g',
     };
 
     const goalValues = {
@@ -84,17 +84,17 @@ describe('NutritionsChart', () => {
       carbs: 200,
       protein: 100,
       fat: 70,
-      unit: 'g'
+      unit: 'g',
     };
 
     console.log('Test Case 3 - Au-dessus des objectifs:');
     console.log('Current:', currentValues);
     console.log('Goals:', goalValues);
     console.log('Expected percentages:', {
-      calories: (2500/2000) * 100,
-      carbs: (250/200) * 100,
-      protein: (120/100) * 100,
-      fat: (90/70) * 100
+      calories: (2500 / 2000) * 100,
+      carbs: (250 / 200) * 100,
+      protein: (120 / 100) * 100,
+      fat: (90 / 70) * 100,
     });
 
     render(
@@ -102,7 +102,7 @@ describe('NutritionsChart', () => {
         currentValues={currentValues}
         goalValues={goalValues}
         displayMode={NutritionDisplayMode.FULL}
-      />
+      />,
     );
   });
 
@@ -113,7 +113,7 @@ describe('NutritionsChart', () => {
       carbs: 150,
       protein: 80,
       fat: 50,
-      unit: 'g'
+      unit: 'g',
     };
 
     const goalValues = {
@@ -121,7 +121,7 @@ describe('NutritionsChart', () => {
       carbs: 0,
       protein: 0,
       fat: 0,
-      unit: 'g'
+      unit: 'g',
     };
 
     console.log('Test Case 4 - Objectifs à zéro:');
@@ -134,7 +134,7 @@ describe('NutritionsChart', () => {
         currentValues={currentValues}
         goalValues={goalValues}
         displayMode={NutritionDisplayMode.FULL}
-      />
+      />,
     );
   });
 });

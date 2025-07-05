@@ -62,106 +62,173 @@ export const missingIngredientApiService = {
    */
   async getSuggestions(
     mealId?: number,
-    status?: SuggestionStatus
+    status?: SuggestionStatus,
   ): Promise<{ success: boolean; suggestions?: any[]; error?: string }> {
     try {
-      logger.debug(LogCategory.IA, `Récupération des suggestions${mealId ? ` pour le repas ${mealId}` : ''}`, 'getSuggestions');
-      
-      const result = await ingredientSuggestionCoreService.getSuggestions(status);
-      
+      logger.debug(
+        LogCategory.IA,
+        `Récupération des suggestions${
+          mealId ? ` pour le repas ${mealId}` : ''
+        }`,
+        'getSuggestions',
+      );
+
+      const result = await ingredientSuggestionCoreService.getSuggestions(
+        status,
+      );
+
       // Si un mealId est spécifié, filtrer les suggestions
       if (mealId && result.success && result.suggestions) {
-        result.suggestions = result.suggestions.filter(s => s.mealId === mealId);
+        result.suggestions = result.suggestions.filter(
+          (s) => s.mealId === mealId,
+        );
       }
-      
+
       return result;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la récupération des suggestions: ${error instanceof Error ? error.message : String(error)}`, 'getSuggestions');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la récupération des suggestions: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'getSuggestions',
+      );
+
       return {
         success: false,
-        error: `Erreur lors de la récupération des suggestions: ${error instanceof Error ? error.message : String(error)}`
+        error: `Erreur lors de la récupération des suggestions: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       };
     }
   },
-  
+
   /**
    * Sauvegarde une suggestion d'ingrédient
    * @param request Requête de suggestion
    * @returns Résultat avec l'ID de la suggestion créée
    */
-  async saveSuggestion(request: SuggestionRequest): Promise<{ success: boolean; suggestionId?: number; error?: string }> {
+  async saveSuggestion(
+    request: SuggestionRequest,
+  ): Promise<{ success: boolean; suggestionId?: number; error?: string }> {
     try {
-      logger.debug(LogCategory.IA, `Sauvegarde d'une suggestion pour le repas ${request.mealId}`, 'saveSuggestion');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Sauvegarde d'une suggestion pour le repas ${request.mealId}`,
+        'saveSuggestion',
+      );
+
       // Créer la suggestion directement, sans rechercher d'ingrédients similaires
       const ingredient: IaIngredientType = {
         name: request.ingredientName,
-        unit: request.unit ? (request.unit as MealUnitEnum) : MealUnitEnum.GRAMMES,
+        unit: request.unit
+          ? (request.unit as MealUnitEnum)
+          : MealUnitEnum.GRAMMES,
         quantity: request.quantity || 0,
         calories: 0,
         protein: 0,
         carbs: 0,
-        fat: 0
+        fat: 0,
       };
-      
-      const response = await ingredientSuggestionCoreService.saveSuggestion(ingredient, 'pending');
-      
+
+      const response = await ingredientSuggestionCoreService.saveSuggestion(
+        ingredient,
+        'pending',
+      );
+
       return response;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la sauvegarde d'une suggestion: ${error instanceof Error ? error.message : String(error)}`, 'saveSuggestion');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la sauvegarde d'une suggestion: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'saveSuggestion',
+      );
+
       return {
         success: false,
-        error: `Erreur lors de la sauvegarde d'une suggestion: ${error instanceof Error ? error.message : String(error)}`
+        error: `Erreur lors de la sauvegarde d'une suggestion: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       };
     }
   },
-  
+
   /**
    * Met à jour le statut d'une suggestion
    * @param update Mise à jour de statut
    * @returns Résultat de la mise à jour
    */
-  async updateSuggestionStatus(update: SuggestionStatusUpdate): Promise<{ success: boolean; error?: string }> {
+  async updateSuggestionStatus(
+    update: SuggestionStatusUpdate,
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      logger.debug(LogCategory.IA, `Mise à jour du statut de la suggestion ${update.suggestionId} à ${update.status}`, 'updateSuggestionStatus');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Mise à jour du statut de la suggestion ${update.suggestionId} à ${update.status}`,
+        'updateSuggestionStatus',
+      );
+
       const response = await ingredientSuggestionCoreService.updateSuggestion(
         update.suggestionId,
-        update.status
+        update.status,
       );
-      
+
       return response;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la mise à jour du statut: ${error instanceof Error ? error.message : String(error)}`, 'updateSuggestionStatus');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la mise à jour du statut: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'updateSuggestionStatus',
+      );
+
       return {
         success: false,
-        error: `Erreur lors de la mise à jour du statut: ${error instanceof Error ? error.message : String(error)}`
+        error: `Erreur lors de la mise à jour du statut: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       };
     }
   },
-  
+
   /**
    * Supprime une suggestion
    * @param suggestionId ID de la suggestion
    * @returns Résultat de la suppression
    */
-  async deleteSuggestion(suggestionId: number): Promise<{ success: boolean; error?: string }> {
+  async deleteSuggestion(
+    suggestionId: number,
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      logger.debug(LogCategory.IA, `Suppression de la suggestion ${suggestionId}`, 'deleteSuggestion');
-      
-      const response = await ingredientSuggestionCoreService.deleteSuggestion(suggestionId);
-      
+      logger.debug(
+        LogCategory.IA,
+        `Suppression de la suggestion ${suggestionId}`,
+        'deleteSuggestion',
+      );
+
+      const response = await ingredientSuggestionCoreService.deleteSuggestion(
+        suggestionId,
+      );
+
       return response;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la suppression de la suggestion: ${error instanceof Error ? error.message : String(error)}`, 'deleteSuggestion');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la suppression de la suggestion: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'deleteSuggestion',
+      );
+
       return {
         success: false,
-        error: `Erreur lors de la suppression de la suggestion: ${error instanceof Error ? error.message : String(error)}`
+        error: `Erreur lors de la suppression de la suggestion: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       };
     }
-  }
+  },
 };

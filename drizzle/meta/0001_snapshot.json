@@ -106,12 +106,8 @@
           "name": "daily_meal_progress_daily_progress_id_daily_progress_id_fk",
           "tableFrom": "daily_meal_progress",
           "tableTo": "daily_progress",
-          "columnsFrom": [
-            "daily_progress_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["daily_progress_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -119,12 +115,8 @@
           "name": "daily_meal_progress_daily_plan_meal_id_daily_plan_meals_id_fk",
           "tableFrom": "daily_meal_progress",
           "tableTo": "daily_plan_meals",
-          "columnsFrom": [
-            "daily_plan_meal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["daily_plan_meal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -132,12 +124,8 @@
           "name": "daily_meal_progress_meal_id_meals_id_fk",
           "tableFrom": "daily_meal_progress",
           "tableTo": "meals",
-          "columnsFrom": [
-            "meal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -242,12 +230,8 @@
           "name": "daily_plan_plan_id_plan_id_fk",
           "tableFrom": "daily_plan",
           "tableTo": "plan",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -346,12 +330,8 @@
           "name": "daily_plan_meals_daily_plan_id_daily_plan_id_fk",
           "tableFrom": "daily_plan_meals",
           "tableTo": "daily_plan",
-          "columnsFrom": [
-            "daily_plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["daily_plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -359,12 +339,8 @@
           "name": "daily_plan_meals_meal_id_meals_id_fk",
           "tableFrom": "daily_plan_meals",
           "tableTo": "meals",
-          "columnsFrom": [
-            "meal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -467,12 +443,8 @@
           "name": "daily_progress_user_id_users_id_fk",
           "tableFrom": "daily_progress",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -480,12 +452,8 @@
           "name": "daily_progress_plan_id_plan_id_fk",
           "tableFrom": "daily_progress",
           "tableTo": "plan",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -605,12 +573,8 @@
           "name": "ingredient_suggestions_user_id_users_id_fk",
           "tableFrom": "ingredient_suggestions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -802,12 +766,8 @@
           "name": "meal_ingredients_ingredient_standard_id_ingredients_standard_id_fk",
           "tableFrom": "meal_ingredients",
           "tableTo": "ingredients_standard",
-          "columnsFrom": [
-            "ingredient_standard_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ingredient_standard_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -815,12 +775,8 @@
           "name": "meal_ingredients_meal_id_meals_id_fk",
           "tableFrom": "meal_ingredients",
           "tableTo": "meals",
-          "columnsFrom": [
-            "meal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -956,12 +912,8 @@
           "name": "meals_creator_id_users_id_fk",
           "tableFrom": "meals",
           "tableTo": "users",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["creator_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1068,12 +1020,8 @@
           "name": "nutrition_advice_plan_id_plan_id_fk",
           "tableFrom": "nutrition_advice",
           "tableTo": "plan",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1081,12 +1029,8 @@
           "name": "nutrition_advice_meal_id_meals_id_fk",
           "tableFrom": "nutrition_advice",
           "tableTo": "meals",
-          "columnsFrom": [
-            "meal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1094,12 +1038,8 @@
           "name": "nutrition_advice_user_id_users_id_fk",
           "tableFrom": "nutrition_advice",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1260,12 +1200,8 @@
           "name": "plan_user_id_users_id_fk",
           "tableFrom": "plan",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1321,12 +1257,8 @@
           "name": "user_allergies_user_id_users_id_fk",
           "tableFrom": "user_allergies",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1382,12 +1314,8 @@
           "name": "user_dietary_restrictions_user_id_users_id_fk",
           "tableFrom": "user_dietary_restrictions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1479,12 +1407,8 @@
           "name": "user_nutrition_goals_user_id_users_id_fk",
           "tableFrom": "user_nutrition_goals",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1617,9 +1541,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

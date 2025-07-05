@@ -32,7 +32,7 @@ const NutritionCard: React.FC<NutritionCardProps> = ({
   onPress,
 }) => {
   const theme = useAppTheme();
-  
+
   // Définir les styles en fonction de la variante et du mode (light/dark)
   const getBackgroundColor = () => {
     if (isDarkMode) {
@@ -57,7 +57,7 @@ const NutritionCard: React.FC<NutritionCardProps> = ({
   };
 
   const CardComponent = onPress ? TouchableOpacity : View;
-  
+
   return (
     <CardComponent
       style={[
@@ -66,7 +66,9 @@ const NutritionCard: React.FC<NutritionCardProps> = ({
           backgroundColor: getBackgroundColor(),
           borderColor: getBorderColor(),
           borderWidth: variant === 'selected' ? 1.5 : 1,
-          shadowColor: isDarkMode ? 'rgba(4, 6, 15, 0.16)' : 'rgba(0, 0, 0, 0.08)',
+          shadowColor: isDarkMode
+            ? 'rgba(4, 6, 15, 0.16)'
+            : 'rgba(0, 0, 0, 0.08)',
         },
       ]}
       onPress={onPress}
@@ -78,11 +80,7 @@ const NutritionCard: React.FC<NutritionCardProps> = ({
         >
           {title}
         </Text>
-        <Text
-          variant="h3"
-          bold
-          style={[styles.value, { color: color }]}
-        >
+        <Text variant="h3" bold style={[styles.value, { color: color }]}>
           {value}
         </Text>
         {subtitle && (

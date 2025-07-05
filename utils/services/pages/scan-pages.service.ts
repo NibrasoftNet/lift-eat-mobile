@@ -16,9 +16,13 @@ class ScanPagesService {
    * Ajoute ou met à jour un produit scanné dans la table ingredients_standard.
    * @param ingredientData Données normalisées (pour 100 g) provenant du scan OCR / API externe.
    */
-  async addScannedIngredient(ingredientData: IaIngredientType): Promise<OperationResult<{ id: number; alreadyExists: boolean }>> {
+  async addScannedIngredient(
+    ingredientData: IaIngredientType,
+  ): Promise<OperationResult<{ id: number; alreadyExists: boolean }>> {
     try {
-      logger.info(LogCategory.DATABASE, '[SCAN] addScannedIngredient', { ingredientData });
+      logger.info(LogCategory.DATABASE, '[SCAN] addScannedIngredient', {
+        ingredientData,
+      });
 
       // Récupérer l'ID utilisateur courant
       const userId = getCurrentUserIdSync();
@@ -26,10 +30,16 @@ class ScanPagesService {
         throw new Error('User not authenticated');
       }
 
-      const result = await ingredientCoreService.createIngredient(ingredientData);
+      const result = await ingredientCoreService.createIngredient(
+        ingredientData,
+      );
 
       // Enregistrer l'historique avec l'ID utilisateur
-      await this.addScanHistory(ingredientData.barcode, ingredientData.name, userId);
+      await this.addScanHistory(
+        ingredientData.barcode,
+        ingredientData.name,
+        userId,
+      );
 
       return {
         success: true,
@@ -57,7 +67,11 @@ class ScanPagesService {
   /**
    * Enregistre une entrée d'historique de scan
    */
-  async addScanHistory(barcode: string | undefined, name: string, userIdParam?: number) {
+  async addScanHistory(
+    barcode: string | undefined,
+    name: string,
+    userIdParam?: number,
+  ) {
     const userId = userIdParam ?? getCurrentUserIdSync();
     if (!userId) {
       return { success: false, error: 'User not authenticated' } as any;

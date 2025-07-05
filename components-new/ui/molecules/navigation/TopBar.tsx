@@ -19,7 +19,6 @@ import {
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
 
-
 // Types pour les variantes du composant TopBar
 type TopBarType = 'default' | 'navbar' | 'tabs';
 type TopBarTheme = 'light' | 'dark' | 'default';
@@ -74,26 +73,27 @@ const TopBar: React.FC<TopBarProps> = ({
   transparent = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer les couleurs selon le thème
   const isDark = theme === 'dark';
-  const backgroundColor = transparent 
-    ? 'transparent' 
-    : isDark 
-      ? '#1F222A' // Couleur exacte du Figma
-      : '#FFFFFF'; // Couleur exacte du Figma
-  
+  const backgroundColor = transparent
+    ? 'transparent'
+    : isDark
+    ? '#1F222A' // Couleur exacte du Figma
+    : '#FFFFFF'; // Couleur exacte du Figma
+
   const textColor = isDark ? '#FFFFFF' : '#212121'; // Couleurs exactes du Figma
   const activeTabColor = appTheme.color('primary'); // Couleur du thème
   const inactiveTabColor = isDark ? '#9E9E9E' : '#757575'; // Couleurs exactes du Figma
-  
+
   // Déterminer le style de la barre d'état
-  const barStyle = statusBarStyle || (isDark ? 'light-content' : 'dark-content');
-  
+  const barStyle =
+    statusBarStyle || (isDark ? 'light-content' : 'dark-content');
+
   // Rendre la barre d'état
   const renderStatusBar = () => {
     if (!showStatusBar) return null;
-    
+
     return (
       <StatusBar
         barStyle={barStyle}
@@ -102,20 +102,17 @@ const TopBar: React.FC<TopBarProps> = ({
       />
     );
   };
-  
+
   // Rendre les onglets (si type === 'tabs')
   const renderTabs = () => {
     if (type !== 'tabs' || tabs.length === 0) return null;
-    
+
     return (
       <Box style={styles.tabsContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[
-              styles.tab,
-              tab.isActive && styles.activeTab,
-            ]}
+            style={[styles.tab, tab.isActive && styles.activeTab]}
             onPress={() => onTabPress && onTabPress(tab.id)}
             activeOpacity={0.7}
           >
@@ -143,7 +140,7 @@ const TopBar: React.FC<TopBarProps> = ({
       </Box>
     );
   };
-  
+
   // Rendre le contenu principal de la barre
   const renderContent = () => {
     return (
@@ -164,7 +161,7 @@ const TopBar: React.FC<TopBarProps> = ({
             {leftIcon}
           </TouchableOpacity>
         )}
-        
+
         {/* Titre (optionnel) */}
         {title && (
           <Text
@@ -177,10 +174,10 @@ const TopBar: React.FC<TopBarProps> = ({
             {title}
           </Text>
         )}
-        
+
         {/* Espace flexible pour centrer le titre */}
         <View style={styles.flexSpace} />
-        
+
         {/* Icône droite (optionnelle) */}
         {rightIcon && (
           <TouchableOpacity
@@ -195,14 +192,18 @@ const TopBar: React.FC<TopBarProps> = ({
       </Box>
     );
   };
-  
+
   return (
     <SafeAreaView
       style={[
         styles.container,
         {
           backgroundColor,
-          paddingTop: transparent ? 0 : Platform.OS === 'ios' ? 0 : StatusBar.currentHeight,
+          paddingTop: transparent
+            ? 0
+            : Platform.OS === 'ios'
+            ? 0
+            : StatusBar.currentHeight,
         },
         containerStyle as ViewStyle,
       ]}

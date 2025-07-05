@@ -4,14 +4,14 @@
  */
 
 import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
@@ -39,7 +39,10 @@ import { LoginRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/L
 import { LockRegularTwotoneIcon } from '../../../assets/icons/figma/regular-two-tone/LockRegularTwotoneIcon';
 import { MessageRegularTwotoneIcon } from '../../../assets/icons/figma/regular-two-tone/MessageRegularTwotoneIcon';
 // Import validation schema and interfaces
-import { LoginFormData, loginSchema } from '../../../utils/validation/auth/login-schema.validation';
+import {
+  LoginFormData,
+  loginSchema,
+} from '../../../utils/validation/auth/login-schema.validation';
 import { useMutation } from '@tanstack/react-query';
 import { authPagesService } from '../../../utils/services/pages/auth-pages.service';
 import useSessionStore from '../../../utils/store/sessionStore';
@@ -74,22 +77,26 @@ export default function LoginNew() {
   ) => {
     console.log('[SSO] Début du flux SSO avec la stratégie:', strategy);
     try {
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy,
-        redirectUrl: Linking.createURL('/'),
-      });
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy,
+          redirectUrl: Linking.createURL('/'),
+        });
 
-      console.log('[SSO] SSO flow terminé – createdSessionId:', createdSessionId);
+      console.log(
+        '[SSO] SSO flow terminé – createdSessionId:',
+        createdSessionId,
+      );
       console.log('[SSO] signIn object:', signIn);
       console.log('[SSO] signUp object:', signUp);
 
       let email: string | undefined;
       // Try to extract email from signIn/signUp objects if available
-      if ('emailAddress' in (signIn as any || {})) {
+      if ('emailAddress' in ((signIn as any) || {})) {
         // @ts-ignore
         email = signIn?.emailAddress ?? undefined;
       }
-      if (!email && 'emailAddress' in (signUp as any || {})) {
+      if (!email && 'emailAddress' in ((signUp as any) || {})) {
         // @ts-ignore
         email = signUp?.emailAddress ?? undefined;
       }
@@ -119,7 +126,9 @@ export default function LoginNew() {
 
           if (isNewUser) {
             // Nettoyer les anciennes données d'onboarding pour éviter pré-remplissage
-            console.log('[SSO] Nouvel utilisateur – purge des données onboarding');
+            console.log(
+              '[SSO] Nouvel utilisateur – purge des données onboarding',
+            );
             await OnboardingService.clearUserData();
             console.log('[SSO] Redirection vers onboarding-step1');
             router.replace('/(root)/onboarding/onboarding-step1');
@@ -156,22 +165,27 @@ export default function LoginNew() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
       logger.info(LogCategory.AUTH, 'Authentification utilisateur', {
-        email: data.email
+        email: data.email,
       });
-      
+
       // Utiliser le service d'authentification avec la méthode login
       const result = await authPagesService.login(data);
-      
+
       if (!result.success) {
         logger.error(LogCategory.AUTH, `Échec de connexion: ${result.error}`);
         throw new Error(result.error || 'Échec de connexion');
       }
-      
+
       if (!result.data || !result.data.user) {
-        logger.warn(LogCategory.AUTH, `Utilisateur avec l'email ${data.email} non trouvé`);
-        throw new Error('Utilisateur non trouvé. Veuillez vous inscrire d\'abord.');
+        logger.warn(
+          LogCategory.AUTH,
+          `Utilisateur avec l'email ${data.email} non trouvé`,
+        );
+        throw new Error(
+          "Utilisateur non trouvé. Veuillez vous inscrire d'abord.",
+        );
       }
-      
+
       return result.data.user;
     },
     onSuccess: (data) => {
@@ -185,8 +199,8 @@ export default function LoginNew() {
       try {
         // Utiliser router.push qui est compatible avec les types d'Expo Router
         router.push('/(root)/(tabs)/meals/my-meals');
-        
-        console.log('Navigation vers l\'écran des repas après connexion');
+
+        console.log("Navigation vers l'écran des repas après connexion");
       } catch (error) {
         console.error('Erreur lors de la navigation:', error);
         // En cas d'échec, essayer une approche plus simple
@@ -228,7 +242,7 @@ export default function LoginNew() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
@@ -237,20 +251,10 @@ export default function LoginNew() {
           <View style={styles.headerContainer}>
             <LogoIcon size={60} />
             <View style={styles.titleContainer}>
-              <Text
-                variant="h2"
-                bold
-                color="#212121"
-                align='center'
-                mb={10}
-              >
+              <Text variant="h2" bold color="#212121" align="center" mb={10}>
                 Welcome Back! 👋
               </Text>
-              <Text
-                variant="body"
-                color="#616161"
-                align= 'center'
-              >
+              <Text variant="body" color="#616161" align="center">
                 Sign in to continue your journey towards a healthier you.
               </Text>
             </View>
@@ -260,8 +264,14 @@ export default function LoginNew() {
           <View style={styles.formContainer}>
             {/* Champ Email */}
             <View style={styles.inputContainer}>
-              <Text 
-                style={{fontSize: 18, fontWeight: '600', fontFamily: 'Urbanist', color: '#212121', marginBottom: 8}}
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  fontFamily: 'Urbanist',
+                  color: '#212121',
+                  marginBottom: 8,
+                }}
               >
                 Email
               </Text>
@@ -282,7 +292,9 @@ export default function LoginNew() {
                     px={20}
                     py={10}
                     rounded={10}
-                    leftIcon={<MessageRegularTwotoneIcon size={20} color="#A4C73B" />}
+                    leftIcon={
+                      <MessageRegularTwotoneIcon size={20} color="#A4C73B" />
+                    }
                   />
                 )}
               />
@@ -293,8 +305,14 @@ export default function LoginNew() {
 
             {/* Champ Mot de passe */}
             <View style={styles.inputContainer}>
-              <Text 
-                style={{fontSize: 18, fontWeight: '600', fontFamily: 'Urbanist', color: '#212121', marginBottom: 8}}
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  fontFamily: 'Urbanist',
+                  color: '#212121',
+                  marginBottom: 8,
+                }}
               >
                 Password
               </Text>
@@ -314,15 +332,16 @@ export default function LoginNew() {
                     px={20}
                     py={10}
                     rounded={10}
-                    leftIcon={<LockRegularTwotoneIcon size={20} color="#A4C73B" />}
+                    leftIcon={
+                      <LockRegularTwotoneIcon size={20} color="#A4C73B" />
+                    }
                     rightIcon={
-                      <TouchableOpacity
-                        onPress={togglePasswordVisibility}
-                      >
-                        {isPasswordVisible ? 
-                          <HideRegularBoldIcon size={20} color="#A4C73B" /> : 
+                      <TouchableOpacity onPress={togglePasswordVisibility}>
+                        {isPasswordVisible ? (
+                          <HideRegularBoldIcon size={20} color="#A4C73B" />
+                        ) : (
                           <ShowRegularBoldIcon size={20} color="#A4C73B" />
-                        }
+                        )}
                       </TouchableOpacity>
                     }
                   />
@@ -334,7 +353,7 @@ export default function LoginNew() {
             </View>
 
             {/* Options Remember me et Forgot password */}
-            <View style={[styles.optionsContainer, {gap: 20}]}>
+            <View style={[styles.optionsContainer, { gap: 20 }]}>
               <Checkbox
                 checked={isRememberMeChecked}
                 onChange={toggleRememberMe}
@@ -342,7 +361,12 @@ export default function LoginNew() {
                 style="text"
                 theme="light"
                 containerStyle={styles.rememberMeContainer}
-                labelStyle={{color: '#212121', fontFamily: 'Urbanist', fontSize: 14, fontWeight: '500'}}
+                labelStyle={{
+                  color: '#212121',
+                  fontFamily: 'Urbanist',
+                  fontSize: 14,
+                  fontWeight: '500',
+                }}
               />
 
               <TouchableOpacity onPress={handleForgotPassword}>
@@ -350,7 +374,7 @@ export default function LoginNew() {
                   variant="caption"
                   semibold
                   color="#A4C73B"
-                  style={{fontFamily: 'Urbanist', fontWeight: '800'}}
+                  style={{ fontFamily: 'Urbanist', fontWeight: '800' }}
                 >
                   Forgot Password?
                 </Text>
@@ -359,7 +383,10 @@ export default function LoginNew() {
 
             {/* Bouton de connexion */}
             <TouchableOpacity
-              style={[styles.signInButton, isPending && styles.signInButtonDisabled]}
+              style={[
+                styles.signInButton,
+                isPending && styles.signInButtonDisabled,
+              ]}
               onPress={handleSubmit(onSubmit)}
               disabled={isPending}
             >
@@ -368,16 +395,25 @@ export default function LoginNew() {
 
             {/* Divider + Social Buttons */}
             <View style={styles.socialContainer}>
-            <Divider label="or continue with" />
-              
+              <Divider label="or continue with" />
+
               <View style={styles.socialButtonsContainer}>
-                <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn}>
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={handleGoogleSignIn}
+                >
                   <GoogleIcon size={24} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} onPress={handleAppleSignIn}>
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={handleAppleSignIn}
+                >
                   <AppleIcon size={24} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton} onPress={handleFacebookSignIn}>
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={handleFacebookSignIn}
+                >
                   <FacebookIcon size={24} />
                 </TouchableOpacity>
               </View>
@@ -385,10 +421,7 @@ export default function LoginNew() {
 
             {/* Lien vers inscription */}
             <View style={styles.signUpContainer}>
-              <Text
-                variant="caption"
-                color="#616161"
-              >
+              <Text variant="caption" color="#616161">
                 Don't have an account?
               </Text>
               <TouchableOpacity onPress={handleSignUp}>
@@ -396,7 +429,7 @@ export default function LoginNew() {
                   variant="caption"
                   semibold
                   color="#81A540"
-                  style={{marginLeft: 4}}
+                  style={{ marginLeft: 4 }}
                 >
                   Sign Up
                 </Text>

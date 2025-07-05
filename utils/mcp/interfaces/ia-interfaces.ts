@@ -1,5 +1,10 @@
 import { UserOrmPros } from '@/db/schema';
-import { NutritionAdviceType, NutritionAdviceProps, NutritionAdviceCreateProps, NutritionAdviceFeedbackProps } from '@/types/nutrition-advice.type';
+import {
+  NutritionAdviceType,
+  NutritionAdviceProps,
+  NutritionAdviceCreateProps,
+  NutritionAdviceFeedbackProps,
+} from '@/types/nutrition-advice.type';
 
 /**
  * Interface pour les paramètres de requête de contexte utilisateur
@@ -38,11 +43,11 @@ export interface GetUserPreferencesResult {
     height?: number;
     heightUnit?: string;
     physicalActivity?: string;
-    
+
     // Restrictions et allergies
     dietaryRestrictions?: string[];
     allergies?: string[];
-    
+
     // Objectifs nutritionnels - ancienne structure (conservée pour rétrocompatibilité)
     goal?: string;
     goalWeight?: number;
@@ -50,7 +55,7 @@ export interface GetUserPreferencesResult {
     proteinTarget?: number;
     carbsTarget?: number;
     fatTarget?: number;
-    
+
     // Nouvelle structure pour les objectifs nutritionnels
     nutritionGoals?: {
       goal?: string;
@@ -149,7 +154,8 @@ export interface SaveNutritionAdviceResult {
  * Interface pour les paramètres de mise à jour du feedback sur un conseil
  * Utilise NutritionAdviceFeedbackProps défini dans le type global
  */
-export interface UpdateAdviceFeedbackParams extends NutritionAdviceFeedbackProps {}
+export interface UpdateAdviceFeedbackParams
+  extends NutritionAdviceFeedbackProps {}
 
 /**
  * Interface pour les résultats de mise à jour du feedback

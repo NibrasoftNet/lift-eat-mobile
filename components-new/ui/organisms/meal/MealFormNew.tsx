@@ -37,7 +37,9 @@ import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import * as ImagePicker from 'expo-image-picker';
-import FoodImagePicker, { ImageSource } from '@/components-new/ui/molecules/food-selection/FoodImagePicker';
+import FoodImagePicker, {
+  ImageSource,
+} from '@/components-new/ui/molecules/food-selection/FoodImagePicker';
 
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import { NutritionDisplayMode } from '@/utils/enum/nutrition.enum';
@@ -70,7 +72,13 @@ interface MealFormNewProps {
   onRefresh?: () => void;
 }
 
-export default function MealFormNew({ mode, mealId, defaultValues, refreshing = false, onRefresh }: MealFormNewProps) {
+export default function MealFormNew({
+  mode,
+  mealId,
+  defaultValues,
+  refreshing = false,
+  onRefresh,
+}: MealFormNewProps) {
   const router = useRouter();
   const theme = useTheme();
   const { t } = useTranslation();
@@ -89,26 +97,39 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMealTypeModalVisible, setMealTypeModalVisible] = useState(false);
   const [isCuisineModalVisible, setCuisineModalVisible] = useState(false);
-  const [isIngredientPickerVisible, setIsIngredientPickerVisible] = useState(false);
+  const [isIngredientPickerVisible, setIsIngredientPickerVisible] =
+    useState(false);
 
   // helper to normalize image string
   const normalizeImage = (img: string | null | undefined): string | null => {
     if (!img) return null;
-    if (img.startsWith('http') || img.startsWith('file') || img.startsWith('data:')) return img;
+    if (
+      img.startsWith('http') ||
+      img.startsWith('file') ||
+      img.startsWith('data:')
+    )
+      return img;
     return `data:image/jpeg;base64,${img}`;
   };
 
   const [mealImage, setMealImage] = useState<string | null>(
-    normalizeImage(typeof defaultValues?.image === 'string' ? defaultValues?.image : null),
+    normalizeImage(
+      typeof defaultValues?.image === 'string' ? defaultValues?.image : null,
+    ),
   );
   const [showImagePicker, setShowImagePicker] = useState(false);
-  const [imageSource, setImageSource] = useState<ImageSource | undefined>(undefined);
+  const [imageSource, setImageSource] = useState<ImageSource | undefined>(
+    undefined,
+  );
 
   // When default values load (edit mode), sync image
   useEffect(() => {
     if (typeof defaultValues?.image === 'string') {
       setMealImage(normalizeImage(defaultValues.image));
-      setImageSource({ type: 'image', value: normalizeImage(defaultValues.image) ?? '' });
+      setImageSource({
+        type: 'image',
+        value: normalizeImage(defaultValues.image) ?? '',
+      });
     }
   }, [defaultValues?.image]);
 
@@ -152,46 +173,117 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
   });
 
   // Helpers arrays for selectors
-  const mealTypeOptions: Array<{ id: MealTypeEnum; name: string; icon: any }> = [
-    { id: MealTypeEnum.BREAKFAST, name: t('meal.form.mealType.breakfast'), icon: 'breakfast' },
-    { id: MealTypeEnum.LUNCH, name: t('meal.form.mealType.lunch'), icon: 'lunch' },
-    { id: MealTypeEnum.DINNER, name: t('meal.form.mealType.dinner'), icon: 'dinner' },
-    { id: MealTypeEnum.SNACK, name: t('meal.form.mealType.snack'), icon: 'snack' },
-  ];
+  const mealTypeOptions: Array<{ id: MealTypeEnum; name: string; icon: any }> =
+    [
+      {
+        id: MealTypeEnum.BREAKFAST,
+        name: t('meal.form.mealType.breakfast'),
+        icon: 'breakfast',
+      },
+      {
+        id: MealTypeEnum.LUNCH,
+        name: t('meal.form.mealType.lunch'),
+        icon: 'lunch',
+      },
+      {
+        id: MealTypeEnum.DINNER,
+        name: t('meal.form.mealType.dinner'),
+        icon: 'dinner',
+      },
+      {
+        id: MealTypeEnum.SNACK,
+        name: t('meal.form.mealType.snack'),
+        icon: 'snack',
+      },
+    ];
 
-  const cuisineTypeOptions: Array<{ id: CuisineTypeEnum; name: string; icon: any }> = [
-    { id: CuisineTypeEnum.GENERAL, name: t('meal.form.cuisine.general'), icon: 'general' },
-    { id: CuisineTypeEnum.AFRICAN, name: t('meal.form.cuisine.african'), icon: 'african' },
-    { id: CuisineTypeEnum.EUROPEAN, name: t('meal.form.cuisine.european'), icon: 'european' },
-    { id: CuisineTypeEnum.ASIAN, name: t('meal.form.cuisine.asian'), icon: 'asian' },
-    { id: CuisineTypeEnum.AMERICAN, name: t('meal.form.cuisine.american'), icon: 'american' },
-    { id: CuisineTypeEnum.TUNISIAN, name: t('meal.form.cuisine.tunisian'), icon: 'other' },
-    { id: CuisineTypeEnum.CHINESE, name: t('meal.form.cuisine.chinese'), icon: 'asian' },
-    { id: CuisineTypeEnum.FRENCH, name: t('meal.form.cuisine.french'), icon: 'european' },
-    { id: CuisineTypeEnum.ITALIAN, name: t('meal.form.cuisine.italian'), icon: 'european' },
-    { id: CuisineTypeEnum.JAPANESE, name: t('meal.form.cuisine.japanese'), icon: 'asian' },
-    { id: CuisineTypeEnum.MEXICAN, name: t('meal.form.cuisine.mexican'), icon: 'american' },
+  const cuisineTypeOptions: Array<{
+    id: CuisineTypeEnum;
+    name: string;
+    icon: any;
+  }> = [
+    {
+      id: CuisineTypeEnum.GENERAL,
+      name: t('meal.form.cuisine.general'),
+      icon: 'general',
+    },
+    {
+      id: CuisineTypeEnum.AFRICAN,
+      name: t('meal.form.cuisine.african'),
+      icon: 'african',
+    },
+    {
+      id: CuisineTypeEnum.EUROPEAN,
+      name: t('meal.form.cuisine.european'),
+      icon: 'european',
+    },
+    {
+      id: CuisineTypeEnum.ASIAN,
+      name: t('meal.form.cuisine.asian'),
+      icon: 'asian',
+    },
+    {
+      id: CuisineTypeEnum.AMERICAN,
+      name: t('meal.form.cuisine.american'),
+      icon: 'american',
+    },
+    {
+      id: CuisineTypeEnum.TUNISIAN,
+      name: t('meal.form.cuisine.tunisian'),
+      icon: 'other',
+    },
+    {
+      id: CuisineTypeEnum.CHINESE,
+      name: t('meal.form.cuisine.chinese'),
+      icon: 'asian',
+    },
+    {
+      id: CuisineTypeEnum.FRENCH,
+      name: t('meal.form.cuisine.french'),
+      icon: 'european',
+    },
+    {
+      id: CuisineTypeEnum.ITALIAN,
+      name: t('meal.form.cuisine.italian'),
+      icon: 'european',
+    },
+    {
+      id: CuisineTypeEnum.JAPANESE,
+      name: t('meal.form.cuisine.japanese'),
+      icon: 'asian',
+    },
+    {
+      id: CuisineTypeEnum.MEXICAN,
+      name: t('meal.form.cuisine.mexican'),
+      icon: 'american',
+    },
   ];
 
   // Submit handler
   const onSubmit = async (data: MealFormData) => {
     logger.info(LogCategory.FORM, 'Début onSubmit', {
-        mode,
-        mealId,
-        data,
-        hasImage: !!mealImage,
-        ingredientsCount: selectedIngredients.length,
-      });
+      mode,
+      mealId,
+      data,
+      hasImage: !!mealImage,
+      ingredientsCount: selectedIngredients.length,
+    });
     const userId = getCurrentUserIdSync();
     logger.debug(LogCategory.FORM, 'User ID récupéré', { userId });
     if (!userId) {
       logger.error(LogCategory.FORM, 'Utilisateur non authentifié');
-      Alert.alert(t('meal.form.alert.authTitle'), t('meal.form.alert.authMessage'));
+      Alert.alert(
+        t('meal.form.alert.authTitle'),
+        t('meal.form.alert.authMessage'),
+      );
       return;
     }
     if (selectedIngredients.length === 0) {
       logger.error(LogCategory.FORM, 'Aucun ingrédient sélectionné');
-      Alert.alert(t('meal.form.alert.ingredientsTitle'), t('meal.form.alert.ingredientsMessage'));
+      Alert.alert(
+        t('meal.form.alert.ingredientsTitle'),
+        t('meal.form.alert.ingredientsMessage'),
+      );
       return;
     }
     try {
@@ -213,21 +305,38 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
       );
       logger.info(LogCategory.FORM, 'Réponse du mealFormService', { result });
       if (result.success) {
-        logger.info(LogCategory.FORM, 'Création/MAJ repas réussie', { mode, mealId, result });
+        logger.info(LogCategory.FORM, 'Création/MAJ repas réussie', {
+          mode,
+          mealId,
+          result,
+        });
         await invalidateCache(queryClient, DataType.MEAL, {
           id: mode === 'update' ? mealId : undefined,
           invalidateRelated: true,
         });
-        Alert.alert(t('meal.form.alert.successTitle'), mode === 'create' ? t('meal.form.alert.created') : t('meal.form.alert.updated'));
+        Alert.alert(
+          t('meal.form.alert.successTitle'),
+          mode === 'create'
+            ? t('meal.form.alert.created')
+            : t('meal.form.alert.updated'),
+        );
         resetIngredients();
         router.back();
       } else {
-        logger.error(LogCategory.FORM, 'Erreur côté service ou API', { result });
-        Alert.alert(t('meal.form.alert.errorTitle'), result.message || t('meal.form.alert.failed'));
+        logger.error(LogCategory.FORM, 'Erreur côté service ou API', {
+          result,
+        });
+        Alert.alert(
+          t('meal.form.alert.errorTitle'),
+          result.message || t('meal.form.alert.failed'),
+        );
       }
     } catch (err: any) {
       logger.error(LogCategory.FORM, 'Exception JS submit', { err });
-      Alert.alert(t('meal.form.alert.errorTitle'), err?.message || t('meal.form.alert.failed'));
+      Alert.alert(
+        t('meal.form.alert.errorTitle'),
+        err?.message || t('meal.form.alert.failed'),
+      );
     } finally {
       setIsSubmitting(false);
       logger.debug(LogCategory.FORM, 'Fin de onSubmit');
@@ -252,11 +361,22 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <CloseSquareRegularBoldIcon width={24} height={24} color="#8BC255" />
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <CloseSquareRegularBoldIcon
+              width={24}
+              height={24}
+              color="#8BC255"
+            />
           </TouchableOpacity>
           <Text style={styles.screenTitle}>
-            {t(mode === 'create' ? 'meal.form.title.create' : 'meal.form.title.update')}
+            {t(
+              mode === 'create'
+                ? 'meal.form.title.create'
+                : 'meal.form.title.update',
+            )}
           </Text>
         </View>
         {/* Image du repas */}
@@ -292,14 +412,23 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
             control={control}
             name="name"
             render={({ field: { value, onChange } }) => (
-              <Input value={value} onChangeText={onChange} placeholder={t('meal.form.namePlaceholder')} customBorderColor="#8BC255" />
+              <Input
+                value={value}
+                onChangeText={onChange}
+                placeholder={t('meal.form.namePlaceholder')}
+                customBorderColor="#8BC255"
+              />
             )}
           />
-          {errors.name?.message && <Text style={styles.errorText}>{t(errors.name.message)}</Text>}
+          {errors.name?.message && (
+            <Text style={styles.errorText}>{t(errors.name.message)}</Text>
+          )}
         </View>
         {/* Description */}
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>{t('meal.form.descriptionLabel')}</Text>
+          <Text style={styles.inputLabel}>
+            {t('meal.form.descriptionLabel')}
+          </Text>
           <Controller
             control={control}
             name="description"
@@ -314,50 +443,119 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
               />
             )}
           />
-          {errors.description?.message && <Text style={styles.errorText}>{t(errors.description.message)}</Text>}
+          {errors.description?.message && (
+            <Text style={styles.errorText}>
+              {t(errors.description.message)}
+            </Text>
+          )}
         </View>
         {/* Dropdown Selectors */}
-        <Box style={{ flexDirection: 'row', paddingHorizontal: 16, marginBottom: 16 }}>
+        <Box
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: 16,
+            marginBottom: 16,
+          }}
+        >
           <View style={styles.dropdownWrapper}>
-            <TouchableOpacity style={styles.dropdown} onPress={() => setMealTypeModalVisible(true)}>
-              <Text>{mealTypeOptions.find((o) => o.id === watch('type'))?.name ?? t('meal.form.selectType')}</Text>
-              <ArrowDownRegularBoldIcon width={16} height={16} color="#8BC255" />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setMealTypeModalVisible(true)}
+            >
+              <Text>
+                {mealTypeOptions.find((o) => o.id === watch('type'))?.name ??
+                  t('meal.form.selectType')}
+              </Text>
+              <ArrowDownRegularBoldIcon
+                width={16}
+                height={16}
+                color="#8BC255"
+              />
             </TouchableOpacity>
           </View>
           <View style={styles.dropdownWrapper}>
-            <TouchableOpacity style={styles.dropdown} onPress={() => setCuisineModalVisible(true)}>
-              <Text>{cuisineTypeOptions.find((o) => o.id === watch('cuisine'))?.name ?? t('meal.form.selectCuisine')}</Text>
-              <ArrowDownRegularBoldIcon width={16} height={16} color="#8BC255" />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setCuisineModalVisible(true)}
+            >
+              <Text>
+                {cuisineTypeOptions.find((o) => o.id === watch('cuisine'))
+                  ?.name ?? t('meal.form.selectCuisine')}
+              </Text>
+              <ArrowDownRegularBoldIcon
+                width={16}
+                height={16}
+                color="#8BC255"
+              />
             </TouchableOpacity>
           </View>
         </Box>
         {/* MealType modal */}
-        <Modal visible={isMealTypeModalVisible} animationType="slide" transparent onRequestClose={() => setMealTypeModalVisible(false)}>
+        <Modal
+          visible={isMealTypeModalVisible}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setMealTypeModalVisible(false)}
+        >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent1}>
-              <MealTypeSelector mealTypes={mealTypeOptions} selectedMealTypeId={watch('type')} onSelectMealType={(pid: MealTypeEnum) => { setValue('type', pid as any); setMealTypeModalVisible(false); }} />
-              <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setMealTypeModalVisible(false)}>
-                <Text style={{ color: '#A4C73B', fontWeight: '600' }}>{t('common.close')}</Text>
+              <MealTypeSelector
+                mealTypes={mealTypeOptions}
+                selectedMealTypeId={watch('type')}
+                onSelectMealType={(pid: MealTypeEnum) => {
+                  setValue('type', pid as any);
+                  setMealTypeModalVisible(false);
+                }}
+              />
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setMealTypeModalVisible(false)}
+              >
+                <Text style={{ color: '#A4C73B', fontWeight: '600' }}>
+                  {t('common.close')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
         {/* Cuisine modal */}
-        <Modal visible={isCuisineModalVisible} animationType="slide" transparent onRequestClose={() => setCuisineModalVisible(false)}>
+        <Modal
+          visible={isCuisineModalVisible}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setCuisineModalVisible(false)}
+        >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <CuisineSelector cuisineTypes={cuisineTypeOptions} selectedCuisineTypeId={watch('cuisine')} onSelectCuisineType={(cid: CuisineTypeEnum) => { setValue('cuisine', cid as any); setCuisineModalVisible(false); }} />
-              <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setCuisineModalVisible(false)}>
-                <Text style={{ color: '#A4C73B', fontWeight: '600' }}>{t('common.close')}</Text>
+              <CuisineSelector
+                cuisineTypes={cuisineTypeOptions}
+                selectedCuisineTypeId={watch('cuisine')}
+                onSelectCuisineType={(cid: CuisineTypeEnum) => {
+                  setValue('cuisine', cid as any);
+                  setCuisineModalVisible(false);
+                }}
+              />
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setCuisineModalVisible(false)}
+              >
+                <Text style={{ color: '#A4C73B', fontWeight: '600' }}>
+                  {t('common.close')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
         {/* Add ingredient button */}
         <Box style={{ paddingHorizontal: 16, marginBottom: 16 }}>
-          <TouchableOpacity style={styles.addIngredientButton} onPress={() => setIsIngredientPickerVisible(true)}>
+          <TouchableOpacity
+            style={styles.addIngredientButton}
+            onPress={() => setIsIngredientPickerVisible(true)}
+          >
             <PlusRegularBoldIcon width={16} height={16} color="white" />
-            <Text style={styles.addIngredientButtonText}>{t('meal.form.addIngredients')}</Text>
+            <Text style={styles.addIngredientButtonText}>
+              {t('meal.form.addIngredients')}
+            </Text>
           </TouchableOpacity>
         </Box>
         {/* Ingredients list */}
@@ -367,7 +565,9 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
               const rawImg: any = ing.ingredientsStandard?.image;
               const imageUrl = rawImg
                 ? typeof rawImg === 'string'
-                  ? rawImg.startsWith('data:') || rawImg.startsWith('http') || rawImg.startsWith('file')
+                  ? rawImg.startsWith('data:') ||
+                    rawImg.startsWith('http') ||
+                    rawImg.startsWith('file')
                     ? rawImg
                     : `data:image/png;base64,${rawImg}`
                   : `data:image/png;base64,${rawImg}`
@@ -390,7 +590,10 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
           />
         )}
         {/* Drawer */}
-        <IngredientListDrawer visible={isIngredientPickerVisible} onClose={() => setIsIngredientPickerVisible(false)} />
+        <IngredientListDrawer
+          visible={isIngredientPickerVisible}
+          onClose={() => setIsIngredientPickerVisible(false)}
+        />
         {/* Macros progress */}
         <Box style={{ alignItems: 'center', marginVertical: 24 }}>
           <CircularNutritionProgress
@@ -407,7 +610,10 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
             onPress={() => {
               logger.info(LogCategory.FORM, 'Bouton Créer pressé');
               if (isSubmitting) {
-                logger.warn(LogCategory.FORM, 'Bouton submit désactivé (isSubmitting=true)');
+                logger.warn(
+                  LogCategory.FORM,
+                  'Bouton submit désactivé (isSubmitting=true)',
+                );
                 return;
               }
               // handleSubmit retourne une fonction, il faut l’appeler
@@ -415,7 +621,10 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
               if (typeof submitFn === 'function') {
                 submitFn();
               } else {
-                logger.error(LogCategory.FORM, 'handleSubmit(onSubmit) ne retourne pas de fonction !');
+                logger.error(
+                  LogCategory.FORM,
+                  'handleSubmit(onSubmit) ne retourne pas de fonction !',
+                );
               }
             }}
             disabled={isSubmitting}
@@ -424,7 +633,11 @@ export default function MealFormNew({ mode, mealId, defaultValues, refreshing = 
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.addIngredientButtonText}>
-                {t(mode === 'create' ? 'meal.form.submit.create' : 'meal.form.submit.update')}
+                {t(
+                  mode === 'create'
+                    ? 'meal.form.submit.create'
+                    : 'meal.form.submit.update',
+                )}
               </Text>
             )}
           </TouchableOpacity>
@@ -474,14 +687,24 @@ const createStyles = (theme: ThemeInterface) =>
       alignSelf: 'center',
       marginBottom: 16,
       overflow: 'hidden',
-      marginTop:20,
+      marginTop: 20,
     },
     imagePreview: { width: '100%', height: '100%' },
     inputContainer: { marginBottom: 16, width: '100%', paddingHorizontal: 16 },
-    inputLabel: { fontSize: 16, fontWeight: '500', marginBottom: 8, color: theme.isDark ? '#CDCDCD' : '#333' },
+    inputLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      marginBottom: 8,
+      color: theme.isDark ? '#CDCDCD' : '#333',
+    },
     errorText: { color: theme.color('error'), fontSize: 14, marginTop: 4 },
     section: { marginBottom: 24 },
-    label: { fontSize: 16, fontWeight: '600', marginBottom: 8, color: theme.isDark ? '#FFFFFF' : '#333' },
+    label: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: theme.isDark ? '#FFFFFF' : '#333',
+    },
     dropdownWrapper: { flex: 1, marginHorizontal: 1 },
     dropdown: {
       flexDirection: 'row',
@@ -509,11 +732,23 @@ const createStyles = (theme: ThemeInterface) =>
       backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'flex-end',
     },
-    modalContent: { backgroundColor: theme.colors.background, padding: 16, maxHeight: '80%' },
-    modalContent1: { backgroundColor: theme.colors.background, padding: 16, maxHeight: '60%' },
+    modalContent: {
+      backgroundColor: theme.colors.background,
+      padding: 16,
+      maxHeight: '80%',
+    },
+    modalContent1: {
+      backgroundColor: theme.colors.background,
+      padding: 16,
+      maxHeight: '60%',
+    },
     modalCloseBtn: { alignSelf: 'center', marginTop: 12 },
     submitButton: { width: '100%' },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     textArea: {
       borderWidth: 1,
       borderColor: '#A4C73B',

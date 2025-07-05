@@ -12,32 +12,32 @@ declare module 'react-native-liquid-progress' {
      * Taille du composant
      */
     size: number;
-    
+
     /**
      * Valeur de progression (0-100)
      */
     value: number;
-    
+
     /**
      * Couleur d'arrière-plan
      */
     backgroundColor?: string;
-    
+
     /**
      * Couleur de la vague avant
      */
     frontWaveColor?: string;
-    
+
     /**
      * Couleur de la vague arrière
      */
     backWaveColor?: string;
-    
+
     /**
      * Durée de l'animation en ms
      */
     duration?: number;
-    
+
     /**
      * Styles supplémentaires
      */

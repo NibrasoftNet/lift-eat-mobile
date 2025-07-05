@@ -1,5 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, ActivityIndicator, Text, RefreshControl, ScrollView } from 'react-native';
+import {
+  View,
+  ActivityIndicator,
+  Text,
+  RefreshControl,
+  ScrollView,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +17,11 @@ import { mealPagesService } from '@/utils/services/pages/meal-pages.service';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
 import { IngredientWithStandardProps } from '@/types/ingredient.type';
 import { MealDefaultValuesProps } from '@/utils/validation/meal/meal.validation';
-import { CuisineTypeEnum, MealTypeEnum, MealUnitEnum } from '@/utils/enum/meal.enum';
+import {
+  CuisineTypeEnum,
+  MealTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
 
 export default function EditMealV2Screen() {
   const { t } = useTranslation();
@@ -19,18 +29,15 @@ export default function EditMealV2Screen() {
   const { id } = useLocalSearchParams();
   const mealId = Array.isArray(id) ? Number(id[0]) : Number(id);
 
-  const {
-    setSelectedIngredients,
-    setTotalMacros,
-    resetIngredients,
-  } = useIngredientStore();
+  const { setSelectedIngredients, setTotalMacros, resetIngredients } =
+    useIngredientStore();
 
   // Fetch existing meal details
   const {
     data: mealData,
     isLoading,
     error,
-  refetch,
+    refetch,
   } = useQuery({
     queryKey: ['meal-details', mealId],
     queryFn: () => mealPagesService.getMealDetails(mealId),
@@ -92,9 +99,18 @@ export default function EditMealV2Screen() {
 
   if (error || !mealData?.success) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 16,
+        }}
+      >
         <Link href="/meals/my-meals" asChild>
-          <View style={{ padding: 12, backgroundColor: '#A4C73B', borderRadius: 8 }}>
+          <View
+            style={{ padding: 12, backgroundColor: '#A4C73B', borderRadius: 8 }}
+          >
             <Text style={{ color: '#fff' }}>{t('meal.error.loading')}</Text>
           </View>
         </Link>
@@ -115,7 +131,9 @@ export default function EditMealV2Screen() {
       try {
         // Attempt direct toString on buffer-like object
         // @ts-ignore
-        imageStr = `data:image/jpeg;base64,${(meal.image as any).toString('base64')}`;
+        imageStr = `data:image/jpeg;base64,${(meal.image as any).toString(
+          'base64',
+        )}`;
       } catch (e) {
         // Ignore conversion errors
       }

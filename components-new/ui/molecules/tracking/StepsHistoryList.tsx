@@ -25,7 +25,7 @@ const StepsHistoryList: React.FC<HistoryListProps> = ({
   style,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs basées sur le thème (fidèles au design Figma)
   const colors = {
     baseColor: isDarkMode ? '#35383F' : '#F5F5F5',
@@ -33,10 +33,12 @@ const StepsHistoryList: React.FC<HistoryListProps> = ({
     secondaryTextColor: isDarkMode ? '#9E9E9E' : '#757575',
     emptyProgressColor: isDarkMode ? '#35383F' : '#E0E0E0',
   };
-  
+
   // Si état vide, utilisez la couleur appropriée
-  const finalProgressColor = isEmpty ? colors.emptyProgressColor : progressColor;
-  
+  const finalProgressColor = isEmpty
+    ? colors.emptyProgressColor
+    : progressColor;
+
   // Si état vide, mettez la valeur de progression à 0
   const finalProgressPercentage = isEmpty ? 0 : progressPercentage;
 
@@ -51,11 +53,13 @@ const StepsHistoryList: React.FC<HistoryListProps> = ({
           progressColor={finalProgressColor}
           baseColor={colors.baseColor}
         />
-        
+
         {/* Contenu central (texte) */}
         <View style={styles.contentContainer}>
           {isEmpty ? (
-            <Text style={[styles.emptyText, { color: colors.secondaryTextColor }]}>
+            <Text
+              style={[styles.emptyText, { color: colors.secondaryTextColor }]}
+            >
               No data
             </Text>
           ) : (
@@ -63,7 +67,12 @@ const StepsHistoryList: React.FC<HistoryListProps> = ({
               <Text style={[styles.centerText, { color: colors.textColor }]}>
                 {centerText}
               </Text>
-              <Text style={[styles.bottomText, { color: colors.secondaryTextColor }]}>
+              <Text
+                style={[
+                  styles.bottomText,
+                  { color: colors.secondaryTextColor },
+                ]}
+              >
                 {bottomText}
               </Text>
             </>

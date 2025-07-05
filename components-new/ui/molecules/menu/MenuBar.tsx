@@ -8,12 +8,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
 // Import des composants individuels de menu basés sur les références Figma spécifiques
-import { 
-  MealMenuItem, 
-  ProgressMenuItem, 
-  AnalyticsMenuItem, 
-  PlanMenuItem, 
-  AssistantMenuItem 
+import {
+  MealMenuItem,
+  ProgressMenuItem,
+  AnalyticsMenuItem,
+  PlanMenuItem,
+  AssistantMenuItem,
 } from './items';
 
 /**
@@ -28,12 +28,12 @@ interface MenuBarProps {
    * Tab actif dans le menu
    */
   activeTab: MenuTab;
-  
+
   /**
    * Fonction appelée lors du changement de tab
    */
   onTabChange: (tab: MenuTab) => void;
-  
+
   /**
    * Mode sombre - correspond à la variante dark dans le design Figma
    * Par défaut: true (fond transparent foncé)
@@ -46,37 +46,42 @@ interface MenuBarProps {
  * Implémente la barre de menu principale avec les éléments spécifiés dans le design
  * tout en conservant les noms de tabs personnalisés pour notre application
  */
-const MenuBar: React.FC<MenuBarProps> = ({ 
-  activeTab, 
+const MenuBar: React.FC<MenuBarProps> = ({
+  activeTab,
   onTabChange,
-  darkMode = true
+  darkMode = true,
 }) => {
   return (
-    <View style={[styles.container, darkMode ? styles.darkContainer : styles.lightContainer]}>
+    <View
+      style={[
+        styles.container,
+        darkMode ? styles.darkContainer : styles.lightContainer,
+      ]}
+    >
       {/* Assistant Menu Item avec icône (node-id=48453:15801) */}
       <AssistantMenuItem
         isActive={activeTab === 'assistant'}
         onPress={() => onTabChange('assistant')}
       />
-      
+
       {/* Plan Menu Item avec icône (node-id=44443:23757) */}
-      <PlanMenuItem 
+      <PlanMenuItem
         isActive={activeTab === 'plan'}
         onPress={() => onTabChange('plan')}
       />
-      
+
       {/* Meal Menu Item avec icône (node-id=44443:22604) */}
       <MealMenuItem
         isActive={activeTab === 'meal'}
         onPress={() => onTabChange('meal')}
       />
-      
+
       {/* Progress Menu Item avec icône (node-id=48453:12903) */}
       <ProgressMenuItem
         isActive={activeTab === 'progress'}
         onPress={() => onTabChange('progress')}
       />
-      
+
       {/* Analytics Menu Item avec icône (node-id=48453:12930) */}
       <AnalyticsMenuItem
         isActive={activeTab === 'analytics'}
@@ -111,7 +116,7 @@ const styles = StyleSheet.create({
     // Note: React Native ne supporte pas nativement backdropFilter
     // Pour une implémentation complète, il faudrait utiliser react-native-blur
     // ou une solution native personnalisée
-  }
+  },
 });
 
 export default MenuBar;

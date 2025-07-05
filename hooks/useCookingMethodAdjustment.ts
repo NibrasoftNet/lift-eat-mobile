@@ -1,9 +1,9 @@
 /**
  * Hook personnalisé pour les ajustements de cuisson
- * 
+ *
  * Centralise la logique d'ajustement des valeurs nutritionnelles
  * en fonction de la méthode de cuisson sélectionnée.
- * 
+ *
  * Version optimisée avec mémoïsation des calculs et API simplifiée.
  */
 
@@ -44,24 +44,27 @@ export const COOKING_METHODS_INFO: Record<CookingMethod, CookingMethodInfo> = {
     label: 'Bouilli',
     iconComponent: 'FontAwesome5',
     iconName: 'hot-tub',
-    description: 'Cuisson dans l\'eau bouillante.',
-    impact: 'Perte de certains nutriments solubles dans l\'eau, réduit légèrement les calories.',
+    description: "Cuisson dans l'eau bouillante.",
+    impact:
+      "Perte de certains nutriments solubles dans l'eau, réduit légèrement les calories.",
   },
   [CookingMethod.STEAMED]: {
     method: CookingMethod.STEAMED,
     label: 'Vapeur',
     iconComponent: 'FontAwesome5',
     iconName: 'cloud',
-    description: 'Cuisson à la vapeur d\'eau.',
-    impact: 'Préserve mieux les nutriments que bouilli, perte minimale de nutriments.',
+    description: "Cuisson à la vapeur d'eau.",
+    impact:
+      'Préserve mieux les nutriments que bouilli, perte minimale de nutriments.',
   },
   [CookingMethod.FRIED]: {
     method: CookingMethod.FRIED,
     label: 'Frit',
     iconComponent: 'FontAwesome5',
     iconName: 'oil-can',
-    description: 'Cuisson dans l\'huile chaude.',
-    impact: 'Augmente significativement les lipides et calories, absorption d\'huile.',
+    description: "Cuisson dans l'huile chaude.",
+    impact:
+      "Augmente significativement les lipides et calories, absorption d'huile.",
   },
   [CookingMethod.BAKED]: {
     method: CookingMethod.BAKED,
@@ -69,7 +72,7 @@ export const COOKING_METHODS_INFO: Record<CookingMethod, CookingMethodInfo> = {
     iconComponent: 'FontAwesome5',
     iconName: 'thermometer-full',
     description: 'Cuisson au four (chaleur sèche).',
-    impact: 'Perte modérée d\'eau, légère concentration des nutriments.',
+    impact: "Perte modérée d'eau, légère concentration des nutriments.",
   },
   [CookingMethod.GRILLED]: {
     method: CookingMethod.GRILLED,
@@ -114,7 +117,7 @@ export interface CookingMethodAdjustmentOptions {
     method: CookingMethod,
     adjustedMacros: MacroNutrientsBase,
     normalizedMacros: MacroNutrientsBase,
-    adjustedWeight: number
+    adjustedWeight: number,
   ) => void;
 }
 
@@ -136,7 +139,7 @@ export interface CookingMethodAdjustmentResult {
   methodInfo: CookingMethodInfo;
   /** Toutes les méthodes de cuisson disponibles */
   allMethods: Record<CookingMethod, CookingMethodInfo>;
-  
+
   /** Changer la méthode de cuisson */
   updateCookingMethod: (method: CookingMethod) => void;
   /** Réinitialiser à l'état cru */
@@ -151,13 +154,13 @@ export interface CookingMethodAdjustmentResult {
 
 /**
  * Hook pour l'ajustement des valeurs nutritionnelles selon la méthode de cuisson
- * 
+ *
  * @example
  * Utilisation basique
  * const { adjustedMacros, updateCookingMethod } = useCookingMethodAdjustment({
  *   initialMacros: mealNutrition
  * });
- * 
+ *
  * @example
  * Avec callback
  * const { adjustedMacros } = useCookingMethodAdjustment({
@@ -173,13 +176,14 @@ export function useCookingMethodAdjustment({
   initialWeight = STANDARD_WEIGHT,
   initialMethod = CookingMethod.RAW,
   displayMode = NutritionDisplayMode.PER_100G,
-  onAdjustment
+  onAdjustment,
 }: CookingMethodAdjustmentOptions): CookingMethodAdjustmentResult {
   // États pour les valeurs brutes (non cuites)
   const [rawMacros, setRawMacros] = useState<MacroNutrientsBase>(initialMacros);
   const [rawWeight, setRawWeight] = useState<number>(initialWeight);
-  const [selectedMethod, setSelectedMethod] = useState<CookingMethod>(initialMethod);
-  
+  const [selectedMethod, setSelectedMethod] =
+    useState<CookingMethod>(initialMethod);
+
   /**
    * Calculer le pourcentage de changement entre deux valeurs
    */
@@ -191,101 +195,129 @@ export function useCookingMethodAdjustment({
   /**
    * Calculer les pourcentages d'ajustement entre deux ensembles de valeurs nutritionnelles
    */
-  const calculateAdjustmentPercentages = useCallback((
-    originalMacros: MacroNutrientsBase,
-    adjustedMacros: MacroNutrientsBase,
-    originalWeight: number,
-    adjustedWeight: number
-  ): AdjustmentPercentages => {
-    return {
-      calories: getPercentage(originalMacros.calories, adjustedMacros.calories),
-      carbs: getPercentage(originalMacros.carbs, adjustedMacros.carbs),
-      protein: getPercentage(originalMacros.protein, adjustedMacros.protein),
-      fat: getPercentage(originalMacros.fat, adjustedMacros.fat),
-      weight: getPercentage(originalWeight, adjustedWeight)
-    };
-  }, [getPercentage]);
+  const calculateAdjustmentPercentages = useCallback(
+    (
+      originalMacros: MacroNutrientsBase,
+      adjustedMacros: MacroNutrientsBase,
+      originalWeight: number,
+      adjustedWeight: number,
+    ): AdjustmentPercentages => {
+      return {
+        calories: getPercentage(
+          originalMacros.calories,
+          adjustedMacros.calories,
+        ),
+        carbs: getPercentage(originalMacros.carbs, adjustedMacros.carbs),
+        protein: getPercentage(originalMacros.protein, adjustedMacros.protein),
+        fat: getPercentage(originalMacros.fat, adjustedMacros.fat),
+        weight: getPercentage(originalWeight, adjustedWeight),
+      };
+    },
+    [getPercentage],
+  );
 
   /**
    * Recalculer les ajustements pour une méthode de cuisson spécifique
    */
-  const recalculateAdjustments = useCallback((
-    macros: MacroNutrientsBase,
-    weight: number,
-    method: CookingMethod
-  ) => {
-    try {
-      // Calculer le poids cuit
-      const adjustedWeight = calculateCookedWeight(weight, method);
+  const recalculateAdjustments = useCallback(
+    (macros: MacroNutrientsBase, weight: number, method: CookingMethod) => {
+      try {
+        // Calculer le poids cuit
+        const adjustedWeight = calculateCookedWeight(weight, method);
 
-      // Ajuster les macros en fonction de la méthode de cuisson
-      const adjustedMacros = nutritionEngine.adjustForCooking(
-        macros,
-        method
-      );
+        // Ajuster les macros en fonction de la méthode de cuisson
+        const adjustedMacros = nutritionEngine.adjustForCooking(macros, method);
 
-      // Log pour le débogage
-      logger.debug(
-        LogCategory.NUTRITION,
-        `Ajustement de cuisson: ${method}`,
-        { original: macros, adjusted: adjustedMacros }
-      );
+        // Log pour le débogage
+        logger.debug(
+          LogCategory.NUTRITION,
+          `Ajustement de cuisson: ${method}`,
+          { original: macros, adjusted: adjustedMacros },
+        );
 
-      return {
-        macros: adjustedMacros,
-        weight: adjustedWeight
-      };
-    } catch (error) {
-      logger.error(
-        LogCategory.NUTRITION,
-        "Erreur lors de l'ajustement de cuisson",
-        { error, method, macros, weight }
-      );
+        return {
+          macros: adjustedMacros,
+          weight: adjustedWeight,
+        };
+      } catch (error) {
+        logger.error(
+          LogCategory.NUTRITION,
+          "Erreur lors de l'ajustement de cuisson",
+          { error, method, macros, weight },
+        );
 
-      // Valeurs par défaut en cas d'erreur
-      return {
-        macros: { ...macros },
-        weight: weight
-      };
-    }
-  }, []);
+        // Valeurs par défaut en cas d'erreur
+        return {
+          macros: { ...macros },
+          weight: weight,
+        };
+      }
+    },
+    [],
+  );
 
   // Calcul des valeurs ajustées et normalisées
   const calculatedValues = useMemo(() => {
     // Recalculer les valeurs pour la méthode actuelle
-    const adjusted = recalculateAdjustments(rawMacros, rawWeight, selectedMethod);
-    
+    const adjusted = recalculateAdjustments(
+      rawMacros,
+      rawWeight,
+      selectedMethod,
+    );
+
     // Normaliser pour l'affichage standard
     const normalizedMacros = nutritionEngine.adjustForFinalMealWeight(
       adjusted.macros,
       adjusted.weight,
-      STANDARD_WEIGHT
+      STANDARD_WEIGHT,
     );
-    
+
     // Calculer les pourcentages d'ajustement
     const percentages = calculateAdjustmentPercentages(
       rawMacros,
       adjusted.macros,
       rawWeight,
-      adjusted.weight
+      adjusted.weight,
     );
-    
+
     return {
       adjustedMacros: adjusted.macros,
       adjustedWeight: adjusted.weight,
       normalizedMacros,
-      adjustmentPercentages: percentages
+      adjustmentPercentages: percentages,
     };
-  }, [rawMacros, rawWeight, selectedMethod, recalculateAdjustments, calculateAdjustmentPercentages]);
+  }, [
+    rawMacros,
+    rawWeight,
+    selectedMethod,
+    recalculateAdjustments,
+    calculateAdjustmentPercentages,
+  ]);
 
-  const { adjustedMacros, adjustedWeight, normalizedMacros, adjustmentPercentages } = calculatedValues;
+  const {
+    adjustedMacros,
+    adjustedWeight,
+    normalizedMacros,
+    adjustmentPercentages,
+  } = calculatedValues;
 
   // Effet pour notifier le parent des changements
   useEffect(() => {
     if (onAdjustment) {
-      onAdjustment(selectedMethod, adjustedMacros, normalizedMacros, adjustedWeight);
+      onAdjustment(
+        selectedMethod,
+        adjustedMacros,
+        normalizedMacros,
+        adjustedWeight,
+      );
     }
-  }, [selectedMethod, adjustedMacros, normalizedMacros, adjustedWeight, onAdjustment]);
+  }, [
+    selectedMethod,
+    adjustedMacros,
+    normalizedMacros,
+    adjustedWeight,
+    onAdjustment,
+  ]);
 
   /**
    * Changer la méthode de cuisson
@@ -304,12 +336,15 @@ export function useCookingMethodAdjustment({
   /**
    * Mettre à jour les valeurs brutes
    */
-  const updateInitialValues = useCallback((macros: MacroNutrientsBase, weight?: number) => {
-    setRawMacros(macros);
-    if (weight !== undefined) {
-      setRawWeight(weight);
-    }
-  }, []);
+  const updateInitialValues = useCallback(
+    (macros: MacroNutrientsBase, weight?: number) => {
+      setRawMacros(macros);
+      if (weight !== undefined) {
+        setRawWeight(weight);
+      }
+    },
+    [],
+  );
 
   /**
    * Formater un pourcentage pour l'affichage
@@ -317,7 +352,7 @@ export function useCookingMethodAdjustment({
   const formatPercentage = useCallback((value: number): string => {
     return formattingUIService.formatPercentage(value);
   }, []);
-  
+
   /**
    * Obtenir une classe CSS basée sur le pourcentage
    */
@@ -334,14 +369,14 @@ export function useCookingMethodAdjustment({
     adjustmentPercentages,
     methodInfo: COOKING_METHODS_INFO[selectedMethod],
     allMethods: COOKING_METHODS_INFO,
-    
+
     // Actions
     updateCookingMethod,
     resetToRaw,
     updateInitialValues,
-    
+
     // Utilitaires
     formatPercentage,
-    getDifferenceClass
+    getDifferenceClass,
   };
 }

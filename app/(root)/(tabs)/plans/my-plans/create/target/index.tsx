@@ -22,7 +22,7 @@ export default function CreateNutritionTargetScreen() {
       const id = await getCurrentUserId(true);
       setUserId(id);
     };
-    
+
     fetchUserId();
   }, []);
 
@@ -33,20 +33,22 @@ export default function CreateNutritionTargetScreen() {
       if (!userId) {
         throw new Error('No user ID found in session');
       }
-      
+
       // Utiliser le service utilisateur pour récupérer les détails
       return userPagesService.getUserProfile(Number(userId));
     },
     {
       enabled: !!userId, // Requête activée uniquement si l'ID utilisateur est disponible
-    }
+    },
   );
 
   // Gérer les états de chargement et d'erreur manuellement
   if (userQuery.isLoading || userQuery.isPending) {
     return (
       <VStack className="flex-1 justify-center items-center p-4">
-        <Text className="text-center mb-4">Chargement des données utilisateur...</Text>
+        <Text className="text-center mb-4">
+          Chargement des données utilisateur...
+        </Text>
       </VStack>
     );
   }
@@ -54,7 +56,9 @@ export default function CreateNutritionTargetScreen() {
   if (userQuery.error) {
     return (
       <VStack className="flex-1 justify-center items-center p-4">
-        <Text className="text-center mb-4">Impossible de charger les données utilisateur.</Text>
+        <Text className="text-center mb-4">
+          Impossible de charger les données utilisateur.
+        </Text>
       </VStack>
     );
   }
@@ -66,7 +70,7 @@ export default function CreateNutritionTargetScreen() {
     durationWeeks: 1,
     goalUnit: GoalEnum.MAINTAIN,
   };
-  
+
   return (
     <NutritionGoalForm
       defaultValues={nutritionGoalDefaultValueProps}

@@ -1,18 +1,20 @@
 # Checklist de Création du Module Scanner
 
 ## Contraintes techniques
+
 - Aucun composant Gluestack UI (`@gluestack-ui/*`) ne doit être utilisé dans ce module.
 - Tous les composants doivent être soit custom (dans `components-new/ui/...`), soit natifs React Native.
 - Le style doit être géré avec `StyleSheet.create`, le `ThemeProvider` du projet, et les couleurs définies localement.
 
-
 ## 1. Préparation de l'environnement
+
 - **Dépendances**
   - [x] Assurez-vous que toutes les dépendances sont à jour dans `package.json`.
   - [x] Vérifiez que le `ThemeProvider` est correctement configuré pour appliquer les styles globaux.
   - [x] Vérifiez que les icônes SVG sont disponibles dans `assets/icons/figma`.
 
 ## 2. Création des Composants Atomiques
+
 - **Box**
   - [x] `Box` déjà créé dans `components-new/ui/atoms/base`.
 - **Text**
@@ -23,6 +25,7 @@
   - [x] `Image` déjà créé dans `components-new/ui/atoms/display`.
 
 ## 3. Mise en page et disposition
+
 - **Convention de layout**
   - [x] Utilisez le composant `Box` (custom) avec la prop `flexDirection: 'row'` ou `'column'` et `gap` pour remplacer le comportement de `VStack` et `HStack`.
   - [x] Il n'est pas nécessaire de créer de nouveaux composants `VStack`/`HStack` : suivez la convention utilisée dans les nouveaux écrans repas.
@@ -37,6 +40,7 @@
     ```
 
 ## 4. Création des Composants du Scanner
+
 - **CameraView**
   - [x] Afficher le flux caméra en plein écran (Expo Camera)
   - [x] Gérer les permissions (demande + états)
@@ -65,6 +69,7 @@
   - [x] Créez `ScanHistory` dans `components-new/ui/molecules/scan` pour afficher l'historique des scans.
 
 ## 5. Intégration des Icônes SVG
+
 - **Icônes**
   - [x] Utiliser les icônes de notre collection `assets/icons/figma`
   - [x] Importez `BarcodeRegularBoldIcon` pour l'icône de code-barres.
@@ -73,40 +78,47 @@
   - [x] Importez `HeartRegularBoldIcon` pour le favori.
 
 ## 6. Checklist UI technique et conformité Figma
+
 - [ ] Tous les espacements, couleurs, arrondis, ombres et typographies doivent suivre le design Figma (node 50429-110580).
 - [ ] Vérifier la responsivité sur différents écrans.
 - [ ] Ajouter des commentaires clairs dans chaque composant.
 - [x] Valider l’accessibilité (contrastes, tailles de texte, focus, etc.).
 - [x] Respecter la typographie.
-- [x] Intégration du *dynamic theming* via l’objet `Colors` et `useColorScheme`.
+- [x] Intégration du _dynamic theming_ via l’objet `Colors` et `useColorScheme`.
 
 ## 6.1. Internationalisation (i18n)
+
 - [x] Intégrer `useTranslation` pour les textes statiques.
 - [x] Remplacer les chaînes de caractères en dur par des clés de traduction (ex: `scanner.overlayInstruction`).
 - [x] Mettre à jour les fichiers `translation.json` pour `en-US` et `fr-FR`.
 
 ## 7. Mise en Œuvre de la Structure de l'Écran
+
 - **Structure**
   - [x] Implémentez la structure de `ScannerScreen` en utilisant les nouveaux composants.
   - [x] Assurez-vous que tous les composants sont correctement intégrés et affichés.
   - [ ] Vérifiez l'affichage sur différentes tailles d'écran pour garantir la réactivité.
 
 ## 8. Tests et Validation
+
 - **Tests Unitaires**
   - [ ] Testez chaque composant individuellement pour vérifier leur bon fonctionnement.
 - **Intégration**
+
   - [ ] Vérifiez l'intégration avec le service `scannerService` pour s'assurer de la compatibilité.
 
 - **Fonctionnalité**
   - [ ] Validez le fonctionnement du scanner avec des codes-barres réels pour garantir l'exactitude.
 
 ## 9. Documentation
+
 - **Commentaires**
   - [ ] Documentez chaque composant avec des commentaires clairs et explicites pour faciliter la maintenance.
 - **Mise à Jour**
   - [x] Mettez à jour la documentation du projet pour inclure le nouveau module scanner et ses fonctionnalités.
 
 ## 10. Tâches Backend
+
 - **Ajout dans ingredients_standard**
   - [x] Implémenter le service pages "scanPagesService.addScannedIngredient" (appel ingredientCoreService.createIngredient)
   - [x] Brancher le bouton « Add » du ScanResultCard pour appeler ce service
@@ -119,6 +131,7 @@
   - [ ] Implémenter la conversion Buffer → URL côté UI pour l'affichage offline
 
 ## 11. Refactorisation V2 – Séparation des écrans
+
 - **Structure de dossiers**
   - [x] Déplacer l’actuel `meals/scanner.tsx` vers `meals/scanner/index.tsx`
   - [x] Créer `meals/scanner/history.tsx` pour l’historique des scans

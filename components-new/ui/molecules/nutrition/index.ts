@@ -9,4 +9,3 @@ export { default as CalorieCircle } from './CalorieCircle';
 export { default as FoodEmoji } from './FoodEmoji';
 export { default as FoodName } from './FoodName';
 export { default as NutrientRow } from './NutrientRow';
-

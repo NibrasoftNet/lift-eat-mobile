@@ -3,8 +3,9 @@ export enum GenderEnum {
   FEMALE = 'FEMALE',
 }
 
-export const GenderTypeArray = Object.values(GenderEnum) as unknown as Readonly<[GenderEnum, ...GenderEnum[]]>;
-
+export const GenderTypeArray = Object.values(GenderEnum) as unknown as Readonly<
+  [GenderEnum, ...GenderEnum[]]
+>;
 
 export enum PhysicalActivityEnum {
   LOW = 'LOW',
@@ -13,5 +14,6 @@ export enum PhysicalActivityEnum {
   HIGH = 'HIGH',
 }
 
-export const PhysicalActivityTypeArray = Object.values(PhysicalActivityEnum) as unknown as Readonly<[PhysicalActivityEnum, ...PhysicalActivityEnum[]]>;
-
+export const PhysicalActivityTypeArray = Object.values(
+  PhysicalActivityEnum,
+) as unknown as Readonly<[PhysicalActivityEnum, ...PhysicalActivityEnum[]]>;

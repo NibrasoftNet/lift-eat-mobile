@@ -39,7 +39,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       {/* Categories */}
       {categories && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('scanner.productDetails.categories')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('scanner.productDetails.categories')}
+          </Text>
           <Text style={styles.sectionContent}>{categories}</Text>
         </View>
       )}
@@ -47,7 +49,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       {/* Nutrition facts */}
       {nutritionFacts.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('scanner.productDetails.nutritionFacts')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('scanner.productDetails.nutritionFacts')}
+          </Text>
           {nutritionFacts.map((item) => (
             <View key={item.label} style={styles.nutritionRow}>
               <Text style={styles.nutritionLabel}>{item.label}</Text>

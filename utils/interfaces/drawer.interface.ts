@@ -34,14 +34,14 @@ export interface MealDrawerServiceInterface {
    * @returns Le nom du type de repas en français
    */
   getMealTypeName(type: MealTypeEnum): string;
-  
+
   /**
    * Obtient les couleurs associées à un type de repas
    * @param type - Le type de repas
    * @returns Les classes de couleur pour l'arrière-plan et le texte
    */
   getMealTypeColor(type: MealTypeEnum): MealTypeColor;
-  
+
   /**
    * Filtre les repas par type
    * @param meals - La liste des repas à filtrer
@@ -49,15 +49,18 @@ export interface MealDrawerServiceInterface {
    * @returns La liste des repas filtrés
    */
   filterMealsByType(meals: MealOrmProps[], type?: MealTypeEnum): MealOrmProps[];
-  
+
   /**
    * Filtre les repas par type de cuisine
    * @param meals - La liste des repas à filtrer
    * @param cuisine - Le type de cuisine à filtrer (optionnel)
    * @returns La liste des repas filtrés
    */
-  filterMealsByCuisine(meals: MealOrmProps[], cuisine?: CuisineTypeEnum): MealOrmProps[];
-  
+  filterMealsByCuisine(
+    meals: MealOrmProps[],
+    cuisine?: CuisineTypeEnum,
+  ): MealOrmProps[];
+
   /**
    * Ajoute des repas à un plan journalier
    * @param dailyPlanId - L'ID du plan journalier
@@ -68,7 +71,7 @@ export interface MealDrawerServiceInterface {
   addMealsToPlan(
     dailyPlanId: number,
     planId: number,
-    meals: MealWithQuantity[]
+    meals: MealWithQuantity[],
   ): Promise<{ success: boolean; errors?: string[] }>;
 }
 
@@ -83,22 +86,22 @@ export interface IngredientWithUniqueId {
   image: any; // Buffer ou null
   quantity: number;
   unit: string | null;
-  
+
   // Propriu00e9tu00e9s pru00e9-calculu00e9es pour l'affichage
   displayName: string;
   displayUnit: string;
   hasImage: boolean;
-  
+
   // Propriu00e9tu00e9s nutritionnelles
   calories: number;
   carbs: number;
   fat: number;
   protein: number;
-  
+
   // Dates
   createdAt: Date | string;
   updatedAt: Date | string;
-  
+
   // Autres propriu00e9tu00e9s hu00e9ritu00e9es
   [key: string]: any;
 }
@@ -133,12 +136,12 @@ export interface IngredientDrawerServiceInterface {
    * @returns Une promesse contenant les ingru00e9dients et les informations de pagination
    */
   fetchIngredients(params: GetIngredientsParams): Promise<GetIngredientsResult>;
-  
+
   /**
    * Méthode optimizeIngredientData supprimée le 13 mai 2025
    * Cette fonctionnalité est désormais implémentée dans ingredientPagesService.getIngredientsForDisplay
    */
-  
+
   /**
    * Debounce un terme de recherche pour u00e9viter trop d'appels u00e0 l'API
    * @param searchTerm - Le terme de recherche u00e0 debouncer
@@ -148,7 +151,7 @@ export interface IngredientDrawerServiceInterface {
   debounceSearchTerm(
     searchTerm: string,
     callback: (term: string) => void,
-    delay?: number
+    delay?: number,
   ): void;
 
   /**
@@ -156,7 +159,10 @@ export interface IngredientDrawerServiceInterface {
    * @param ingredientId - L'ID de l'ingrédient
    * @returns Les informations d'affichage ou une valeur par défaut si non trouvé
    */
-  getIngredientDisplayInfo(ingredientId: number): { displayName: string; displayUnit: string };
+  getIngredientDisplayInfo(ingredientId: number): {
+    displayName: string;
+    displayUnit: string;
+  };
 
   /**
    * Détermine le type d'élément pour les filtres et l'affichage
@@ -180,9 +186,9 @@ export interface DrawerServiceInterface {
   debounceSearchTerm(
     searchTerm: string,
     callback: (term: string) => void,
-    delay?: number
+    delay?: number,
   ): void;
-  
+
   /**
    * Génère un identifiant unique pour un élément de liste
    * @param prefix - Le préfixe pour l'identifiant (ex: 'ing' pour ingrédients)
@@ -195,7 +201,7 @@ export interface DrawerServiceInterface {
     prefix: string,
     id: number,
     pageParam: number,
-    index: number
+    index: number,
   ): string;
 
   /**
@@ -206,7 +212,7 @@ export interface DrawerServiceInterface {
    */
   createEndReachedHandler(
     hasNextPage: boolean | undefined,
-    fetchNextPage: () => Promise<any>
+    fetchNextPage: () => Promise<any>,
   ): () => void;
 
   /**
@@ -216,7 +222,7 @@ export interface DrawerServiceInterface {
   getFlashListConfig(): {
     estimatedItemSize: number;
     onEndReachedThreshold: number;
-    estimatedListSize: {height: number; width: number};
+    estimatedListSize: { height: number; width: number };
     initialNumToRender: number;
     maxToRenderPerBatch: number;
     windowSize: number;
@@ -372,20 +378,20 @@ export interface AuthDrawerServiceInterface {
    * @returns Une promesse indiquant le succès ou l'échec de la vérification
    */
   verifyOtp(otpCode: string): Promise<{ success: boolean; error?: string }>;
-  
+
   /**
    * Renvoie un code OTP à l'utilisateur
    * @returns Une promesse indiquant le succès ou l'échec de l'envoi
    */
   resendOtp(): Promise<{ success: boolean; error?: string }>;
-  
+
   /**
    * Gère la redirection post-authentification
    * @param destinationPath - Le chemin de destination après l'authentification (optionnel)
    * @returns Une promesse vide
    */
   handleAuthSuccess(destinationPath?: string): Promise<void>;
-  
+
   /**
    * Génère un message de toast pour les résultats d'authentification
    * @param success - Indique si l'opération est un succès

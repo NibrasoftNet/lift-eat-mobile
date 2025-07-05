@@ -3,27 +3,28 @@
 ## Liste des tâches par priorité
 
 ### Phase 1: Correction de la logique métier
+
 - [x] Modifier `handleCreateMeal` pour insérer les entrées dans `mealIngredients`
 - [x] Ajouter une fonction d'association d'ingrédients existants
 - [x] Assurer que les quantités d'ingrédients sont correctement traitées
 - [x] Implémenter la vérification de l'existence des ingrédients avant l'association
 - [x] Implémenter le système de suggestion d'ingrédients manquants (backend)
-   - [x] Détecter et retourner les ingrédients manquants via l'API
-   - [x] Implémenter l'interface utilisateur pour la gestion des ingrédients manquants
-      - [x] Créer un composant `MissingIngredientsModal` pour afficher les ingrédients manquants
-      - [x] Implémenter le state management pour gérer les ingrédients manquants dans `MealGeneratorForm`
-      - [x] Ajouter la logique d'affichage conditionnel du modal après génération de repas
-      - [x] Styliser le modal selon les standards de design de l'application
-   - [x] Implémenter la création rapide d'ingrédients
-      - [x] Créer le formulaire d'ajout rapide d'ingrédient dans le modal
-      - [x] Développer la méthode `createIngredient` dans `IngredientService`
-      - [x] Ajouter la validation des données pour les nouveaux ingrédients
-      - [x] Implémenter la logique de mise à jour de l'UI après création
-   - [x] Développer le système de persistance de suggestions
-      - [x] Créer une table `ingredientSuggestions` dans la base de données
-      - [x] Implémenter les méthodes CRUD pour les suggestions dans le serveur MCP
-      - [x] Ajouter un service côté client pour gérer les suggestions persistantes
-      - [x] Intégrer la récupération des suggestions dans le processus de génération de repas
+  - [x] Détecter et retourner les ingrédients manquants via l'API
+  - [x] Implémenter l'interface utilisateur pour la gestion des ingrédients manquants
+    - [x] Créer un composant `MissingIngredientsModal` pour afficher les ingrédients manquants
+    - [x] Implémenter le state management pour gérer les ingrédients manquants dans `MealGeneratorForm`
+    - [x] Ajouter la logique d'affichage conditionnel du modal après génération de repas
+    - [x] Styliser le modal selon les standards de design de l'application
+  - [x] Implémenter la création rapide d'ingrédients
+    - [x] Créer le formulaire d'ajout rapide d'ingrédient dans le modal
+    - [x] Développer la méthode `createIngredient` dans `IngredientService`
+    - [x] Ajouter la validation des données pour les nouveaux ingrédients
+    - [x] Implémenter la logique de mise à jour de l'UI après création
+  - [x] Développer le système de persistance de suggestions
+    - [x] Créer une table `ingredientSuggestions` dans la base de données
+    - [x] Implémenter les méthodes CRUD pour les suggestions dans le serveur MCP
+    - [x] Ajouter un service côté client pour gérer les suggestions persistantes
+    - [x] Intégrer la récupération des suggestions dans le processus de génération de repas
 - [x] Standardiser le schéma des données IA avec celui de la base de données
 - [x] Créer des fonctions de transformation de données cohérentes
   - [x] Implémenter transformIaIngredientToDbFormat et transformDbIngredientToIaFormat
@@ -63,6 +64,7 @@
   - [x] Intégrer la journalisation détaillée des fallbacks générés
 
 ### Phase 2: Refactorisation de l'architecture
+
 - [x] Créer des hooks personnalisés pour la logique métier d'IA
   - [x] Implémenter `useMealGeneration` pour encapsuler la génération de repas
   - [x] Implémenter `usePlanGeneration` pour encapsuler la génération de plans nutritionnels
@@ -106,6 +108,7 @@
   - [x] Ajouter des feedbacks visuels pour les différents états de soumission
 
 ### Phase 3: Harmonisation du style et du thème
+
 - [x] Remplacer `ThemedView` par `Box`
 - [x] Remplacer `TextInput` par `Input` et `InputField`
 - [x] Remplacer `TouchableOpacity` par `Pressable`
@@ -116,6 +119,7 @@
 - [x] Remplacer `StyleSheet.create` par l'approche de style de l'application
 
 #### 3.1 Composants refactorisés
+
 - [x] Plan-generator/PlanConfigurationForm.tsx
 - [x] Plan-generator/PlanGeneratorForm.tsx
 - [x] Plan-generator/PlanGenerationResult.tsx
@@ -127,10 +131,12 @@
 - [x] meal-generator/MealGeneratorBasicForm.tsx
 
 #### 3.2 Composants restants à refactoriser
+
 - [ ] meal-generator/MealGeneratorForm.tsx
 - [ ] meal-generator/SpecificRequirements.tsx
 
 ### Phase 4: Tests et optimisation
+
 - [ ] Tester tous les scénarios
 - [ ] Optimiser les performances
 - [x] Documenter l'architecture refactorisée
@@ -140,6 +146,7 @@
 ### 1. Refactorisation de l'architecture
 
 #### 1.1 Composants UI
+
 - [x] Remplacer `View` par `Box`
 - [x] Remplacer `TextInput` par `Input` et `InputField`
 - [x] Remplacer `TouchableOpacity` par `Pressable`
@@ -149,6 +156,7 @@
 - [x] Utiliser `VStack` et `HStack` au lieu de Flexbox direct
 
 #### 1.2 Gestion de formulaire
+
 - [x] Implémenter `useForm` avec validation Zod
   - [x] Définir le schéma Zod pour la validation du formulaire de génération de repas
   - [x] Définir le schéma Zod pour la validation du formulaire de génération de plan
@@ -170,6 +178,7 @@
   - [x] Ajouter des feedbacks visuels pour les différents états de soumission
 
 #### 1.3 Séparation des responsabilités
+
 - [x] Créer des hooks personnalisés pour la logique métier d'IA
 - [x] Séparer les appels API dans des services dédiés
 - [x] Créer une couche d'abstraction pour les interactions avec Gemini
@@ -189,6 +198,7 @@
 ### 2. Correction des problèmes de style et thème
 
 #### 2.1 Harmonisation des styles
+
 - [x] Remplacer `StyleSheet.create` par l'approche de style de l'application
 - [x] Supprimer les couleurs codées en dur et utiliser les variables de thème
 - [x] Standardiser les espacements et la typographie
@@ -196,6 +206,7 @@
 - [ ] Utiliser les tokens de style cohérents avec le reste de l'application
 
 #### 2.2 Composants UI cohérents
+
 - [x] Standardiser les sélecteurs (utiliser `Select` au lieu de modals personnalisés)
 - [x] Utiliser les composants `FormControl` pour la gestion des champs
 - [x] Standardiser l'affichage des erreurs
@@ -205,18 +216,21 @@
 ### 3. Correction des problèmes de logique métier
 
 #### 3.1 Association des ingrédients avec les repas
+
 - [x] Modifier `handleCreateMeal` pour insérer les entrées dans `mealIngredients`
 - [x] Ajouter une fonction d'association d'ingrédients existants
 - [x] Assurer que les quantités d'ingrédients sont correctement traitées
 - [x] Implémenter la vérification de l'existence des ingrédients avant l'association
 
 #### 3.2 Alignement des schémas de données
+
 - [x] Standardiser le schéma des données IA avec celui de la base de données
 - [x] Créer des fonctions de transformation de données cohérentes
 - [x] Normaliser les valeurs numériques (calories, macros) avec le même format
 - [x] Assurer la cohérence des énumérations (types de repas, types de cuisine)
 
 #### 3.3 Amélioration du traitement des réponses IA
+
 - [x] Renforcer la validation des réponses de l'IA
   - [x] Créer un module dédié `responseValidation.ts` avec des validations renforcées
   - [x] Implémenter des mécanismes de récupération pour les données invalides
@@ -244,6 +258,7 @@
   - [x] Intégrer la journalisation détaillée des fallbacks générés
 
 ### Phase 3: Harmonisation du style et du thème
+
 - [x] Remplacer `ThemedView` par `Box`
 - [x] Remplacer `TextInput` par `Input` et `InputField`
 - [x] Remplacer `TouchableOpacity` par `Pressable`
@@ -254,6 +269,7 @@
 - [x] Remplacer `StyleSheet.create` par l'approche de style de l'application
 
 #### 3.1 Composants refactorisés
+
 - [x] Plan-generator/PlanConfigurationForm.tsx
 - [x] Plan-generator/PlanGeneratorForm.tsx
 - [x] Plan-generator/PlanGenerationResult.tsx
@@ -265,10 +281,12 @@
 - [x] meal-generator/MealGeneratorBasicForm.tsx
 
 #### 3.2 Composants restants à refactoriser
+
 - [ ] meal-generator/MealGeneratorForm.tsx
 - [ ] meal-generator/SpecificRequirements.tsx
 
 ### Phase 4: Tests et optimisation
+
 - [ ] Tester tous les scénarios
 - [ ] Optimiser les performances
 - [x] Documenter l'architecture refactorisée

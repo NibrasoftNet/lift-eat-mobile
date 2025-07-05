@@ -38,7 +38,11 @@ function readJson(filePath) {
 }
 
 function writeJson(filePath, obj) {
-  fs.writeFileSync(path.resolve(filePath), JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(
+    path.resolve(filePath),
+    JSON.stringify(obj, null, 2) + '\n',
+    'utf8',
+  );
 }
 
 // Flatten nested object into Map<keyPath, value>
@@ -62,7 +66,11 @@ function setNested(obj, pathArr, value) {
     if (i === pathArr.length - 1) {
       current[key] = value;
     } else {
-      if (typeof current[key] !== 'object' || Array.isArray(current[key]) || current[key] === null) {
+      if (
+        typeof current[key] !== 'object' ||
+        Array.isArray(current[key]) ||
+        current[key] === null
+      ) {
         current[key] = {};
       }
       current = current[key];

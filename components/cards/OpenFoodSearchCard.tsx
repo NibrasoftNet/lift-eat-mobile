@@ -161,7 +161,9 @@ const OpenFoodSearchCard: React.FC<{
             <Card className="gap-2">
               <HStack className="items-center justify-between">
                 <VStack className="gap-1">
-                  <Text className="font-semibold text-lg">Valeurs Nutritionnelles</Text>
+                  <Text className="font-semibold text-lg">
+                    Valeurs Nutritionnelles
+                  </Text>
                   <Text className="text-xs text-gray-600 font-semibold">
                     Pour 100g
                   </Text>
@@ -177,10 +179,13 @@ const OpenFoodSearchCard: React.FC<{
                   valueClassName="bg-red-300"
                 />
               </HStack>
-              
+
               {/* Ligne de séparation */}
-              <Divider orientation="horizontal" className="w-full h-0.5 bg-gray-100" />
-              
+              <Divider
+                orientation="horizontal"
+                className="w-full h-0.5 bg-gray-100"
+              />
+
               {/* Vue simplifiée avec NutritionBox */}
               <HStack className="justify-around pt-3 border-t border-gray-100">
                 {/* Carbs */}

@@ -36,22 +36,22 @@ const CuisineTypeFilter: React.FC<CuisineTypeFilterProps> = ({
   onCuisineSelect,
 }) => {
   const theme = useAppTheme();
-  
+
   // Liste des types de cuisine
   const cuisineTypes = Object.values(CuisineTypeEnum);
 
   return (
     <View style={styles.container}>
-      <Text 
-        variant="subtitle" 
-        color={theme.color('primary')} 
+      <Text
+        variant="subtitle"
+        color={theme.color('primary')}
         style={styles.title}
       >
         Cuisine
       </Text>
-      
-      <ScrollView 
-        horizontal 
+
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -62,19 +62,23 @@ const CuisineTypeFilter: React.FC<CuisineTypeFilterProps> = ({
             !selectedCuisine && {
               backgroundColor: theme.color('primary'),
               borderColor: theme.color('primary'),
-            }
+            },
           ]}
           onPress={() => onCuisineSelect(undefined)}
           activeOpacity={0.7}
         >
-          <Text 
-            variant="caption" 
-            color={!selectedCuisine ? theme.color('background') : theme.color('blueGrey')}
+          <Text
+            variant="caption"
+            color={
+              !selectedCuisine
+                ? theme.color('background')
+                : theme.color('blueGrey')
+            }
           >
             Tous
           </Text>
         </TouchableOpacity>
-        
+
         {/* Filtres par type de cuisine */}
         {cuisineTypes.map((cuisine) => (
           <TouchableOpacity
@@ -84,14 +88,18 @@ const CuisineTypeFilter: React.FC<CuisineTypeFilterProps> = ({
               selectedCuisine === cuisine && {
                 backgroundColor: theme.color('primary'),
                 borderColor: theme.color('primary'),
-              }
+              },
             ]}
             onPress={() => onCuisineSelect(cuisine)}
             activeOpacity={0.7}
           >
-            <Text 
-              variant="caption" 
-              color={selectedCuisine === cuisine ? theme.color('background') : theme.color('blueGrey')}
+            <Text
+              variant="caption"
+              color={
+                selectedCuisine === cuisine
+                  ? theme.color('background')
+                  : theme.color('blueGrey')
+              }
             >
               {CUISINE_LABELS[cuisine]}
             </Text>

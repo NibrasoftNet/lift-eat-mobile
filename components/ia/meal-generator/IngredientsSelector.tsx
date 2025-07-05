@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleSheet, TextInput, Modal, FlatList, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import { Plus, Delete, Search, Check } from 'lucide-react-native';
 import { Controller, Control, FormState } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +15,10 @@ import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
 import { MealUnitEnum } from '@/utils/enum/meal.enum';
-import { MealGeneratorFormType, IngredientFormType } from '@/utils/validation/ia/mealGeneratorForm.schema';
+import {
+  MealGeneratorFormType,
+  IngredientFormType,
+} from '@/utils/validation/ia/mealGeneratorForm.schema';
 import { UiState, UiStateActions } from '@/hooks/ia/useUiState';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 
@@ -17,7 +26,7 @@ interface IngredientsSelectorProps {
   control: Control<MealGeneratorFormType>;
   uiState: UiState;
   uiActions: UiStateActions;
-  addIngredient: (ingredient: { id: number, name: string }) => void;
+  addIngredient: (ingredient: { id: number; name: string }) => void;
   removeIngredient: (id: number) => void;
   updateIngredientQuantity: (id: number, quantity: number) => void;
 }
@@ -28,14 +37,17 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
   uiActions,
   addIngredient,
   removeIngredient,
-  updateIngredientQuantity
+  updateIngredientQuantity,
 }) => {
   // Récupérer les ingrédients depuis la base de données
   const { data: dbIngredients, isLoading: isLoadingIngredients } = useQuery({
     queryKey: ['ingredients', uiState.searchTerm],
     queryFn: async () => {
       try {
-        const result = await sqliteMCPServer.getIngredientsListViaMCP(uiState.searchTerm, 50);
+        const result = await sqliteMCPServer.getIngredientsListViaMCP(
+          uiState.searchTerm,
+          50,
+        );
         return result.success ? result.ingredients : [];
       } catch (error) {
         console.error('Erreur lors de la récupération des ingrédients:', error);
@@ -51,7 +63,7 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
   };
 
   const renderIngredientItem = (ingredient: IngredientFormType) => (
-    <Box 
+    <Box
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -61,15 +73,17 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
         borderColor: '#ddd',
         borderRadius: 8,
         marginBottom: 8,
-      }} 
+      }}
       key={ingredient.id}
     >
       <Text style={{ flex: 1, fontSize: 16 }}>{ingredient.name}</Text>
-      <HStack style={{ 
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        flex: 1,
-      }}>
+      <HStack
+        style={{
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          flex: 1,
+        }}
+      >
         <Pressable
           style={{
             width: 30,
@@ -80,7 +94,12 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
             justifyContent: 'center',
             marginHorizontal: 4,
           }}
-          onPress={() => updateIngredientQuantity(ingredient.id, Math.max(1, ingredient.quantity - 10))}
+          onPress={() =>
+            updateIngredientQuantity(
+              ingredient.id,
+              Math.max(1, ingredient.quantity - 10),
+            )
+          }
         >
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>-</Text>
         </Pressable>
@@ -114,7 +133,9 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
             justifyContent: 'center',
             marginHorizontal: 4,
           }}
-          onPress={() => updateIngredientQuantity(ingredient.id, ingredient.quantity + 10)}
+          onPress={() =>
+            updateIngredientQuantity(ingredient.id, ingredient.quantity + 10)
+          }
         >
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>+</Text>
         </Pressable>
@@ -134,30 +155,38 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
       visible={uiState.modals.ingredients}
       onRequestClose={() => uiActions.hideModal('ingredients')}
     >
-      <Box style={{
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <Box style={{
-          width: '90%',
-          height: '80%',
-          backgroundColor: 'white',
-          borderRadius: 8,
-          padding: 16,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
-        }}>
-          <HStack style={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 16,
-          }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Sélectionner des ingrédients</Text>
+      <Box
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          style={{
+            width: '90%',
+            height: '80%',
+            backgroundColor: 'white',
+            borderRadius: 8,
+            padding: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+          }}
+        >
+          <HStack
+            style={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+              Sélectionner des ingrédients
+            </Text>
             <Pressable
               style={{ padding: 8 }}
               onPress={() => uiActions.hideModal('ingredients')}
@@ -165,15 +194,17 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
               <Text>Fermer</Text>
             </Pressable>
           </HStack>
-          
-          <HStack style={{
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 8,
-            paddingHorizontal: 8,
-            marginBottom: 16,
-          }}>
+
+          <HStack
+            style={{
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 8,
+              paddingHorizontal: 8,
+              marginBottom: 16,
+            }}
+          >
             <Search size={20} color="#666" style={{ marginRight: 8 }} />
             <TextInput
               style={{ flex: 1, paddingVertical: 8 }}
@@ -182,9 +213,15 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
               onChangeText={handleSearch}
             />
           </HStack>
-          
+
           {isLoadingIngredients ? (
-            <Box style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Box
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
               <ActivityIndicator size="large" color="#2196F3" />
             </Box>
           ) : (
@@ -193,7 +230,7 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
               keyExtractor={(item) => item.id.toString()}
               style={{ flex: 1 }}
               renderItem={({ item }) => (
-                <Pressable 
+                <Pressable
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -213,21 +250,29 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
                     control={control}
                     name="selectedIngredients"
                     render={({ field, fieldState, formState }) => {
-                      const isSelected = field.value?.some(ing => ing.id === item.id);
-                      return isSelected ? <Check size={20} color="#2196F3" /> : <Box style={{ width: 20 }} />;
+                      const isSelected = field.value?.some(
+                        (ing) => ing.id === item.id,
+                      );
+                      return isSelected ? (
+                        <Check size={20} color="#2196F3" />
+                      ) : (
+                        <Box style={{ width: 20 }} />
+                      );
                     }}
                   />
                 </Pressable>
               )}
               ListEmptyComponent={() => (
-                <Text style={{
-                  textAlign: 'center',
-                  marginVertical: 16,
-                  opacity: 0.6,
-                }}>
-                  {uiState.searchTerm 
-                    ? "Aucun ingrédient trouvé pour cette recherche"
-                    : "Commencez à taper pour rechercher des ingrédients"}
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    marginVertical: 16,
+                    opacity: 0.6,
+                  }}
+                >
+                  {uiState.searchTerm
+                    ? 'Aucun ingrédient trouvé pour cette recherche'
+                    : 'Commencez à taper pour rechercher des ingrédients'}
                 </Text>
               )}
             />
@@ -239,8 +284,10 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
 
   return (
     <Box style={{ marginBottom: 16 }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Ingrédients</Text>
-      
+      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
+        Ingrédients
+      </Text>
+
       <Controller
         control={control}
         name="selectedIngredients"
@@ -248,29 +295,36 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
           <>
             <Box style={{ marginBottom: 12 }}>
               {field.value && field.value.length > 0 ? (
-                field.value.map(ingredient => renderIngredientItem(ingredient))
+                field.value.map((ingredient) =>
+                  renderIngredientItem(ingredient),
+                )
               ) : (
-                <Text style={{
-                  textAlign: 'center',
-                  marginVertical: 16,
-                  opacity: 0.6,
-                }}>
-                  Aucun ingrédient sélectionné. Ajoutez des ingrédients pour commencer.
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    marginVertical: 16,
+                    opacity: 0.6,
+                  }}
+                >
+                  Aucun ingrédient sélectionné. Ajoutez des ingrédients pour
+                  commencer.
                 </Text>
               )}
             </Box>
-            
+
             {fieldState.error && (
-              <Text style={{
-                color: 'red',
-                fontSize: 12,
-                marginTop: 4,
-                marginBottom: 8,
-              }}>
+              <Text
+                style={{
+                  color: 'red',
+                  fontSize: 12,
+                  marginTop: 4,
+                  marginBottom: 8,
+                }}
+              >
                 {fieldState.error.message}
               </Text>
             )}
-            
+
             <Pressable
               style={{
                 backgroundColor: '#2196F3',
@@ -285,19 +339,21 @@ const IngredientsSelector: React.FC<IngredientsSelectorProps> = ({
               onPress={() => uiActions.showModal('ingredients')}
             >
               <Plus size={20} color="white" />
-              <Text style={{
-                color: 'white',
-                fontSize: 16,
-                fontWeight: 'bold',
-                marginLeft: 8,
-              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  marginLeft: 8,
+                }}
+              >
                 Ajouter des ingrédients
               </Text>
             </Pressable>
           </>
         )}
       />
-      
+
       {renderIngredientsModal()}
     </Box>
   );

@@ -22,22 +22,26 @@ interface CreateMealButtonProps {
  * Bouton pour créer un nouveau repas
  * Avec icône + et texte "Crée un repas"
  */
-const CreateMealButton: React.FC<CreateMealButtonProps> = ({
-  onPress,
-}) => {
+const CreateMealButton: React.FC<CreateMealButtonProps> = ({ onPress }) => {
   // Wrap the original onPress to inject logging
   const handlePress = () => {
     logger.info(LogCategory.USER, 'CreateMealButton pressed');
     if (onPress) {
       onPress();
     } else {
-      logger.warn(LogCategory.USER, 'CreateMealButton pressed but onPress is undefined');
+      logger.warn(
+        LogCategory.USER,
+        'CreateMealButton pressed but onPress is undefined',
+      );
     }
   };
   const { t } = useTranslation();
   const theme = useAppTheme();
   const isDark = theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
 
   return (
     <TouchableOpacity
@@ -48,10 +52,7 @@ const CreateMealButton: React.FC<CreateMealButtonProps> = ({
     >
       <View style={styles.content}>
         <PlusRegularBoldIcon width={20} height={20} color={'#FFFFFF'} />
-        <Text 
-          variant="body" 
-          style={[styles.text, { color: '#FFFFFF' }]}
-        >
+        <Text variant="body" style={[styles.text, { color: '#FFFFFF' }]}>
           {t('meal.form.submit.create')}
         </Text>
       </View>

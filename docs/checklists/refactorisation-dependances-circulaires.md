@@ -14,6 +14,7 @@ Ces cycles peuvent provoquer des comportements imprévisibles, des problèmes d'
 ## Phase 1 : Analyse et préparation
 
 - [ ] **Cartographier les dépendances actuelles**
+
   - [ ] Documenter toutes les imports/exports entre les modules impliqués
   - [ ] Identifier les fonctionnalités spécifiques qui créent les cycles
 
@@ -26,6 +27,7 @@ Ces cycles peuvent provoquer des comportements imprévisibles, des problèmes d'
 ### 1. Restructuration des services centraux
 
 - [ ] **Créer un module d'interfaces partagées**
+
   - [ ] Définir les interfaces pour les services de base de données
   - [ ] Définir les interfaces pour les services nutritionnels
   - [ ] Placer ces interfaces dans `utils/interfaces/services.interface.ts`
@@ -37,6 +39,7 @@ Ces cycles peuvent provoquer des comportements imprévisibles, des problèmes d'
 ### 2. Implémentation du pattern Façade
 
 - [ ] **Renforcer le rôle du Nutrition Engine**
+
   - [ ] Faire de `nutritionEngine.ts` la façade officielle pour toutes les opérations nutritionnelles
   - [ ] Rediriger les imports directs vers cette façade
   - [ ] Éliminer les références directes entre couches
@@ -54,6 +57,7 @@ Ces cycles peuvent provoquer des comportements imprévisibles, des problèmes d'
 ## Phase 3 : Implémentation et transition
 
 - [ ] **Implémenter les changements par domaine**
+
   - [ ] Domaine nutrition : briser le cycle nutrition-core → sqlite-server
   - [ ] Domaine utilisateur : briser le cycle userContext → sqlite-server
   - [ ] Domaine repas : restructurer meal-handlers pour suivre le nouveau pattern
@@ -65,10 +69,12 @@ Ces cycles peuvent provoquer des comportements imprévisibles, des problèmes d'
 ## Phase 4 : Validation et déploiement
 
 - [ ] **Vérifier l'absence de cycles**
+
   - [ ] Utiliser des outils d'analyse de dépendances
   - [ ] Vérifier les logs de démarrage de l'application
 
 - [ ] **Tests complets**
+
   - [ ] Valider le fonctionnement de toutes les fonctionnalités nutritionnelles
   - [ ] Tester particulièrement les cas à la frontière entre modules
 

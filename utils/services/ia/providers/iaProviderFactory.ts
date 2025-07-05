@@ -24,18 +24,18 @@ export enum IaProviderType {
 class IaProviderFactoryImpl implements IaProviderFactory {
   private providers: Map<string, IaProvider> = new Map();
   private defaultProviderType: IaProviderType;
-  
+
   /**
    * Initialise la factory avec un type de fournisseur par défaut
    * @param defaultProviderType Type de fournisseur par défaut
    */
   constructor(defaultProviderType: IaProviderType = IaProviderType.GEMINI) {
     this.defaultProviderType = defaultProviderType;
-    logger.info('IaProviderFactory initialisée', 'constructor', { 
-      defaultProvider: defaultProviderType 
+    logger.info('IaProviderFactory initialisée', 'constructor', {
+      defaultProvider: defaultProviderType,
     });
   }
-  
+
   /**
    * Crée un fournisseur d'IA en fonction de la configuration
    * @param providerType Type de fournisseur à créer
@@ -45,90 +45,111 @@ class IaProviderFactoryImpl implements IaProviderFactory {
    */
   createProvider(
     providerType: string,
-    config?: Record<string, any>
+    config?: Record<string, any>,
   ): IaProvider {
-    logger.debug('Création d\'un fournisseur IA', 'createProvider', { providerType });
-    
+    logger.debug("Création d'un fournisseur IA", 'createProvider', {
+      providerType,
+    });
+
     // Vérifier si un fournisseur de ce type a déjà été créé
     const existingProvider = this.providers.get(providerType);
     if (existingProvider) {
       return existingProvider;
     }
-    
+
     // Créer un nouveau fournisseur en fonction du type
     let provider: IaProvider;
-    
+
     switch (providerType.toLowerCase()) {
       case IaProviderType.GEMINI:
         // Récupérer la clé API depuis le fichier Config ou les variables d'environnement si non fournie
         if (!config?.apiKey) {
           if (GEMINI_API_KEY) {
             config = { ...config, apiKey: GEMINI_API_KEY };
-            logger.debug('Utilisation de la clé API Gemini depuis le fichier de configuration', 'createProvider');
+            logger.debug(
+              'Utilisation de la clé API Gemini depuis le fichier de configuration',
+              'createProvider',
+            );
           } else if (process.env.GEMINI_API_KEY) {
             config = { ...config, apiKey: process.env.GEMINI_API_KEY };
-            logger.debug('Utilisation de la clé API Gemini depuis les variables d\'environnement', 'createProvider');
+            logger.debug(
+              "Utilisation de la clé API Gemini depuis les variables d'environnement",
+              'createProvider',
+            );
           } else {
             throw new IaError(
-              'Clé API Gemini non trouvée. Définissez GEMINI_API_KEY dans le fichier de configuration ou les variables d\'environnement.',
-              IaErrorType.UNAUTHORIZED_ERROR
+              "Clé API Gemini non trouvée. Définissez GEMINI_API_KEY dans le fichier de configuration ou les variables d'environnement.",
+              IaErrorType.UNAUTHORIZED_ERROR,
             );
           }
         }
-        
+
         // Utiliser l'URL de base depuis le fichier Config ou les variables d'environnement si disponible
         if (!config?.apiBaseUrl) {
           if (GEMINI_API_BASE_URL) {
             config = { ...config, apiBaseUrl: GEMINI_API_BASE_URL };
-            logger.debug('Utilisation de l\'URL de base Gemini depuis le fichier de configuration', 'createProvider');
+            logger.debug(
+              "Utilisation de l'URL de base Gemini depuis le fichier de configuration",
+              'createProvider',
+            );
           } else if (process.env.GEMINI_API_BASE_URL) {
             config = { ...config, apiBaseUrl: process.env.GEMINI_API_BASE_URL };
-            logger.debug('Utilisation de l\'URL de base Gemini depuis les variables d\'environnement', 'createProvider');
+            logger.debug(
+              "Utilisation de l'URL de base Gemini depuis les variables d'environnement",
+              'createProvider',
+            );
           }
         }
-        
+
         provider = new GeminiProvider(config as GeminiConfig);
         break;
-        
+
       default:
         throw new IaError(
           `Type de fournisseur IA non supporté: ${providerType}`,
-          IaErrorType.UNSUPPORTED_OPERATION
+          IaErrorType.UNSUPPORTED_OPERATION,
         );
     }
-    
+
     // Stocker le fournisseur pour une utilisation ultérieure
     this.providers.set(providerType, provider);
-    
+
     return provider;
   }
-  
+
   /**
    * Retourne le fournisseur par défaut configuré dans l'application
    * @returns Instance du fournisseur d'IA par défaut
    */
   getDefaultProvider(): IaProvider {
-    logger.debug('Récupération du fournisseur par défaut', 'getDefaultProvider');
-    
+    logger.debug(
+      'Récupération du fournisseur par défaut',
+      'getDefaultProvider',
+    );
+
     // Vérifier si le fournisseur par défaut a déjà été créé
     const existingProvider = this.providers.get(this.defaultProviderType);
     if (existingProvider) {
       return existingProvider;
     }
-    
+
     // Sinon, créer un nouveau fournisseur par défaut
     return this.createProvider(this.defaultProviderType);
   }
-  
+
   /**
    * Change le type de fournisseur par défaut
    * @param providerType Nouveau type de fournisseur par défaut
    */
   setDefaultProviderType(providerType: IaProviderType): void {
     this.defaultProviderType = providerType;
-    logger.info('Type de fournisseur par défaut modifié', 'setDefaultProviderType', { 
-      newDefaultProvider: providerType 
-    });
+    logger.info(
+      'Type de fournisseur par défaut modifié',
+      'setDefaultProviderType',
+      {
+        newDefaultProvider: providerType,
+      },
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * Utilitaires pour le calcul d'équivalence calorique selon le principe 4-9-4
- * 
+ *
  * Ce module implémente tous les calculs liés à la conversion entre macronutriments
  * et calories selon les facteurs standards d'Atwater:
  * - 4 calories par gramme de glucides
@@ -26,7 +26,7 @@ export const calculateCaloriesFromMacros = (
   carbs: number,
   protein: number,
   fat: number,
-  fiber: number = 0
+  fiber: number = 0,
 ): number => {
   try {
     return preciseCalculation(
@@ -36,10 +36,14 @@ export const calculateCaloriesFromMacros = (
         f * MacroCalorieFactors.FAT +
         fb * (MacroCalorieFactors.FIBER || 0),
       [carbs, protein, fat, fiber],
-      0 // Arrondir à l'entier pour les calories
+      0, // Arrondir à l'entier pour les calories
     );
   } catch (error) {
-    logger.error(LogCategory.NUTRITION, 'Erreur dans calculateCaloriesFromMacros', { error });
+    logger.error(
+      LogCategory.NUTRITION,
+      'Erreur dans calculateCaloriesFromMacros',
+      { error },
+    );
     return 0;
   }
 };
@@ -52,16 +56,17 @@ export const calculateCaloriesFromMacros = (
  */
 export const calculateMacrosFromCalories = (
   calories: number,
-  distribution: { protein: number; carbs: number; fat: number }
+  distribution: { protein: number; carbs: number; fat: number },
 ): { protein: number; carbs: number; fat: number } => {
   try {
     // Vérifier que la distribution totalise 100%
-    const totalDistribution = distribution.protein + distribution.carbs + distribution.fat;
+    const totalDistribution =
+      distribution.protein + distribution.carbs + distribution.fat;
     if (Math.abs(totalDistribution - 1) > 0.01) {
       logger.warn(
         LogCategory.NUTRITION,
         'Distribution des macros incorrecte, doit totaliser 100%',
-        { distribution, total: totalDistribution }
+        { distribution, total: totalDistribution },
       );
       // Normaliser la distribution
       distribution = {
@@ -78,12 +83,19 @@ export const calculateMacrosFromCalories = (
 
     // Convertir les calories en grammes
     return {
-      protein: roundToDecimals(proteinCalories / MacroCalorieFactors.PROTEIN, 1),
+      protein: roundToDecimals(
+        proteinCalories / MacroCalorieFactors.PROTEIN,
+        1,
+      ),
       carbs: roundToDecimals(carbsCalories / MacroCalorieFactors.CARBS, 1),
       fat: roundToDecimals(fatCalories / MacroCalorieFactors.FAT, 1),
     };
   } catch (error) {
-    logger.error(LogCategory.NUTRITION, 'Erreur dans calculateMacrosFromCalories', { error });
+    logger.error(
+      LogCategory.NUTRITION,
+      'Erreur dans calculateMacrosFromCalories',
+      { error },
+    );
     return { protein: 0, carbs: 0, fat: 0 };
   }
 };
@@ -96,18 +108,19 @@ export const calculateMacrosFromCalories = (
  */
 export const verifyCalorieMacroConsistency = (
   macros: MacroNutrientsBase,
-  marginPercent: number = 5
+  marginPercent: number = 5,
 ): boolean => {
   try {
     const calculatedCalories = calculateCaloriesFromMacros(
       macros.carbs,
       macros.protein,
-      macros.fat
+      macros.fat,
     );
-    
+
     const margin = macros.calories * (marginPercent / 100);
-    const isConsistent = Math.abs(calculatedCalories - macros.calories) <= margin;
-    
+    const isConsistent =
+      Math.abs(calculatedCalories - macros.calories) <= margin;
+
     if (!isConsistent) {
       logger.warn(
         LogCategory.NUTRITION,
@@ -117,13 +130,17 @@ export const verifyCalorieMacroConsistency = (
           calculatedCalories,
           difference: calculatedCalories - macros.calories,
           marginAllowed: margin,
-        }
+        },
       );
     }
-    
+
     return isConsistent;
   } catch (error) {
-    logger.error(LogCategory.NUTRITION, 'Erreur dans verifyCalorieMacroConsistency', { error });
+    logger.error(
+      LogCategory.NUTRITION,
+      'Erreur dans verifyCalorieMacroConsistency',
+      { error },
+    );
     return false;
   }
 };
@@ -134,21 +151,25 @@ export const verifyCalorieMacroConsistency = (
  * @returns Objet avec calories ajustées
  */
 export const adjustCaloriesToMatchMacros = (
-  macros: MacroNutrientsBase
+  macros: MacroNutrientsBase,
 ): MacroNutrientsBase => {
   try {
     const calculatedCalories = calculateCaloriesFromMacros(
       macros.carbs,
       macros.protein,
-      macros.fat
+      macros.fat,
     );
-    
+
     return {
       ...macros,
       calories: calculatedCalories,
     };
   } catch (error) {
-    logger.error(LogCategory.NUTRITION, 'Erreur dans adjustCaloriesToMatchMacros', { error });
+    logger.error(
+      LogCategory.NUTRITION,
+      'Erreur dans adjustCaloriesToMatchMacros',
+      { error },
+    );
     return macros;
   }
 };
@@ -161,12 +182,15 @@ export const adjustCaloriesToMatchMacros = (
  */
 export const adjustMacrosForTargetDistribution = (
   macros: MacroNutrientsBase,
-  targetDistribution: { protein: number; carbs: number; fat: number }
+  targetDistribution: { protein: number; carbs: number; fat: number },
 ): MacroNutrientsBase => {
   try {
     // Calculer les nouveaux grammes de macros selon la distribution cible
-    const newMacros = calculateMacrosFromCalories(macros.calories, targetDistribution);
-    
+    const newMacros = calculateMacrosFromCalories(
+      macros.calories,
+      targetDistribution,
+    );
+
     return {
       ...macros,
       protein: newMacros.protein,
@@ -174,7 +198,11 @@ export const adjustMacrosForTargetDistribution = (
       fat: newMacros.fat,
     };
   } catch (error) {
-    logger.error(LogCategory.NUTRITION, 'Erreur dans adjustMacrosForTargetDistribution', { error });
+    logger.error(
+      LogCategory.NUTRITION,
+      'Erreur dans adjustMacrosForTargetDistribution',
+      { error },
+    );
     return macros;
   }
 };

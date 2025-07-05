@@ -14,7 +14,11 @@ export interface CalendarEmojiProps extends ImageProps {
  * Emoji 🗓 Calendar (Fluent).
  * Utilisé pour l'icône de sélection de date dans la barre de titre.
  */
-export const CalendarEmoji: React.FC<CalendarEmojiProps> = ({ size = 24, style, ...props }) => {
+export const CalendarEmoji: React.FC<CalendarEmojiProps> = ({
+  size = 24,
+  style,
+  ...props
+}) => {
   return (
     <Image
       source={calendarPng}

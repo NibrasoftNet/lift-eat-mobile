@@ -1,5 +1,12 @@
 import React, { ReactNode } from 'react';
-import { View, ScrollView, StyleSheet, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderBar } from '../organisms/navigation';
 
@@ -13,12 +20,12 @@ interface AuthLayoutProps {
 
 /**
  * AuthLayout component
- * 
+ *
  * Template dédié aux écrans d'authentification avec:
  * - HeaderBar optionnel (avec ou sans titre)
  * - Zone de contenu centrée avec scroll
  * - Gestion du clavier pour éviter qu'il ne recouvre les champs de saisie
- * 
+ *
  * Reproduit fidèlement le design Figma des écrans d'authentification.
  */
 const AuthLayout: React.FC<AuthLayoutProps> = ({
@@ -38,7 +45,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         backgroundColor="transparent"
         translucent
       />
-      
+
       <View className={`flex-1 ${bgColor}`}>
         {(title || showBackButton) && (
           <HeaderBar
@@ -48,7 +55,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             darkMode={darkMode}
           />
         )}
-        
+
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"

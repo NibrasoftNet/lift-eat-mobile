@@ -18,6 +18,7 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 ### 1. Analyse et préparation
 
 - [x] **1.1** Identifier tous les composants du module Plan qui affichent ou manipulent des valeurs nutritionnelles
+
   - [x] Analyser `PlanMealCard`, `PlanDetailsComponent` et autres composants liés
   - [x] Identifier les points d'intégration avec le service `planService.calculateMealNutrition`
   - [x] Documenter les flux de données nutritionnelles actuels dans le module Plan
@@ -30,6 +31,7 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 ### 2. Mise à jour des types et des interfaces
 
 - [x] **2.1** Standardiser l'utilisation de l'enum `NutritionDisplayMode`
+
   - [x] Remplacer toutes les chaînes littérales par des valeurs d'enum appropriées
   - [x] Mettre à jour les interfaces du module Plan pour utiliser les types standardisés
 
@@ -40,12 +42,14 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 ### 3. Refactorisation des composants d'interface utilisateur
 
 - [x] **3.1** Mettre à jour `PlanMealCard`
+
   - [x] Utiliser le service Plan mis à jour avec mode `NutritionDisplayMode.PER_100G`
   - [x] Standardiser l'affichage "Pour 100g" avec facteur d'ajustement
   - [x] Mettre à jour la logique de rendu pour afficher les valeurs normalisées
   - [x] Ajouter l'indicateur de facteur d'ajustement normalisé
 
 - [x] **3.2** Mettre à jour les écrans de détail de plan
+
   - [x] Examiner l'utilisation des composants nutritionnels dans `PlanDetailsComponent`
   - [x] Mettre à jour si nécessaire pour utiliser le mode `NutritionDisplayMode.PER_100G`
   - [x] Assurer la cohérence visuelle avec le module Repas
@@ -59,6 +63,7 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 ### 4. Intégration avec les services
 
 - [x] **4.1** Mettre à jour le service `planService`
+
   - [x] Adapter la méthode `calculateMealNutrition` pour supporter la normalisation
   - [x] Ajouter le paramètre `displayMode` avec `NutritionDisplayMode.PER_100G` par défaut
   - [x] Intégrer `normalizeMacrosToReferenceWeight` pour la normalisation cohérente
@@ -73,10 +78,12 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 ### 5. Tests et validation
 
 - [ ] **5.1** Créer des tests unitaires
+
   - [ ] Tester les calculs de normalisation dans différents scénarios
   - [ ] Valider la compatibilité entre les modules Repas et Plan
 
 - [ ] **5.2** Tests d'intégration
+
   - [ ] Vérifier que les valeurs affichées sont cohérentes à travers l'application
   - [ ] Tester les cas limites (faibles quantités, valeurs extrêmes)
 
@@ -84,6 +91,7 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
   - [x] Vérifier que les modifications n'ont pas cassé l'interface existante
   - [x] Vérifier que l'affichage nutritionnel est cohérent dans `PlanMealCard`
   - [x] Vérifier l'affichage standardisé dans la page détails du plan
+
 ## Progrès d'implémentation (05 mai 2025)
 
 ### Réalisé (✅)
@@ -117,11 +125,11 @@ Nous avons précédemment standardisé l'affichage des valeurs nutritionnelles �
 
 ## Risques et atténuations
 
-| Risque | Impact | Probabilité | Atténuation |
-|--------|--------|-------------|-------------|
-| Incohérence des calculs nutritionnels | Élevé | Moyenne | Tests approfondis avec données réelles |
-| Régression dans l'UI | Moyen | Faible | Tests manuels sur différents appareils |
-| Impact sur les performances | Moyen | Faible | Mémoisation et optimisation des recalculs |
+| Risque                                | Impact | Probabilité | Atténuation                               |
+| ------------------------------------- | ------ | ----------- | ----------------------------------------- |
+| Incohérence des calculs nutritionnels | Élevé  | Moyenne     | Tests approfondis avec données réelles    |
+| Régression dans l'UI                  | Moyen  | Faible      | Tests manuels sur différents appareils    |
+| Impact sur les performances           | Moyen  | Faible      | Mémoisation et optimisation des recalculs |
 
 ## Conclusion
 

@@ -9,7 +9,9 @@ interface UserSettingsDrawerServiceInterface {
   fetchUserData: (userId: number) => Promise<UserOrmPros | null>;
 }
 
-class UserSettingsDrawerUIService implements UserSettingsDrawerServiceInterface {
+class UserSettingsDrawerUIService
+  implements UserSettingsDrawerServiceInterface
+{
   // Méthode pour obtenir les éléments du menu
   getMenuItems(): MenuItem[] {
     return [
@@ -56,14 +58,16 @@ class UserSettingsDrawerUIService implements UserSettingsDrawerServiceInterface 
         case 'newPassword':
           return '/new-password';
         default:
-          logger.warn(LogCategory.NAVIGATION, 'Unknown navigation tag', { tag });
+          logger.warn(LogCategory.NAVIGATION, 'Unknown navigation tag', {
+            tag,
+          });
           return '/';
       }
     } catch (error) {
       logger.error(LogCategory.NAVIGATION, 'Error getting navigation URL', {
         error: error instanceof Error ? error.message : String(error),
         tag,
-        userId
+        userId,
       });
       return '/';
     }
@@ -78,12 +82,12 @@ class UserSettingsDrawerUIService implements UserSettingsDrawerServiceInterface 
         id: userId,
         name: 'John Doe',
         email: 'john@example.com',
-        profileImage: null
+        profileImage: null,
       } as UserOrmPros;
     } catch (error) {
       logger.error(LogCategory.USER, 'Error fetching user data', {
         error: error instanceof Error ? error.message : String(error),
-        userId
+        userId,
       });
       return null;
     }

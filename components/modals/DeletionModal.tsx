@@ -60,15 +60,23 @@ const DeletionModal: React.FC<DeletionModalProps> = ({
         <ModalFooter className="w-full">
           <Button
             className="flex-grow bg-transparent border border-gray-300 h-9"
-            onPress={() => deletionModalUIService.handleCancelDelete(setShowModal)}
+            onPress={() =>
+              deletionModalUIService.handleCancelDelete(setShowModal)
+            }
           >
             <ButtonText>Cancel</ButtonText>
           </Button>
-          <Button 
+          <Button
             onPress={() => {
-              logger.info(LogCategory.USER, 'Delete confirmation button clicked');
-              deletionModalUIService.handleConfirmDelete(handleDelete, setShowModal);
-            }} 
+              logger.info(
+                LogCategory.USER,
+                'Delete confirmation button clicked',
+              );
+              deletionModalUIService.handleConfirmDelete(
+                handleDelete,
+                setShowModal,
+              );
+            }}
             className="flex-grow bg-primary-500 h-9"
           >
             {isPending ? (

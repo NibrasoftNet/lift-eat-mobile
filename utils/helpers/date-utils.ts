@@ -15,7 +15,7 @@ export const getDayFullName = (day: DayEnum): string => {
     [DayEnum.SATURDAY]: 'Samedi',
     [DayEnum.SUNDAY]: 'Dimanche',
   };
-  
+
   return dayNames[day] || day;
 };
 

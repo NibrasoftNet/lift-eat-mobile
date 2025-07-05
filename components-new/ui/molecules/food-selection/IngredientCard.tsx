@@ -1,5 +1,11 @@
 import React, { useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated, Image } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Image,
+} from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Text } from '../../atoms/base';
@@ -32,7 +38,7 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
   const { id, ingredientsStandard, quantity } = ingredient;
   // Vérification de la structure de l'ingrédient dans la console
   console.log('Ingredient data:', JSON.stringify(ingredient, null, 2));
-  
+
   // Gestionnaire pour le clic sur la carte
   const handlePress = () => {
     if (onPress) {
@@ -51,15 +57,18 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
   };
 
   // Rendu du bouton de suppression (visible lors du swipe vers la gauche)
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
     if (!onDelete) return null;
-    
+
     const trans = dragX.interpolate({
       inputRange: [-80, 0],
       outputRange: [0, 80],
       extrapolate: 'clamp',
     });
-    
+
     return (
       <Animated.View
         style={[
@@ -84,11 +93,8 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
       friction={2}
       rightThreshold={40}
     >
-      <TouchableOpacity 
-        style={[
-          styles.container, 
-          { backgroundColor: '#FFFFFF' }
-        ]}
+      <TouchableOpacity
+        style={[styles.container, { backgroundColor: '#FFFFFF' }]}
         onPress={onPress ? handlePress : undefined}
         disabled={!onPress}
       >
@@ -116,12 +122,10 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
             </Text>
           </View>
         </View>
-        
+
         {/* Partie droite avec quantité */}
         <View style={styles.rightSection}>
-          <Text style={styles.quantityText}>
-            {quantity || 0}g
-          </Text>
+          <Text style={styles.quantityText}>{quantity || 0}g</Text>
         </View>
       </TouchableOpacity>
     </Swipeable>

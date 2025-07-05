@@ -33,15 +33,10 @@ export default function SplashScreen() {
   return (
     <View style={[styles.container, { backgroundColor: '#A1CE50' }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#A1CE50" />
-      
+
       <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
         <LogoIcon size={80} />
-        <Text 
-          variant="h1" 
-          style={styles.appName}
-          bold
-          color="#212121"
-        >
+        <Text variant="h1" style={styles.appName} bold color="#212121">
           Nutrio
         </Text>
       </Animated.View>

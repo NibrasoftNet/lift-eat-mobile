@@ -16,10 +16,10 @@ interface TitleAndDescriptionProps {
 
 export const TitleAndDescription: React.FC<TitleAndDescriptionProps> = ({
   title,
-  description
+  description,
 }) => {
   const theme = useAppTheme();
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     lineHeight: 18 * 1.6, // line-height: 1.6em
     letterSpacing: 18 * 0.0111, // letter-spacing: 1.11%
     color: '#616161',
-  }
+  },
 });
 
 export default TitleAndDescription;

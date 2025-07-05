@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, ImageSourcePropType } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  ImageSourcePropType,
+} from 'react-native';
 
 interface AvatarProps {
   // Image source

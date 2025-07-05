@@ -17,19 +17,30 @@ export async function handleAddScanHistory(
   try {
     if (!db) throw new Error('Database not initialized');
     const { barcode, name, userId } = params;
-    logger.info(LogCategory.DATABASE, `[handleAddScanHistory] Params received`, { barcode, name, userId });
+    logger.info(
+      LogCategory.DATABASE,
+      `[handleAddScanHistory] Params received`,
+      { barcode, name, userId },
+    );
     const [result] = await db
       .insert(scanHistory)
       .values({ barcode, name, userId })
       .returning({ id: scanHistory.id });
-    logger.info(LogCategory.DATABASE, `[handleAddScanHistory] Insert result`, { result });
+    logger.info(LogCategory.DATABASE, `[handleAddScanHistory] Insert result`, {
+      result,
+    });
     return { success: true, id: result.id };
   } catch (error) {
     logger.error(
       LogCategory.DATABASE,
-      `Error in handleAddScanHistory: ${error instanceof Error ? error.message : String(error)}`,
+      `Error in handleAddScanHistory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
@@ -51,14 +62,21 @@ export async function handleGetScanHistory(
   } catch (error) {
     logger.error(
       LogCategory.DATABASE,
-      `Error in handleGetScanHistory: ${error instanceof Error ? error.message : String(error)}`,
+      `Error in handleGetScanHistory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
 /** Vide l'historique */
-export async function handleClearScanHistory(db: any): Promise<{ success: boolean; error?: string }> {
+export async function handleClearScanHistory(
+  db: any,
+): Promise<{ success: boolean; error?: string }> {
   try {
     if (!db) throw new Error('Database not initialized');
     await db.delete(scanHistory);
@@ -66,8 +84,13 @@ export async function handleClearScanHistory(db: any): Promise<{ success: boolea
   } catch (error) {
     logger.error(
       LogCategory.DATABASE,
-      `Error in handleClearScanHistory: ${error instanceof Error ? error.message : String(error)}`,
+      `Error in handleClearScanHistory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }

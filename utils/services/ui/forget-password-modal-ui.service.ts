@@ -1,8 +1,8 @@
-import { ModalOperationResult } from "@/utils/interfaces/modals.interface";
-import { ResetPasswordData } from "@/utils/interfaces/auth.interface";
-import { authCoreService } from "@/utils/services/core/auth-core.service";
-import { logger } from "@/utils/services/common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
+import { ModalOperationResult } from '@/utils/interfaces/modals.interface';
+import { ResetPasswordData } from '@/utils/interfaces/auth.interface';
+import { authCoreService } from '@/utils/services/core/auth-core.service';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Service pour la gestion du modal de mot de passe oublié
@@ -13,7 +13,7 @@ class ForgetPasswordModalUIService {
    */
   getDefaultValues(): ResetPasswordData {
     return {
-      email: "",
+      email: '',
     };
   }
 
@@ -23,33 +23,44 @@ class ForgetPasswordModalUIService {
    */
   async submitForm(data: ResetPasswordData): Promise<ModalOperationResult> {
     try {
-      logger.info(LogCategory.AUTH, "Tentative de réinitialisation de mot de passe", {
-        email: data.email,
-      });
+      logger.info(
+        LogCategory.AUTH,
+        'Tentative de réinitialisation de mot de passe',
+        {
+          email: data.email,
+        },
+      );
 
       const result = await authCoreService.resetPassword(data);
 
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Échec de la réinitialisation du mot de passe",
-          message: "Une erreur est survenue lors de la réinitialisation du mot de passe",
+          error: result.error || 'Échec de la réinitialisation du mot de passe',
+          message:
+            'Une erreur est survenue lors de la réinitialisation du mot de passe',
         };
       }
 
       return {
         success: true,
-        message: "Email de réinitialisation envoyé avec succès",
+        message: 'Email de réinitialisation envoyé avec succès',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.AUTH, "Erreur lors de la réinitialisation du mot de passe", {
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.AUTH,
+        'Erreur lors de la réinitialisation du mot de passe',
+        {
+          error: errorMessage,
+        },
+      );
       return {
         success: false,
         error: errorMessage,
-        message: "Une erreur est survenue lors de la réinitialisation du mot de passe",
+        message:
+          'Une erreur est survenue lors de la réinitialisation du mot de passe',
       };
     }
   }
@@ -61,7 +72,7 @@ class ForgetPasswordModalUIService {
    */
   handleSuccessNavigation(router: any, setShowModal: (show: boolean) => void) {
     setShowModal(false);
-    router.push("/login");
+    router.push('/login');
   }
 
   /**
@@ -72,7 +83,7 @@ class ForgetPasswordModalUIService {
   handleError(error: any, toast: any) {
     toast.show({
       title: error instanceof Error ? error.message : String(error),
-      type: "error",
+      type: 'error',
     });
   }
 

@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState } from "react";
-import { ModalContextProps, ModalType } from "@/utils/interfaces/modals.interface";
+import React, { createContext, useContext, useState } from 'react';
+import {
+  ModalContextProps,
+  ModalType,
+} from '@/utils/interfaces/modals.interface';
 
 const ModalContext = createContext<ModalContextProps>({
   isOpen: false,

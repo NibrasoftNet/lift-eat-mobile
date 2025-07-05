@@ -59,53 +59,57 @@ const Checkbox: React.FC<CheckboxProps> = ({
   disabled = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // État interne pour le mode non contrôlé
   const [isChecked, setIsChecked] = useState(defaultChecked);
-  
+
   // Synchroniser l'état interne avec l'état externe
   useEffect(() => {
     if (checked !== undefined) {
       setIsChecked(checked);
     }
   }, [checked]);
-  
+
   // Gérer le changement d'état
   const handleToggle = () => {
     if (disabled) return;
-    
+
     const newValue = !isChecked;
     setIsChecked(newValue);
-    
+
     if (onChange) {
       onChange(newValue);
     }
   };
-  
+
   // Déterminer les couleurs selon le thème
   const isDark = theme === 'dark';
-  
+
   // Taille et couleurs exactes du Figma
   const checkboxSize = 24; // Taille exacte du Figma
   const borderRadius = 6; // Rayon exact du Figma
   const borderWidth = 3; // Épaisseur exacte du Figma
-  
+
   // Couleurs selon le thème et l'état
-  const backgroundColor = isChecked 
-    ? appTheme.color('primary') 
-    : 'transparent';
-  
-  const borderColor = disabled 
-    ? (isDark ? '#3A3A3A' : '#E0E0E0') 
+  const backgroundColor = isChecked ? appTheme.color('primary') : 'transparent';
+
+  const borderColor = disabled
+    ? isDark
+      ? '#3A3A3A'
+      : '#E0E0E0'
     : appTheme.color('primary');
-  
-  const textColor = isDark 
-    ? (disabled ? '#3A3A3A' : 'white') 
-    : (disabled ? '#BDBDBD' : appTheme.color('primary'));
-  
+
+  const textColor = isDark
+    ? disabled
+      ? '#3A3A3A'
+      : 'white'
+    : disabled
+    ? '#BDBDBD'
+    : appTheme.color('primary');
+
   // Opacité pour l'état désactivé
   const opacity = disabled ? 0.5 : 1;
-  
+
   return (
     <TouchableOpacity
       style={[
@@ -135,14 +139,11 @@ const Checkbox: React.FC<CheckboxProps> = ({
       >
         {isChecked && (
           <Box flex={1} justifyContent="center" alignItems="center">
-            <TickSquareRegularBoldIcon
-              size={checkboxSize - 2}
-              color="white"
-            />
+            <TickSquareRegularBoldIcon size={checkboxSize - 2} color="white" />
           </Box>
         )}
       </View>
-      
+
       {/* Label (optionnel) */}
       {style === 'text' && label && (
         <Text

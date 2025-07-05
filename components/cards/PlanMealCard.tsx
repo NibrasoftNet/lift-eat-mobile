@@ -30,36 +30,43 @@ interface PlanMealCardProps {
   key?: string | number;
 }
 
-const PlanMealCard: React.FC<PlanMealCardProps> = ({ 
-  meal, 
-  onMealDeleted, 
-  dailyPlanId 
+const PlanMealCard: React.FC<PlanMealCardProps> = ({
+  meal,
+  onMealDeleted,
+  dailyPlanId,
 }) => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const toast = useToast();
   const queryClient = useQueryClient();
-  
+
   // Créer une clé de requête unique pour ce repas spécifique avec le service planPagesService
   const mealCardDataQueryKey = [`meal-card-${meal.id}-plan-${dailyPlanId}`];
-  
+
   // Utiliser useQuery pour récupérer toutes les données via planPagesService
   const { data: mealCardData } = useQuery({
     queryKey: mealCardDataQueryKey,
     queryFn: async () => {
       if (!dailyPlanId || !meal.id) return null;
-      
+
       // Utiliser le service planPagesService pour récupérer toutes les données formatées
-      const result = await planPagesService.getPlanMealCardData(dailyPlanId, meal.id);
-      
+      const result = await planPagesService.getPlanMealCardData(
+        dailyPlanId,
+        meal.id,
+      );
+
       if (!result.success || !result.data) {
-        logger.error(LogCategory.UI, `Erreur lors de la récupération des données pour la carte repas`, {
-          dailyPlanId, 
-          mealId: meal.id,
-          error: result.error
-        });
+        logger.error(
+          LogCategory.UI,
+          `Erreur lors de la récupération des données pour la carte repas`,
+          {
+            dailyPlanId,
+            mealId: meal.id,
+            error: result.error,
+          },
+        );
         return null;
       }
-      
+
       return result.data;
     },
     // Activer le rafraîchissement automatique
@@ -72,11 +79,13 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
     // Invalider toutes les requêtes liées aux plans et aux repas
     invalidateCache(queryClient, DataType.PLAN, { invalidateRelated: true });
     invalidateCache(queryClient, DataType.MEAL, { invalidateRelated: true });
-    invalidateCache(queryClient, DataType.DAILY_PLAN, { invalidateRelated: true });
-    
+    invalidateCache(queryClient, DataType.DAILY_PLAN, {
+      invalidateRelated: true,
+    });
+
     // Invalider manuellement notre clé de requête spécifique
     queryClient.invalidateQueries({ queryKey: mealCardDataQueryKey });
-    
+
     // Propager la mise à jour si nécessaire
     if (onMealDeleted) {
       await onMealDeleted();
@@ -86,19 +95,27 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
   const handleRemoveMealFromPlan = async () => {
     try {
       if (meal.id && dailyPlanId) {
-        logger.info(LogCategory.UI, `Suppression du repas ${meal.id} du plan ${dailyPlanId}`);
-        
+        logger.info(
+          LogCategory.UI,
+          `Suppression du repas ${meal.id} du plan ${dailyPlanId}`,
+        );
+
         // Utiliser planPagesService pour cette opération (couche Presenter)
-        const result = await planPagesService.removeMealFromPlan(dailyPlanId, meal.id);
-        
+        const result = await planPagesService.removeMealFromPlan(
+          dailyPlanId,
+          meal.id,
+        );
+
         if (!result.success) {
-          throw new Error(result.error || `Échec de la suppression du repas du plan`);
+          throw new Error(
+            result.error || `Échec de la suppression du repas du plan`,
+          );
         }
-        
+
         // Invalider les caches pour rafraîchir les données
         invalidateCache(queryClient, DataType.PLAN);
         queryClient.invalidateQueries({ queryKey: mealCardDataQueryKey });
-        
+
         toast.show({
           render: ({ id }) => (
             <Toast nativeID={id} action="success" variant="solid">
@@ -119,17 +136,21 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
           </Toast>
         ),
       });
-      logger.error(LogCategory.UI, `Erreur lors de la suppression du repas du plan`, {
-        error: error instanceof Error ? error.message : String(error),
-        mealId: meal.id,
-        dailyPlanId
-      });
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors de la suppression du repas du plan`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          mealId: meal.id,
+          dailyPlanId,
+        },
+      );
     }
   };
 
   return (
     <>
-      <Pressable 
+      <Pressable
         className="flex w-full rounded-2xl bg-white shadow-lg p-4 mb-3 border-l-4 border-l-primary-500"
         onPress={() => {}}
         onLongPress={() => setShowOptionsModal(true)}
@@ -147,7 +168,11 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
                     }}
                   />
                 ) : (
-                  <Icon as={HandPlatter} size="lg" className="stroke-primary-500" />
+                  <Icon
+                    as={HandPlatter}
+                    size="lg"
+                    className="stroke-primary-500"
+                  />
                 )}
               </Avatar>
               <VStack>
@@ -155,7 +180,7 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
                   {mealCardData?.meal?.name || meal.name}
                 </Text>
                 <Text className="text-sm text-gray-500">
-                  {mealCardData?.displayText || "Pour 100g"}
+                  {mealCardData?.displayText || 'Pour 100g'}
                 </Text>
               </VStack>
             </HStack>
@@ -163,7 +188,11 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
             {/* Calories avec badge */}
             <Box className="bg-primary-50 px-3 py-1 rounded-full">
               <Text className="text-primary-700 font-bold">
-                {standardizeNutritionalRounding(mealCardData?.macros?.calories || meal.calories || 0, 'calories')} KCal
+                {standardizeNutritionalRounding(
+                  mealCardData?.macros?.calories || meal.calories || 0,
+                  'calories',
+                )}{' '}
+                KCal
               </Text>
             </Box>
           </HStack>
@@ -173,10 +202,11 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
             <VStack className="items-center bg-gray-50 rounded-lg p-2 flex-1 mx-1">
               <Text className="text-xs text-gray-500">Quantité</Text>
               <Text className="font-medium">
-                {mealCardData?.quantity || meal.quantity || 100} {meal.unit || 'g'}
+                {mealCardData?.quantity || meal.quantity || 100}{' '}
+                {meal.unit || 'g'}
               </Text>
             </VStack>
-            
+
             <VStack className="items-center bg-gray-50 rounded-lg p-2 flex-1 mx-1">
               <Text className="text-xs text-gray-500">Ajustement</Text>
               <Text className="font-medium">
@@ -184,11 +214,15 @@ const PlanMealCard: React.FC<PlanMealCardProps> = ({
               </Text>
             </VStack>
 
-            <Pressable 
+            <Pressable
               className="bg-primary-100 rounded-full p-2"
               onPress={() => setShowOptionsModal(true)}
             >
-              <Icon as={CircleChevronRight} size="md" className="text-primary-600" />
+              <Icon
+                as={CircleChevronRight}
+                size="md"
+                className="text-primary-600"
+              />
             </Pressable>
           </HStack>
         </VStack>

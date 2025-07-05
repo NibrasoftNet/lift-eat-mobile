@@ -49,18 +49,19 @@ const AppLogo: React.FC<AppLogoProps> = ({
   appName = 'Lift', // Nom par défaut de l'application
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer les dimensions du logo
   const logoSize = size;
   const fontSize = size * 0.8; // Proportionnel à la taille du logo
-  
+
   // Déterminer les couleurs selon le type
-  const logoBackgroundColor = type === 'circle' ? appTheme.color('primary') : 'transparent';
+  const logoBackgroundColor =
+    type === 'circle' ? appTheme.color('primary') : 'transparent';
   const textColor = type === 'text-dark' ? '#FFFFFF' : '#212121'; // Couleurs exactes du Figma
-  
+
   // Déterminer si le texte doit être affiché
   const showText = type === 'text-light' || type === 'text-dark';
-  
+
   // Rendre le logo
   const renderLogo = () => {
     return (
@@ -88,17 +89,17 @@ const AppLogo: React.FC<AppLogoProps> = ({
       </View>
     );
   };
-  
+
   return (
     <Box
       style={{
         ...styles.container,
         ...(showText ? styles.containerWithText : {}),
-        ...(containerStyle as object || {})
+        ...((containerStyle as object) || {}),
       }}
     >
       {renderLogo()}
-      
+
       {showText && (
         <Text
           style={[

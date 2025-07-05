@@ -112,27 +112,31 @@
 ## Notes importantes
 
 1. **Gestion de la mémoire** :
+
    - Utiliser une fenêtre glissante pour limiter la taille
    - Prioriser les messages récents et pertinents
    - Nettoyer régulièrement les anciennes conversations
 
 2. **Optimisation du contexte** :
+
    - Ne garder que les informations pertinentes
    - Mettre à jour le contexte de manière asynchrone
    - Utiliser des tags pour identifier les sujets importants
 
 3. **Performance** :
+
    - Mettre en cache les conversations récentes
    - Utiliser des indices SQLite appropriés
    - Implémenter le nettoyage en arrière-plan
 
 4. **Format des prompts** :
+
    ```typescript
    const enrichedPrompt = `
    ${previousContext}
    
    Recent conversation:
-   ${recentMessages.map(m => `${m.role}: ${m.content}`).join('\n')}
+   ${recentMessages.map((m) => `${m.role}: ${m.content}`).join('\n')}
    
    Current context:
    ${currentContext}

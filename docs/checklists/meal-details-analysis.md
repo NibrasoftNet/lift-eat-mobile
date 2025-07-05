@@ -1,22 +1,27 @@
 # Analyse de la page de détail des repas
 
 ## Objectif
+
 Ce document analyse l'écran de détail des repas actuel et propose une implémentation avec le nouveau thème en suivant l'architecture MCP (Model-Controller-Presenter) de l'application Lift.
 
 ## Structure actuelle
+
 La page actuelle (`meals/my-meals/details/[id].tsx`) est organisée comme suit:
 
 1. **Interfaces et types**:
+
    - `MealIngredientDetailProps`: Interface pour les ingrédients
    - `IngredientWithStandardOrmProps`: Interface pour les ingrédients avec leurs standards
    - `MealDetailData`: Interface pour les données complètes de la page
 
 2. **Composants principaux**:
+
    - `MealDetailsComponent`: Affiche les détails du repas (UI)
    - `MealDetailsPage`: Composant de page
    - `MealDetailsScreen`: Composant principal exporté qui gère la logique et les données
 
 3. **Fonctionnalités clés**:
+
    - Affichage des détails du repas (nom, calories, type, etc.)
    - Affichage des ingrédients dans un accordéon
    - Calcul des macronutriments (protéines, lipides, glucides)
@@ -30,21 +35,21 @@ La page actuelle (`meals/my-meals/details/[id].tsx`) est organisée comme suit:
 
 ## Composants UI actuels vs nouveaux composants
 
-| Composant actuel | Nouveau composant | Description |
-|------------------|-------------------|-------------|
-| `VStack` | `View` (avec styles) | Conteneur vertical |
-| `HStack` | `View` (avec styles flexDirection: 'row') | Conteneur horizontal |
-| `Box` | `View` | Conteneur simple |
-| `Card` | `components-new/ui/molecules/cards/Card` | Carte avec bordure et ombre |
-| `Text` | `components-new/ui/atoms/base/Text` | Texte avec variantes |
-| `Avatar` | `components-new/ui/atoms/Avatar` | Affichage d'image de profil |
-| `Icon` | Icônes SVG directes | Icônes du système |
-| `Divider` | `components-new/ui/atoms/Divider` | Séparateur visuel |
-| `FlashList/FlatList` | `components-new/ui/molecules/lists/FlashList` | Liste performante pour les ingrédients |
-| `Accordion` | `components-new/ui/molecules/Accordion` | Accordéon pour les listes extensibles |
-| `Button` | `components-new/ui/atoms/Button` | Bouton d'action |
-| `MacrosInfoCard` | `components-new/ui/molecules/tracking/CircularNutritionProgress` | Visualisation circulaire des macronutriments |
-| `DeletionModal` | `components-new/ui/molecules/modals/ConfirmationModal` | Modal de confirmation |
+| Composant actuel     | Nouveau composant                                                | Description                                  |
+| -------------------- | ---------------------------------------------------------------- | -------------------------------------------- |
+| `VStack`             | `View` (avec styles)                                             | Conteneur vertical                           |
+| `HStack`             | `View` (avec styles flexDirection: 'row')                        | Conteneur horizontal                         |
+| `Box`                | `View`                                                           | Conteneur simple                             |
+| `Card`               | `components-new/ui/molecules/cards/Card`                         | Carte avec bordure et ombre                  |
+| `Text`               | `components-new/ui/atoms/base/Text`                              | Texte avec variantes                         |
+| `Avatar`             | `components-new/ui/atoms/Avatar`                                 | Affichage d'image de profil                  |
+| `Icon`               | Icônes SVG directes                                              | Icônes du système                            |
+| `Divider`            | `components-new/ui/atoms/Divider`                                | Séparateur visuel                            |
+| `FlashList/FlatList` | `components-new/ui/molecules/lists/FlashList`                    | Liste performante pour les ingrédients       |
+| `Accordion`          | `components-new/ui/molecules/Accordion`                          | Accordéon pour les listes extensibles        |
+| `Button`             | `components-new/ui/atoms/Button`                                 | Bouton d'action                              |
+| `MacrosInfoCard`     | `components-new/ui/molecules/tracking/CircularNutritionProgress` | Visualisation circulaire des macronutriments |
+| `DeletionModal`      | `components-new/ui/molecules/modals/ConfirmationModal`           | Modal de confirmation                        |
 
 ## Icônes à utiliser (selon convention du projet)
 
@@ -55,6 +60,7 @@ import { ArrowLeftRegularBoldIcon } from '../../../assets/icons/figma/regular-bo
 ```
 
 Les icônes requises pour la page détail:
+
 - `ArrowLeftRegularBoldIcon`: Pour le bouton de retour
 - `EditRegularBoldIcon`: Pour le bouton d'édition
 - `DeleteRegularBoldIcon`: Pour le bouton de suppression
@@ -68,9 +74,11 @@ Les icônes requises pour la page détail:
 Conformément à l'architecture MCP, nous utiliserons:
 
 1. **Model**:
+
    - `MealOrmProps` et `IngredientOrmProps` du schéma de la base de données
 
 2. **Controller (Core Services)**:
+
    - `nutrition-core.service.ts` pour la logique des calculs nutritionnels
 
 3. **Presenter (Page Services)**:
@@ -88,7 +96,14 @@ Conformément à l'architecture MCP, nous utiliserons:
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Text } from '@/components-new/ui/atoms/base';
@@ -112,27 +127,30 @@ import { NutritionDisplayMode } from '@/utils/enum/nutrition.enum';
 
 // Interfaces et types (reprendre les mêmes que dans le fichier original)
 // ...
-
 ```
 
 ### 2. Composants principaux à développer
 
 #### CircularNutritionProgress
+
 Visualisation des macronutriments sous forme de cercle segmenté avec affichage des calories, protéines, glucides et lipides.
 
 #### IngredientsList
+
 Affiche la liste des ingrédients du repas avec leurs quantités, optimisée avec FlashList.
 
 #### MealDetailHeader
+
 En-tête de la page avec l'image du repas, le nom, et les actions (éditer, supprimer).
 
 ### 3. Logique et fonctionnalités
 
 1. **Chargement des données**:
+
    ```typescript
    const { id } = useLocalSearchParams();
    const mealId = Array.isArray(id) ? id[0] : id;
-   
+
    const { data, isLoading, error } = useQuery({
      queryKey: [DataType.MEAL, mealId],
      queryFn: () => mealPagesService.getMealDetails(Number(mealId)),
@@ -140,6 +158,7 @@ En-tête de la page avec l'image du repas, le nom, et les actions (éditer, supp
    ```
 
 2. **Suppression d'un repas**:
+
    ```typescript
    const queryClient = useQueryClient();
    const { mutate: deleteMeal } = useMutation({
@@ -156,7 +175,9 @@ En-tête de la page avec l'image du repas, le nom, et les actions (éditer, supp
    if (error) {
      return (
        <View style={styles.errorContainer}>
-         <Text variant="body">Une erreur est survenue lors du chargement des détails</Text>
+         <Text variant="body">
+           Une erreur est survenue lors du chargement des détails
+         </Text>
          <TouchableOpacity onPress={() => router.back()}>
            <Text variant="button">Retour</Text>
          </TouchableOpacity>
@@ -170,21 +191,25 @@ En-tête de la page avec l'image du repas, le nom, et les actions (éditer, supp
 La nouvelle interface devrait s'organiser comme suit:
 
 1. **En-tête**
+
    - Image du repas (grande taille)
    - Nom du repas (grand titre)
    - Calories (sous-titre)
    - Boutons d'action (Retour, Éditer, Supprimer)
 
 2. **Informations nutritionnelles**
+
    - Carte avec macronutriments
    - Représentation visuelle (barres ou cercles)
 
 3. **Informations générales**
+
    - Type de repas
    - Poids
    - Temps de préparation
 
 4. **Ingrédients**
+
    - Liste des ingrédients avec quantités
    - Option pour voir les détails de chaque ingrédient
 
@@ -306,28 +331,32 @@ const styles = StyleSheet.create({
 ### 2. Composants à développer
 
 - [x] **MealDetailHeader** (`components-new/ui/organisms/meal/MealDetailHeader.tsx`)
+
   - [x] Image du repas avec gradient (utiliser `StyleSheet`)
   - [x] Bouton de retour avec `ArrowLeftRegularBoldIcon` (SVG import direct)
   - [x] Boutons d'action (Modifier avec `EditRegularBoldIcon`, Supprimer avec `DeleteRegularBoldIcon`)
   - [x] Titre du repas et affichage des calories
 
 - [x] **CircularNutritionProgress** (`components-new/ui/molecules/tracking/CircularNutritionProgress.tsx`)
+
   - [x] Cercle segmenté pour visualiser les macronutriments (remplace `MacrosInfoCard`)
   - [x] Affichage des calories au centre du cercle
   - [x] Légende pour protéines, lipides, glucides avec code couleur
   - [x] Version détaillée avec grammes et pourcentages
 
 - [x] **GeneralInfoSection** (`components-new/ui/molecules/info/GeneralInfoSection.tsx`)
+
   - [x] Type de repas (utilisant `ChartRegularBoldIcon` comme alternative à `UtensilsCrossedRegularBoldIcon`)
   - [x] Poids (utilisant `InfoCircleRegularBoldIcon` comme alternative à `WeightRegularBoldIcon`)
   - [x] Temps de préparation (utilisant `TimeCircleRegularBoldIcon` comme alternative à `ClockRegularBoldIcon`)
   - [x] Mise en page avec alignement cohérent des icônes
 
 - [x] **IngredientsList** (`components-new/ui/organisms/meal/IngredientsList.tsx`)
+
   - [x] Liste des ingrédients avec quantités et unités
   - [x] Affichage des images d'ingrédients avec gestion des images par défaut
   - [x] Style épuré avec fond blanc et séparateurs fins (#EEEEEE)
-  - [x] Optimisation avec `FlatList` pour les performances 
+  - [x] Optimisation avec `FlatList` pour les performances
   - [x] Gestion des ingrédients standards et personnalisés
   - [x] Option pour supprimer les ingrédients avec swipe et confirmation
 
@@ -343,12 +372,14 @@ const styles = StyleSheet.create({
 L'intégration avec l'architecture MCP de l'application est déjà bien avancée, comme en témoigne l'affichage correct des images et des valeurs nutritionnelles :
 
 - [x] **Services Model (Couche M)**
+
   - [x] Utiliser les interfaces de base `MealOrmProps` et `IngredientOrmProps` définies dans `db/schema.ts`
   - [x] Intégrer les interfaces structurées dans `utils/mcp/interfaces` pour garantir la cohérence des données
   - [x] Assurer la liaison avec les handlers MCP appropriés dans `utils/mcp/handlers` pour l'interaction avec la base de données
   - [x] Gérer correctement les transformations d'interfaces entre la base de données et l'affichage
 
 - [x] **Services Controller (Couche C)**
+
   - [x] Intégrer `nutrition-core.service.ts` pour tous les calculs de macronutriments et de calories
   - [x] Utiliser `nutritionEngine.ts` comme façade simplifiée pour accéder aux services nutritionnels
   - [x] Adapter les calculs pour prendre en compte les quantités des ingrédients et leur valeur nutritionnelle
@@ -363,6 +394,7 @@ L'intégration avec l'architecture MCP de l'application est déjà bien avancée
 ### 4. Fonctionnalités
 
 - [x] **Chargement des données**
+
   - [x] Récupération des paramètres avec `useLocalSearchParams`
   - [x] Conversion et validation de l'ID du repas
   - [x] Requête avec `useQuery` et gestion des états (loading, error, success)
@@ -376,6 +408,7 @@ L'intégration avec l'architecture MCP de l'application est déjà bien avancée
 ### 5. Expérience utilisateur
 
 - [x] **Gestion des états**
+
   - [x] Écran de chargement pendant la récupération des données
   - [x] Gestion des erreurs avec messages explicites
   - [x] État vide si aucune donnée n'est disponible

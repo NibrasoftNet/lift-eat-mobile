@@ -3,7 +3,7 @@
  * Contient les informations d'affichage et description des méthodes de cuisson
  */
 
-import { CookingMethod } from "@/utils/constants/CookingConstants";
+import { CookingMethod } from '@/utils/constants/CookingConstants';
 
 /**
  * Interface pour les informations sur les méthodes de cuisson
@@ -34,24 +34,27 @@ export const COOKING_METHODS_INFO: Record<CookingMethod, CookingMethodInfo> = {
     label: 'Bouilli',
     iconComponent: 'FontAwesome5',
     iconName: 'hot-tub',
-    description: 'Cuisson dans l\'eau bouillante.',
-    impact: 'Perte de certains nutriments solubles dans l\'eau, réduit légèrement les calories.',
+    description: "Cuisson dans l'eau bouillante.",
+    impact:
+      "Perte de certains nutriments solubles dans l'eau, réduit légèrement les calories.",
   },
   [CookingMethod.STEAMED]: {
     method: CookingMethod.STEAMED,
     label: 'Vapeur',
     iconComponent: 'FontAwesome5',
     iconName: 'cloud',
-    description: 'Cuisson à la vapeur d\'eau.',
-    impact: 'Préserve mieux les nutriments que bouilli, perte minimale de nutriments.',
+    description: "Cuisson à la vapeur d'eau.",
+    impact:
+      'Préserve mieux les nutriments que bouilli, perte minimale de nutriments.',
   },
   [CookingMethod.FRIED]: {
     method: CookingMethod.FRIED,
     label: 'Frit',
     iconComponent: 'FontAwesome5',
     iconName: 'oil-can',
-    description: 'Cuisson dans l\'huile chaude.',
-    impact: 'Augmente significativement les lipides et calories, absorption d\'huile.',
+    description: "Cuisson dans l'huile chaude.",
+    impact:
+      "Augmente significativement les lipides et calories, absorption d'huile.",
   },
   [CookingMethod.BAKED]: {
     method: CookingMethod.BAKED,
@@ -59,7 +62,7 @@ export const COOKING_METHODS_INFO: Record<CookingMethod, CookingMethodInfo> = {
     iconComponent: 'FontAwesome5',
     iconName: 'thermometer-full',
     description: 'Cuisson au four (chaleur sèche).',
-    impact: 'Perte modérée d\'eau, légère concentration des nutriments.',
+    impact: "Perte modérée d'eau, légère concentration des nutriments.",
   },
   [CookingMethod.GRILLED]: {
     method: CookingMethod.GRILLED,

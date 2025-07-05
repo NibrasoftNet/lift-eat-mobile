@@ -38,69 +38,85 @@ export const planService = {
     pageInfo?: {
       currentPage: number;
       totalPages: number;
-    }
+    };
   }> {
     try {
       // Récupérer l'ID utilisateur
       const userId = getCurrentUserIdSync();
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour récupérer les plans');
+        logger.error(
+          LogCategory.AUTH,
+          'Utilisateur non authentifié pour récupérer les plans',
+        );
         return { success: false, error: 'Utilisateur non authentifié' };
       }
-      
-      logger.info(LogCategory.DATABASE, 'Récupération de la liste des plans avec filtres', { userId, filters });
-      
+
+      logger.info(
+        LogCategory.DATABASE,
+        'Récupération de la liste des plans avec filtres',
+        { userId, filters },
+      );
+
       // Appel au service MCP pour récupérer tous les plans
       const result = await sqliteMCPServer.getPlansListViaMCP(userId);
-      
+
       if (!result || !result.success) {
-        logger.error(LogCategory.DATABASE, 'Échec de la récupération des plans', {
-          error: result?.error
-        });
-        
+        logger.error(
+          LogCategory.DATABASE,
+          'Échec de la récupération des plans',
+          {
+            error: result?.error,
+          },
+        );
+
         return {
           success: false,
-          error: result?.error || 'Échec de la récupération des plans'
+          error: result?.error || 'Échec de la récupération des plans',
         };
       }
-      
+
       // S'assurer que nous avons un tableau de plans
       const plans = Array.isArray(result.plans) ? result.plans : [];
-      
+
       // Définir les options de pagination
       const page = filters.page || 1;
       const limit = filters.limit || 10;
-      
+
       // Appliquer le filtre de recherche si spécifié
       let filteredPlans = plans;
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        filteredPlans = plans.filter(plan => 
-          plan.name?.toLowerCase().includes(searchLower)
+        filteredPlans = plans.filter((plan) =>
+          plan.name?.toLowerCase().includes(searchLower),
         );
       }
-      
+
       // Appliquer la pagination
       const totalCount = filteredPlans.length;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const paginatedPlans = filteredPlans.slice(startIndex, endIndex);
-      
+
       // Calculer le nombre total de pages
       const totalPages = Math.ceil(totalCount / limit);
-      
+
       return {
         success: true,
         plans: paginatedPlans,
         totalCount,
         pageInfo: {
           currentPage: page,
-          totalPages
-        }
+          totalPages,
+        },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération des plans', { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        'Erreur lors de la récupération des plans',
+        { error: errorMessage },
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -120,47 +136,68 @@ export const planService = {
       // Récupérer l'ID utilisateur
       const userId = getCurrentUserIdSync();
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour récupérer les détails du plan');
+        logger.error(
+          LogCategory.AUTH,
+          'Utilisateur non authentifié pour récupérer les détails du plan',
+        );
         return { success: false, error: 'Utilisateur non authentifié' };
       }
-      
-      logger.info(LogCategory.DATABASE, `Récupération des détails du plan ${planId}`);
-      
+
+      logger.info(
+        LogCategory.DATABASE,
+        `Récupération des détails du plan ${planId}`,
+      );
+
       // Récupérer les détails du plan
-      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
-      
+      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(
+        planId,
+        userId,
+      );
+
       if (!planResult || !planResult.success) {
-        logger.error(LogCategory.DATABASE, `Échec de la récupération du plan ${planId}`, {
-          error: planResult?.error
-        });
-        
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec de la récupération du plan ${planId}`,
+          {
+            error: planResult?.error,
+          },
+        );
+
         return {
           success: false,
-          error: planResult?.error || `Plan introuvable (ID: ${planId})`
+          error: planResult?.error || `Plan introuvable (ID: ${planId})`,
         };
       }
-      
+
       // Vérifier que l'utilisateur est le propriétaire du plan
       if (!this.isAuthorizedToModify(planResult.plan)) {
-        logger.error(LogCategory.AUTH, `L'utilisateur ${userId} n'est pas autorisé à voir le plan ${planId}`);
+        logger.error(
+          LogCategory.AUTH,
+          `L'utilisateur ${userId} n'est pas autorisé à voir le plan ${planId}`,
+        );
         return {
           success: false,
-          error: 'Vous n\'êtes pas autorisé à voir ce plan'
+          error: "Vous n'êtes pas autorisé à voir ce plan",
         };
       }
-      
+
       // Les plans journaliers devraient déjà être inclus dans la réponse getPlanDetailsViaMCP
       // Si non inclus, nous créons un tableau vide par défaut
       const dailyPlans = planResult.dailyPlans || [];
-      
+
       return {
         success: true,
         plan: planResult.plan,
-        dailyPlans: dailyPlans
+        dailyPlans: dailyPlans,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Erreur lors de la récupération des détails du plan ${planId}`, { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Erreur lors de la récupération des détails du plan ${planId}`,
+        { error: errorMessage },
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -169,30 +206,51 @@ export const planService = {
    * @param planId - Identifiant du plan u00e0 supprimer
    * @returns Promise avec le ru00e9sultat de l'opu00e9ration
    */
-  async deletePlan(planId: number): Promise<{ success: boolean; error?: string }> {
+  async deletePlan(
+    planId: number,
+  ): Promise<{ success: boolean; error?: string }> {
     // 1. Ru00e9cupu00e9rer l'ID utilisateur de maniu00e8re centralisu00e9e
     const userId = getCurrentUserIdSync();
     if (!userId) {
-      logger.error(LogCategory.AUTH, 'Authentication required to delete a plan');
-      return { success: false, error: 'You must be logged in to delete a plan' };
+      logger.error(
+        LogCategory.AUTH,
+        'Authentication required to delete a plan',
+      );
+      return {
+        success: false,
+        error: 'You must be logged in to delete a plan',
+      };
     }
 
-    logger.info(LogCategory.DATABASE, `Attempting to delete plan ${planId} for user ${userId}`);
-    
+    logger.info(
+      LogCategory.DATABASE,
+      `Attempting to delete plan ${planId} for user ${userId}`,
+    );
+
     try {
       // 2. Appeler le MCP pour effectuer la suppression
       // Le MCP effectue du00e9ju00e0 les vu00e9rifications de propriu00e9tu00e9 dans handleDeletePlan
       const result = await sqliteMCPServer.deletePlanViaMCP(planId, userId);
-      
+
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to delete plan: ${result.error}`);
-        return { success: false, error: result.error || `Failed to delete plan ${planId}` };
+        logger.error(
+          LogCategory.DATABASE,
+          `Failed to delete plan: ${result.error}`,
+        );
+        return {
+          success: false,
+          error: result.error || `Failed to delete plan ${planId}`,
+        };
       }
-      
+
       return { success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Error deleting plan: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error deleting plan: ${errorMessage}`,
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -202,27 +260,48 @@ export const planService = {
    * @param planId - Identifiant du plan u00e0 du00e9finir comme actuel
    * @returns Promise avec le ru00e9sultat de l'opu00e9ration
    */
-  async setCurrentPlan(planId: number): Promise<{ success: boolean; error?: string }> {
+  async setCurrentPlan(
+    planId: number,
+  ): Promise<{ success: boolean; error?: string }> {
     const userId = getCurrentUserIdSync();
     if (!userId) {
-      logger.error(LogCategory.AUTH, 'Authentication required to set current plan');
-      return { success: false, error: 'You must be logged in to set current plan' };
+      logger.error(
+        LogCategory.AUTH,
+        'Authentication required to set current plan',
+      );
+      return {
+        success: false,
+        error: 'You must be logged in to set current plan',
+      };
     }
 
-    logger.info(LogCategory.DATABASE, `Attempting to set plan ${planId} as current for user ${userId}`);
-    
+    logger.info(
+      LogCategory.DATABASE,
+      `Attempting to set plan ${planId} as current for user ${userId}`,
+    );
+
     try {
       const result = await sqliteMCPServer.setCurrentPlanViaMCP(planId, userId);
-      
+
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to set current plan: ${result.error}`);
-        return { success: false, error: result.error || `Failed to set plan ${planId} as current` };
+        logger.error(
+          LogCategory.DATABASE,
+          `Failed to set current plan: ${result.error}`,
+        );
+        return {
+          success: false,
+          error: result.error || `Failed to set plan ${planId} as current`,
+        };
       }
-      
+
       return { success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Error setting current plan: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error setting current plan: ${errorMessage}`,
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -232,10 +311,13 @@ export const planService = {
    * @param queryClient - Instance du queryClient pour la gestion du cache
    * @param planId - Identifiant du plan modifiu00e9
    */
-  invalidatePlanCache(queryClient: ReturnType<typeof useQueryClient>, planId: number) {
-    return invalidateCache(queryClient, DataType.PLAN, { 
-      id: planId, 
-      invalidateRelated: true 
+  invalidatePlanCache(
+    queryClient: ReturnType<typeof useQueryClient>,
+    planId: number,
+  ) {
+    return invalidateCache(queryClient, DataType.PLAN, {
+      id: planId,
+      invalidateRelated: true,
     });
   },
 
@@ -259,24 +341,34 @@ export const planService = {
    */
   async getMealQuantityInPlan(
     dailyPlanId: number,
-    mealId: number
+    mealId: number,
   ): Promise<{ success: boolean; quantity?: number; error?: string }> {
     try {
-      logger.info(LogCategory.DATABASE, `Getting quantity for meal ${mealId} in daily plan ${dailyPlanId}`);
-      return await sqliteMCPServer.getMealQuantityInPlanViaMCP(dailyPlanId, mealId);
+      logger.info(
+        LogCategory.DATABASE,
+        `Getting quantity for meal ${mealId} in daily plan ${dailyPlanId}`,
+      );
+      return await sqliteMCPServer.getMealQuantityInPlanViaMCP(
+        dailyPlanId,
+        mealId,
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Error getting meal quantity: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error getting meal quantity: ${errorMessage}`,
+      );
       return { success: false, error: errorMessage };
     }
   },
 
   /**
    * Méthode calculateMealNutrition supprimée le 13 mai 2025
-   * 
+   *
    * Cette méthode permettait de calculer les valeurs nutritionnelles d'un repas pour une quantité donnée.
    * Elle était dépréciée et a été supprimée dans le cadre de la refactorisation du module de nutrition.
-   * 
+   *
    * Alternatives recommandées :
    * - nutritionEngine.getMealNutrition(mealId, quantity, displayMode)
    * - nutritionPagesService.getMealNutritionForDisplay(mealId, quantity, displayMode)
@@ -292,14 +384,25 @@ export const planService = {
   async updateMealQuantityInPlan(
     dailyPlanId: number,
     mealId: number,
-    newQuantity: number
+    newQuantity: number,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      logger.info(LogCategory.DATABASE, `Updating quantity for meal ${mealId} in daily plan ${dailyPlanId} to ${newQuantity}`);
-      return await sqliteMCPServer.updateMealQuantityInPlanViaMCP(dailyPlanId, mealId, newQuantity);
+      logger.info(
+        LogCategory.DATABASE,
+        `Updating quantity for meal ${mealId} in daily plan ${dailyPlanId} to ${newQuantity}`,
+      );
+      return await sqliteMCPServer.updateMealQuantityInPlanViaMCP(
+        dailyPlanId,
+        mealId,
+        newQuantity,
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Error updating meal quantity: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error updating meal quantity: ${errorMessage}`,
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -312,14 +415,24 @@ export const planService = {
    */
   async removeMealFromDailyPlan(
     dailyPlanId: number,
-    mealId: number
+    mealId: number,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      logger.info(LogCategory.DATABASE, `Removing meal ${mealId} from daily plan ${dailyPlanId}`);
-      return await sqliteMCPServer.removeMealFromDailyPlanViaMCP(dailyPlanId, mealId);
+      logger.info(
+        LogCategory.DATABASE,
+        `Removing meal ${mealId} from daily plan ${dailyPlanId}`,
+      );
+      return await sqliteMCPServer.removeMealFromDailyPlanViaMCP(
+        dailyPlanId,
+        mealId,
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Error removing meal from daily plan: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error removing meal from daily plan: ${errorMessage}`,
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -328,7 +441,7 @@ export const planService = {
    * Calcule les valeurs nutritionnelles d'un plan journalier
    * Cette méthode est dépréciée et ne devrait plus être utilisée directement.
    * Utilisez nutritionEngine.getPlanNutrition() à la place.
-   * 
+   *
    * @param dailyPlanId ID du plan journalier
    * @param displayMode Mode d'affichage (default: AS_IS pour plans)
    * @returns Valeurs nutritionnelles calculées
@@ -347,38 +460,46 @@ export const planService = {
       // Récupérer l'ID utilisateur
       const userId = getCurrentUserIdSync();
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour créer un plan');
+        logger.error(
+          LogCategory.AUTH,
+          'Utilisateur non authentifié pour créer un plan',
+        );
         return { success: false, error: 'Utilisateur non authentifié' };
       }
-      
-      logger.info(LogCategory.DATABASE, 'Création d\'un nouveau plan', { planData });
-      
+
+      logger.info(LogCategory.DATABASE, "Création d'un nouveau plan", {
+        planData,
+      });
+
       // Valider les données du plan
       if (!planData.name) {
         return { success: false, error: 'Le nom du plan est requis' };
       }
-      
+
       // Créer le plan via MCP en passant les données du plan et l'ID utilisateur séparément
       const result = await sqliteMCPServer.createPlanViaMCP(planData, userId);
-      
+
       if (!result || !result.success) {
         logger.error(LogCategory.DATABASE, 'Échec de la création du plan', {
-          error: result?.error
+          error: result?.error,
         });
-        
+
         return {
           success: false,
-          error: result?.error || 'Échec de la création du plan'
+          error: result?.error || 'Échec de la création du plan',
         };
       }
-      
+
       return {
         success: true,
-        planId: result.planId
+        planId: result.planId,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, 'Erreur lors de la création du plan', { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(LogCategory.DATABASE, 'Erreur lors de la création du plan', {
+        error: errorMessage,
+      });
       return { success: false, error: errorMessage };
     }
   },
@@ -396,33 +517,49 @@ export const planService = {
       // Récupérer l'ID utilisateur
       const userId = getCurrentUserIdSync();
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour récupérer le plan courant');
+        logger.error(
+          LogCategory.AUTH,
+          'Utilisateur non authentifié pour récupérer le plan courant',
+        );
         return { success: false, error: 'Utilisateur non authentifié' };
       }
-      
-      logger.info(LogCategory.DATABASE, 'Récupération du plan courant pour l\'utilisateur', { userId });
-      
+
+      logger.info(
+        LogCategory.DATABASE,
+        "Récupération du plan courant pour l'utilisateur",
+        { userId },
+      );
+
       // Récupérer le plan courant via MCP
       const result = await sqliteMCPServer.getCurrentPlanViaMCP(userId);
-      
+
       if (!result || !result.success) {
-        logger.error(LogCategory.DATABASE, 'Échec de la récupération du plan courant', {
-          error: result?.error
-        });
-        
+        logger.error(
+          LogCategory.DATABASE,
+          'Échec de la récupération du plan courant',
+          {
+            error: result?.error,
+          },
+        );
+
         return {
           success: false,
-          error: result?.error || 'Échec de la récupération du plan courant'
+          error: result?.error || 'Échec de la récupération du plan courant',
         };
       }
-      
+
       return {
         success: true,
-        plan: result.plan
+        plan: result.plan,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération du plan courant', { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        'Erreur lors de la récupération du plan courant',
+        { error: errorMessage },
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -439,40 +576,65 @@ export const planService = {
     dailyPlanId: number,
     mealId: number,
     quantity: number = 100,
-    mealType?: MealTypeEnum
+    mealType?: MealTypeEnum,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Valider que la quantité est positive
       if (isNaN(quantity) || quantity <= 0) {
-        logger.error(LogCategory.FORM, 'La quantité du repas doit être positive');
-        return { success: false, error: 'La quantité du repas doit être positive' };
-      }
-      
-      logger.info(LogCategory.DATABASE, `Ajout du repas ${mealId} au plan journalier ${dailyPlanId}`, {
-        quantity,
-        mealType
-      });
-      
-      // Ajouter le repas au plan journalier via MCP
-      const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(dailyPlanId, mealId, quantity, mealType);
-      
-      if (!result || !result.success) {
-        logger.error(LogCategory.DATABASE, `Échec de l'ajout du repas ${mealId} au plan journalier ${dailyPlanId}`, {
-          error: result?.error
-        });
-        
+        logger.error(
+          LogCategory.FORM,
+          'La quantité du repas doit être positive',
+        );
         return {
           success: false,
-          error: result?.error || `Échec de l'ajout du repas au plan journalier`
+          error: 'La quantité du repas doit être positive',
         };
       }
-      
+
+      logger.info(
+        LogCategory.DATABASE,
+        `Ajout du repas ${mealId} au plan journalier ${dailyPlanId}`,
+        {
+          quantity,
+          mealType,
+        },
+      );
+
+      // Ajouter le repas au plan journalier via MCP
+      const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(
+        dailyPlanId,
+        mealId,
+        quantity,
+        mealType,
+      );
+
+      if (!result || !result.success) {
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec de l'ajout du repas ${mealId} au plan journalier ${dailyPlanId}`,
+          {
+            error: result?.error,
+          },
+        );
+
+        return {
+          success: false,
+          error:
+            result?.error || `Échec de l'ajout du repas au plan journalier`,
+        };
+      }
+
       return { success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Erreur lors de l'ajout du repas ${mealId} au plan journalier ${dailyPlanId}`, { 
-        error: errorMessage 
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Erreur lors de l'ajout du repas ${mealId} au plan journalier ${dailyPlanId}`,
+        {
+          error: errorMessage,
+        },
+      );
       return { success: false, error: errorMessage };
     }
   },
@@ -483,7 +645,10 @@ export const planService = {
    * @param planData Données du plan à mettre à jour
    * @returns Résultat de l'opération
    */
-  async updatePlan(planId: number, planData: any): Promise<{
+  async updatePlan(
+    planId: number,
+    planData: any,
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
@@ -491,69 +656,93 @@ export const planService = {
       // Récupérer l'ID utilisateur
       const userId = getCurrentUserIdSync();
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'Utilisateur non authentifié pour mettre à jour un plan');
+        logger.error(
+          LogCategory.AUTH,
+          'Utilisateur non authentifié pour mettre à jour un plan',
+        );
         return { success: false, error: 'Utilisateur non authentifié' };
       }
-      
-      logger.info(LogCategory.DATABASE, `Mise à jour du plan ${planId}`, { planData });
-      
+
+      logger.info(LogCategory.DATABASE, `Mise à jour du plan ${planId}`, {
+        planData,
+      });
+
       // Récupérer le plan existant pour vérifier les droits
-      const existingPlanResult = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
-      
+      const existingPlanResult = await sqliteMCPServer.getPlanDetailsViaMCP(
+        planId,
+        userId,
+      );
+
       if (!existingPlanResult || !existingPlanResult.success) {
         logger.error(LogCategory.DATABASE, `Plan introuvable (ID: ${planId})`);
         return { success: false, error: `Plan introuvable (ID: ${planId})` };
       }
-      
+
       // Vérifier que l'utilisateur est le propriétaire du plan
       if (!this.isAuthorizedToModify(existingPlanResult.plan)) {
-        logger.error(LogCategory.AUTH, `L'utilisateur ${userId} n'est pas autorisé à modifier le plan ${planId}`);
+        logger.error(
+          LogCategory.AUTH,
+          `L'utilisateur ${userId} n'est pas autorisé à modifier le plan ${planId}`,
+        );
         return {
           success: false,
-          error: 'Vous n\'êtes pas autorisé à modifier ce plan'
+          error: "Vous n'êtes pas autorisé à modifier ce plan",
         };
       }
-      
+
       // Valider les données du plan
       if (!planData.name) {
         return { success: false, error: 'Le nom du plan est requis' };
       }
-      
+
       // Préparer les données à envoyer au MCP
       const planToUpdate = {
         ...planData,
-        id: planId
+        id: planId,
       };
-      
+
       // Mettre à jour le plan via MCP
-      const result = await sqliteMCPServer.updatePlanViaMCP(planId, planToUpdate, userId);
-      
+      const result = await sqliteMCPServer.updatePlanViaMCP(
+        planId,
+        planToUpdate,
+        userId,
+      );
+
       if (!result || !result.success) {
-        logger.error(LogCategory.DATABASE, `Échec de la mise à jour du plan ${planId}`, {
-          error: result?.error
-        });
-        
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec de la mise à jour du plan ${planId}`,
+          {
+            error: result?.error,
+          },
+        );
+
         return {
           success: false,
-          error: result?.error || `Échec de la mise à jour du plan ${planId}`
+          error: result?.error || `Échec de la mise à jour du plan ${planId}`,
         };
       }
-      
+
       return { success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.DATABASE, `Erreur lors de la mise à jour du plan ${planId}`, { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.DATABASE,
+        `Erreur lors de la mise à jour du plan ${planId}`,
+        { error: errorMessage },
+      );
       return { success: false, error: errorMessage };
     }
   },
-  
+
   /**
    * Méthode calculateDailyPlanNutrition supprimée le 13 mai 2025
-   * 
+   *
    * Cette méthode permettait de calculer les valeurs nutritionnelles d'un plan journalier.
    * Elle a été supprimée dans le cadre de la refactorisation du module de nutrition
    * pour centraliser la logique nutritionnelle dans le nutritionEngine et éviter les cycles de dépendances.
-   * 
+   *
    * Alternatives recommandées :
    * - nutritionEngine.getDailyPlanNutrition(dailyPlanId, displayMode)
    * - nutritionPagesService.getDailyPlanMacrosForDisplay(dailyPlanId, displayMode)

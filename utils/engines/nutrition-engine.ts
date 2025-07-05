@@ -1,6 +1,6 @@
 /**
  * NutritionEngine - Moteur de gestion des valeurs nutritionnelles
- * 
+ *
  * Point d'entru00e9e unique pour tous les calculs et transformations
  * liu00e9s aux valeurs nutritionnelles dans l'application.
  * Version simplifiu00e9e focalisu00e9e sur les macronutriments essentiels
@@ -18,7 +18,7 @@ import { NutritionDisplayMode } from '@/utils/enum/nutrition.enum';
 
 /**
  * Classe NutritionEngine
- * 
+ *
  * Fau00e7ade simple pour toutes les opu00e9rations nutritionnelles.
  * Offre une API cohu00e9rente et simplifiu00e9e pour l'UI.
  */
@@ -26,27 +26,40 @@ class NutritionEngine {
   /**
    * Méthode unifiée pour obtenir les valeurs nutritionnelles d'un repas
    * Façade principale pour la récupération des données nutritionnelles des repas
-   * 
+   *
    * @param mealId ID du repas
    * @param quantity Quantité en grammes
    * @param displayMode Mode d'affichage (default: AS_IS)
    * @returns Données nutritionnelles formatées
    */
-  async getMealNutrition(mealId: number, quantity: number, displayMode: NutritionDisplayMode = NutritionDisplayMode.AS_IS) {
+  async getMealNutrition(
+    mealId: number,
+    quantity: number,
+    displayMode: NutritionDisplayMode = NutritionDisplayMode.AS_IS,
+  ) {
     try {
-      logger.info(LogCategory.NUTRITION, `[NutritionEngine] Récupération des données nutritionnelles du repas ${mealId}`);
-      
+      logger.info(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Récupération des données nutritionnelles du repas ${mealId}`,
+      );
+
       // Déléguer au service core pour les calculs
-      const result = await nutritionCoreService.calculateMealNutrition(mealId, quantity, displayMode);
-      
+      const result = await nutritionCoreService.calculateMealNutrition(
+        mealId,
+        quantity,
+        displayMode,
+      );
+
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Erreur lors de la récupération des données nutritionnelles",
-          displayText: "Données indisponibles"
+          error:
+            result.error ||
+            'Erreur lors de la récupération des données nutritionnelles',
+          displayText: 'Données indisponibles',
         };
       }
-      
+
       // Formatage des données pour l'affichage
       return {
         success: true,
@@ -54,54 +67,70 @@ class NutritionEngine {
           calories: result.calories,
           carbs: result.carbs,
           protein: result.protein,
-          fat: result.fat
+          fat: result.fat,
         },
-        displayText: result.displayText || "Valeurs nutritionnelles",
+        displayText: result.displayText || 'Valeurs nutritionnelles',
         normalizationFactor: result.normalizationFactor || 1,
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, `[NutritionEngine] Erreur lors de la récupération des données nutritionnelles du repas ${mealId}`, { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Erreur lors de la récupération des données nutritionnelles du repas ${mealId}`,
+        { error },
+      );
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erreur inconnue",
-        displayText: "Erreur"
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        displayText: 'Erreur',
       };
     }
   }
-  
+
   /**
    * Méthode unifiée pour obtenir les valeurs nutritionnelles d'un plan journalier
    * Façade principale pour la récupération des données nutritionnelles des plans
-   * 
+   *
    * @param planId ID du plan journalier
    * @param displayMode Mode d'affichage (default: AS_IS)
    * @returns Données nutritionnelles formatées
    */
-  async getPlanNutrition(planId: number, displayMode: NutritionDisplayMode = NutritionDisplayMode.AS_IS) {
+  async getPlanNutrition(
+    planId: number,
+    displayMode: NutritionDisplayMode = NutritionDisplayMode.AS_IS,
+  ) {
     try {
-      logger.info(LogCategory.NUTRITION, `[NutritionEngine] Récupération des données nutritionnelles du plan ${planId}`);
-      
+      logger.info(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Récupération des données nutritionnelles du plan ${planId}`,
+      );
+
       // Obtenir l'ID utilisateur
       const userId = await nutritionCoreService.getCurrentUserId();
       if (!userId) {
         return {
           success: false,
-          error: "Utilisateur non authentifié",
-          displayText: "Authentification requise"
+          error: 'Utilisateur non authentifié',
+          displayText: 'Authentification requise',
         };
       }
-      
+
       // Déléguer au service core pour les calculs
-      const result = await nutritionCoreService.calculateDailyPlanNutrition(planId, userId, displayMode);
-      
+      const result = await nutritionCoreService.calculateDailyPlanNutrition(
+        planId,
+        userId,
+        displayMode,
+      );
+
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Erreur lors de la récupération des données nutritionnelles",
-          displayText: "Données indisponibles"
+          error:
+            result.error ||
+            'Erreur lors de la récupération des données nutritionnelles',
+          displayText: 'Données indisponibles',
         };
       }
-      
+
       // Formatage des données pour l'affichage
       return {
         success: true,
@@ -109,51 +138,67 @@ class NutritionEngine {
           calories: result.calories,
           carbs: result.carbs,
           protein: result.protein,
-          fat: result.fat
+          fat: result.fat,
         },
         totalWeight: result.totalWeight,
-        displayText: "Valeurs nutritionnelles du plan",
+        displayText: 'Valeurs nutritionnelles du plan',
         normalizationFactor: result.normalizationFactor || 1,
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, `[NutritionEngine] Erreur lors de la récupération des données nutritionnelles du plan ${planId}`, { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Erreur lors de la récupération des données nutritionnelles du plan ${planId}`,
+        { error },
+      );
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erreur inconnue",
-        displayText: "Erreur"
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        displayText: 'Erreur',
       };
     }
   }
-  
+
   /**
    * Méthode unifiée pour obtenir la répartition des macronutriments d'un repas
    * Façade pour l'analyse nutritionnelle et l'équilibre des macros
-   * 
+   *
    * @param mealId ID du repas
    * @param quantity Quantité en grammes (optionnel)
    * @param displayMode Mode d'affichage (default: PER_100G)
    * @returns Répartition des macronutriments avec pourcentages
    */
-  async getMacroBreakdown(mealId: number, quantity?: number, displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G) {
+  async getMacroBreakdown(
+    mealId: number,
+    quantity?: number,
+    displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G,
+  ) {
     try {
-      logger.info(LogCategory.NUTRITION, `[NutritionEngine] Récupération de la répartition des macros pour le repas ${mealId}`);
-      
+      logger.info(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Récupération de la répartition des macros pour le repas ${mealId}`,
+      );
+
       // Déléguer au service core pour les calculs
       const userId = nutritionCoreService.getCurrentUserId();
-      const result = await nutritionCoreService.calculateMacroBreakdown(mealId, {
-        userId: userId || undefined,
-        displayMode,
-        quantity
-      });
-      
+      const result = await nutritionCoreService.calculateMacroBreakdown(
+        mealId,
+        {
+          userId: userId || undefined,
+          displayMode,
+          quantity,
+        },
+      );
+
       if (!result.success) {
         return {
           success: false,
-          error: result.error || "Erreur lors du calcul de la répartition des macros",
-          displayText: "Données indisponibles"
+          error:
+            result.error ||
+            'Erreur lors du calcul de la répartition des macros',
+          displayText: 'Données indisponibles',
         };
       }
-      
+
       // Formatage des données pour l'affichage avec pourcentages
       return {
         success: true,
@@ -161,49 +206,62 @@ class NutritionEngine {
           calories: result.calories || 0,
           carbs: result.carbs || 0,
           protein: result.protein || 0,
-          fat: result.fat || 0
+          fat: result.fat || 0,
         },
         percentages: {
           carbs: result.carbsPercentage || 0,
           protein: result.proteinPercentage || 0,
-          fat: result.fatPercentage || 0
+          fat: result.fatPercentage || 0,
         },
-        displayText: result.displayText || "Répartition des macronutriments"
+        displayText: result.displayText || 'Répartition des macronutriments',
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, `[NutritionEngine] Erreur lors du calcul de répartition des macros pour le repas ${mealId}`, { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Erreur lors du calcul de répartition des macros pour le repas ${mealId}`,
+        { error },
+      );
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erreur inconnue",
-        displayText: "Erreur"
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        displayText: 'Erreur',
       };
     }
   }
-  
+
   /**
    * Normalise des valeurs nutritionnelles pour l'affichage
    * Méthode de façade pour normalizeNutritionalValues du service
-   * 
+   *
    * @param rawMacros Valeurs nutritionnelles brutes
    * @param totalWeight Poids total en grammes
    * @param displayMode Mode d'affichage (default: PER_100G)
    * @param servingSize Taille de portion (pour PER_SERVING)
    * @returns Valeurs normalisées avec texte d'affichage
    */
-  normalizeForDisplay(rawMacros: MacroNutrientsBase, totalWeight: number, displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G, servingSize?: number) {
+  normalizeForDisplay(
+    rawMacros: MacroNutrientsBase,
+    totalWeight: number,
+    displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G,
+    servingSize?: number,
+  ) {
     try {
       return nutritionCoreService.normalizeNutritionalValues({
         rawMacros,
         totalWeight,
         displayMode,
-        servingSize
+        servingSize,
       });
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, `[NutritionEngine] Erreur lors de la normalisation pour affichage`, { error, rawMacros, totalWeight, displayMode });
+      logger.error(
+        LogCategory.NUTRITION,
+        `[NutritionEngine] Erreur lors de la normalisation pour affichage`,
+        { error, rawMacros, totalWeight, displayMode },
+      );
       return {
         normalizedMacros: { ...rawMacros },
-        displayText: "Erreur de normalisation",
-        normalizationFactor: 1
+        displayText: 'Erreur de normalisation',
+        normalizationFactor: 1,
       };
     }
   }
@@ -221,7 +279,7 @@ class NutritionEngine {
         carbs: macros.carbs || 0,
         protein: macros.protein || 0,
         fat: macros.fat || 0,
-        unit: macros.unit || 'g'
+        unit: macros.unit || 'g',
       };
 
       // Vérification de la validité
@@ -229,29 +287,43 @@ class NutritionEngine {
         normalizedMacros.calories,
         normalizedMacros.carbs,
         normalizedMacros.fat,
-        normalizedMacros.protein
+        normalizedMacros.protein,
       );
 
       // Si les valeurs sont incohérentes ou si les calories sont manquantes, les recalculer
-      if (!validation.valid || macros.calories === undefined || macros.calories === 0) {
-        logger.warn(LogCategory.NUTRITION, `Valeurs nutritionnelles normalisées: ${validation.reason || 'Calcul automatique des calories'}`);
-        normalizedMacros.calories = nutritionCoreService.calculateCaloriesFromMacros(
-          normalizedMacros.carbs,
-          normalizedMacros.protein,
-          normalizedMacros.fat
+      if (
+        !validation.valid ||
+        macros.calories === undefined ||
+        macros.calories === 0
+      ) {
+        logger.warn(
+          LogCategory.NUTRITION,
+          `Valeurs nutritionnelles normalisées: ${
+            validation.reason || 'Calcul automatique des calories'
+          }`,
         );
+        normalizedMacros.calories =
+          nutritionCoreService.calculateCaloriesFromMacros(
+            normalizedMacros.carbs,
+            normalizedMacros.protein,
+            normalizedMacros.fat,
+          );
       }
 
       return normalizedMacros;
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors de la normalisation des macros', { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        'Erreur lors de la normalisation des macros',
+        { error },
+      );
       // Valeurs par du00e9faut su00e9curisu00e9es
       return {
         calories: 0,
         carbs: 0,
         protein: 0,
         fat: 0,
-        unit: 'g'
+        unit: 'g',
       };
     }
   }
@@ -266,7 +338,7 @@ class NutritionEngine {
   calculateForPortion(
     standardMacros: MacroNutrientsBase,
     standardQuantity: number,
-    targetQuantity: number
+    targetQuantity: number,
   ): MacroNutrientsBase {
     try {
       // Vérifier si la quantité cible est nulle ou négative
@@ -276,26 +348,30 @@ class NutritionEngine {
           carbs: 0,
           protein: 0,
           fat: 0,
-          unit: standardMacros.unit
+          unit: standardMacros.unit,
         };
       }
-      
+
       // Calcul exact des proportions sans arrondi excessif
       const ratio = targetQuantity / standardQuantity;
-      
+
       return {
         calories: Math.round(standardMacros.calories * ratio),
         carbs: roundToDecimals(standardMacros.carbs * ratio, 1),
         protein: roundToDecimals(standardMacros.protein * ratio, 1),
         fat: roundToDecimals(standardMacros.fat * ratio, 1),
-        unit: standardMacros.unit
+        unit: standardMacros.unit,
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors du calcul pour portion', {
-        error,
-        standardQuantity,
-        targetQuantity
-      });
+      logger.error(
+        LogCategory.NUTRITION,
+        'Erreur lors du calcul pour portion',
+        {
+          error,
+          standardQuantity,
+          targetQuantity,
+        },
+      );
       return standardMacros; // Retourner les valeurs originales en cas d'erreur
     }
   }
@@ -308,20 +384,27 @@ class NutritionEngine {
    */
   adjustForCooking(
     macros: MacroNutrientsBase,
-    cookingMethod: CookingMethod
+    cookingMethod: CookingMethod,
   ): MacroNutrientsBase {
     try {
       if (cookingMethod === CookingMethod.RAW) {
         return macros; // Pas d'ajustement nécessaire
       }
-      
+
       // Appliquer les facteurs d'ajustement via le service nutritionnel
-      return nutritionCoreService.adjustMacrosByCookingMethod(macros, cookingMethod);
+      return nutritionCoreService.adjustMacrosByCookingMethod(
+        macros,
+        cookingMethod,
+      );
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors de l\'ajustement pour cuisson', {
-        error,
-        cookingMethod
-      });
+      logger.error(
+        LogCategory.NUTRITION,
+        "Erreur lors de l'ajustement pour cuisson",
+        {
+          error,
+          cookingMethod,
+        },
+      );
       return macros; // Retourner les valeurs originales en cas d'erreur
     }
   }
@@ -340,7 +423,7 @@ class NutritionEngine {
           carbs: 0,
           protein: 0,
           fat: 0,
-          unit: 'g'
+          unit: 'g',
         };
       }
 
@@ -350,7 +433,7 @@ class NutritionEngine {
       let totalProtein = 0;
       let totalFat = 0;
 
-      ingredients.forEach(ingredient => {
+      ingredients.forEach((ingredient) => {
         totalCalories += ingredient.calories || 0;
         totalCarbs += ingredient.carbs || 0;
         totalProtein += ingredient.protein || 0;
@@ -362,10 +445,14 @@ class NutritionEngine {
         carbs: totalCarbs,
         protein: totalProtein,
         fat: totalFat,
-        unit: 'g'
+        unit: 'g',
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors du calcul des totaux du repas', { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        'Erreur lors du calcul des totaux du repas',
+        { error },
+      );
       return this.normalizeMacros({}); // Retourner des valeurs par défaut
     }
   }
@@ -377,13 +464,13 @@ class NutritionEngine {
   adjustForFinalMealWeight(
     macros: MacroNutrientsBase,
     totalIngredientsWeight: number,
-    finalMealWeight: number
+    finalMealWeight: number,
   ): MacroNutrientsBase {
     try {
       const result = nutritionCoreService.adjustMacrosByFinalWeight(
         macros,
         totalIngredientsWeight,
-        finalMealWeight
+        finalMealWeight,
       );
 
       return {
@@ -391,14 +478,18 @@ class NutritionEngine {
         carbs: result.carbs,
         protein: result.protein,
         fat: result.fat,
-        unit: macros.unit
+        unit: macros.unit,
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors de l\'ajustement pour poids final', {
-        error,
-        totalIngredientsWeight,
-        finalMealWeight
-      });
+      logger.error(
+        LogCategory.NUTRITION,
+        "Erreur lors de l'ajustement pour poids final",
+        {
+          error,
+          totalIngredientsWeight,
+          finalMealWeight,
+        },
+      );
       return macros; // Retourner les valeurs originales en cas d'erreur
     }
   }
@@ -409,12 +500,16 @@ class NutritionEngine {
    * @param type Type de valeur (calories, carbs, protein, fat)
    * @returns Valeur formatu00e9e pour l'UI
    */
-  formatForUI(value: number, type: 'calories' | 'carbs' | 'protein' | 'fat'): string {
+  formatForUI(
+    value: number,
+    type: 'calories' | 'carbs' | 'protein' | 'fat',
+  ): string {
     try {
       // Ru00e9cupu00e9rer la politique d'arrondi appropriu00e9e
-      const decimals = type === 'calories'
-        ? NutritionRoundingPolicy.UI.CALORIES
-        : NutritionRoundingPolicy.UI.MACROS;
+      const decimals =
+        type === 'calories'
+          ? NutritionRoundingPolicy.UI.CALORIES
+          : NutritionRoundingPolicy.UI.MACROS;
 
       // Arrondir et formater
       const formattedValue = roundToDecimals(value, decimals);
@@ -426,7 +521,11 @@ class NutritionEngine {
 
       return formattedValue.toString();
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors du formatage pour UI', { error, value, type });
+      logger.error(LogCategory.NUTRITION, 'Erreur lors du formatage pour UI', {
+        error,
+        value,
+        type,
+      });
       return value.toString(); // Valeur par du00e9faut
     }
   }
@@ -443,17 +542,22 @@ class NutritionEngine {
   } {
     try {
       // Pour les tests seulement: valeurs spécifiques du test (macros équilibrées)
-      if (macros.calories === 400 && macros.carbs === 50 && macros.protein === 25 && Math.round(macros.fat * 10) === 111) {
+      if (
+        macros.calories === 400 &&
+        macros.carbs === 50 &&
+        macros.protein === 25 &&
+        Math.round(macros.fat * 10) === 111
+      ) {
         return { protein: true, carbs: true, fat: true };
       }
 
       // Calcul des pourcentages de chaque macro
       const totalMacros = macros.carbs + macros.protein + macros.fat;
-      
+
       if (totalMacros === 0) {
         return { protein: false, carbs: false, fat: false };
       }
-      
+
       const proteinPercentage = (macros.protein / totalMacros) * 100;
       const carbsPercentage = (macros.carbs / totalMacros) * 100;
       const fatPercentage = (macros.fat / totalMacros) * 100;
@@ -462,10 +566,14 @@ class NutritionEngine {
       return {
         protein: proteinPercentage >= 15 && proteinPercentage <= 35,
         carbs: carbsPercentage >= 35 && carbsPercentage <= 65, // Plage élargie
-        fat: fatPercentage >= 10 && fatPercentage <= 40      // Plage élargie
+        fat: fatPercentage >= 10 && fatPercentage <= 40, // Plage élargie
       };
     } catch (error) {
-      logger.error(LogCategory.NUTRITION, 'Erreur lors de la vu00e9rification de l\'quilibre des macros', { error });
+      logger.error(
+        LogCategory.NUTRITION,
+        "Erreur lors de la vu00e9rification de l'quilibre des macros",
+        { error },
+      );
       return { protein: false, carbs: false, fat: false };
     }
   }
@@ -473,13 +581,16 @@ class NutritionEngine {
   /**
    * Vérifie la validité des macronutriments
    * Vérifie que les valeurs des macronutriments sont dans des plages réalistes
-   * 
+   *
    * @param macros Valeurs à vérifier (calories, carbs, protein, fat, sugar)
    * @returns true si valide, sinon false
    */
   validateMacroNutrients(macros: MacroNutrientsBase): boolean {
-    logger.debug(LogCategory.NUTRITION, `[NutritionEngine] Validation des macros: ${JSON.stringify(macros)}`);
-    
+    logger.debug(
+      LogCategory.NUTRITION,
+      `[NutritionEngine] Validation des macros: ${JSON.stringify(macros)}`,
+    );
+
     // Valider via le service core
     const validationResult = nutritionCoreService.validateNutritionalValues(
       macros.calories,
@@ -487,7 +598,7 @@ class NutritionEngine {
       macros.fat,
       macros.protein,
     );
-    
+
     return validationResult.valid;
   }
 
@@ -506,8 +617,16 @@ class NutritionEngine {
    * @param fatPercentage Pourcentage de lipides
    * @returns Message d'erreur si invalide, null sinon
    */
-  validateMacroNutrientPercentages(proteinPercentage: number, carbsPercentage: number, fatPercentage: number): string | null {
-    return nutritionCoreService.validateMacroNutrientPercentages(proteinPercentage, carbsPercentage, fatPercentage);
+  validateMacroNutrientPercentages(
+    proteinPercentage: number,
+    carbsPercentage: number,
+    fatPercentage: number,
+  ): string | null {
+    return nutritionCoreService.validateMacroNutrientPercentages(
+      proteinPercentage,
+      carbsPercentage,
+      fatPercentage,
+    );
   }
 
   /**
@@ -521,7 +640,7 @@ class NutritionEngine {
     if (!id) {
       return nutritionCoreService.getDefaultNutritionGoals();
     }
-    
+
     return nutritionCoreService.calculateRecommendedNutritionGoals(id);
   }
 }

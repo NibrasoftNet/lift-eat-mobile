@@ -8,12 +8,12 @@ interface CalorieCircleProps {
    * Valeur calorique à afficher
    */
   calories: number;
-  
+
   /**
    * Couleur du texte (varie selon le mode sombre/clair)
    */
   textColor: string;
-  
+
   /**
    * Couleur de la bordure du cercle
    */
@@ -45,7 +45,7 @@ interface CalorieCircleProps {
  * avec coloration selon la répartition des nutriments
  * node-id=48485:28639
  */
-const CalorieCircle: React.FC<CalorieCircleProps> = ({ 
+const CalorieCircle: React.FC<CalorieCircleProps> = ({
   calories,
   textColor,
   borderColor,
@@ -53,9 +53,9 @@ const CalorieCircle: React.FC<CalorieCircleProps> = ({
   protein = 5,
   fat = 13,
   isDarkMode = false,
-  carbsColor = '#00B894',  // Vert pour les glucides (selon Figma node-id=48468:22898)
+  carbsColor = '#00B894', // Vert pour les glucides (selon Figma node-id=48468:22898)
   proteinColor = '#6C5CE7', // Violet pour les protéines (selon Figma node-id=48468:22898)
-  fatColor = '#FF7675'      // Rouge-rose pour les lipides (selon Figma node-id=48468:22898)
+  fatColor = '#FF7675', // Rouge-rose pour les lipides (selon Figma node-id=48468:22898)
 }) => {
   // Calcul des pourcentages pour la répartition visuelle selon la contribution calorique réelle (Figma)
   // Les macronutriments sont convertis en calories selon leurs facteurs d'énergie standards:
@@ -65,7 +65,8 @@ const CalorieCircle: React.FC<CalorieCircleProps> = ({
   const carbsCalories = carbs * 4;
   const proteinCalories = protein * 4;
   const fatCalories = fat * 9;
-  const totalCalories = calories > 0 ? calories : (carbsCalories + proteinCalories + fatCalories);
+  const totalCalories =
+    calories > 0 ? calories : carbsCalories + proteinCalories + fatCalories;
 
   const carbsPercentage = carbsCalories / totalCalories;
   const proteinPercentage = proteinCalories / totalCalories;
@@ -75,33 +76,49 @@ const CalorieCircle: React.FC<CalorieCircleProps> = ({
   const carbsAngle = carbsPercentage * 360;
   const proteinAngle = proteinPercentage * 360;
   const fatAngle = fatPercentage * 360;
-  
+
   // Conversion des angles en coordonnées pour les arcs SVG
-  const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
-    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  const polarToCartesian = (
+    centerX: number,
+    centerY: number,
+    radius: number,
+    angleInDegrees: number,
+  ) => {
+    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
     return {
-      x: centerX + (radius * Math.cos(angleInRadians)),
-      y: centerY + (radius * Math.sin(angleInRadians))
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians),
     };
   };
-  
+
   const createArc = (startAngle: number, endAngle: number) => {
     const center = 36;
     const radius = 34.5; // Légèrement plus petit que le rayon total (36px - 1.5px border)
-    
+
     const start = polarToCartesian(center, center, radius, endAngle);
     const end = polarToCartesian(center, center, radius, startAngle);
-    
+
     const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-    
+
     return [
-      'M', start.x, start.y,
-      'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-      'L', center, center,
-      'Z'
+      'M',
+      start.x,
+      start.y,
+      'A',
+      radius,
+      radius,
+      0,
+      largeArcFlag,
+      0,
+      end.x,
+      end.y,
+      'L',
+      center,
+      center,
+      'Z',
     ].join(' ');
   };
-  
+
   // Création des chemins SVG pour chaque segment
   let startAngle = 0;
   const fatPath = createArc(startAngle, startAngle + fatAngle);
@@ -119,19 +136,29 @@ const CalorieCircle: React.FC<CalorieCircleProps> = ({
           <Path d={proteinPath} fill={proteinColor} />
           <Path d={carbsPath} fill={carbsColor} />
         </G>
-        
+
         {/* Cercle central blanc pour créer l'effet d'anneau */}
-        <Circle cx="36" cy="36" r="30" fill={isDarkMode ? '#212121' : 'white'} />
-        
+        <Circle
+          cx="36"
+          cy="36"
+          r="30"
+          fill={isDarkMode ? '#212121' : 'white'}
+        />
+
         {/* Bordure du cercle extérieur */}
-        <Circle cx="36" cy="36" r="35.5" stroke={borderColor} strokeWidth="0.5" fill="none" />
+        <Circle
+          cx="36"
+          cy="36"
+          r="35.5"
+          stroke={borderColor}
+          strokeWidth="0.5"
+          fill="none"
+        />
       </Svg>
-      
+
       {/* Texte affichant la valeur calorique */}
-      <Text style={[styles.value, { color: textColor }]}>
-        {calories}
-      </Text>
-      
+      <Text style={[styles.value, { color: textColor }]}>{calories}</Text>
+
       {/* Texte "kcal" */}
       <Text style={[styles.unit, { color: textColor }]}>kcal</Text>
     </View>

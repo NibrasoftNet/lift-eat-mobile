@@ -58,17 +58,17 @@ const Tag: React.FC<TagProps> = ({
   disabled = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer les couleurs selon le thème et l'état
   const isDark = theme === 'dark';
-  
+
   // Obtenir les dimensions selon la taille
   let paddingHorizontal;
   let paddingVertical;
   let fontSize;
   let borderRadius;
   let borderWidth;
-  
+
   switch (size) {
     case 'small':
       paddingHorizontal = 8;
@@ -93,12 +93,12 @@ const Tag: React.FC<TagProps> = ({
       borderWidth = 1.5;
       break;
   }
-  
+
   // Déterminer les couleurs selon l'état
   let backgroundColor;
   let textColor;
   let borderColor;
-  
+
   if (disabled) {
     backgroundColor = isDark ? '#35383F' : '#F6F6F6';
     textColor = isDark ? '#9E9E9E' : '#BDBDBD';
@@ -128,7 +128,7 @@ const Tag: React.FC<TagProps> = ({
         break;
     }
   }
-  
+
   // Ajuster les styles selon le type de tag
   if (style === 'filled') {
     backgroundColor = textColor;
@@ -137,10 +137,10 @@ const Tag: React.FC<TagProps> = ({
   } else if (style === 'borderless') {
     borderColor = 'transparent';
   }
-  
+
   // Opacité pour l'état désactivé
   const opacity = disabled ? 0.5 : 1;
-  
+
   return (
     <TouchableOpacity
       style={[
@@ -161,12 +161,8 @@ const Tag: React.FC<TagProps> = ({
       disabled={disabled || !onPress}
     >
       {/* Icône (optionnelle) */}
-      {icon && (
-        <Box style={styles.iconContainer}>
-          {icon}
-        </Box>
-      )}
-      
+      {icon && <Box style={styles.iconContainer}>{icon}</Box>}
+
       {/* Texte */}
       <Text
         style={[

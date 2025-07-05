@@ -41,49 +41,76 @@ export const planGenerationApiService = {
    * @param userId ID de l'utilisateur
    * @returns Réponse de création
    */
-  async createPlan(plan: IaPlanType, userId: number): Promise<CreatePlanResponse> {
+  async createPlan(
+    plan: IaPlanType,
+    userId: number,
+  ): Promise<CreatePlanResponse> {
     try {
-      logger.debug(LogCategory.IA, `Création du plan ${plan.name} pour l'utilisateur ${userId}`, 'createPlan');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Création du plan ${plan.name} pour l'utilisateur ${userId}`,
+        'createPlan',
+      );
+
       // Utiliser le MCP Server pour ajouter le plan
       const result = await sqliteMCPServer.addPlanViaMCP(plan, userId);
-      
+
       if (!result.success) {
-        logger.error(LogCategory.IA, `Erreur lors de la création du plan: ${result.error}`, 'createPlan');
+        logger.error(
+          LogCategory.IA,
+          `Erreur lors de la création du plan: ${result.error}`,
+          'createPlan',
+        );
         return {
           success: false,
-          error: result.error
+          error: result.error,
         };
       }
-      
+
       // Invalider le cache pour actualiser la liste des plans
       const queryClient = getQueryClient();
       if (queryClient) {
-        logger.debug(LogCategory.IA, `Invalidation du cache des plans pour l'utilisateur ${userId}`, 'createPlan');
+        logger.debug(
+          LogCategory.IA,
+          `Invalidation du cache des plans pour l'utilisateur ${userId}`,
+          'createPlan',
+        );
         await queryClient.invalidateQueries({
           predicate: (query) => {
             const queryKey = query.queryKey[0];
-            return typeof queryKey === 'string' && queryKey.startsWith('my-plans');
-          }
+            return (
+              typeof queryKey === 'string' && queryKey.startsWith('my-plans')
+            );
+          },
         });
       }
-      
-      logger.info(LogCategory.IA, `Plan ${plan.name} créé avec succès (ID: ${result.planId})`, 'createPlan');
-      
+
+      logger.info(
+        LogCategory.IA,
+        `Plan ${plan.name} créé avec succès (ID: ${result.planId})`,
+        'createPlan',
+      );
+
       return {
         success: true,
-        planId: result.planId
+        planId: result.planId,
       };
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la création du plan: ${error instanceof Error ? error.message : String(error)}`, 'createPlan');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la création du plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'createPlan',
+      );
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   },
-  
+
   /**
    * Récupère un plan par son ID
    * @param planId ID du plan
@@ -92,40 +119,52 @@ export const planGenerationApiService = {
    */
   async getPlanById(planId: number, userId: number): Promise<any> {
     try {
-      logger.debug(LogCategory.IA, `Récupération du plan ${planId} pour l'utilisateur ${userId}`, 'getPlanById');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Récupération du plan ${planId} pour l'utilisateur ${userId}`,
+        'getPlanById',
+      );
+
       // Utiliser la méthode disponible dans sqliteMCPServer - le serveur gère déjà l'accès à la base de données
       const result = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
-      
+
       if (!result.success || !result.plan) {
         throw new IaError(
           `Plan ${planId} non trouvé`,
-          IaErrorType.MISSING_DATA_ERROR
+          IaErrorType.MISSING_DATA_ERROR,
         );
       }
-      
+
       const plan = result.plan;
-      
+
       // Vérifier que le plan appartient à l'utilisateur
       if (plan && plan.userId !== userId) {
         throw new IaError(
           `Plan ${planId} n'appartient pas à l'utilisateur ${userId}`,
-          IaErrorType.UNAUTHORIZED_ERROR
+          IaErrorType.UNAUTHORIZED_ERROR,
         );
       }
-      
+
       return plan;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la récupération du plan: ${error instanceof Error ? error.message : String(error)}`, 'getPlanById');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la récupération du plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'getPlanById',
+      );
+
       throw new IaError(
-        `Erreur lors de la récupération du plan: ${error instanceof Error ? error.message : String(error)}`,
+        `Erreur lors de la récupération du plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         IaErrorType.API_ERROR,
-        error
+        error,
       );
     }
   },
-  
+
   /**
    * Recherche des plans selon des critères
    * @param params Paramètres de recherche
@@ -133,30 +172,42 @@ export const planGenerationApiService = {
    */
   async searchPlans(params: SearchPlanParams): Promise<any[]> {
     try {
-      logger.debug(LogCategory.IA, `Recherche de plans pour l'utilisateur ${params.userId}`, 'searchPlans');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Recherche de plans pour l'utilisateur ${params.userId}`,
+        'searchPlans',
+      );
+
       // Utiliser la méthode disponible dans sqliteMCPServer - le serveur gère déjà l'accès à la base de données
       const result = await sqliteMCPServer.getPlansListViaMCP(params.userId);
-      
+
       if (!result.success) {
         throw new IaError(
           `Erreur lors de la recherche de plans: ${result.error}`,
-          IaErrorType.API_ERROR
+          IaErrorType.API_ERROR,
         );
       }
-      
+
       return result.plans || [];
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la recherche de plans: ${error instanceof Error ? error.message : String(error)}`, 'searchPlans');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la recherche de plans: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'searchPlans',
+      );
+
       throw new IaError(
-        `Erreur lors de la recherche de plans: ${error instanceof Error ? error.message : String(error)}`,
+        `Erreur lors de la recherche de plans: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         IaErrorType.API_ERROR,
-        error
+        error,
       );
     }
   },
-  
+
   /**
    * Associer un repas à un plan nutritionnel
    * @param planId ID du plan
@@ -167,73 +218,98 @@ export const planGenerationApiService = {
    * @returns true si l'association a réussi
    */
   async associateMealToPlan(
-    planId: number, 
-    mealId: number, 
-    dayIndex: number, 
+    planId: number,
+    mealId: number,
+    dayIndex: number,
     mealOrder: number,
-    userId: number
+    userId: number,
   ): Promise<boolean> {
     try {
-      logger.debug(LogCategory.IA, `Association du repas ${mealId} au plan ${planId} (jour ${dayIndex}, ordre ${mealOrder})`, 'associateMealToPlan');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Association du repas ${mealId} au plan ${planId} (jour ${dayIndex}, ordre ${mealOrder})`,
+        'associateMealToPlan',
+      );
+
       // Vérifier que le plan appartient à l'utilisateur
-      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
-      
+      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(
+        planId,
+        userId,
+      );
+
       if (!planResult.success || !planResult.plan) {
         throw new IaError(
           `Plan ${planId} non trouvé`,
-          IaErrorType.MISSING_DATA_ERROR
+          IaErrorType.MISSING_DATA_ERROR,
         );
       }
-      
+
       const plan = planResult.plan;
-      
+
       if (plan && plan.userId !== userId) {
         throw new IaError(
           `Plan ${planId} n'appartient pas à l'utilisateur ${userId}`,
-          IaErrorType.UNAUTHORIZED_ERROR
+          IaErrorType.UNAUTHORIZED_ERROR,
         );
       }
-      
+
       // Associer le repas au plan en utilisant la méthode correcte
       // Le MCP server possède déjà cette méthode
       const dailyPlanId = dayIndex; // On suppose que dailyPlanId correspond au jour de la semaine
-      const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(dailyPlanId, planId, mealId, mealOrder as unknown as MealTypeEnum);
-      
+      const result = await sqliteMCPServer.addMealToDailyPlanViaMCP(
+        dailyPlanId,
+        planId,
+        mealId,
+        mealOrder as unknown as MealTypeEnum,
+      );
+
       if (!result.success) {
         throw new IaError(
           `Erreur lors de l'association du repas au plan: ${result.error}`,
-          IaErrorType.API_ERROR
+          IaErrorType.API_ERROR,
         );
       }
-      
+
       // Invalider le cache
       const queryClient = getQueryClient();
       if (queryClient) {
         await queryClient.invalidateQueries({
           predicate: (query) => {
             const queryKey = query.queryKey[0];
-            return typeof queryKey === 'string' && 
-                  (queryKey.startsWith('my-plans') || 
-                   queryKey === `plan-${planId}`);
-          }
+            return (
+              typeof queryKey === 'string' &&
+              (queryKey.startsWith('my-plans') || queryKey === `plan-${planId}`)
+            );
+          },
         });
       }
-      
-      logger.info(LogCategory.IA, `Repas ${mealId} associé au plan ${planId} avec succès`, 'associateMealToPlan');
-      
+
+      logger.info(
+        LogCategory.IA,
+        `Repas ${mealId} associé au plan ${planId} avec succès`,
+        'associateMealToPlan',
+      );
+
       return true;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de l'association du repas au plan: ${error instanceof Error ? error.message : String(error)}`, 'associateMealToPlan');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de l'association du repas au plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'associateMealToPlan',
+      );
+
       throw new IaError(
-        `Erreur lors de l'association du repas au plan: ${error instanceof Error ? error.message : String(error)}`,
+        `Erreur lors de l'association du repas au plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         IaErrorType.API_ERROR,
-        error
+        error,
       );
     }
   },
-  
+
   /**
    * Supprime un plan
    * @param planId ID du plan
@@ -242,60 +318,85 @@ export const planGenerationApiService = {
    */
   async deletePlan(planId: number, userId: number): Promise<boolean> {
     try {
-      logger.debug(LogCategory.IA, `Suppression du plan ${planId} pour l'utilisateur ${userId}`, 'deletePlan');
-      
+      logger.debug(
+        LogCategory.IA,
+        `Suppression du plan ${planId} pour l'utilisateur ${userId}`,
+        'deletePlan',
+      );
+
       // Vérifier que le plan appartient à l'utilisateur
-      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(planId, userId);
-      
+      const planResult = await sqliteMCPServer.getPlanDetailsViaMCP(
+        planId,
+        userId,
+      );
+
       if (!planResult.success || !planResult.plan) {
         throw new IaError(
           `Plan ${planId} non trouvé`,
-          IaErrorType.MISSING_DATA_ERROR
+          IaErrorType.MISSING_DATA_ERROR,
         );
       }
-      
+
       const plan = planResult.plan;
-      
+
       if (plan && plan.userId !== userId) {
         throw new IaError(
           `Plan ${planId} n'appartient pas à l'utilisateur ${userId}`,
-          IaErrorType.UNAUTHORIZED_ERROR
+          IaErrorType.UNAUTHORIZED_ERROR,
         );
       }
-      
+
       // Supprimer le plan
       const result = await planService.deletePlan(planId);
-      
+
       if (!result.success) {
         throw new IaError(
           `Erreur lors de la suppression du plan: ${result.error}`,
-          IaErrorType.API_ERROR
+          IaErrorType.API_ERROR,
         );
       }
-      
+
       // Invalider le cache
       const queryClient = getQueryClient();
       if (queryClient) {
-        logger.debug(LogCategory.IA, `Invalidation du cache des plans pour l'utilisateur ${userId}`, 'deletePlan');
+        logger.debug(
+          LogCategory.IA,
+          `Invalidation du cache des plans pour l'utilisateur ${userId}`,
+          'deletePlan',
+        );
         await queryClient.invalidateQueries({
           predicate: (query) => {
             const queryKey = query.queryKey[0];
-            return typeof queryKey === 'string' && queryKey.startsWith('my-plans');
-          }
+            return (
+              typeof queryKey === 'string' && queryKey.startsWith('my-plans')
+            );
+          },
         });
       }
-      
-      logger.info(LogCategory.IA, `Plan ${planId} supprimé avec succès`, 'deletePlan');
-      
+
+      logger.info(
+        LogCategory.IA,
+        `Plan ${planId} supprimé avec succès`,
+        'deletePlan',
+      );
+
       return true;
     } catch (error) {
-      logger.error(LogCategory.IA, `Erreur lors de la suppression du plan: ${error instanceof Error ? error.message : String(error)}`, 'deletePlan');
-      
+      logger.error(
+        LogCategory.IA,
+        `Erreur lors de la suppression du plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        'deletePlan',
+      );
+
       throw new IaError(
-        `Erreur lors de la suppression du plan: ${error instanceof Error ? error.message : String(error)}`,
+        `Erreur lors de la suppression du plan: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         IaErrorType.API_ERROR,
-        error
+        error,
       );
     }
-  }
+  },
 };

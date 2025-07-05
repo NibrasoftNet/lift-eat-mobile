@@ -1,4 +1,10 @@
-import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useEffect,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/common/logging.service';
@@ -30,7 +36,6 @@ interface UserContextType {
   setCurrentUser: (user: User) => void;
   refreshUser: (userId: number) => Promise<void>;
   logout: () => void;
-  
 }
 
 // Création du contexte avec valeurs par défaut
@@ -41,7 +46,6 @@ export const UserContext = createContext<UserContextType>({
   setCurrentUser: () => {},
   refreshUser: async () => {},
   logout: () => {},
-
 });
 
 /**
@@ -52,26 +56,33 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Charger l'utilisateur depuis AsyncStorage au démarrage
   useEffect(() => {
     const loadUserFromStorage = async () => {
       try {
         setIsLoading(true);
-        
+
         // Récupérer l'ID utilisateur depuis AsyncStorage
         const userId = await AsyncStorage.getItem('userId');
-        
-        logger.info(LogCategory.USER, `Tentative de chargement de l'utilisateur depuis le stockage`, {
-          storedUserId: userId || 'aucun'
-        });
-        
+
+        logger.info(
+          LogCategory.USER,
+          `Tentative de chargement de l'utilisateur depuis le stockage`,
+          {
+            storedUserId: userId || 'aucun',
+          },
+        );
+
         if (userId) {
           // Convertir l'ID en nombre et charger l'utilisateur
           const numericId = parseInt(userId, 10);
-          
+
           if (!isNaN(numericId)) {
-            logger.info(LogCategory.USER, `Chargement des données utilisateur pour l'ID: ${numericId}`);
+            logger.info(
+              LogCategory.USER,
+              `Chargement des données utilisateur pour l'ID: ${numericId}`,
+            );
 
             // Mettre à jour immédiatement le sessionStore avec l'ID pour que les services synchrones puissent l'utiliser
             const { setUser } = useSessionStore.getState();
@@ -79,10 +90,16 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
 
             await refreshUser(numericId);
           } else {
-            logger.warn(LogCategory.USER, `ID utilisateur invalide dans AsyncStorage: ${userId}`);
+            logger.warn(
+              LogCategory.USER,
+              `ID utilisateur invalide dans AsyncStorage: ${userId}`,
+            );
           }
         } else {
-          logger.info(LogCategory.USER, `Aucun ID utilisateur trouvé dans AsyncStorage`);
+          logger.info(
+            LogCategory.USER,
+            `Aucun ID utilisateur trouvé dans AsyncStorage`,
+          );
         }
       } catch (err: any) {
         const errorMessage = `Erreur lors du chargement de l'utilisateur: ${err.message}`;
@@ -92,10 +109,9 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     };
-    
+
     loadUserFromStorage();
   }, []);
-
 
   /**
    * Rafraîchit les données de l'utilisateur depuis le serveur MCP
@@ -105,12 +121,12 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       logger.info(LogCategory.USER, `Refreshing user data for ID: ${userId}`);
-      
+
       // Utilisation du MCP Server pour récupérer les détails de l'utilisateur
       const response = await sqliteMCPServer.getUserDetailsViaMCP(userId);
-      
+
       if (response.success && response.user) {
         setCurrentUser(response.user as User);
 
@@ -118,7 +134,10 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
         const { setUser } = useSessionStore.getState();
         setUser({ id: response.user.id, email: response.user.email });
 
-        logger.info(LogCategory.USER, `User data refreshed successfully: ${response.user.name}`);
+        logger.info(
+          LogCategory.USER,
+          `User data refreshed successfully: ${response.user.name}`,
+        );
       } else {
         throw new Error(response.error || 'Failed to fetch user details');
       }
@@ -126,12 +145,18 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage = `Error refreshing user: ${err.message}`;
       logger.error(LogCategory.USER, errorMessage);
       setError(errorMessage);
-      
+
       // Si l'utilisateur n'est pas trouvé, supprimer son ID d'AsyncStorage
       if (err.message && err.message.includes('not found')) {
-        logger.warn(LogCategory.USER, `Suppression de l'ID utilisateur ${userId} d'AsyncStorage car il n'existe plus`);
-        AsyncStorage.removeItem('userId').catch(storageErr => {
-          logger.error(LogCategory.USER, `Erreur lors de la suppression de l'ID utilisateur d'AsyncStorage: ${storageErr.message}`);
+        logger.warn(
+          LogCategory.USER,
+          `Suppression de l'ID utilisateur ${userId} d'AsyncStorage car il n'existe plus`,
+        );
+        AsyncStorage.removeItem('userId').catch((storageErr) => {
+          logger.error(
+            LogCategory.USER,
+            `Erreur lors de la suppression de l'ID utilisateur d'AsyncStorage: ${storageErr.message}`,
+          );
         });
       }
       // Ne pas effacer l'utilisateur actuel en cas d'erreur de rafraîchissement
@@ -146,7 +171,7 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setCurrentUser(null);
     logger.info(LogCategory.USER, 'User logged out');
-    
+
     // Note: La déconnexion de Clerk doit être gérée séparément dans les composants qui utilisent Clerk
   };
 
@@ -160,13 +185,10 @@ export const UserContextProvider = ({ children }: { children: ReactNode }) => {
     setCurrentUser,
     refreshUser,
     logout,
-
   };
 
   return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
   );
 };
 

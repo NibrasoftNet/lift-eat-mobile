@@ -44,18 +44,22 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
   const router = useRouter();
 
   const handleViewDetails = () => {
-    logger.info(LogCategory.NAVIGATION, 'View meal details button clicked', { mealId: meal.id });
+    logger.info(LogCategory.NAVIGATION, 'View meal details button clicked', {
+      mealId: meal.id,
+    });
     mealOptionsModalUIService.handleViewDetails(meal, router, onClose);
   };
 
   const handleDelete = async () => {
     try {
-      logger.info(LogCategory.USER, 'Delete meal button clicked', { mealId: meal.id });
+      logger.info(LogCategory.USER, 'Delete meal button clicked', {
+        mealId: meal.id,
+      });
       await mealOptionsModalUIService.handleDelete(onDelete, onClose);
     } catch (error) {
       logger.error(LogCategory.DATABASE, 'Error in meal deletion', {
         error: error instanceof Error ? error.message : String(error),
-        mealId: meal.id
+        mealId: meal.id,
       });
       onClose();
     }
@@ -73,8 +77,10 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
           </ModalHeader>
           <ModalBody className="mt-0 mb-4">
             <VStack space="md" className="p-2">
-              <Text className="text-lg font-semibold text-center">{meal.name}</Text>
-              
+              <Text className="text-lg font-semibold text-center">
+                {meal.name}
+              </Text>
+
               <Button
                 className="bg-primary-500 w-full"
                 onPress={handleViewDetails}
@@ -91,10 +97,7 @@ const MealOptionsModal: React.FC<MealOptionsModalProps> = ({
                 </Button>
               )}
 
-              <Button
-                className="bg-red-500 w-full"
-                onPress={handleDelete}
-              >
+              <Button className="bg-red-500 w-full" onPress={handleDelete}>
                 <ButtonText>Delete</ButtonText>
               </Button>
             </VStack>

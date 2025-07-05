@@ -30,14 +30,21 @@ const SegmentedTabButtons: React.FC<SegmentedTabButtonsProps> = ({
 }) => {
   return (
     <View style={styles.segmentedButtonContainer}>
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <TouchableOpacity
           key={tab.id}
-          style={[styles.segmentButton, activeTabId === tab.id && styles.activeSegmentButton]}
+          style={[
+            styles.segmentButton,
+            activeTabId === tab.id && styles.activeSegmentButton,
+          ]}
           onPress={() => onTabPress(tab.id)}
         >
           <Text
-            style={activeTabId === tab.id ? styles.activeSegmentText : styles.segmentText}
+            style={
+              activeTabId === tab.id
+                ? styles.activeSegmentText
+                : styles.segmentText
+            }
             variant="body"
           >
             {tab.label}

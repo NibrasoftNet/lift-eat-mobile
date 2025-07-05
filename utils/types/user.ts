@@ -1,4 +1,8 @@
-import { DietaryRestrictionEnum, AllergyEnum, GoalEnum } from '@/utils/enum/user-details.enum';
+import {
+  DietaryRestrictionEnum,
+  AllergyEnum,
+  GoalEnum,
+} from '@/utils/enum/user-details.enum';
 
 /**
  * Structure pour les objectifs nutritionnels de l'utilisateur

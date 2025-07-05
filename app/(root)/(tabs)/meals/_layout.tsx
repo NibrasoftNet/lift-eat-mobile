@@ -65,8 +65,6 @@ export default function MealsLayout() {
           ),
         }}
       />
-
-
     </Tabs>
   );
 }

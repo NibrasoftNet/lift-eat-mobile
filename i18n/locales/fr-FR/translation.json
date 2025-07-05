@@ -95,16 +95,16 @@
       "error": "Une erreur est survenue"
     },
     "filterButton": {
-        "accessibility": "Filtrer les repas"
-      },
-      "scanner": {
+      "accessibility": "Filtrer les repas"
+    },
+    "scanner": {
       "title": "Scanner un code-barres",
       "error": "Connexion requise",
       "scanError": "Erreur lors du scan du code-barres",
-        "noNutrition": "Aucune information nutritionnelle disponible pour ce produit.",
-        "accessibility": "Scanner un code-barres avec OpenFoodFacts",
+      "noNutrition": "Aucune information nutritionnelle disponible pour ce produit.",
+      "accessibility": "Scanner un code-barres avec OpenFoodFacts",
       "scanning": "Scan en cours...",
-    "overlayInstruction": "Positionnez le code-barres dans le cadre pour le scanner",
+      "overlayInstruction": "Positionnez le code-barres dans le cadre pour le scanner",
       "history": {
         "title": "Historique de scan",
         "loadError": "Erreur lors du chargement de l'historique"
@@ -155,31 +155,31 @@
       "save": "Enregistrer le repas",
       "cancel": "Annuler",
       "nameLabel": "Nom",
-        "namePlaceholder": "ex. Salade, Omelette",
-        "descriptionLabel": "Préparation",
-        "descriptionPlaceholder": "ex. Salade, Sandwich, etc.",
-        "selectType": "Sélectionner le type",
-        "selectCuisine": "Sélectionner la cuisine",
-        "addIngredients": "Ajouter des ingrédients",
-        "submit": {
-          "create": "Créer le repas",
-          "update": "Enregistrer les changements"
+      "namePlaceholder": "ex. Salade, Omelette",
+      "descriptionLabel": "Préparation",
+      "descriptionPlaceholder": "ex. Salade, Sandwich, etc.",
+      "selectType": "Sélectionner le type",
+      "selectCuisine": "Sélectionner la cuisine",
+      "addIngredients": "Ajouter des ingrédients",
+      "submit": {
+        "create": "Créer le repas",
+        "update": "Enregistrer les changements"
+      },
+      "validation": {
+        "name": {
+          "required": "Le nom est requis",
+          "min": "Le nom doit contenir au moins 3 caractères",
+          "max": "Le nom doit contenir au plus 50 caractères"
         },
-        "validation": {
-          "name": {
-            "required": "Le nom est requis",
-            "min": "Le nom doit contenir au moins 3 caractères",
-            "max": "Le nom doit contenir au plus 50 caractères"
-          },
-          "description": {
-            "required": "La description est requise",
-            "min": "La description doit contenir au moins 3 caractères"
-          },
-          "quantity": {
-            "min": "La quantité doit être au moins 1"
-          }
+        "description": {
+          "required": "La description est requise",
+          "min": "La description doit contenir au moins 3 caractères"
         },
-        "image": {
+        "quantity": {
+          "min": "La quantité doit être au moins 1"
+        }
+      },
+      "image": {
         "selectTitle": "Sélectionner une image",
         "selectMessage": "Choisir la source",
         "gallery": "Galerie",

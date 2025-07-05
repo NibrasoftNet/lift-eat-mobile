@@ -29,12 +29,12 @@ interface IAChatProps {
 }
 
 const initialSuggestions = [
-  "Comment augmenter mon apport en protéines?",
-  "Quels aliments sont riches en vitamine D?",
-  "Combien de calories par jour pour perdre du poids?",
-  "Explique-moi le régime cétogène",
-  "Quels fruits sont faibles en sucre?",
-  "Comment réduire l'inflammation par l'alimentation?"
+  'Comment augmenter mon apport en protéines?',
+  'Quels aliments sont riches en vitamine D?',
+  'Combien de calories par jour pour perdre du poids?',
+  'Explique-moi le régime cétogène',
+  'Quels fruits sont faibles en sucre?',
+  "Comment réduire l'inflammation par l'alimentation?",
 ];
 
 const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
@@ -44,24 +44,28 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
   const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [showUserContext, setShowUserContext] = useState(false);
   const [userContext, setUserContext] = useState<string>('');
-  
+
   // Récupérer le contexte utilisateur pour l'afficher lorsque demandé
   useEffect(() => {
     if (currentUser) {
-      iaService.getUserContext()
-        .then(context => {
-          setUserContext(context || "Aucun contexte utilisateur disponible");
+      iaService
+        .getUserContext()
+        .then((context) => {
+          setUserContext(context || 'Aucun contexte utilisateur disponible');
         })
-        .catch(error => {
-          console.error("Erreur lors de la récupération du contexte utilisateur:", error);
-          setUserContext("Impossible de récupérer le contexte utilisateur");
+        .catch((error) => {
+          console.error(
+            'Erreur lors de la récupération du contexte utilisateur:',
+            error,
+          );
+          setUserContext('Impossible de récupérer le contexte utilisateur');
         });
     }
   }, [currentUser]);
-  
+
   const scrollViewRef = useRef<ScrollView>(null);
   const toast = useToast();
-  
+
   // Initialiser le chat avec un message de bienvenue
   useEffect(() => {
     if (currentUser && messages.length === 0) {
@@ -71,7 +75,7 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
           text: "Bonjour! Je suis votre assistant nutritionnel IA. Comment puis-je vous aider aujourd'hui?",
           sender: 'assistant',
           timestamp: new Date(),
-        }
+        },
       ]);
     }
   }, [currentUser, messages.length]);
@@ -87,7 +91,7 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || !currentUser) return;
-    
+
     // Ajouter le message de l'utilisateur
     const userMessage: Message = {
       id: messages.length + 1,
@@ -95,30 +99,35 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
       sender: 'user',
       timestamp: new Date(),
     };
-    
-    setMessages(prev => [...prev, userMessage]);
-    
+
+    setMessages((prev) => [...prev, userMessage]);
+
     try {
       setLoading(true);
-      
+
       // Indiquer à l'utilisateur que l'IA est en train de répondre
-      setMessages(prev => [...prev, {
-        id: messages.length + 2,
-        text: "...",
-        sender: 'assistant',
-        timestamp: new Date(),
-      }]);
-      
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messages.length + 2,
+          text: '...',
+          sender: 'assistant',
+          timestamp: new Date(),
+        },
+      ]);
+
       // Utiliser le service IA pour générer une réponse
       const response = await iaService.generateResponse(text.trim());
-      
+
       // Remplacer le message "..." par la vraie réponse
-      setMessages(prev => prev.slice(0, -1).concat({
-        id: messages.length + 2,
-        text: response.text,
-        sender: 'assistant',
-        timestamp: new Date(),
-      }));
+      setMessages((prev) =>
+        prev.slice(0, -1).concat({
+          id: messages.length + 2,
+          text: response.text,
+          sender: 'assistant',
+          timestamp: new Date(),
+        }),
+      );
 
       // Si une action a été détectée (par exemple, création d'un repas ou d'un plan)
       if (response.action) {
@@ -140,7 +149,9 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
                 id={id}
                 color={ToastTypeEnum.ERROR}
                 title="Erreur lors de l'action"
-                description={`L'action ${response.action?.type} a échoué: ${response.action?.message || 'Erreur inconnue'}`}
+                description={`L'action ${response.action?.type} a échoué: ${
+                  response.action?.message || 'Erreur inconnue'
+                }`}
               />
             ),
           });
@@ -151,17 +162,18 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
       if (onMessageSent) {
         onMessageSent(text.trim(), response.text);
       }
-
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du message:', error);
+      console.error("Erreur lors de l'envoi du message:", error);
 
       // Remplacer le message "..." par un message d'erreur
-      setMessages(prev => prev.slice(0, -1).concat({
-        id: messages.length + 2,
-        text: "Désolé, je n'ai pas pu générer une réponse. Veuillez réessayer plus tard.",
-        sender: 'assistant',
-        timestamp: new Date(),
-      }));
+      setMessages((prev) =>
+        prev.slice(0, -1).concat({
+          id: messages.length + 2,
+          text: "Désolé, je n'ai pas pu générer une réponse. Veuillez réessayer plus tard.",
+          sender: 'assistant',
+          timestamp: new Date(),
+        }),
+      );
 
       toast.show({
         render: ({ id }) => (
@@ -191,8 +203,15 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
       {/* En-tête */}
       <Box className="px-4 py-3 border-b border-gray-200 flex-row items-center justify-between bg-white shadow-sm">
         <Text className="text-lg font-bold">Assistant IA</Text>
-        <Pressable onPress={toggleUserContext} className="p-2 rounded-full hover:bg-gray-100">
-          {showUserContext ? <EyeOff size={20} color="#666" /> : <Eye size={20} color="#666" />}
+        <Pressable
+          onPress={toggleUserContext}
+          className="p-2 rounded-full hover:bg-gray-100"
+        >
+          {showUserContext ? (
+            <EyeOff size={20} color="#666" />
+          ) : (
+            <Eye size={20} color="#666" />
+          )}
         </Pressable>
       </Box>
 
@@ -201,24 +220,26 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
         <Box className="p-4 bg-blue-50 border-b border-blue-200 shadow-sm">
           <HStack className="items-center space-x-2 mb-2">
             <User size={16} color="#0077B6" />
-            <Text className="font-bold text-blue-700">Contexte Utilisateur</Text>
+            <Text className="font-bold text-blue-700">
+              Contexte Utilisateur
+            </Text>
           </HStack>
           <Box className="p-2 bg-white rounded-md border border-blue-100">
             <Text className="text-xs font-mono text-gray-800 whitespace-pre-wrap">
-              {userContext || "Chargement du contexte utilisateur..."}
+              {userContext || 'Chargement du contexte utilisateur...'}
             </Text>
           </Box>
         </Box>
       )}
 
       {/* Zone de messages */}
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         className="flex-1"
         contentContainerStyle={{ padding: 16 }}
       >
         {messages.map((message) => (
-          <ChatMessage 
+          <ChatMessage
             key={message.id}
             message={message.text}
             type={message.sender}
@@ -232,8 +253,8 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
       {messages.length <= 2 && (
         <Box className="p-4 border-t border-gray-200 bg-white shadow-sm">
           <Text className="font-bold mb-2.5 text-sm">Suggestions:</Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingRight: 16 }}
           >
@@ -255,14 +276,13 @@ const IAChat: React.FC<IAChatProps> = ({ onMessageSent }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <ChatInput
-          onSendMessage={sendMessage}
-          isLoading={loading}
-        />
+        <ChatInput onSendMessage={sendMessage} isLoading={loading} />
       </KeyboardAvoidingView>
 
       <Box className="py-3 items-center bg-white border-t border-gray-100 shadow-sm">
-        <Text className="text-xs text-gray-500 font-medium">Propulsé par Gemini</Text>
+        <Text className="text-xs text-gray-500 font-medium">
+          Propulsé par Gemini
+        </Text>
       </Box>
     </Box>
   );

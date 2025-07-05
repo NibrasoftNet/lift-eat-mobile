@@ -4,7 +4,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import { Box, Text } from '../../atoms/base';
 
@@ -32,13 +40,17 @@ interface IngredientSelectorProps {
   /**
    * Callback appelé lorsqu'un ingrédient est sélectionné
    */
-  onSelectIngredient: (ingredient: Ingredient, quantity: number, unit: string) => void;
-  
+  onSelectIngredient: (
+    ingredient: Ingredient,
+    quantity: number,
+    unit: string,
+  ) => void;
+
   /**
    * Ingrédients déjà sélectionnés (pour éviter les doublons)
    */
   selectedIngredientIds?: string[];
-  
+
   /**
    * Indicateur du mode sombre
    */
@@ -56,21 +68,25 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
   isDarkMode = false,
 }) => {
   const theme = useTheme();
-  
+
   // États du composant
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Ingredient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  
+
   // Couleurs basées sur le thème
   const backgroundColor = isDarkMode ? '#1F222A' : theme.colors.background;
   const textColor = isDarkMode ? '#FFFFFF' : theme.colors.primary;
-  const placeholderColor = isDarkMode ? theme.colors.blueGrey + '80' : theme.colors.blueGrey;
+  const placeholderColor = isDarkMode
+    ? theme.colors.blueGrey + '80'
+    : theme.colors.blueGrey;
   const borderColor = isDarkMode ? '#35383F' : theme.colors.blueGrey + '30';
-  const cardBackgroundColor = isDarkMode ? '#2A2D35' : theme.colors.backgroundGrey;
-  
+  const cardBackgroundColor = isDarkMode
+    ? '#2A2D35'
+    : theme.colors.backgroundGrey;
+
   // Effet pour rechercher des ingrédients lorsque la requête change
   useEffect(() => {
     if (searchQuery.length > 2) {
@@ -80,16 +96,16 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
       setSearchResults([]);
     }
   }, [searchQuery]);
-  
+
   // Fonction de recherche d'ingrédients (simulée)
   // Dans une implémentation réelle, cela appellerait une API ou un service
   const searchIngredients = async (query: string) => {
     setIsLoading(true);
-    
+
     try {
       // Simuler une requête API
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       // Données fictives pour la démonstration
       const mockResults: Ingredient[] = [
         {
@@ -137,21 +153,24 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           imageUrl: 'https://cdn.example.com/salmon.jpg',
         },
       ];
-      
+
       // Filtrer les résultats en fonction de la requête
-      const filteredResults = mockResults.filter(ingredient => 
-        ingredient.name.toLowerCase().includes(query.toLowerCase())
+      const filteredResults = mockResults.filter((ingredient) =>
+        ingredient.name.toLowerCase().includes(query.toLowerCase()),
       );
-      
+
       setSearchResults(filteredResults);
     } catch (error) {
-      console.error('Erreur lors de la recherche d\'ingrédients:', error);
-      Alert.alert('Erreur', 'Impossible de rechercher des ingrédients pour le moment.');
+      console.error("Erreur lors de la recherche d'ingrédients:", error);
+      Alert.alert(
+        'Erreur',
+        'Impossible de rechercher des ingrédients pour le moment.',
+      );
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   // Gérer la sélection d'un ingrédient
   const handleSelectIngredient = (ingredient: Ingredient) => {
     // Vérifier si l'ingrédient est déjà sélectionné
@@ -159,24 +178,31 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
       Alert.alert(
         'Ingrédient déjà ajouté',
         'Cet ingrédient fait déjà partie de votre repas.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
-    
+
     // Demander la quantité (dans une implémentation complète, utiliser un modal)
-    onSelectIngredient(ingredient, ingredient.defaultQuantity, ingredient.defaultUnit);
+    onSelectIngredient(
+      ingredient,
+      ingredient.defaultQuantity,
+      ingredient.defaultUnit,
+    );
   };
-  
+
   // Gérer l'affichage des filtres
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
-  
+
   // Rendu d'un élément de la liste des résultats
   const renderIngredientItem = ({ item }: { item: Ingredient }) => (
     <TouchableOpacity
-      style={[styles.ingredientItem, { backgroundColor: cardBackgroundColor, borderColor }]}
+      style={[
+        styles.ingredientItem,
+        { backgroundColor: cardBackgroundColor, borderColor },
+      ]}
       onPress={() => handleSelectIngredient(item)}
       activeOpacity={0.7}
     >
@@ -185,35 +211,45 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           {item.name}
         </Text>
         <Text style={styles.nutritionInfo}>
-          {item.calories} kcal | P: {item.protein}g | G: {item.carbs}g | L: {item.fat}g
+          {item.calories} kcal | P: {item.protein}g | G: {item.carbs}g | L:{' '}
+          {item.fat}g
         </Text>
       </View>
-      
+
       <View style={styles.addButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
           onPress={() => handleSelectIngredient(item)}
         >
-          <PlusRegularBoldIcon width={20} height={20} color={theme.colors.background} />
+          <PlusRegularBoldIcon
+            width={20}
+            height={20}
+            color={theme.colors.background}
+          />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
-  
+
   return (
     <Box style={[styles.container, { backgroundColor }]}>
-      <Text
-        variant="subtitle"
-        color={textColor}
-        style={styles.title}
-      >
+      <Text variant="subtitle" color={textColor} style={styles.title}>
         Ajouter des ingrédients
       </Text>
-      
+
       {/* Barre de recherche */}
-      <View style={[styles.searchBarContainer, { backgroundColor: cardBackgroundColor, borderColor }]}>
-        <SearchRegularBoldIcon width={20} height={20} color={placeholderColor} />
-        
+      <View
+        style={[
+          styles.searchBarContainer,
+          { backgroundColor: cardBackgroundColor, borderColor },
+        ]}
+      >
+        <SearchRegularBoldIcon
+          width={20}
+          height={20}
+          color={placeholderColor}
+        />
+
         <TextInput
           style={[styles.searchInput, { color: textColor }]}
           placeholder="Rechercher un ingrédient..."
@@ -222,21 +258,27 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           onChangeText={setSearchQuery}
           autoCapitalize="none"
         />
-        
-        <TouchableOpacity 
-          style={styles.filterButton}
-          onPress={toggleFilters}
-        >
-          <FilterRegularBoldIcon width={20} height={20} color={placeholderColor} />
-          
+
+        <TouchableOpacity style={styles.filterButton} onPress={toggleFilters}>
+          <FilterRegularBoldIcon
+            width={20}
+            height={20}
+            color={placeholderColor}
+          />
+
           {activeFilters.length > 0 && (
-            <View style={[styles.filterBadge, { backgroundColor: theme.colors.primary }]}>
+            <View
+              style={[
+                styles.filterBadge,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            >
               <Text style={styles.filterBadgeText}>{activeFilters.length}</Text>
             </View>
           )}
         </TouchableOpacity>
       </View>
-      
+
       {/* Filtres (masqués par défaut) */}
       {showFilters && (
         <View style={[styles.filtersContainer, { borderColor }]}>
@@ -245,12 +287,16 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           </Text>
         </View>
       )}
-      
+
       {/* Indicateur de chargement */}
       {isLoading && (
-        <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={theme.colors.primary}
+          style={styles.loader}
+        />
       )}
-      
+
       {/* Résultats de recherche */}
       {searchResults.length > 0 ? (
         <FlatList
@@ -263,19 +309,23 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
         />
       ) : searchQuery.length > 2 && !isLoading ? (
         <View style={styles.emptyStateContainer}>
-          <InfoCircleRegularBoldIcon width={24} height={24} color={placeholderColor} />
-          <Text
-            style={[styles.emptyStateText, { color: placeholderColor }]}
-          >
+          <InfoCircleRegularBoldIcon
+            width={24}
+            height={24}
+            color={placeholderColor}
+          />
+          <Text style={[styles.emptyStateText, { color: placeholderColor }]}>
             Aucun ingrédient trouvé pour "{searchQuery}"
           </Text>
         </View>
       ) : searchQuery.length > 0 && searchQuery.length <= 2 ? (
         <View style={styles.emptyStateContainer}>
-          <InfoCircleRegularBoldIcon width={24} height={24} color={placeholderColor} />
-          <Text
-            style={[styles.emptyStateText, { color: placeholderColor }]}
-          >
+          <InfoCircleRegularBoldIcon
+            width={24}
+            height={24}
+            color={placeholderColor}
+          />
+          <Text style={[styles.emptyStateText, { color: placeholderColor }]}>
             Entrez au moins 3 caractères pour lancer la recherche
           </Text>
         </View>

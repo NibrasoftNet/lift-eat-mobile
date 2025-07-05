@@ -28,7 +28,11 @@ const ScannerIndexScreen: React.FC = () => {
   const handleScan = async (barcode: string) => {
     const now = Date.now();
     if (isProcessingRef.current) return;
-    if (barcode === lastBarcodeRef.current && now - lastScanTimeRef.current < 2000) return;
+    if (
+      barcode === lastBarcodeRef.current &&
+      now - lastScanTimeRef.current < 2000
+    )
+      return;
     isProcessingRef.current = true;
     try {
       setScanning(true);
@@ -38,7 +42,10 @@ const ScannerIndexScreen: React.FC = () => {
       } else {
         await scannerPagesService.scanBarcode(barcode, userId);
       }
-      router.push({ pathname: '/meals/scanner/product/[code]', params: { code: barcode } });
+      router.push({
+        pathname: '/meals/scanner/product/[code]',
+        params: { code: barcode },
+      });
     } catch (e) {
       setError(t('meal.scanner.scanError'));
     } finally {
@@ -53,7 +60,7 @@ const ScannerIndexScreen: React.FC = () => {
     <Box style={styles.container}>
       <Box style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <CloseSquareRegularBoldIcon width={28} height={28} color='#A4C73B' />
+          <CloseSquareRegularBoldIcon width={28} height={28} color="#A4C73B" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('meal.scanner.title')}</Text>
       </Box>
@@ -76,10 +83,26 @@ const ScannerIndexScreen: React.FC = () => {
 const createStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
-    header: { padding: 22, backgroundColor: theme.colors.surface, flexDirection: 'row', alignItems: 'center' },
-    title: { fontSize: 24, fontWeight: '600', color: theme.colors.text, marginLeft: 30, padding: 10 },
+    header: {
+      padding: 22,
+      backgroundColor: theme.colors.surface,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginLeft: 30,
+      padding: 10,
+    },
     cameraContainer: { flex: 1 },
-    errorContainer: { backgroundColor: theme.colors.error, padding: 12, margin: 16, borderRadius: 8 },
+    errorContainer: {
+      backgroundColor: theme.colors.error,
+      padding: 12,
+      margin: 16,
+      borderRadius: 8,
+    },
     errorText: { color: '#fff', textAlign: 'center' },
   });
 

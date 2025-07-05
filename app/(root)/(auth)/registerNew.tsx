@@ -2,12 +2,18 @@
  * Register - Écran d'inscription selon design Figma
  * Extrait du Figma Kit: Nutrio – Calorie Counter App UI Kit
  * node-id=40432-39018
- * 
+ *
  * Intégration avec Clerk pour l'authentification et Convex pour le stockage
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { useRouter, Link } from 'expo-router';
@@ -72,14 +78,14 @@ export default function Register() {
   const { setCurrentUser } = useUserContext();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
-  
+
   // Hooks Clerk pour l'inscription
   const { isLoaded, signUp, setActive } = useSignUp();
-  
+
   // Utilisation directe de l'API Convex pour créer un utilisateur
   // anyApi est utilisé par Convex, nous devons utiliser l'approche dynamique
-  const createUser = useConvexMutation("users:createUser" as any);
-  
+  const createUser = useConvexMutation('users:createUser' as any);
+
   // Vérifier que l'utilisateur n'est pas déjà inscrit
   useEffect(() => {
     if (isLoaded && signUp.status === 'complete') {
@@ -105,82 +111,120 @@ export default function Register() {
 
   // Importer le service utilisateur pour la création dans SQLite
   const userService = authPagesService;
-  
+
   // Mutation pour l'inscription
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: RegisterFormData) => {
       if (!isLoaded || !signUp) {
         throw new Error("Le service d'authentification n'est pas disponible");
       }
-      
+
       if (!agreeToTerms) {
         throw new Error("Vous devez accepter les conditions d'utilisation");
       }
-      
+
       try {
-        console.log('[DEBUG - REGISTER] Tentative d\'inscription avec email:', data.email);
-        logger.info(LogCategory.AUTH, 'Tentative inscription', { email: data.email });
-        
+        console.log(
+          "[DEBUG - REGISTER] Tentative d'inscription avec email:",
+          data.email,
+        );
+        logger.info(LogCategory.AUTH, 'Tentative inscription', {
+          email: data.email,
+        });
+
         // PHASE 1: Création du compte utilisateur dans Clerk
         // ---------------------------------------------------
         // Clerk gère l'authentification, et nous ne créons pas l'utilisateur
         // dans SQLite ici - cela sera fait APRES la vérification du code OTP
         // dans verification.tsx
-        
+
         // Initialiser le processus d'inscription avec Clerk
         const signUpAttempt = await signUp.create({
           emailAddress: data.email,
           password: data.password,
         });
-        
-        console.log('[DEBUG - REGISTER] Processus d\'inscription initié dans Clerk:', signUpAttempt.status);
-        logger.info(LogCategory.AUTH, 'Processus d\'inscription initié dans Clerk', {
-          email: data.email,
-          status: signUpAttempt.status
-        });
-        
+
+        console.log(
+          "[DEBUG - REGISTER] Processus d'inscription initié dans Clerk:",
+          signUpAttempt.status,
+        );
+        logger.info(
+          LogCategory.AUTH,
+          "Processus d'inscription initié dans Clerk",
+          {
+            email: data.email,
+            status: signUpAttempt.status,
+          },
+        );
+
         // Préparer la vérification de l'email
-        console.log('[DEBUG - REGISTER] Préparation de l\'envoi du code de vérification pour:', data.email);
+        console.log(
+          "[DEBUG - REGISTER] Préparation de l'envoi du code de vérification pour:",
+          data.email,
+        );
         logger.info(LogCategory.AUTH, `Préparation OTP pour ${data.email}`);
-        
+
         try {
           // Envoyer un code de vérification à l'utilisateur par email
-          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-          console.log('[DEBUG - REGISTER] Code de vérification envoyé avec succès!');
-          logger.info(LogCategory.AUTH, `OTP envoyé avec succès pour ${data.email}`);
+          await signUp.prepareEmailAddressVerification({
+            strategy: 'email_code',
+          });
+          console.log(
+            '[DEBUG - REGISTER] Code de vérification envoyé avec succès!',
+          );
+          logger.info(
+            LogCategory.AUTH,
+            `OTP envoyé avec succès pour ${data.email}`,
+          );
         } catch (prepareError) {
-          console.error('[DEBUG - REGISTER] Erreur lors de l\'envoi du code de vérification:', prepareError);
+          console.error(
+            "[DEBUG - REGISTER] Erreur lors de l'envoi du code de vérification:",
+            prepareError,
+          );
           logger.error(LogCategory.AUTH, 'Erreur envoi OTP', {
             email: data.email,
-            error: prepareError instanceof Error ? prepareError.message : String(prepareError)
+            error:
+              prepareError instanceof Error
+                ? prepareError.message
+                : String(prepareError),
           });
-          throw new Error('Impossible d\'envoyer le code de vérification: ' + 
-            (prepareError instanceof Error ? prepareError.message : 'Erreur inconnue'));
+          throw new Error(
+            "Impossible d'envoyer le code de vérification: " +
+              (prepareError instanceof Error
+                ? prepareError.message
+                : 'Erreur inconnue'),
+          );
         }
-        
-        // IMPORTANT: Nous retournons uniquement les informations de base 
-        // L'utilisateur n'est PAS encore créé dans Clerk, cela se produira 
+
+        // IMPORTANT: Nous retournons uniquement les informations de base
+        // L'utilisateur n'est PAS encore créé dans Clerk, cela se produira
         // après la vérification du code OTP
         // La création dans SQLite sera également faite à ce moment-là
         return {
           success: true,
           email: data.email,
           name: data.name || data.email.split('@')[0],
-          // Note: à ce stade, nous n'avons pas d'ID utilisateur - il sera généré 
+          // Note: à ce stade, nous n'avons pas d'ID utilisateur - il sera généré
           // après la vérification OTP
         };
       } catch (error: any) {
-        console.error('[DEBUG - REGISTER] Erreur lors de l\'inscription:', error);
+        console.error(
+          "[DEBUG - REGISTER] Erreur lors de l'inscription:",
+          error,
+        );
         logger.error(LogCategory.AUTH, 'Échec inscription', {
           error: error.message || 'Erreur inconnue',
-          email: data.email
+          email: data.email,
         });
         throw new Error(error.message || "Erreur lors de l'inscription");
       }
     },
     onSuccess: (result) => {
-      console.log('[DEBUG - REGISTER:onSuccess] Processus d\'inscription initié:', result);
-      
+      console.log(
+        "[DEBUG - REGISTER:onSuccess] Processus d'inscription initié:",
+        result,
+      );
+
       // Afficher un toast de succès
       toast.show({
         placement: 'top',
@@ -193,17 +237,21 @@ export default function Register() {
           />
         ),
       });
-      
+
       // IMPORTANT: À ce stade, nous n'avons pas encore d'ID utilisateur
       // L'utilisateur n'est pas encore créé dans Clerk (il sera créé après vérification)
       // et donc pas encore dans SQLite non plus
-      
+
       // Log pour debug
-      logger.info(LogCategory.AUTH, 'Redirection vers la page de vérification', {
-        email: result.email,
-        name: result.name
-      });
-      
+      logger.info(
+        LogCategory.AUTH,
+        'Redirection vers la page de vérification',
+        {
+          email: result.email,
+          name: result.name,
+        },
+      );
+
       // Rediriger vers la page de vérification par email
       router.replace('/verification');
     },
@@ -237,17 +285,18 @@ export default function Register() {
     strategy: 'oauth_google' | 'oauth_apple' | 'oauth_facebook',
   ) => {
     try {
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy,
-        redirectUrl: Linking.createURL('/'),
-      });
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy,
+          redirectUrl: Linking.createURL('/'),
+        });
 
       let email: string | undefined;
-      if ('emailAddress' in (signIn as any || {})) {
+      if ('emailAddress' in ((signIn as any) || {})) {
         // @ts-ignore
         email = signIn?.emailAddress;
       }
-      if (!email && 'emailAddress' in (signUp as any || {})) {
+      if (!email && 'emailAddress' in ((signUp as any) || {})) {
         // @ts-ignore
         email = signUp?.emailAddress;
       }
@@ -290,19 +339,19 @@ export default function Register() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           {/* Bouton retour */}
-          <TouchableOpacity 
-            style={styles.backButton} 
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={() => router.back()}
           >
             <ArrowLeftRegularBoldIcon width={24} height={24} color="#000" />
           </TouchableOpacity>
-          
+
           {/* En-tête avec titre et description */}
-          <TitleAndDescription 
-            title="Join Nutrio Today ✨" 
-            description="Create a Nutrio account to track your meals, stay active, and achieve your health goals." 
+          <TitleAndDescription
+            title="Join Nutrio Today ✨"
+            description="Create a Nutrio account to track your meals, stay active, and achieve your health goals."
           />
-          
+
           {/* Formulaire d'inscription */}
           <View style={styles.formContainer}>
             {/* Champ Email */}
@@ -326,7 +375,9 @@ export default function Register() {
                     px={20}
                     py={10}
                     rounded={10}
-                    leftIcon={<MessageRegularTwotoneIcon size={20} color="#81A540" />}
+                    leftIcon={
+                      <MessageRegularTwotoneIcon size={20} color="#81A540" />
+                    }
                   />
                 )}
               />
@@ -334,7 +385,7 @@ export default function Register() {
                 <Text style={styles.errorText}>{errors.email.message}</Text>
               )}
             </View>
-            
+
             {/* Champ Mot de passe */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Password</Text>
@@ -355,15 +406,18 @@ export default function Register() {
                     px={20}
                     py={10}
                     rounded={10}
-                    leftIcon={<LockRegularTwotoneIcon size={20} color="#81A540" />}
+                    leftIcon={
+                      <LockRegularTwotoneIcon size={20} color="#81A540" />
+                    }
                     rightIcon={
                       <TouchableOpacity
                         onPress={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? 
-                          <HideRegularBoldIcon size={20} color="#3F51B2" /> : 
+                        {showPassword ? (
+                          <HideRegularBoldIcon size={20} color="#3F51B2" />
+                        ) : (
                           <ShowRegularBoldIcon size={20} color="#3F51B2" />
-                        }
+                        )}
                       </TouchableOpacity>
                     }
                   />
@@ -373,7 +427,7 @@ export default function Register() {
                 <Text style={styles.errorText}>{errors.password.message}</Text>
               )}
             </View>
-            
+
             {/* Conditions d'utilisation */}
             <View style={styles.termsContainer}>
               <Checkbox
@@ -386,19 +440,19 @@ export default function Register() {
               </Text>
             </View>
           </View>
-          
+
           {/* Lien de connexion */}
           <View style={styles.signInContainer}>
-            <Text style={styles.normalText}>Already have an account?{' '}</Text>
+            <Text style={styles.normalText}>Already have an account? </Text>
             <TouchableOpacity onPress={() => router.push('/loginNew')}>
               <Text style={styles.linkText}>Sign in</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Section alternative */}
           <View style={styles.alternativeSection}>
             <ContinueWithDivider text="or continue with" />
-            
+
             {/* Boutons sociaux */}
             <SocialLoginGroup
               onGooglePress={handleGoogleSignIn}
@@ -409,10 +463,10 @@ export default function Register() {
           </View>
         </View>
       </ScrollView>
-      
+
       {/* Bouton Sign up (fixed en bas) */}
       <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.signUpButton}
           onPress={handleSubmit(onSubmit)}
           activeOpacity={0.7}

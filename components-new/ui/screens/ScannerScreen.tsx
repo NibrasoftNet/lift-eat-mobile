@@ -3,9 +3,13 @@ import { View, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { Box, Text } from '@/components-new/ui/atoms';
 import { useTheme } from '@/themeNew';
 import { scannerPagesService } from '@/utils/services/pages/scanner-pages.service';
-import  ScanOverlay  from '@/components-new/ui/organisms/scan/ScanOverlay';
+import ScanOverlay from '@/components-new/ui/organisms/scan/ScanOverlay';
 import { ScanHistoryItem } from '@/types/scanhistory.types';
-import { ScanResult, Product, ProductResult } from '@/utils/api/OpenFoodFactsService';
+import {
+  ScanResult,
+  Product,
+  ProductResult,
+} from '@/utils/api/OpenFoodFactsService';
 import { BarcodeRegularBoldIcon } from '@/assets/icons/figma/regular-bold/BarcodeRegularBoldIcon';
 import { ScanResultWithCode } from '@/types/scanner.types';
 import { CameraRegularBoldIcon } from '@/assets/icons/figma/regular-bold/CameraRegularBoldIcon';
@@ -18,7 +22,10 @@ interface ScannerScreenProps {
   onScanSuccess?: (item: ScanHistoryItem | null) => void;
 }
 
-const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) => {
+const ScannerScreen: React.FC<ScannerScreenProps> = ({
+  userId,
+  onScanSuccess,
+}) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   // theme & styles
@@ -27,7 +34,9 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<ScanHistoryItem[]>([]);
   const [scanResult, setScanResult] = useState<ScanHistoryItem | null>(null);
-  const [productResult, setProductResult] = useState<ProductResult | null>(null);
+  const [productResult, setProductResult] = useState<ProductResult | null>(
+    null,
+  );
   const [historyVisible, setHistoryVisible] = useState<boolean>(false);
 
   // Ajout throttle scan
@@ -44,12 +53,17 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
           barcode: item.barcode,
           name: item.name,
           scannedAt: item.scannedAt,
-          userId: item.userId
+          userId: item.userId,
         }));
-        const uniqueHistory = formattedHistory.filter((item, index, self) => self.findIndex(h => h.barcode === item.barcode) === index);
-      setHistory(uniqueHistory);
+        const uniqueHistory = formattedHistory.filter(
+          (item, index, self) =>
+            self.findIndex((h) => h.barcode === item.barcode) === index,
+        );
+        setHistory(uniqueHistory);
       } else {
-        setError(result.error || 'Erreur lors de la récupération de l\'historique');
+        setError(
+          result.error || "Erreur lors de la récupération de l'historique",
+        );
       }
     } catch (err) {
       console.error('Error loading scan history:', err);
@@ -68,7 +82,9 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
         setHistory([]);
         await loadHistory();
       } else {
-        setError(result.error || 'Erreur lors de la suppression de l\'historique');
+        setError(
+          result.error || "Erreur lors de la suppression de l'historique",
+        );
       }
     } catch (err) {
       console.error('Error clearing scan history:', err);
@@ -79,7 +95,11 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
   const handleScan = async (barcode: string) => {
     const now = Date.now();
     if (isProcessingRef.current) return;
-    if (barcode === lastBarcodeRef.current && now - lastScanTimeRef.current < 2000) return;
+    if (
+      barcode === lastBarcodeRef.current &&
+      now - lastScanTimeRef.current < 2000
+    )
+      return;
     isProcessingRef.current = true;
     try {
       setScanning(true);
@@ -87,15 +107,16 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
       if (result.isValid && result.productResult) {
         const scanResult = {
           id: Date.now(),
-          barcode: (result.productResult as ProductResult & { code: string }).code,
+          barcode: (result.productResult as ProductResult & { code: string })
+            .code,
           name: result.productResult.name,
           scannedAt: new Date().toISOString(),
-          userId: userId
+          userId: userId,
         } as ScanHistoryItem;
         setScanResult(scanResult);
-      setProductResult(result.productResult);
-      // Hide history when a new product is scanned to ensure card visibility
-      setHistoryVisible(false);
+        setProductResult(result.productResult);
+        // Hide history when a new product is scanned to ensure card visibility
+        setHistoryVisible(false);
         onScanSuccess?.(scanResult);
         await loadHistory();
       } else {
@@ -111,27 +132,14 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   return (
     <Box style={styles.container}>
       <Box style={styles.header}>
         <Text style={styles.title}>Scanner</Text>
-        <TouchableOpacity onPress={() => setHistoryVisible(prev => !prev)}>
-          <Text style={styles.toggleButton}>{historyVisible ? 'Cacher historique' : 'Voir historique'}</Text>
+        <TouchableOpacity onPress={() => setHistoryVisible((prev) => !prev)}>
+          <Text style={styles.toggleButton}>
+            {historyVisible ? 'Cacher historique' : 'Voir historique'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleClearHistory}>
           <Text style={styles.clearButton}>Effacer l'historique</Text>
@@ -139,40 +147,48 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ userId, onScanSuccess }) 
       </Box>
       <Box style={styles.content}>
         <Box style={styles.scanArea}>
-          <ScanOverlay
-            onScan={handleScan}
-            scanning={scanning}
-
-          />
+          <ScanOverlay onScan={handleScan} scanning={scanning} />
         </Box>
         {productResult && (
           <Box style={{ padding: 16 }}>
             <ScanResultCard
-              imageUrl={typeof productResult.image === 'object' && productResult.image && 'uri' in (productResult.image as any) ? (productResult.image as any).uri : ''}
+              imageUrl={
+                typeof productResult.image === 'object' &&
+                productResult.image &&
+                'uri' in (productResult.image as any)
+                  ? (productResult.image as any).uri
+                  : ''
+              }
               name={productResult.name}
               calories={productResult.calories}
-              macros={{ carbs: productResult.carbs, protein: productResult.protein, fat: productResult.fats }}
+              macros={{
+                carbs: productResult.carbs,
+                protein: productResult.protein,
+                fat: productResult.fats,
+              }}
               onAdd={() => setProductResult(null)}
             />
           </Box>
         )}
         {historyVisible && (
-        <Box style={styles.history}>
-          <Text style={styles.historyTitle}>Historique des scans</Text>
-          <FlatList
-            style={styles.historyList}
-            contentContainerStyle={{ paddingBottom: 8 }}
-            data={history}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item }: { item: ScanHistoryItem }) => (
-              <Box style={styles.historyItem}>
-                <Text style={styles.historyBarcode}>{item.barcode}</Text>
-                <Text style={styles.historyName}>{item.name}</Text>
-                <Text style={styles.historyDate}>{new Date(item.scannedAt).toLocaleDateString()}</Text>
-              </Box>
-            )}
-          />
-        </Box>
+          <Box style={styles.history}>
+            <Text style={styles.historyTitle}>Historique des scans</Text>
+            <FlatList
+              style={styles.historyList}
+              contentContainerStyle={{ paddingBottom: 8 }}
+              data={history}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }: { item: ScanHistoryItem }) => (
+                <Box style={styles.historyItem}>
+                  <Text style={styles.historyBarcode}>{item.barcode}</Text>
+                  <Text style={styles.historyName}>{item.name}</Text>
+                  <Text style={styles.historyDate}>
+                    {new Date(item.scannedAt).toLocaleDateString()}
+                  </Text>
+                </Box>
+              )}
+            />
+          </Box>
         )}
       </Box>
       {error && (
@@ -307,7 +323,6 @@ const createStyles = (theme: any) => ({
     shadowRadius: 3.84,
     elevation: 5,
   },
-
 });
 
 export default ScannerScreen;

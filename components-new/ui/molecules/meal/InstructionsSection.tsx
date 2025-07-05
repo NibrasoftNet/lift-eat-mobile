@@ -23,42 +23,40 @@ interface InstructionsSectionProps {
 const InstructionsSection: React.FC<InstructionsSectionProps> = ({
   instructions,
   isDarkMode = false,
-  title = "Instructions de préparation",
+  title = 'Instructions de préparation',
   maxHeight = 300,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs selon le thème
   const backgroundColor = isDarkMode ? '#1F222A' : '#FFFFFF';
   const textColor = isDarkMode ? '#FFFFFF' : '#212121';
   const secondaryTextColor = isDarkMode ? '#CDCDCD' : '#757575';
   const borderColor = isDarkMode ? '#35383F' : '#EEEEEE';
   const iconColor = isDarkMode ? '#FFFFFF' : '#212121';
-  
+
   // Formatter les instructions (ajouter des sauts de ligne si nécessaire)
   const formatInstructions = (text: string) => {
     // Si le texte contient déjà des sauts de ligne, on les conserve
     if (text.includes('\n')) return text;
-    
+
     // Sinon, on essaie d'ajouter des sauts de ligne après chaque phrase
     return text.replace(/\.\s+/g, '.\n\n');
   };
-  
+
   const formattedInstructions = formatInstructions(instructions);
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* En-tête de la section */}
       <View style={styles.header}>
         <InfoCircleRegularBoldIcon width={20} height={20} color={iconColor} />
-        <Text style={[styles.title, { color: textColor }]}>
-          {title}
-        </Text>
+        <Text style={[styles.title, { color: textColor }]}>{title}</Text>
       </View>
-      
+
       {/* Instructions */}
       {instructions ? (
-        <ScrollView 
+        <ScrollView
           style={[styles.instructionsScroll, { maxHeight }]}
           contentContainerStyle={styles.instructionsContainer}
         >

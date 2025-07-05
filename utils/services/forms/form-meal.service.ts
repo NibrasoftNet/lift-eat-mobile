@@ -4,15 +4,22 @@
  * notamment la gestion des ingrédients, la validation et la soumission
  */
 
-import { FormOperationResult } from "@/utils/interfaces/forms.interface";
-import { MealDefaultValuesProps, MealFormData } from "@/utils/validation/meal/meal.validation";
-import { ToastTypeEnum } from "@/utils/enum/general.enum";
-import { LogCategory } from "@/utils/enum/logging.enum";
-import { logger } from "@/utils/services/common/logging.service";
-import { MealTypeEnum, CuisineTypeEnum, MealUnitEnum } from "@/utils/enum/meal.enum";
-import { getImageFromPicker } from "@/utils/utils";
-import sqliteMCPServer from "@/utils/mcp/sqlite-server";
-import { invalidateCache, DataType } from "@/utils/helpers/queryInvalidation";
+import { FormOperationResult } from '@/utils/interfaces/forms.interface';
+import {
+  MealDefaultValuesProps,
+  MealFormData,
+} from '@/utils/validation/meal/meal.validation';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { logger } from '@/utils/services/common/logging.service';
+import {
+  MealTypeEnum,
+  CuisineTypeEnum,
+  MealUnitEnum,
+} from '@/utils/enum/meal.enum';
+import { getImageFromPicker } from '@/utils/utils';
+import sqliteMCPServer from '@/utils/mcp/sqlite-server';
+import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { QueryClient } from '@tanstack/react-query';
 import * as FileSystem from 'expo-file-system';
 import { STANDARD_WEIGHT } from '@/utils/constants/CookingConstants';
@@ -27,7 +34,7 @@ class MealFormService {
    * @param toast - Service toast pour afficher les messages
    * @returns Un booléen indiquant si l'utilisateur est autorisé
    */
-  
+
   /**
    * Convertit une URI d'image locale en base64
    * @param uri - L'URI de l'image locale
@@ -39,23 +46,28 @@ class MealFormService {
       if (!uri.startsWith('file://')) {
         throw new Error('URI must be a local file URI');
       }
-      
+
       // Lire le fichier en base64
       const base64 = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      
+
       logger.info(LogCategory.FORM, 'Successfully converted image to base64');
       return base64;
     } catch (error) {
-      logger.error(LogCategory.FORM, 'Error converting image to base64', { error });
+      logger.error(LogCategory.FORM, 'Error converting image to base64', {
+        error,
+      });
       throw error;
     }
   }
 
   validateUserAccess(userId: string | null, toast: any): boolean {
     if (!userId) {
-      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing meal form');
+      logger.warn(
+        LogCategory.AUTH,
+        'User not authenticated when accessing meal form',
+      );
       if (toast && typeof toast.show === 'function') {
         toast.show({
           placement: 'top',
@@ -64,20 +76,23 @@ class MealFormService {
             return {
               id: toastId,
               color: ToastTypeEnum.ERROR,
-              title: "Authentication Required",
-              description: "Please log in to create or edit a meal"
+              title: 'Authentication Required',
+              description: 'Please log in to create or edit a meal',
             };
           },
         });
       } else {
-        logger.warn(LogCategory.UI, 'Toast service not available for displaying authentication error');
+        logger.warn(
+          LogCategory.UI,
+          'Toast service not available for displaying authentication error',
+        );
       }
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Soumet les données du formulaire pour la création/modification d'un repas
    * @param data - Les données du formulaire
@@ -92,17 +107,20 @@ class MealFormService {
     userId: string | null,
     mealId: number | null = null,
     toastOrMacros: any,
-    selectedIngredients: any[] = []
+    selectedIngredients: any[] = [],
   ): Promise<FormOperationResult> {
     try {
       // Vérifier si toastOrMacros est un service toast (il aura une méthode 'show')
       const isToast = toastOrMacros && typeof toastOrMacros.show === 'function';
       const macros = isToast ? null : toastOrMacros;
       const toast = isToast ? toastOrMacros : null;
-      
+
       // Valider l'accès utilisateur - mais ne pas utiliser toast ici si ce n'est pas un objet toast
       if (!userId) {
-        logger.warn(LogCategory.AUTH, 'User not authenticated when submitting meal form');
+        logger.warn(
+          LogCategory.AUTH,
+          'User not authenticated when submitting meal form',
+        );
         if (toast) {
           toast.show({
             placement: 'top',
@@ -111,26 +129,29 @@ class MealFormService {
               return {
                 id: toastId,
                 color: ToastTypeEnum.ERROR,
-                title: "Authentication Required",
-                description: "Please log in to create or edit a meal"
+                title: 'Authentication Required',
+                description: 'Please log in to create or edit a meal',
               };
             },
           });
         }
         return {
           success: false,
-          message: "Authentication required",
-          data: null
+          message: 'Authentication required',
+          data: null,
         };
       }
-      
+
       // --- Gestion des macros -------------------------------------------------
       // Si des macros bruts sont fournis (calculés pour le poids total du repas)
       // nous les convertissons d'abord à une base 100 g afin que les valeurs
       // enregistrées correspondent exactement à celles que le back-end conservera.
       let macrosFor100g = macros;
       if (macros && selectedIngredients && selectedIngredients.length > 0) {
-        const totalWeight = selectedIngredients.reduce((sum, ing) => sum + (ing.quantity || 0), 0);
+        const totalWeight = selectedIngredients.reduce(
+          (sum, ing) => sum + (ing.quantity || 0),
+          0,
+        );
         if (Math.abs(totalWeight - STANDARD_WEIGHT) > 0.01) {
           const factor = STANDARD_WEIGHT / totalWeight;
           macrosFor100g = {
@@ -155,7 +176,7 @@ class MealFormService {
         cuisine: data.cuisine,
         // L'image sera traitée séparément ci-dessous
       };
-      
+
       // Ajouter un champ spécial pour l'image URI qui sera traité correctement
       if (data.image) {
         try {
@@ -165,11 +186,20 @@ class MealFormService {
               try {
                 // Pour un URI local, convertir en base64 avant envoi
                 logger.info(LogCategory.FORM, 'Converting image URI to base64');
-                const base64Data = await this.convertImageUriToBase64(data.image);
+                const base64Data = await this.convertImageUriToBase64(
+                  data.image,
+                );
                 (mealData as any).image = base64Data;
-                logger.info(LogCategory.FORM, 'Image converted to base64 for direct saving');
+                logger.info(
+                  LogCategory.FORM,
+                  'Image converted to base64 for direct saving',
+                );
               } catch (convError) {
-                logger.error(LogCategory.FORM, 'Failed to convert image, falling back to URI', { error: convError });
+                logger.error(
+                  LogCategory.FORM,
+                  'Failed to convert image, falling back to URI',
+                  { error: convError },
+                );
                 // En cas d'erreur de conversion, utiliser l'URI directement
                 (mealData as any).imageUri = data.image;
               }
@@ -192,25 +222,26 @@ class MealFormService {
           (mealData as any).imageUri = data.image;
         }
       }
-      
+
       // Log pour débogage
-      logger.info(LogCategory.FORM, 'Submitting meal data to database', { 
-        mealId: mealId || 'new', 
+      logger.info(LogCategory.FORM, 'Submitting meal data to database', {
+        mealId: mealId || 'new',
         hasImage: !!data.image,
         imageType: data.image ? typeof data.image : 'none',
-        operation: mealId ? 'update' : 'create'
+        operation: mealId ? 'update' : 'create',
       });
-      
+
       let result;
-      
+
       // Création ou modification
       if (mealId) {
         // --- LOG: état AVANT mise à jour ---
         try {
-          const beforeResult = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(
-            mealId,
-            userId ? parseInt(userId, 10) : undefined
-          );
+          const beforeResult =
+            await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(
+              mealId,
+              userId ? parseInt(userId, 10) : undefined,
+            );
           if (beforeResult?.success) {
             logger.info(LogCategory.NUTRITION, 'Meal BEFORE update', {
               macros: {
@@ -231,26 +262,35 @@ class MealFormService {
               })),
             });
           } else {
-            logger.warn(LogCategory.NUTRITION, 'Unable to fetch meal BEFORE update', { mealId });
+            logger.warn(
+              LogCategory.NUTRITION,
+              'Unable to fetch meal BEFORE update',
+              { mealId },
+            );
           }
         } catch (logError) {
-          logger.warn(LogCategory.NUTRITION, 'Error logging meal BEFORE update', { error: logError });
+          logger.warn(
+            LogCategory.NUTRITION,
+            'Error logging meal BEFORE update',
+            { error: logError },
+          );
         }
 
         // Mise à jour via MCP
         result = await sqliteMCPServer.updateMealViaMCP(
-          mealId, 
-          mealData, 
+          mealId,
+          mealData,
           selectedIngredients, // envoyer les ingrédients sélectionnés
-          userId ? parseInt(userId, 10) : undefined
+          userId ? parseInt(userId, 10) : undefined,
         );
 
         // --- LOG: état APRÈS mise à jour ---
         try {
-          const afterResult = await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(
-            mealId,
-            userId ? parseInt(userId, 10) : undefined
-          );
+          const afterResult =
+            await sqliteMCPServer.getMealByIdWithIngredientsViaMCP(
+              mealId,
+              userId ? parseInt(userId, 10) : undefined,
+            );
           if (afterResult?.success) {
             logger.info(LogCategory.NUTRITION, 'Meal AFTER update', {
               macros: {
@@ -271,17 +311,25 @@ class MealFormService {
               })),
             });
           } else {
-            logger.warn(LogCategory.NUTRITION, 'Unable to fetch meal AFTER update', { mealId });
+            logger.warn(
+              LogCategory.NUTRITION,
+              'Unable to fetch meal AFTER update',
+              { mealId },
+            );
           }
         } catch (logError) {
-          logger.warn(LogCategory.NUTRITION, 'Error logging meal AFTER update', { error: logError });
+          logger.warn(
+            LogCategory.NUTRITION,
+            'Error logging meal AFTER update',
+            { error: logError },
+          );
         }
-        
+
         if (result && result.success) {
           // Invalider le cache pour forcer le rechargement des données
           const queryClient = new QueryClient();
           invalidateCache(queryClient, DataType.MEAL);
-          
+
           if (toast) {
             toast.show({
               placement: 'top',
@@ -290,25 +338,27 @@ class MealFormService {
                 return {
                   id: toastId,
                   color: ToastTypeEnum.SUCCESS,
-                  title: "Meal Updated",
-                  description: "Your meal has been updated successfully"
+                  title: 'Meal Updated',
+                  description: 'Your meal has been updated successfully',
                 };
               },
             });
           }
-          
+
           return {
             success: true,
-            message: "Meal updated successfully",
-            data: result
+            message: 'Meal updated successfully',
+            data: result,
           };
         } else {
-          throw new Error(result?.error || "Failed to update meal");
+          throw new Error(result?.error || 'Failed to update meal');
         }
       } else {
         // Création via MCP
-        logger.info(LogCategory.DATABASE, 'Creating new meal via MCP', { userId });
-        
+        logger.info(LogCategory.DATABASE, 'Creating new meal via MCP', {
+          userId,
+        });
+
         // Structure des macros au format attendu par l'API
         const totalMacrosFormatted = {
           totalCalories: macros ? macros.totalCalories : data.calories || 0,
@@ -316,20 +366,20 @@ class MealFormService {
           totalFats: macros ? macros.totalFats : data.fat || 0,
           totalProtein: macros ? macros.totalProtein : data.protein || 0,
         };
-        
+
         // Appel à createNewMealViaMCP avec les 4 paramètres attendus
         result = await sqliteMCPServer.createNewMealViaMCP(
-          mealData,                           // data
-          selectedIngredients,                // selectedIngredients
-          totalMacrosFormatted,               // totalMacros
-          parseInt(userId, 10)                // creatorId
+          mealData, // data
+          selectedIngredients, // selectedIngredients
+          totalMacrosFormatted, // totalMacros
+          parseInt(userId, 10), // creatorId
         );
-        
+
         if (result && result.success) {
           // Invalider le cache pour forcer le rechargement des données
           const queryClient = new QueryClient();
           invalidateCache(queryClient, DataType.MEAL);
-          
+
           if (toast) {
             toast.show({
               placement: 'top',
@@ -338,26 +388,30 @@ class MealFormService {
                 return {
                   id: toastId,
                   color: ToastTypeEnum.SUCCESS,
-                  title: "Meal Created",
-                  description: "Your meal has been created successfully"
+                  title: 'Meal Created',
+                  description: 'Your meal has been created successfully',
                 };
               },
             });
           }
-          
+
           return {
             success: true,
-            message: "Meal created successfully",
-            data: result
+            message: 'Meal created successfully',
+            data: result,
           };
         } else {
-          throw new Error(result?.error || "Failed to create meal");
+          throw new Error(result?.error || 'Failed to create meal');
         }
       }
     } catch (error) {
       // Journaliser l'erreur
-      logger.error(LogCategory.FORM, 'Error submitting meal form', { error, userId, mealId });
-      
+      logger.error(LogCategory.FORM, 'Error submitting meal form', {
+        error,
+        userId,
+        mealId,
+      });
+
       // Afficher un toast d'erreur si le service toast est disponible
       if (toastOrMacros && typeof toastOrMacros.show === 'function') {
         toastOrMacros.show({
@@ -367,23 +421,27 @@ class MealFormService {
             return {
               id: toastId,
               color: ToastTypeEnum.ERROR,
-              title: "Submission Error",
-              description: "An error occurred while saving your meal"
+              title: 'Submission Error',
+              description: 'An error occurred while saving your meal',
             };
           },
         });
       } else {
-        logger.warn(LogCategory.UI, 'Toast service not available for displaying submission error');
+        logger.warn(
+          LogCategory.UI,
+          'Toast service not available for displaying submission error',
+        );
       }
-      
+
       return {
         success: false,
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-        data: null
+        message:
+          error instanceof Error ? error.message : 'An unknown error occurred',
+        data: null,
       };
     }
   }
-  
+
   /**
    * Génère les valeurs par défaut pour le formulaire de repas
    * @returns Les valeurs par défaut
@@ -401,35 +459,51 @@ class MealFormService {
       quantity: 1,
       unit: MealUnitEnum.GRAMMES,
       creatorId: 1,
-      ingredients: []
+      ingredients: [],
     };
   }
-  
+
   /**
    * Gère la sélection d'une image pour le repas
    * @param setFieldValue - Fonction pour définir la valeur d'un champ
    * @returns Une fonction asynchrone pour la sélection d'image
    */
-  handleImageSelection(setFieldValue: (field: string, value: any) => void): (source?: 'camera' | 'gallery') => Promise<void> {
+  handleImageSelection(
+    setFieldValue: (field: string, value: any) => void,
+  ): (source?: 'camera' | 'gallery') => Promise<void> {
     return async (source: 'camera' | 'gallery' = 'gallery') => {
       try {
         logger.info(LogCategory.FORM, `Selecting meal image from ${source}`);
         const result = await getImageFromPicker(source);
-        
+
         // Vérifier si l'utilisateur a annulé la sélection
-        if (result && !result.canceled && result.assets && result.assets.length > 0) {
+        if (
+          result &&
+          !result.canceled &&
+          result.assets &&
+          result.assets.length > 0
+        ) {
           const imageUri = result.assets[0].uri;
-          logger.info(LogCategory.FORM, `Image selected successfully: ${imageUri}`);
+          logger.info(
+            LogCategory.FORM,
+            `Image selected successfully: ${imageUri}`,
+          );
           setFieldValue('image', imageUri);
         } else {
-          logger.info(LogCategory.FORM, 'Image selection canceled or no image selected');
+          logger.info(
+            LogCategory.FORM,
+            'Image selection canceled or no image selected',
+          );
         }
       } catch (error) {
-        logger.error(LogCategory.FORM, 'Error selecting image for meal', { error, source });
+        logger.error(LogCategory.FORM, 'Error selecting image for meal', {
+          error,
+          source,
+        });
       }
     };
   }
-  
+
   /**
    * Options pour le type de repas
    * @returns Liste des options pour le type de repas
@@ -439,10 +513,10 @@ class MealFormService {
       { label: 'Breakfast', value: MealTypeEnum.BREAKFAST },
       { label: 'Lunch', value: MealTypeEnum.LUNCH },
       { label: 'Dinner', value: MealTypeEnum.DINNER },
-      { label: 'Snack', value: MealTypeEnum.SNACK }
+      { label: 'Snack', value: MealTypeEnum.SNACK },
     ];
   }
-  
+
   /**
    * Options pour le type de cuisine
    * @returns Liste des options pour le type de cuisine
@@ -454,10 +528,10 @@ class MealFormService {
       { label: 'French', value: CuisineTypeEnum.FRENCH },
       { label: 'Mexican', value: CuisineTypeEnum.MEXICAN },
       { label: 'Japanese', value: CuisineTypeEnum.JAPANESE },
-      { label: 'American', value: CuisineTypeEnum.AMERICAN }
+      { label: 'American', value: CuisineTypeEnum.AMERICAN },
     ];
   }
-  
+
   /**
    * Options pour les unités de mesure
    * @returns Liste des options pour les unités
@@ -467,7 +541,7 @@ class MealFormService {
       { label: 'Grammes', value: MealUnitEnum.GRAMMES },
       { label: 'Millilitres', value: MealUnitEnum.MILLILITRES },
       { label: 'Pièces', value: MealUnitEnum.PIECES },
-      { label: 'Portions', value: MealUnitEnum.SERVING }
+      { label: 'Portions', value: MealUnitEnum.SERVING },
     ];
   }
 }

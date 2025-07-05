@@ -10,7 +10,10 @@ export const registerSchema = z.object({
       message: 'Email invalide!',
     }),
   password: passwordSchema,
-  name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').optional(),
+  name: z
+    .string()
+    .min(2, 'Le nom doit contenir au moins 2 caractères')
+    .optional(),
 });
 
 // Ensure this matches the interface from auth.interface.ts

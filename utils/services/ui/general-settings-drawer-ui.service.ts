@@ -1,9 +1,14 @@
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { preferencesUIService } from '@/utils/services/ui/preferences-ui.service';
-import { GeneralSettingsDrawerServiceInterface, GeneralSettingsMenuItem } from '@/utils/interfaces/drawer.interface';
+import {
+  GeneralSettingsDrawerServiceInterface,
+  GeneralSettingsMenuItem,
+} from '@/utils/interfaces/drawer.interface';
 
-class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInterface {
+class GeneralSettingsDrawerUIService
+  implements GeneralSettingsDrawerServiceInterface
+{
   // Méthode pour changer la langue
   async handleLanguageChange(lang: string): Promise<void> {
     try {
@@ -11,7 +16,7 @@ class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInte
       logger.info(LogCategory.UI, 'Language changed', { lang });
     } catch (error) {
       logger.error(LogCategory.UI, 'Error changing language', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -24,7 +29,7 @@ class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInte
       logger.info(LogCategory.UI, 'Theme changed', { theme });
     } catch (error) {
       logger.error(LogCategory.UI, 'Error changing theme', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -37,7 +42,7 @@ class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInte
       logger.info(LogCategory.UI, 'Notifications toggled', { enabled });
     } catch (error) {
       logger.error(LogCategory.UI, 'Error toggling notifications', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -107,7 +112,7 @@ class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInte
       return true;
     } catch (error) {
       logger.error(LogCategory.UI, 'Error changing language', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -115,4 +120,5 @@ class GeneralSettingsDrawerUIService implements GeneralSettingsDrawerServiceInte
 }
 
 // Exporter une instance unique du service
-export const generalSettingsDrawerUIService = new GeneralSettingsDrawerUIService();
+export const generalSettingsDrawerUIService =
+  new GeneralSettingsDrawerUIService();

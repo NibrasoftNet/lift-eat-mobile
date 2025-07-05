@@ -36,11 +36,18 @@ class Logger {
 
   private formatLog(entry: LogEntry): string {
     const platform = Platform.OS.toUpperCase();
-    const formattedData = entry.data ? `\nData: ${JSON.stringify(entry.data, null, 2)}` : '';
+    const formattedData = entry.data
+      ? `\nData: ${JSON.stringify(entry.data, null, 2)}`
+      : '';
     return `[${entry.timestamp}][${platform}][${entry.level}][${entry.category}] ${entry.message}${formattedData}`;
   }
 
-  private createLogEntry(level: LogLevel, category: LogCategory, message: string, data?: any): LogEntry {
+  private createLogEntry(
+    level: LogLevel,
+    category: LogCategory,
+    message: string,
+    data?: any,
+  ): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
@@ -52,7 +59,12 @@ class Logger {
 
   public debug(category: LogCategory, message: string, data?: any) {
     if (this.isDebugMode) {
-      const entry = this.createLogEntry(LogLevel.DEBUG, category, message, data);
+      const entry = this.createLogEntry(
+        LogLevel.DEBUG,
+        category,
+        message,
+        data,
+      );
       console.debug(this.formatLog(entry));
     }
   }
@@ -79,7 +91,9 @@ class Logger {
 
   public endPerformanceLog(operation: string, startTime: number) {
     const duration = performance.now() - startTime;
-    this.debug(LogCategory.PERFORMANCE, `${operation} completed`, { durationMs: duration });
+    this.debug(LogCategory.PERFORMANCE, `${operation} completed`, {
+      durationMs: duration,
+    });
   }
 }
 

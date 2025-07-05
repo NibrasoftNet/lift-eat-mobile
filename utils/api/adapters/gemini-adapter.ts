@@ -43,7 +43,7 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
     this.registerVersionedMethod(
       'generateText',
       new ApiVersionImpl(1, 0, 0),
-      this.generateTextV1
+      this.generateTextV1,
     );
   }
 
@@ -64,8 +64,11 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
    */
   public async generateText(params: GeminiRequestParams): Promise<string> {
     try {
-      logger.info(LogCategory.IA, `Sending prompt to Gemini API: "${params.prompt.substring(0, 50)}..."`);
-      
+      logger.info(
+        LogCategory.IA,
+        `Sending prompt to Gemini API: "${params.prompt.substring(0, 50)}..."`,
+      );
+
       const response = await fetch(
         `${this.apiInfo.baseUrl}/v1/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
         {
@@ -88,7 +91,7 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
               maxOutputTokens: params.maxTokens || 1024,
             },
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -96,15 +99,20 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
         throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json() as GeminiResponseV1;
-      
+      const data = (await response.json()) as GeminiResponseV1;
+
       if (!data.candidates || data.candidates.length === 0) {
         throw new Error('No response from Gemini API');
       }
 
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      logger.error(LogCategory.IA, `Error in Gemini API call: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `Error in Gemini API call: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       throw error;
     }
   }
@@ -115,8 +123,14 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
    */
   private async generateTextV1(params: GeminiRequestParams): Promise<string> {
     try {
-      logger.info(LogCategory.IA, `Using v1.0.0 implementation for Gemini API: "${params.prompt.substring(0, 50)}..."`);
-      
+      logger.info(
+        LogCategory.IA,
+        `Using v1.0.0 implementation for Gemini API: "${params.prompt.substring(
+          0,
+          50,
+        )}..."`,
+      );
+
       // Format de requête pour l'API Gemini v1.0.0
       const response = await fetch(
         `${this.apiInfo.baseUrl}/v1/models/gemini-1.0-pro:generateContent?key=${this.apiKey}`,
@@ -132,24 +146,31 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
             temperature: params.temperature || 0.7,
             maxOutputTokens: params.maxTokens || 1024,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Gemini API v1.0.0 error: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Gemini API v1.0.0 error: ${response.status} - ${errorText}`,
+        );
       }
 
       // Format de réponse pour l'API Gemini v1.0.0
       const data = await response.json();
-      
+
       if (!data.candidates || data.candidates.length === 0) {
         throw new Error('No response from Gemini API v1.0.0');
       }
 
       return data.candidates[0].text;
     } catch (error) {
-      logger.error(LogCategory.IA, `Error in Gemini API v1.0.0 call: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `Error in Gemini API v1.0.0 call: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       throw error;
     }
   }
@@ -163,15 +184,20 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
       // Appel à un endpoint pour vérifier la version
       // Note: Gemini ne fournit pas d'endpoint spécifique pour la version, donc c'est une simulation
       logger.info(LogCategory.INTEGRATION, 'Checking Gemini API version');
-      
+
       // Dans une implémentation réelle, on appellerait un endpoint qui retourne la version
       // Ici, on simule un appel réseau
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Retourner la version actuelle (simulation)
       return new ApiVersionImpl(1, 5, 0);
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, `Error checking Gemini API version: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.INTEGRATION,
+        `Error checking Gemini API version: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       // En cas d'erreur, on retourne la dernière version connue
       return this.apiInfo.currentVersion as ApiVersionImpl;
     }
@@ -185,7 +211,7 @@ export class GeminiApiAdapter extends ExternalApiAdapter {
    */
   public async generateTextWithVersion(
     params: GeminiRequestParams,
-    requiredVersion: ApiVersionImpl
+    requiredVersion: ApiVersionImpl,
   ): Promise<string> {
     return this.adaptApiCall<string>('generateText', requiredVersion, params);
   }

@@ -1,11 +1,20 @@
 import * as React from 'react';
-import Svg, { Path, Circle, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Circle,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface BasketballEmojiProps {
   size?: number;
 }
 
-export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) => {
+export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({
+  size = 100,
+}) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">
       <Defs>
@@ -20,7 +29,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
           <Stop stopColor="#FF9800" />
           <Stop offset="1" stopColor="#E65100" />
         </RadialGradient>
-        
+
         <LinearGradient
           id="paint1_linear_basketball_highlight"
           x1="35"
@@ -36,7 +45,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
 
       {/* Ballon de basket */}
       <Circle cx="50" cy="50" r="35" fill="url(#paint0_radial_basketball)" />
-      
+
       {/* Ligne horizontale */}
       <Path
         d="M15 50H85"
@@ -45,7 +54,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Ligne verticale */}
       <Path
         d="M50 15V85"
@@ -54,7 +63,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Courbes supérieures */}
       <Path
         d="M25 25C30 35 40 42.5 50 42.5C60 42.5 70 35 75 25"
@@ -63,7 +72,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Courbes inférieures */}
       <Path
         d="M25 75C30 65 40 57.5 50 57.5C60 57.5 70 65 75 75"
@@ -72,7 +81,7 @@ export const BasketballEmoji: React.FC<BasketballEmojiProps> = ({ size = 100 }) 
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Reflet sur le ballon */}
       <Path
         d="M35 35C40 40 45 45 50 45C55 45 60 40 65 35"

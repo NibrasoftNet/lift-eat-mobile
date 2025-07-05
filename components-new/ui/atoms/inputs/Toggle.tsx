@@ -58,13 +58,13 @@ const Toggle: React.FC<ToggleProps> = ({
   disabled = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // État interne pour le mode non contrôlé
   const [isEnabled, setIsEnabled] = useState(defaultValue);
-  
+
   // Animation pour le déplacement du cercle
   const translateX = useState(new Animated.Value(isEnabled ? 1 : 0))[0];
-  
+
   // Synchroniser l'état interne avec l'état externe
   useEffect(() => {
     if (value !== undefined) {
@@ -76,35 +76,35 @@ const Toggle: React.FC<ToggleProps> = ({
       }).start();
     }
   }, [value, translateX]);
-  
+
   // Gérer le changement d'état
   const handleToggle = () => {
     if (disabled) return;
-    
+
     const newValue = !isEnabled;
     setIsEnabled(newValue);
-    
+
     Animated.timing(translateX, {
       toValue: newValue ? 1 : 0,
       duration: 200,
       useNativeDriver: true,
     }).start();
-    
+
     if (onValueChange) {
       onValueChange(newValue);
     }
   };
-  
+
   // Dimensions exactes du Figma
   const TOGGLE_WIDTH = 48; // Largeur exacte du Figma
   const TOGGLE_HEIGHT = 24; // Hauteur exacte du Figma
   const CIRCLE_SIZE = 20; // Taille exacte du Figma
   const CIRCLE_MARGIN = 2; // Marge exacte du Figma
-  
+
   // Déterminer les couleurs selon le thème et l'état
   let backgroundColor;
   let circleColor = '#FFFFFF'; // Couleur exacte du Figma
-  
+
   if (disabled) {
     if (theme === 'dark') {
       backgroundColor = '#35383F'; // Couleur exacte du Figma
@@ -120,28 +120,25 @@ const Toggle: React.FC<ToggleProps> = ({
       backgroundColor = '#E0E0E0'; // Couleur exacte du Figma
     }
   }
-  
+
   // Déterminer la position du cercle
   const translateXInterpolate = translateX.interpolate({
     inputRange: [0, 1],
     outputRange: [CIRCLE_MARGIN, TOGGLE_WIDTH - CIRCLE_SIZE - CIRCLE_MARGIN],
   });
-  
+
   // Déterminer le style de bordure pour le style 'line'
-  const borderStyle = style === 'line' && isEnabled
-    ? { borderWidth: 2, borderColor: appTheme.color('primary') }
-    : {};
-  
+  const borderStyle =
+    style === 'line' && isEnabled
+      ? { borderWidth: 2, borderColor: appTheme.color('primary') }
+      : {};
+
   // Opacité pour l'état désactivé
   const opacity = disabled ? 0.5 : 1;
-  
+
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        { opacity },
-        containerStyle,
-      ]}
+      style={[styles.container, { opacity }, containerStyle]}
       onPress={handleToggle}
       activeOpacity={0.8}
       disabled={disabled}
@@ -173,16 +170,20 @@ const Toggle: React.FC<ToggleProps> = ({
           ]}
         />
       </View>
-      
+
       {/* Label (optionnel) */}
       {label && (
         <Text
           style={[
             styles.label,
             {
-              color: disabled 
-                ? (theme === 'dark' ? '#666666' : '#BDBDBD') 
-                : (theme === 'dark' ? 'white' : appTheme.color('primary')),
+              color: disabled
+                ? theme === 'dark'
+                  ? '#666666'
+                  : '#BDBDBD'
+                : theme === 'dark'
+                ? 'white'
+                : appTheme.color('primary'),
               marginLeft: 12, // Espacement exact du Figma
             },
             labelStyle as TextStyle,

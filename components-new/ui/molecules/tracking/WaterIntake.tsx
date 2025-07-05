@@ -2,7 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box } from '../../atoms/base';
-import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Path,
+  Defs,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface WaterIntakeProps {
   /**
@@ -28,7 +34,7 @@ interface WaterIntakeProps {
 /**
  * Composant WaterIntake du Water Tracker
  * Reproduction exacte du design Figma (Water Tracker)
- * 
+ *
  * node-id=48500:35710 (Dark=False)
  * node-id=48500:35709 (Dark=True)
  */
@@ -36,25 +42,26 @@ export const WaterIntake: React.FC<WaterIntakeProps> = ({
   dark = false,
   currentAmount,
   dailyGoal,
-  fillPercentage
+  fillPercentage,
 }) => {
   const theme = useAppTheme();
-  
+
   // Calculer le pourcentage de remplissage si non fourni
-  const calculatedFillPercentage = fillPercentage !== undefined 
-    ? fillPercentage 
-    : Math.min(Math.round((currentAmount / dailyGoal) * 100), 100);
-  
+  const calculatedFillPercentage =
+    fillPercentage !== undefined
+      ? fillPercentage
+      : Math.min(Math.round((currentAmount / dailyGoal) * 100), 100);
+
   // Couleurs selon les tokens Figma exacts
   const backgroundColor = dark ? '#121212' : '#FFFFFF';
   const textPrimaryColor = dark ? '#FFFFFF' : '#212121';
   const textSecondaryColor = dark ? 'rgba(255, 255, 255, 0.7)' : '#616161';
   const dropOuterColor = dark ? '#1E1E1E' : '#F5F5F5';
-  
+
   // Formatage des nombres avec séparateur de milliers (comme dans le design Figma)
   const formattedCurrentAmount = currentAmount.toLocaleString();
   const formattedDailyGoal = dailyGoal.toLocaleString();
-  
+
   return (
     <Box style={[styles.container, { backgroundColor }]}>
       {/* Water Intake Container - forme de goutte d'eau */}
@@ -66,29 +73,39 @@ export const WaterIntake: React.FC<WaterIntakeProps> = ({
               <Stop offset="1" stopColor="#0064FF" />
             </LinearGradient>
           </Defs>
-          
+
           {/* Contour extérieur de la goutte - Path exact comme dans Figma */}
           <Path
             d="M80 10C80 10 140 70 140 130C140 162.033 113.137 188 80 188C46.863 188 20 162.033 20 130C20 70 80 10 80 10Z"
             fill={dropOuterColor}
           />
-          
+
           {/* Remplissage de l'eau avec forme de goutte - amélioré */}
           {calculatedFillPercentage > 0 && (
             <Path
-              d={`M80 ${Math.max(188 - (calculatedFillPercentage * 1.78), 10)}
-                 C80 ${Math.max(188 - (calculatedFillPercentage * 1.78), 10)} 140 ${Math.max(150 - (calculatedFillPercentage * 0.6), 70)} 140 130
+              d={`M80 ${Math.max(188 - calculatedFillPercentage * 1.78, 10)}
+                 C80 ${Math.max(
+                   188 - calculatedFillPercentage * 1.78,
+                   10,
+                 )} 140 ${Math.max(
+                150 - calculatedFillPercentage * 0.6,
+                70,
+              )} 140 130
                  C140 162.033 113.137 188 80 188
                  C46.863 188 20 162.033 20 130
-                 C20 ${Math.max(150 - (calculatedFillPercentage * 0.6), 70)} 80 ${Math.max(188 - (calculatedFillPercentage * 1.78), 10)} 80 ${Math.max(188 - (calculatedFillPercentage * 1.78), 10)}`}
+                 C20 ${Math.max(
+                   150 - calculatedFillPercentage * 0.6,
+                   70,
+                 )} 80 ${Math.max(
+                188 - calculatedFillPercentage * 1.78,
+                10,
+              )} 80 ${Math.max(188 - calculatedFillPercentage * 1.78, 10)}`}
               fill="url(#waterGradient)"
             />
           )}
-          
-
         </Svg>
       </View>
-      
+
       {/* Auto Layout Vertical - exactement comme dans Figma */}
       <View style={styles.contentContainer}>
         {/* Auto Layout Horizontal - pour l'affichage de la quantité */}
@@ -100,11 +117,11 @@ export const WaterIntake: React.FC<WaterIntakeProps> = ({
             mL
           </Text>
         </View>
-        
+
         {/* Auto Layout Horizontal - pour l'affichage de l'objectif */}
         <View style={styles.goalContainer}>
           <Text style={[styles.goalText, { color: textSecondaryColor }]}>
-            Daily goal: 
+            Daily goal:
           </Text>
           <Text style={[styles.goalAmountText, { color: textPrimaryColor }]}>
             {formattedDailyGoal} mL
@@ -176,7 +193,7 @@ const styles = StyleSheet.create({
     fontWeight: '600', // Graisse exacte du Figma (fontWeight: 600)
     lineHeight: 25.6, // LineHeight exact du Figma (lineHeight: 1.6em)
     letterSpacing: 0.2, // LetterSpacing exact du Figma (1.25%)
-  }
+  },
 });
 
 export default WaterIntake;

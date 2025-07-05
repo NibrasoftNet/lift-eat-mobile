@@ -5,10 +5,16 @@
  */
 
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, TextInput, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
-
 
 // Types pour les variantes du composant SearchForm
 export type SearchFormVariant = 'default' | 'filled' | 'outlined';
@@ -95,13 +101,13 @@ const SearchForm: React.FC<SearchFormProps> = ({
 }) => {
   const { color } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
-  
+
   // Déterminer les dimensions selon la taille
   let height;
   let fontSize;
   let iconSize;
   let paddingHorizontal;
-  
+
   switch (size) {
     case 'small':
       height = 40;
@@ -123,14 +129,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
       paddingHorizontal = 16;
       break;
   }
-  
+
   // Déterminer les styles selon la variante
   let backgroundColor;
   let borderWidth;
   let borderColor;
   let textColor;
   let placeholderColor;
-  
+
   switch (variant) {
     case 'filled':
       backgroundColor = color('backgroundGrey');
@@ -155,7 +161,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       placeholderColor = color('blueGrey');
       break;
   }
-  
+
   // Ajuster les styles si le formulaire est désactivé
   if (disabled) {
     backgroundColor = color('backgroundGrey');
@@ -203,7 +209,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const defaultSearchIcon = (
     <Box style={styles.iconContainer}>
       {/* Remplacer par votre icône de recherche */}
-      <Box style={{ width: iconSize, height: iconSize, borderRadius: iconSize / 2, backgroundColor: color('blueGrey') }} />
+      <Box
+        style={{
+          width: iconSize,
+          height: iconSize,
+          borderRadius: iconSize / 2,
+          backgroundColor: color('blueGrey'),
+        }}
+      />
     </Box>
   );
 
@@ -211,18 +224,25 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const defaultClearIcon = (
     <Box style={styles.iconContainer}>
       {/* Remplacer par votre icône d'effacement */}
-      <Box style={{ width: iconSize, height: iconSize, borderRadius: iconSize / 2, backgroundColor: color('blueGrey') }} />
+      <Box
+        style={{
+          width: iconSize,
+          height: iconSize,
+          borderRadius: iconSize / 2,
+          backgroundColor: color('blueGrey'),
+        }}
+      />
     </Box>
   );
 
   return (
-    <Box style={[styles.container, containerStyle as ViewStyle || {}]}>
+    <Box style={[styles.container, (containerStyle as ViewStyle) || {}]}>
       {/* Icône de recherche */}
       {searchIcon || defaultSearchIcon}
-      
+
       {/* Champ de saisie */}
       <TextInput
-        style={[styles.input, inputStyle as TextStyle || {}]}
+        style={[styles.input, (inputStyle as TextStyle) || {}]}
         placeholder={placeholder}
         placeholderTextColor={placeholderColor}
         value={value}
@@ -233,7 +253,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
         editable={!disabled}
         autoFocus={autoFocus}
       />
-      
+
       {/* Bouton d'effacement */}
       {showClearButton && value.length > 0 && (
         <TouchableOpacity

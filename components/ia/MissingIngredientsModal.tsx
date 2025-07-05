@@ -16,8 +16,17 @@ import {
 } from '@/components/ui/actionsheet';
 import { Input, InputField } from '@/components/ui/input';
 import { Button, ButtonText } from '@/components/ui/button';
-import { FormControl, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control';
-import { useToast, Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
+import {
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
+} from '@/components/ui/form-control';
+import {
+  useToast,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+} from '@/components/ui/toast';
 import { Heading } from '@/components/ui/heading';
 import { IaIngredientType } from '@/utils/validation/ia/ia.schemas';
 import { ingredientCoreService } from '@/utils/services/core/ingredient-core.service';
@@ -36,13 +45,11 @@ interface MissingIngredientsModalProps {
 /**
  * Modal pour afficher et gérer les ingrédients manquants dans la génération de repas
  */
-export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = ({
-  isOpen,
-  onClose,
-  missingIngredients,
-  onIngredientAdded
-}) => {
-  const [selectedIngredient, setSelectedIngredient] = useState<IaIngredientType | null>(null);
+export const MissingIngredientsModal: React.FC<
+  MissingIngredientsModalProps
+> = ({ isOpen, onClose, missingIngredients, onIngredientAdded }) => {
+  const [selectedIngredient, setSelectedIngredient] =
+    useState<IaIngredientType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nutritionValues, setNutritionValues] = useState({
     calories: '',
@@ -87,12 +94,18 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
           for (const ingredient of missingIngredients) {
             await ingredientSuggestionCoreService.saveSuggestion(ingredient);
           }
-          logger.info(LogCategory.IA, `Saved ${missingIngredients.length} ingredient suggestions`);
+          logger.info(
+            LogCategory.IA,
+            `Saved ${missingIngredients.length} ingredient suggestions`,
+          );
         } catch (error) {
-          logger.error(LogCategory.IA, `Error saving ingredient suggestions: ${error}`);
+          logger.error(
+            LogCategory.IA,
+            `Error saving ingredient suggestions: ${error}`,
+          );
         }
       };
-      
+
       saveSuggestions();
     }
   }, [isOpen, missingIngredients]);
@@ -104,10 +117,18 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
     setIsLoading(true);
     try {
       // Convertir les valeurs nutritionnelles en nombres
-      const caloriesValue = nutritionValues.calories ? parseFloat(nutritionValues.calories) : 0;
-      const proteinValue = nutritionValues.protein ? parseFloat(nutritionValues.protein) : 0;
-      const carbsValue = nutritionValues.carbs ? parseFloat(nutritionValues.carbs) : 0;
-      const fatValue = nutritionValues.fat ? parseFloat(nutritionValues.fat) : 0;
+      const caloriesValue = nutritionValues.calories
+        ? parseFloat(nutritionValues.calories)
+        : 0;
+      const proteinValue = nutritionValues.protein
+        ? parseFloat(nutritionValues.protein)
+        : 0;
+      const carbsValue = nutritionValues.carbs
+        ? parseFloat(nutritionValues.carbs)
+        : 0;
+      const fatValue = nutritionValues.fat
+        ? parseFloat(nutritionValues.fat)
+        : 0;
 
       // Créer un nouvel ingrédient avec les valeurs nutritionnelles fournies
       const newIngredient = {
@@ -121,12 +142,14 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
         categoryId: undefined,
       };
 
-      const createdIngredient = await ingredientCoreService.createIngredient(newIngredient);
-      
+      const createdIngredient = await ingredientCoreService.createIngredient(
+        newIngredient,
+      );
+
       // Ajouter l'ingrédient créé à la liste des ingrédients du repas
       if (createdIngredient) {
         onIngredientAdded(createdIngredient);
-        
+
         // Afficher un toast de confirmation
         toast.show({
           render: ({ id }) => {
@@ -135,7 +158,8 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
                 <VStack space="xs">
                   <ToastTitle>Ingrédient ajouté</ToastTitle>
                   <ToastDescription>
-                    L'ingrédient {selectedIngredient.name} a été ajouté à votre base de données.
+                    L'ingrédient {selectedIngredient.name} a été ajouté à votre
+                    base de données.
                   </ToastDescription>
                 </VStack>
               </Toast>
@@ -159,7 +183,7 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
           },
         });
       }
-      
+
       handleClose(); // Fermer le modal après l'ajout
     } catch (error: any) {
       logger.error(LogCategory.IA, `Error creating ingredient: ${error}`);
@@ -171,7 +195,8 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
               <VStack space="xs">
                 <ToastTitle>Erreur</ToastTitle>
                 <ToastDescription>
-                  Une erreur est survenue lors de l'ajout de l'ingrédient: {error.message}
+                  Une erreur est survenue lors de l'ajout de l'ingrédient:{' '}
+                  {error.message}
                 </ToastDescription>
               </VStack>
             </Toast>
@@ -189,7 +214,9 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
       <HStack space="md" className="w-full justify-between">
         <VStack space="xs">
           <Text className="font-bold">{item.name}</Text>
-          <Text className="text-sm text-gray-500">{item.quantity} {item.unit}</Text>
+          <Text className="text-sm text-gray-500">
+            {item.quantity} {item.unit}
+          </Text>
         </VStack>
         <Button
           size="sm"
@@ -209,28 +236,35 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
         <ActionsheetDragIndicatorWrapper>
           <ActionsheetDragIndicator />
         </ActionsheetDragIndicatorWrapper>
-        
+
         <VStack space="md" className="w-full p-4">
           <Heading size="md" className="mb-2">
-            {selectedIngredient 
+            {selectedIngredient
               ? `Ajouter ${selectedIngredient.name}`
               : 'Ingrédients manquants'}
           </Heading>
-          
+
           {selectedIngredient ? (
             <VStack space="md" className="w-full">
               <Text className="mb-2">
                 Ajoutez les valeurs nutritionnelles pour cet ingrédient:
               </Text>
-              
+
               <FormControl className="mb-3">
                 <FormControlLabel>
-                  <FormControlLabelText>Calories (pour 100g)</FormControlLabelText>
+                  <FormControlLabelText>
+                    Calories (pour 100g)
+                  </FormControlLabelText>
                 </FormControlLabel>
                 <Input>
                   <InputField
                     value={nutritionValues.calories}
-                    onChangeText={(text) => setNutritionValues(prev => ({ ...prev, calories: text }))}
+                    onChangeText={(text) =>
+                      setNutritionValues((prev) => ({
+                        ...prev,
+                        calories: text,
+                      }))
+                    }
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -244,7 +278,9 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
                 <Input>
                   <InputField
                     value={nutritionValues.protein}
-                    onChangeText={(text) => setNutritionValues(prev => ({ ...prev, protein: text }))}
+                    onChangeText={(text) =>
+                      setNutritionValues((prev) => ({ ...prev, protein: text }))
+                    }
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -258,7 +294,9 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
                 <Input>
                   <InputField
                     value={nutritionValues.carbs}
-                    onChangeText={(text) => setNutritionValues(prev => ({ ...prev, carbs: text }))}
+                    onChangeText={(text) =>
+                      setNutritionValues((prev) => ({ ...prev, carbs: text }))
+                    }
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -272,7 +310,9 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
                 <Input>
                   <InputField
                     value={nutritionValues.fat}
-                    onChangeText={(text) => setNutritionValues(prev => ({ ...prev, fat: text }))}
+                    onChangeText={(text) =>
+                      setNutritionValues((prev) => ({ ...prev, fat: text }))
+                    }
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -280,10 +320,19 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
               </FormControl>
 
               <HStack space="md" className="justify-end">
-                <Button variant="outline" action="secondary" onPress={handleClose} disabled={isLoading}>
+                <Button
+                  variant="outline"
+                  action="secondary"
+                  onPress={handleClose}
+                  disabled={isLoading}
+                >
                   <ButtonText>Annuler</ButtonText>
                 </Button>
-                <Button action="primary" onPress={handleCreateIngredient} disabled={isLoading}>
+                <Button
+                  action="primary"
+                  onPress={handleCreateIngredient}
+                  disabled={isLoading}
+                >
                   <ButtonText>Ajouter</ButtonText>
                 </Button>
               </HStack>
@@ -291,9 +340,10 @@ export const MissingIngredientsModal: React.FC<MissingIngredientsModalProps> = (
           ) : (
             <VStack space="md" className="w-full">
               <Text className="text-md mb-2">
-                Ces ingrédients ne sont pas dans votre base de données. Sélectionnez-en un pour l'ajouter.
+                Ces ingrédients ne sont pas dans votre base de données.
+                Sélectionnez-en un pour l'ajouter.
               </Text>
-              
+
               <Box className="max-h-[300px] overflow-auto">
                 <FlatList
                   data={missingIngredients}

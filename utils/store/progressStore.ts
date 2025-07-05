@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { 
-  DailyProgressOrmProps, 
-  DailyMealProgressOrmProps, 
-  MealOrmProps 
+import {
+  DailyProgressOrmProps,
+  DailyMealProgressOrmProps,
+  MealOrmProps,
 } from '@/db/schema';
 
 // Type pour un repas avec son état de progression
-export type MealWithProgress = MealOrmProps & { 
+export type MealWithProgress = MealOrmProps & {
   progress: DailyMealProgressOrmProps | null;
   mealType?: string | null; // Type flexible spécifique au plan journalier
 };
@@ -29,18 +29,18 @@ interface ProgressState {
   mealsWithProgress: MealWithProgress[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Getters
   getAvailableMeals: () => MealsByType;
   getConsumedMeals: () => MealsByType;
-  
+
   // Actions
   setSelectedDate: (date: string | null) => void;
   setDailyProgress: (progress: DailyProgressOrmProps | null) => void;
   setMealsWithProgress: (meals: MealWithProgress[]) => void;
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  
+
   // Helper
   clearState: () => void;
 }
@@ -51,11 +51,11 @@ const categorizeMealsByType = (meals: MealWithProgress[]): MealsByType => {
     (acc, meal) => {
       // Si ni type ni mealType n'est défini, on ne peut pas catégoriser
       if (!meal.type && !meal.mealType) return acc;
-      
+
       // Priorité au type spécifique du plan journalier s'il existe
       if (meal.mealType) {
         const flexibleMealType = meal.mealType.toLowerCase();
-        
+
         if (flexibleMealType.includes('breakfast')) {
           acc.breakfast.push(meal);
           return acc;
@@ -70,10 +70,10 @@ const categorizeMealsByType = (meals: MealWithProgress[]): MealsByType => {
           return acc;
         }
       }
-      
+
       // Sinon on utilise le type par défaut du repas
       const defaultMealType = meal.type?.toLowerCase() || '';
-      
+
       if (defaultMealType.includes('breakfast')) {
         acc.breakfast.push(meal);
       } else if (defaultMealType.includes('lunch')) {
@@ -83,10 +83,10 @@ const categorizeMealsByType = (meals: MealWithProgress[]): MealsByType => {
       } else {
         acc.snacks.push(meal);
       }
-      
+
       return acc;
     },
-    { breakfast: [], lunch: [], dinner: [], snacks: [] }
+    { breakfast: [], lunch: [], dinner: [], snacks: [] },
   );
 };
 
@@ -100,47 +100,48 @@ const useProgressStore = create<ProgressState>()(
       mealsWithProgress: [],
       isLoading: false,
       error: null,
-      
+
       // Getters
       getAvailableMeals: () => {
         const meals = get().mealsWithProgress.filter(
-          meal => !meal.progress || !meal.progress.consomme
+          (meal) => !meal.progress || !meal.progress.consomme,
         );
         return categorizeMealsByType(meals);
       },
-      
+
       getConsumedMeals: () => {
         const meals = get().mealsWithProgress.filter(
-          meal => meal.progress && meal.progress.consomme
+          (meal) => meal.progress && meal.progress.consomme,
         );
         return categorizeMealsByType(meals);
       },
-      
+
       // Actions
       setSelectedDate: (date) => set({ selectedDate: date }),
-      
+
       setDailyProgress: (progress) => set({ dailyProgress: progress }),
-      
+
       setMealsWithProgress: (meals) => set({ mealsWithProgress: meals }),
-      
+
       setIsLoading: (loading) => set({ isLoading: loading }),
-      
+
       setError: (error) => set({ error }),
-      
+
       // Helper
-      clearState: () => set({
-        selectedDate: null,
-        dailyProgress: null,
-        mealsWithProgress: [],
-        isLoading: false,
-        error: null,
-      }),
+      clearState: () =>
+        set({
+          selectedDate: null,
+          dailyProgress: null,
+          mealsWithProgress: [],
+          isLoading: false,
+          error: null,
+        }),
     }),
     {
       name: 'progress-storage',
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
 
 export default useProgressStore;

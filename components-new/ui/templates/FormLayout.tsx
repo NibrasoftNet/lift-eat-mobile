@@ -1,5 +1,13 @@
 import React, { ReactNode } from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Pressable, Text } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderBar } from '../organisms/navigation';
 
@@ -16,13 +24,13 @@ interface FormLayoutProps {
 
 /**
  * FormLayout component
- * 
+ *
  * Template dédié aux formulaires avec:
  * - HeaderBar avec titre
  * - Zone de contenu scrollable
  * - Bouton de soumission en bas de l'écran
  * - Gestion du clavier
- * 
+ *
  * Reproduit fidèlement le design Figma sans aucune modification personnelle.
  */
 const FormLayout: React.FC<FormLayoutProps> = ({
@@ -37,7 +45,7 @@ const FormLayout: React.FC<FormLayoutProps> = ({
 }) => {
   const bgColor = darkMode ? 'bg-gray-900' : 'bg-white';
   const textColor = darkMode ? 'text-white' : 'text-gray-900';
-  
+
   const buttonBgEnabled = 'bg-green-500'; // #A1CE50 from Figma
   const buttonBgDisabled = 'bg-gray-300';
   const buttonTextEnabled = 'text-white';
@@ -51,7 +59,7 @@ const FormLayout: React.FC<FormLayoutProps> = ({
         onBackPress={onBackPress}
         darkMode={darkMode}
       />
-      
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -66,17 +74,21 @@ const FormLayout: React.FC<FormLayoutProps> = ({
             {children}
           </SafeAreaView>
         </ScrollView>
-        
+
         {onSubmit && (
           <SafeAreaView edges={['bottom']} className="px-5 py-3">
             <Pressable
               onPress={submitDisabled ? undefined : onSubmit}
               disabled={submitDisabled}
-              className={`py-4 rounded-xl items-center ${submitDisabled ? buttonBgDisabled : buttonBgEnabled}`}
+              className={`py-4 rounded-xl items-center ${
+                submitDisabled ? buttonBgDisabled : buttonBgEnabled
+              }`}
               style={styles.submitButton}
             >
               <Text
-                className={`font-urbanist-bold text-base ${submitDisabled ? buttonTextDisabled : buttonTextEnabled}`}
+                className={`font-urbanist-bold text-base ${
+                  submitDisabled ? buttonTextDisabled : buttonTextEnabled
+                }`}
               >
                 {submitLabel}
               </Text>

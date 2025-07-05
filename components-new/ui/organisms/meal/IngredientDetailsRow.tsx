@@ -18,15 +18,28 @@ interface IngredientDetailsRowProps extends Props {
   onQuantityChange: (qty: number) => void;
 }
 
-const IngredientDetailsRow: React.FC<IngredientDetailsRowProps> = ({ ingredient, onClose, maxHeight = 430, quantity, onQuantityChange }) => {
+const IngredientDetailsRow: React.FC<IngredientDetailsRowProps> = ({
+  ingredient,
+  onClose,
+  maxHeight = 430,
+  quantity,
+  onQuantityChange,
+}) => {
   const theme = useTheme();
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(animation, { toValue: 1, duration: 300, useNativeDriver: false }).start();
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   }, [animation]);
 
-  const height = animation.interpolate({ inputRange: [0, 1], outputRange: [0, maxHeight] });
+  const height = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, maxHeight],
+  });
 
   return (
     <Animated.View style={{ height, overflow: 'hidden' }}>

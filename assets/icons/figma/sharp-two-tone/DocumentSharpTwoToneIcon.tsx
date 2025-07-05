@@ -9,17 +9,32 @@ interface IconProps extends SvgProps {
 /**
  * DocumentSharpTwoToneIcon component
  */
-export const DocumentSharpTwoToneIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 25 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M10.9381 13.3931H8.62207" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M14.6918 9.22904H8.62207" fill={none} stroke={color} strokeWidth="1.5" />
-    <Rect x="3.87695" y="0.4" width="16.7465" height="18.5" fill={none} stroke={color} />
+export const DocumentSharpTwoToneIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
+    <Path
+      d="M10.9381 13.3931H8.62207"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M14.6918 9.22904H8.62207"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Rect
+      x="3.87695"
+      y="0.4"
+      width="16.7465"
+      height="18.5"
+      fill={none}
+      stroke={color}
+    />
   </Svg>
 );
 

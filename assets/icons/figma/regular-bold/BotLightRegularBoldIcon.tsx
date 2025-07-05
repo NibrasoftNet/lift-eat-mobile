@@ -7,11 +7,9 @@ interface BotLightRegularBoldIconProps {
   color?: string;
 }
 
-export const BotLightRegularBoldIcon: React.FC<BotLightRegularBoldIconProps> = ({
-  width = 24,
-  height = 24,
-  color = '#212121',
-}) => {
+export const BotLightRegularBoldIcon: React.FC<
+  BotLightRegularBoldIconProps
+> = ({ width = 24, height = 24, color = '#212121' }) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
       <G clipPath="url(#clip0_28449_26012)">
@@ -22,7 +20,7 @@ export const BotLightRegularBoldIcon: React.FC<BotLightRegularBoldIconProps> = (
       </G>
       <Defs>
         <ClipPath id="clip0_28449_26012">
-          <Rect width="24" height="24" fill="white"/>
+          <Rect width="24" height="24" fill="white" />
         </ClipPath>
       </Defs>
     </Svg>

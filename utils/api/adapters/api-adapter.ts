@@ -1,4 +1,8 @@
-import { ApiVersion, ApiVersionImpl, ExternalApiInfo } from '../interfaces/version';
+import {
+  ApiVersion,
+  ApiVersionImpl,
+  ExternalApiInfo,
+} from '../interfaces/version';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 
@@ -15,10 +19,13 @@ export abstract class ExternalApiAdapter {
       name,
       baseUrl,
       currentVersion: version,
-      lastCheckedAt: new Date()
+      lastCheckedAt: new Date(),
     };
 
-    logger.info(LogCategory.INTEGRATION, `${name} API adapter initialized with version ${version.toString()}`);
+    logger.info(
+      LogCategory.INTEGRATION,
+      `${name} API adapter initialized with version ${version.toString()}`,
+    );
   }
 
   /**
@@ -27,10 +34,17 @@ export abstract class ExternalApiAdapter {
    * @param version Version de l'API
    * @param implementation Fonction d'implémentation
    */
-  protected registerVersionedMethod(methodName: string, version: ApiVersion, implementation: Function): void {
+  protected registerVersionedMethod(
+    methodName: string,
+    version: ApiVersion,
+    implementation: Function,
+  ): void {
     const key = `${methodName}_v${version.toString()}`;
     this.fallbackImplementations.set(key, implementation);
-    logger.debug(LogCategory.INTEGRATION, `Registered API method: ${methodName} at version ${version.toString()}`);
+    logger.debug(
+      LogCategory.INTEGRATION,
+      `Registered API method: ${methodName} at version ${version.toString()}`,
+    );
   }
 
   /**
@@ -41,17 +55,17 @@ export abstract class ExternalApiAdapter {
    * @returns Résultat de l'appel API
    */
   protected async adaptApiCall<T>(
-    methodName: string, 
-    requiredVersion: ApiVersion, 
-    params: any
+    methodName: string,
+    requiredVersion: ApiVersion,
+    params: any,
   ): Promise<T> {
     const startTime = performance.now();
     try {
       // Vérifier si la version requise est compatible avec la version actuelle
       if (requiredVersion.isCompatibleWith(this.apiInfo.currentVersion)) {
         logger.debug(
-          LogCategory.INTEGRATION, 
-          `Using current implementation for ${methodName} (required: ${requiredVersion.toString()}, current: ${this.apiInfo.currentVersion.toString()})`
+          LogCategory.INTEGRATION,
+          `Using current implementation for ${methodName} (required: ${requiredVersion.toString()}, current: ${this.apiInfo.currentVersion.toString()})`,
         );
         // Utiliser l'implémentation actuelle (this[methodName])
         // @ts-ignore - methodName est dynamique
@@ -60,8 +74,8 @@ export abstract class ExternalApiAdapter {
 
       // Chercher une implémentation compatible dans les fallbacks
       const compatibleKey = Array.from(this.fallbackImplementations.keys())
-        .filter(key => key.startsWith(`${methodName}_v`))
-        .find(key => {
+        .filter((key) => key.startsWith(`${methodName}_v`))
+        .find((key) => {
           const keyVersion = key.split('_v')[1];
           const [major, minor, patch] = keyVersion.split('.').map(Number);
           const keyApiVersion = new ApiVersionImpl(major, minor, patch);
@@ -70,8 +84,8 @@ export abstract class ExternalApiAdapter {
 
       if (compatibleKey) {
         logger.info(
-          LogCategory.INTEGRATION, 
-          `Using fallback implementation for ${methodName} (required: ${requiredVersion.toString()})`
+          LogCategory.INTEGRATION,
+          `Using fallback implementation for ${methodName} (required: ${requiredVersion.toString()})`,
         );
         const implementation = this.fallbackImplementations.get(compatibleKey);
         if (implementation) {
@@ -80,19 +94,21 @@ export abstract class ExternalApiAdapter {
       }
 
       throw new Error(
-        `No compatible implementation found for ${methodName} at version ${requiredVersion.toString()}`
+        `No compatible implementation found for ${methodName} at version ${requiredVersion.toString()}`,
       );
     } catch (error) {
       logger.error(
-        LogCategory.INTEGRATION, 
-        `Error in API call ${methodName}: ${error instanceof Error ? error.message : String(error)}`
+        LogCategory.INTEGRATION,
+        `Error in API call ${methodName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
       throw error;
     } finally {
       const accessTime = performance.now() - startTime;
       logger.debug(
-        LogCategory.INTEGRATION, 
-        `API access time for ${methodName}: ${accessTime.toFixed(2)}ms`
+        LogCategory.INTEGRATION,
+        `API access time for ${methodName}: ${accessTime.toFixed(2)}ms`,
       );
     }
   }
@@ -107,8 +123,10 @@ export abstract class ExternalApiAdapter {
     this.apiInfo.lastCheckedAt = new Date();
 
     logger.info(
-      LogCategory.INTEGRATION, 
-      `Updated ${this.apiInfo.name} API version from ${oldVersion.toString()} to ${newVersion.toString()}`
+      LogCategory.INTEGRATION,
+      `Updated ${
+        this.apiInfo.name
+      } API version from ${oldVersion.toString()} to ${newVersion.toString()}`,
     );
   }
 

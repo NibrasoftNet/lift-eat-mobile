@@ -9,15 +9,18 @@ interface IconProps extends SvgProps {
 /**
  * ArrowRight2RegularTwotoneIcon component
  */
-export const ArrowRight2RegularTwotoneIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M8.5 5L15.5 12L8.5 19" fill={none} stroke={color} strokeWidth="1.5" />
+export const ArrowRight2RegularTwotoneIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M8.5 5L15.5 12L8.5 19"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </Svg>
 );
 

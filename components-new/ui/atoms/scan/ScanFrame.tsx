@@ -15,7 +15,10 @@ interface ScanFrameProps {
   borderColor?: string;
 }
 
-const ScanFrame: React.FC<ScanFrameProps> = ({ detected = false, borderColor = '#FFFFFF' }) => {
+const ScanFrame: React.FC<ScanFrameProps> = ({
+  detected = false,
+  borderColor = '#FFFFFF',
+}) => {
   const theme = useTheme();
   const scanAnim = useRef(new Animated.Value(0)).current;
 
@@ -44,11 +47,11 @@ const ScanFrame: React.FC<ScanFrameProps> = ({ detected = false, borderColor = '
   }, [detected]);
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
         styles.frame,
         { borderColor },
-        detected ? styles.detectedFrame : styles.defaultFrame
+        detected ? styles.detectedFrame : styles.defaultFrame,
       ]}
     >
       {/* Animated scanning line */}

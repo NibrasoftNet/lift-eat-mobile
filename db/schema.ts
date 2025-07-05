@@ -115,7 +115,7 @@ export const ingredientSuggestions = sqliteTable('ingredient_suggestions', {
   suggested_protein: real('suggested_protein').default(0),
   suggestion_source: text('suggestion_source').default('ia'),
   status: text('status', {
-    enum: ['pending', 'accepted', 'rejected']
+    enum: ['pending', 'accepted', 'rejected'],
   }).default('pending'),
   // Foreign key to users table
   userId: integer('user_id')
@@ -147,7 +147,7 @@ export const mealIngredients = sqliteTable('meal_ingredients', {
 });
 
 // Meals table (independent meal)
-// NOTE: Toutes les valeurs nutritionnelles des repas sont standardisées à 100g 
+// NOTE: Toutes les valeurs nutritionnelles des repas sont standardisées à 100g
 // pour permettre des comparaisons cohérentes et des calculs proportionnels.
 export const meals = sqliteTable('meals', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
@@ -358,10 +358,10 @@ export const nutritionAdvice = sqliteTable('nutrition_advice', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   title: text('title').notNull(),
   content: text('content').notNull(),
-  type: text('type').notNull().default('GENERAL'),  // GENERAL, MEAL_SPECIFIC, PLAN_SPECIFIC
-  context: text('context'),  // Contexte associé (ex: macros ciblées, repas référencé)
-  liked: integer({ mode: 'boolean' }),  // Notation utilisateur (null si pas de feedback)
-  applied: integer({ mode: 'boolean' }).default(false),  // Si l'utilisateur a appliqué le conseil
+  type: text('type').notNull().default('GENERAL'), // GENERAL, MEAL_SPECIFIC, PLAN_SPECIFIC
+  context: text('context'), // Contexte associé (ex: macros ciblées, repas référencé)
+  liked: integer({ mode: 'boolean' }), // Notation utilisateur (null si pas de feedback)
+  applied: integer({ mode: 'boolean' }).default(false), // Si l'utilisateur a appliqué le conseil
   // Références (optionnelles)
   planId: integer('plan_id').references(() => plan.id),
   mealId: integer('meal_id').references(() => meals.id),
@@ -378,7 +378,9 @@ export const scanHistory = sqliteTable('scan_history', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   barcode: text('barcode').notNull(),
   name: text('name').notNull(),
-  scannedAt: text('scanned_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  scannedAt: text('scanned_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
   userId: integer('user_id')
     .references(() => users.id)
     .notNull(),
@@ -391,23 +393,33 @@ export type DailyMealProgressOrmProps = typeof dailyMealProgress.$inferSelect;
 export type NutritionAdviceOrmProps = typeof nutritionAdvice.$inferSelect;
 
 // Type pour les suggestions d'ingrédients
-export type IngredientSuggestionsOrmProps = typeof ingredientSuggestions.$inferSelect;
+export type IngredientSuggestionsOrmProps =
+  typeof ingredientSuggestions.$inferSelect;
 
 // Table des restrictions alimentaires des utilisateurs
-export const userDietaryRestrictions = sqliteTable('user_dietary_restrictions', {
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  restriction: text('restriction', { enum: DietaryRestrictionTypeArray }).notNull(),
-});
+export const userDietaryRestrictions = sqliteTable(
+  'user_dietary_restrictions',
+  {
+    createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    restriction: text('restriction', {
+      enum: DietaryRestrictionTypeArray,
+    }).notNull(),
+  },
+);
 
 // Table des allergies des utilisateurs
 export const userAllergies = sqliteTable('user_allergies', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   allergy: text('allergy', { enum: AllergyTypeArray }).notNull(),
 });
 
@@ -416,8 +428,12 @@ export const userNutritionGoals = sqliteTable('user_nutrition_goals', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  goal: text('goal', { enum: GoalTypeArray }).notNull().default(GoalEnum.MAINTAIN),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  goal: text('goal', { enum: GoalTypeArray })
+    .notNull()
+    .default(GoalEnum.MAINTAIN),
   targetWeight: real('target_weight'),
   dailyCalories: integer('daily_calories'),
   proteinPercentage: integer('protein_percentage'),
@@ -426,6 +442,7 @@ export const userNutritionGoals = sqliteTable('user_nutrition_goals', {
 });
 
 // Types pour les nouvelles tables
-export type UserDietaryRestrictionsOrmProps = typeof userDietaryRestrictions.$inferSelect;
+export type UserDietaryRestrictionsOrmProps =
+  typeof userDietaryRestrictions.$inferSelect;
 export type UserAllergiesOrmProps = typeof userAllergies.$inferSelect;
 export type UserNutritionGoalsOrmProps = typeof userNutritionGoals.$inferSelect;

@@ -14,7 +14,7 @@ interface ContinueWithDividerProps {
 }
 
 export const ContinueWithDivider: React.FC<ContinueWithDividerProps> = ({
-  text = 'or continue with'
+  text = 'or continue with',
 }) => {
   return (
     <View style={styles.container}>
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     lineHeight: 18 * 1.4, // line-height: 1.4em
     color: '#616161',
     textAlign: 'center',
-  }
+  },
 });
 
 export default ContinueWithDivider;

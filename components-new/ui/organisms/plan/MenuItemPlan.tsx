@@ -55,7 +55,11 @@ const MenuItemPlan: React.FC<MenuItemPlanProps> = ({
             activeOpacity={row.disabled ? 1 : 0.8}
             onPress={row.disabled ? undefined : row.onPress}
           >
-            <Icon as={row.icon} size="sm" color={row.disabled ? '#BDBDBD' : '#212121'} />
+            <Icon
+              as={row.icon}
+              size="sm"
+              color={row.disabled ? '#BDBDBD' : '#212121'}
+            />
             <Text style={[styles.label, row.disabled && styles.disabledLabel]}>
               {row.label}
             </Text>
@@ -109,7 +113,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   disabledLabel: {
-    color: '#BDBDBD'
+    color: '#BDBDBD',
   },
   divider: {
     width: '100%',

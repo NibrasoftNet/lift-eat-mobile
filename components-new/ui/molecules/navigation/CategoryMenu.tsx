@@ -5,10 +5,16 @@
  */
 
 import React from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
-
 
 export interface CategoryItem {
   /**
@@ -127,39 +133,39 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({
   // Fonction pour appliquer les styles conditionnellement
   const getItemStyles = (isActive?: boolean): StyleProp<ViewStyle> => {
     const baseStyles: Array<ViewStyle | undefined | false> = [styles.item];
-    
+
     if (itemStyle) {
       baseStyles.push(itemStyle as any);
     }
-    
+
     if (isActive) {
       baseStyles.push(styles.activeItem);
-      
+
       if (activeItemStyle) {
         baseStyles.push(activeItemStyle as any);
       }
     }
-    
+
     // Filtrer les valeurs undefined ou false
     return baseStyles.filter(Boolean) as StyleProp<ViewStyle>;
   };
-  
+
   // Fonction pour appliquer les styles de texte conditionnellement
   const getTextStyles = (isActive?: boolean): StyleProp<TextStyle> => {
     const baseStyles: Array<TextStyle | undefined | false> = [styles.text];
-    
+
     if (textStyle) {
       baseStyles.push(textStyle as any);
     }
-    
+
     if (isActive) {
       baseStyles.push(styles.activeText);
-      
+
       if (activeTextStyle) {
         baseStyles.push(activeTextStyle as any);
       }
     }
-    
+
     // Filtrer les valeurs undefined ou false
     return baseStyles.filter(Boolean) as StyleProp<TextStyle>;
   };
@@ -175,7 +181,7 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({
       >
         {categories.map((category) => {
           const isActive = category.isActive;
-          
+
           return (
             <TouchableOpacity
               key={category.id}
@@ -184,15 +190,10 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({
               activeOpacity={0.7}
             >
               {category.icon && (
-                <Box style={styles.iconContainer}>
-                  {category.icon}
-                </Box>
+                <Box style={styles.iconContainer}>{category.icon}</Box>
               )}
-              
-              <Text
-                urbanist="body"
-                style={getTextStyles(isActive) as any}
-              >
+
+              <Text urbanist="body" style={getTextStyles(isActive) as any}>
                 {category.label}
               </Text>
             </TouchableOpacity>

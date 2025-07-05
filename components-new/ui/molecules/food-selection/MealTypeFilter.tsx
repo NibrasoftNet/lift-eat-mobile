@@ -11,8 +11,6 @@ import { CoffeeRegularBoldIcon } from '../../../../assets/icons/figma/regular-bo
 import { CategoryRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/CategoryRegularBoldIcon';
 import { ChocolateDrinkRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/ChocolateDrinkRegularBoldIcon';
 
-
-
 // Icônes associées à chaque type de repas
 const MEAL_TYPE_ICONS: Record<MealTypeEnum, React.ComponentType<any>> = {
   [MealTypeEnum.BREAKFAST]: CoffeeRegularBoldIcon,
@@ -39,22 +37,22 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
 }) => {
   const theme = useAppTheme();
   const { t } = useTranslation();
-  
+
   // Liste des types de repas
   const mealTypes = Object.values(MealTypeEnum);
 
   return (
     <View style={styles.container}>
-      <Text 
-        variant="subtitle" 
-        color={theme.color('primary')} 
+      <Text
+        variant="subtitle"
+        color={theme.color('primary')}
         style={styles.title}
       >
         {t('meal.filters.mealType')}
       </Text>
-      
-      <ScrollView 
-        horizontal 
+
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -65,24 +63,28 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
             !selectedMealType && {
               backgroundColor: theme.color('primary'),
               borderColor: theme.color('primary'),
-            }
+            },
           ]}
           onPress={() => onMealTypeSelect(undefined)}
           activeOpacity={0.7}
         >
-          <Text 
-            variant="caption" 
-            color={!selectedMealType ? theme.color('background') : theme.color('blueGrey')}
+          <Text
+            variant="caption"
+            color={
+              !selectedMealType
+                ? theme.color('background')
+                : theme.color('blueGrey')
+            }
           >
             {t('common.all')}
           </Text>
         </TouchableOpacity>
-        
+
         {/* Filtres par type de repas */}
         {mealTypes.map((mealType) => {
           const IconComponent = MEAL_TYPE_ICONS[mealType];
           const isSelected = selectedMealType === mealType;
-          
+
           return (
             <TouchableOpacity
               key={mealType}
@@ -91,23 +93,31 @@ const MealTypeFilter: React.FC<MealTypeFilterProps> = ({
                 isSelected && {
                   backgroundColor: theme.color('primary'),
                   borderColor: theme.color('primary'),
-                }
+                },
               ]}
               onPress={() => onMealTypeSelect(mealType)}
               activeOpacity={0.7}
             >
               {/* Icône du type de repas */}
               <View style={styles.iconContainer}>
-                <IconComponent 
-                  width={16} 
-                  height={16} 
-                  color={isSelected ? theme.color('background') : theme.color('blueGrey')} 
+                <IconComponent
+                  width={16}
+                  height={16}
+                  color={
+                    isSelected
+                      ? theme.color('background')
+                      : theme.color('blueGrey')
+                  }
                 />
               </View>
-              
-              <Text 
-                variant="caption" 
-                color={isSelected ? theme.color('background') : theme.color('blueGrey')}
+
+              <Text
+                variant="caption"
+                color={
+                  isSelected
+                    ? theme.color('background')
+                    : theme.color('blueGrey')
+                }
               >
                 {t(`meal.form.mealType.${mealType.toLowerCase()}`)}
               </Text>

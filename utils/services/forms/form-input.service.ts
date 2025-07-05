@@ -3,9 +3,12 @@
  * Fournit des fonctionnalités communes pour tous les composants de formulaire
  */
 
-import { FormInputServiceInterface, ValidationResult } from "@/utils/interfaces/form-input.interface";
-import { logger } from "@/utils/services/common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
+import {
+  FormInputServiceInterface,
+  ValidationResult,
+} from '@/utils/interfaces/form-input.interface';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Implémentation du service générique pour les formulaires
@@ -18,59 +21,63 @@ class FormInputService implements FormInputServiceInterface {
    * @param options - Options de validation (min, max, requis)
    * @returns Le résultat de la validation
    */
-  validateNumber(value: any, fieldName: string, options: {
-    min?: number;
-    max?: number;
-    required?: boolean;
-  } = {}): ValidationResult {
+  validateNumber(
+    value: any,
+    fieldName: string,
+    options: {
+      min?: number;
+      max?: number;
+      required?: boolean;
+    } = {},
+  ): ValidationResult {
     try {
       // Par défaut, la validation est réussie
       const result: ValidationResult = { isValid: true };
-      
+
       // Valeur null ou undefined
       if (value === null || value === undefined || value === '') {
         if (options.required) {
           return {
             isValid: false,
-            errorMessage: `${fieldName} is required`
+            errorMessage: `${fieldName} is required`,
           };
         }
         return result; // Non requis, donc valide
       }
-      
+
       // Conversion en nombre
       const numValue = this.parseNumber(value);
-      
+
       // Vérification de la conversion
       if (isNaN(numValue)) {
         return {
           isValid: false,
-          errorMessage: `${fieldName} must be a valid number`
+          errorMessage: `${fieldName} must be a valid number`,
         };
       }
-      
+
       // Vérification de la valeur minimale
       if (options.min !== undefined && numValue < options.min) {
         return {
           isValid: false,
-          errorMessage: `${fieldName} must be at least ${options.min}`
+          errorMessage: `${fieldName} must be at least ${options.min}`,
         };
       }
-      
+
       // Vérification de la valeur maximale
       if (options.max !== undefined && numValue > options.max) {
         return {
           isValid: false,
-          errorMessage: `${fieldName} must be at most ${options.max}`
+          errorMessage: `${fieldName} must be at most ${options.max}`,
         };
       }
-      
+
       return result;
     } catch (error) {
       logger.error(LogCategory.FORM, `Error validating number: ${error}`);
       return {
         isValid: false,
-        errorMessage: `Invalid ${fieldName} value`
+        errorMessage: `Invalid ${fieldName} value`,
       };
     }
   }
@@ -87,18 +94,18 @@ class FormInputService implements FormInputServiceInterface {
       if (value === null || value === undefined || value === '') {
         return defaultValue;
       }
-      
+
       // Si c'est déjà un nombre, retourner directement
       if (typeof value === 'number') {
         return isNaN(value) ? defaultValue : value;
       }
-      
+
       // Si c'est une chaîne, convertir
       if (typeof value === 'string') {
         const parsed = parseFloat(value.replace(/,/g, '.'));
         return isNaN(parsed) ? defaultValue : parsed;
       }
-      
+
       // Autres cas, essayer la conversion directe
       const parsed = Number(value);
       return isNaN(parsed) ? defaultValue : parsed;
@@ -119,10 +126,11 @@ class FormInputService implements FormInputServiceInterface {
       if (value === null || value === undefined || value === '') {
         return '';
       }
-      
+
       // Conversion en nombre si nécessaire
-      const numValue = typeof value === 'number' ? value : this.parseNumber(value);
-      
+      const numValue =
+        typeof value === 'number' ? value : this.parseNumber(value);
+
       // Formater sans décimales si entier, avec sinon
       if (Number.isInteger(numValue)) {
         return numValue.toString();
@@ -130,7 +138,10 @@ class FormInputService implements FormInputServiceInterface {
         return numValue.toFixed(1);
       }
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error formatting display value: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error formatting display value: ${error}`,
+      );
       return String(value);
     }
   }
@@ -151,7 +162,7 @@ class FormInputService implements FormInputServiceInterface {
   createValidationError(errorMessage: string): ValidationResult {
     return {
       isValid: false,
-      errorMessage
+      errorMessage,
     };
   }
 }

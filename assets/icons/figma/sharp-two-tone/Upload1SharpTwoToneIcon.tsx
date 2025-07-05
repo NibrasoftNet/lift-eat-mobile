@@ -9,17 +9,30 @@ interface IconProps extends SvgProps {
 /**
  * Upload1SharpTwoToneIcon component
  */
-export const Upload1SharpTwoToneIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 25 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M12.2497 3.23101L12.2497 16.0088" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M16.875 10.9946L21.5 10.9946L21.5 21.5186L3 21.5186L3 10.9946L7.625 10.9946" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M8.9751 5.771L12.2501 2.48143L15.5261 5.771" fill={none} stroke={color} strokeWidth="1.5" />
+export const Upload1SharpTwoToneIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
+    <Path
+      d="M12.2497 3.23101L12.2497 16.0088"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M16.875 10.9946L21.5 10.9946L21.5 21.5186L3 21.5186L3 10.9946L7.625 10.9946"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M8.9751 5.771L12.2501 2.48143L15.5261 5.771"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </Svg>
 );
 

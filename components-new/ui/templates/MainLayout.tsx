@@ -17,12 +17,12 @@ interface MainLayoutProps {
 
 /**
  * MainLayout component
- * 
+ *
  * Template principal de l'application intégrant:
  * - HeaderBar avec titre et navigation back
  * - Zone de contenu sécurisée avec scroll
  * - BottomNavigation pour la navigation principale
- * 
+ *
  * Reproduit fidèlement le design Figma sans modification.
  */
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -44,7 +44,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         backgroundColor="transparent"
         translucent
       />
-      
+
       <View className={`flex-1 ${bgColor}`}>
         <HeaderBar
           title={title}
@@ -52,7 +52,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           onBackPress={onBackPress}
           darkMode={darkMode}
         />
-        
+
         <ScrollView
           className="flex-1"
           contentContainerStyle={styles.scrollContent}
@@ -60,7 +60,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         >
           {children}
         </ScrollView>
-        
+
         <BottomNavigation
           activeTab={activeTab}
           onTabChange={onTabChange}

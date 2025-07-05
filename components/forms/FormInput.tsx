@@ -1,5 +1,5 @@
-import React from "react";
-import { Control, Controller } from "react-hook-form";
+import React from 'react';
+import { Control, Controller } from 'react-hook-form';
 import {
   FormControl,
   FormControlLabel,
@@ -10,7 +10,7 @@ import {
   Input,
   InputField,
   AlertCircleIcon,
-} from "@gluestack-ui/themed";
+} from '@gluestack-ui/themed';
 
 interface FormInputProps {
   control: Control<any>;
@@ -18,7 +18,7 @@ interface FormInputProps {
   label: string;
   placeholder?: string;
   error?: string;
-  type?: "text" | "password";
+  type?: 'text' | 'password';
 }
 
 export function FormInput({
@@ -27,7 +27,7 @@ export function FormInput({
   label,
   placeholder,
   error,
-  type = "text",
+  type = 'text',
 }: FormInputProps) {
   return (
     <FormControl isInvalid={!!error}>

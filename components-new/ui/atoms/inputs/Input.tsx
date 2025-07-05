@@ -99,17 +99,17 @@ const Input = forwardRef<TextInput, InputProps>(
       // Autres props
       ...rest
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
     const theme = useAppTheme();
-    
+
     // Déterminer les styles selon la taille
     let paddingHorizontal;
     let paddingVertical;
     let fontSize;
     let height;
-    
+
     switch (size) {
       case 'sm':
         paddingHorizontal = theme.space('md');
@@ -130,13 +130,13 @@ const Input = forwardRef<TextInput, InputProps>(
         fontSize = 15;
         height = 48;
     }
-    
+
     // Déterminer les couleurs et styles selon la variante
     let backgroundColor;
     let borderColor;
     let borderWidth;
     let borderBottomWidth;
-    
+
     switch (variant) {
       case 'filled':
         backgroundColor = theme.color('backgroundGrey');
@@ -163,35 +163,39 @@ const Input = forwardRef<TextInput, InputProps>(
         borderWidth = 1;
         borderBottomWidth = 1;
     }
-    
+
     // Modifier les styles si erreur ou désactivé
     if (error) {
       borderColor = theme.color('error');
     }
-    
+
     if (isDisabled) {
       backgroundColor = theme.color('backgroundGrey');
       borderColor = theme.color('blueGrey') + '80'; // Ajout d'opacité 50%
     }
-    
+
     // Apply custom border colour if provided (and no error state)
     if (!error && customBorderColor) {
       borderColor = customBorderColor;
     }
-    
+
     // Gérer l'affichage du bouton d'effacement
     const showClearButton = !!value && !!onClear;
-    
-    const getRadiusValue = (value: RadiiKeys | number | undefined): number | undefined => {
+
+    const getRadiusValue = (
+      value: RadiiKeys | number | undefined,
+    ): number | undefined => {
       if (value === undefined) return undefined;
       return typeof value === 'number' ? value : theme.radius(value);
     };
 
-    const getSpacingValue = (value: SpacingKeys | number | undefined): number | undefined => {
+    const getSpacingValue = (
+      value: SpacingKeys | number | undefined,
+    ): number | undefined => {
       if (value === undefined) return undefined;
       return typeof value === 'number' ? value : theme.space(value);
     };
-    
+
     // Override padding if specified in props
     const pxValue = px !== undefined ? getSpacingValue(px) : paddingHorizontal;
     const pyValue = py !== undefined ? getSpacingValue(py) : paddingVertical;
@@ -216,7 +220,7 @@ const Input = forwardRef<TextInput, InputProps>(
             {label}
           </Text>
         )}
-        
+
         {/* Container */}
         <View
           style={[
@@ -230,8 +234,8 @@ const Input = forwardRef<TextInput, InputProps>(
               opacity: isDisabled ? 0.6 : 1,
               height,
               paddingHorizontal: pxValue,
-              paddingVertical: pyValue
-            }
+              paddingVertical: pyValue,
+            },
           ]}
         >
           {/* Left Icon */}
@@ -240,7 +244,7 @@ const Input = forwardRef<TextInput, InputProps>(
               {leftIcon}
             </Box>
           )}
-          
+
           {/* TextInput */}
           <TextInput
             ref={ref}
@@ -257,22 +261,29 @@ const Input = forwardRef<TextInput, InputProps>(
                 paddingHorizontal: leftIcon || rightIcon ? 0 : pxValue,
                 paddingVertical: 0,
                 fontSize,
-                color: isDisabled ? theme.color('blueGrey') : theme.color('primary'),
-                flex: 1
-              }
+                color: isDisabled
+                  ? theme.color('blueGrey')
+                  : theme.color('primary'),
+                flex: 1,
+              },
             ]}
             {...rest}
           />
-          
+
           {/* Clear Button */}
           {showClearButton && (
             <TouchableOpacity onPress={onClear} style={styles.clearButton}>
-              <View style={[styles.clearIcon, { backgroundColor: theme.color('blueGrey') + '30' }]}>
+              <View
+                style={[
+                  styles.clearIcon,
+                  { backgroundColor: theme.color('blueGrey') + '30' },
+                ]}
+              >
                 <Text color={theme.color('primary')}>×</Text>
               </View>
             </TouchableOpacity>
           )}
-          
+
           {/* Right Icon */}
           {rightIcon && !showClearButton && (
             <Box ml={theme.space('xs')} mr={theme.space('sm')}>
@@ -280,7 +291,7 @@ const Input = forwardRef<TextInput, InputProps>(
             </Box>
           )}
         </View>
-        
+
         {/* Error Message */}
         {error && (
           <Text
@@ -293,7 +304,7 @@ const Input = forwardRef<TextInput, InputProps>(
         )}
       </Box>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

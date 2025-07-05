@@ -4,7 +4,14 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { CuisineTypeEnum } from '@/utils/enum/meal.enum';
 
@@ -43,33 +50,23 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
   cuisineTypes,
   selectedCuisineTypeId,
   onSelectCuisineType,
-  dark = false
+  dark = false,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs basées sur le design Figma
-  const backgroundColor = dark
-    ? '#121212'
-    : '#FFFFFF';
-  
-  const textColor = dark
-    ? '#FFFFFF'
-    : '#212121';
-    
-  const secondaryTextColor = dark
-    ? 'rgba(255, 255, 255, 0.7)'
-    : '#616161';
-    
-  const borderColor = dark
-    ? 'rgba(255, 255, 255, 0.1)'
-    : '#EEEEEE';
-    
-  const circleColor = dark
-    ? '#1E1E1E'
-    : '#FAFAFA';
-    
+  const backgroundColor = dark ? '#121212' : '#FFFFFF';
+
+  const textColor = dark ? '#FFFFFF' : '#212121';
+
+  const secondaryTextColor = dark ? 'rgba(255, 255, 255, 0.7)' : '#616161';
+
+  const borderColor = dark ? 'rgba(255, 255, 255, 0.1)' : '#EEEEEE';
+
+  const circleColor = dark ? '#1E1E1E' : '#FAFAFA';
+
   const primaryColor = theme.colors.primary;
-  
+
   // Mapping des images de drapeaux
   const flagImages: Record<CuisineOption['icon'], any> = {
     general: require('@/assets/images/flags/general.png'),
@@ -81,11 +78,20 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
   } as const;
 
   // Rendu du drapeau pour un type de cuisine
-  const renderCuisineTypeIcon = (iconType: CuisineOption['icon'], _isSelected: boolean) => {
+  const renderCuisineTypeIcon = (
+    iconType: CuisineOption['icon'],
+    _isSelected: boolean,
+  ) => {
     const src = flagImages[iconType] ?? flagImages.general;
-    return <Image source={src} style={{ width: 50, height: 50, borderRadius: 3 }} resizeMode="cover" />;
+    return (
+      <Image
+        source={src}
+        style={{ width: 50, height: 50, borderRadius: 3 }}
+        resizeMode="cover"
+      />
+    );
   };
-  
+
   // Traduction des types de cuisine en français
   const getCuisineTypeName = (cuisineType: CuisineTypeEnum): string => {
     switch (cuisineType) {
@@ -115,9 +121,11 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
         return 'Autre';
     }
   };
-  
+
   // Déterminer l'icône appropriée pour chaque type de cuisine
-  const getCuisineTypeIcon = (cuisineType: CuisineTypeEnum): CuisineOption['icon'] => {
+  const getCuisineTypeIcon = (
+    cuisineType: CuisineTypeEnum,
+  ): CuisineOption['icon'] => {
     switch (cuisineType) {
       case CuisineTypeEnum.GENERAL:
         return 'general';
@@ -139,43 +147,45 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
         return 'other';
     }
   };
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <Text style={[styles.title, { color: textColor }]}>
-        Type de cuisine
-      </Text>
-      
-      <ScrollView 
-        horizontal 
+      <Text style={[styles.title, { color: textColor }]}>Type de cuisine</Text>
+
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cuisineTypesScrollContent}
       >
         {cuisineTypes.map((cuisineType) => {
           const isSelected = cuisineType.id === selectedCuisineTypeId;
           const iconType = getCuisineTypeIcon(cuisineType.id);
-          
+
           return (
             <TouchableOpacity
               key={cuisineType.id}
               style={[
                 styles.cuisineTypeItem,
-                { borderColor: isSelected ? primaryColor : borderColor }
+                { borderColor: isSelected ? primaryColor : borderColor },
               ]}
               onPress={() => onSelectCuisineType(cuisineType.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconCircle, { backgroundColor: circleColor }]}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: circleColor }]}
+              >
                 {renderCuisineTypeIcon(iconType, isSelected)}
               </View>
-              
-              <Text 
+
+              <Text
                 style={[
-                  styles.cuisineTypeName, 
-                  { 
+                  styles.cuisineTypeName,
+                  {
                     color: textColor,
-                    fontFamily: isSelected ? 'Urbanist-SemiBold' : 'Urbanist-Regular'
-                  }
+                    fontFamily: isSelected
+                      ? 'Urbanist-SemiBold'
+                      : 'Urbanist-Regular',
+                  },
                 ]}
                 numberOfLines={1}
               >

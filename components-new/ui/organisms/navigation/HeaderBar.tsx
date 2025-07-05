@@ -15,7 +15,7 @@ interface HeaderBarProps {
 
 /**
  * HeaderBar component
- * 
+ *
  * Implémente la barre d'en-tête de l'application avec titre et boutons optionnels.
  * Design conforme à Figma - reproduit fidèlement les dimensions et styles.
  */
@@ -28,52 +28,37 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   darkMode = true,
 }) => {
   const insets = useSafeAreaInsets();
-  
-  const bgColor = darkMode 
-    ? 'bg-[rgba(24,26,32,0.85)]' 
-    : 'bg-white';
-  
+
+  const bgColor = darkMode ? 'bg-[rgba(24,26,32,0.85)]' : 'bg-white';
+
   const textColor = darkMode ? 'text-white' : 'text-gray-900';
   const iconColor = darkMode ? '#FFFFFF' : '#212121';
 
   return (
-    <View 
+    <View
       className={`w-full ${bgColor} backdrop-blur-xl`}
-      style={[
-        styles.container,
-        { paddingTop: Math.max(insets.top, 10) }
-      ]}
+      style={[styles.container, { paddingTop: Math.max(insets.top, 10) }]}
     >
       <View className="flex-row items-center justify-between px-4 py-3">
         <View className="flex-row items-center">
           {showBackButton && (
-            <Pressable 
-              onPress={onBackPress}
-              className="mr-4 p-1"
-            >
-              <ArrowLeftRegularBoldIcon 
-                width={24} 
-                height={24} 
-                color={iconColor} 
+            <Pressable onPress={onBackPress} className="mr-4 p-1">
+              <ArrowLeftRegularBoldIcon
+                width={24}
+                height={24}
+                color={iconColor}
               />
             </Pressable>
           )}
-          
+
           <Text className={`font-urbanist-bold text-xl ${textColor}`}>
             {title}
           </Text>
         </View>
-        
+
         {RightIcon && (
-          <Pressable 
-            onPress={onRightIconPress}
-            className="p-1"
-          >
-            <RightIcon 
-              width={24} 
-              height={24} 
-              color={iconColor} 
-            />
+          <Pressable onPress={onRightIconPress} className="p-1">
+            <RightIcon width={24} height={24} color={iconColor} />
           </Pressable>
         )}
       </View>

@@ -10,7 +10,11 @@ import { createIaLogger } from '@/utils/services/ia/loggingEnhancer';
 const logger = createIaLogger('UiStateHook');
 
 // Types pour les modals et états UI
-export type ModalName = 'mealType' | 'cuisineType' | 'ingredients' | 'missingIngredients';
+export type ModalName =
+  | 'mealType'
+  | 'cuisineType'
+  | 'ingredients'
+  | 'missingIngredients';
 
 // Interface pour l'état UI
 export interface UiState {
@@ -38,7 +42,10 @@ export interface UiStateActions {
   setSearchTerm: (term: string) => void;
   startSearching: () => void;
   stopSearching: () => void;
-  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  showToast: (
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning',
+  ) => void;
   hideToast: () => void;
 }
 
@@ -50,15 +57,15 @@ const initialUiState: UiState = {
     mealType: false,
     cuisineType: false,
     ingredients: false,
-    missingIngredients: false
+    missingIngredients: false,
   },
   searching: false,
   searchTerm: '',
   toast: {
     visible: false,
     message: '',
-    type: 'info'
-  }
+    type: 'info',
+  },
 };
 
 /**
@@ -70,7 +77,7 @@ export function useUiState(): [UiState, UiStateActions] {
 
   // Mettre à jour partiellement l'état
   const updateState = (newState: Partial<UiState>) => {
-    setState(prevState => ({ ...prevState, ...newState }));
+    setState((prevState) => ({ ...prevState, ...newState }));
   };
 
   // Actions pour manipuler l'état UI
@@ -79,12 +86,12 @@ export function useUiState(): [UiState, UiStateActions] {
       logger.debug('Démarrage du chargement', 'startLoading');
       updateState({ loading: true });
     },
-    
+
     stopLoading: () => {
       logger.debug('Fin du chargement', 'stopLoading');
       updateState({ loading: false });
     },
-    
+
     setError: (error: IaError | null) => {
       if (error) {
         logger.error(`Erreur définie: ${error.message}`, 'setError');
@@ -93,73 +100,76 @@ export function useUiState(): [UiState, UiStateActions] {
         updateState({ error: null });
       }
     },
-    
+
     clearError: () => {
       logger.debug('Erreur effacée', 'clearError');
       updateState({ error: null });
     },
-    
+
     showModal: (modalName: ModalName) => {
       logger.debug(`Affichage du modal: ${modalName}`, 'showModal');
       updateState({
         modals: {
           ...state.modals,
-          [modalName]: true
-        }
+          [modalName]: true,
+        },
       });
     },
-    
+
     hideModal: (modalName: ModalName) => {
       logger.debug(`Fermeture du modal: ${modalName}`, 'hideModal');
       updateState({
         modals: {
           ...state.modals,
-          [modalName]: false
-        }
+          [modalName]: false,
+        },
       });
     },
-    
+
     toggleModal: (modalName: ModalName) => {
       logger.debug(`Basculement du modal: ${modalName}`, 'toggleModal');
       updateState({
         modals: {
           ...state.modals,
-          [modalName]: !state.modals[modalName]
-        }
+          [modalName]: !state.modals[modalName],
+        },
       });
     },
-    
+
     setSearchTerm: (term: string) => {
       updateState({ searchTerm: term });
     },
-    
+
     startSearching: () => {
       updateState({ searching: true });
     },
-    
+
     stopSearching: () => {
       updateState({ searching: false });
     },
-    
-    showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+
+    showToast: (
+      message: string,
+      type: 'success' | 'error' | 'info' | 'warning',
+    ) => {
       logger.debug(`Affichage du toast: ${message} (${type})`, 'showToast');
       updateState({
         toast: {
           visible: true,
           message,
-          type
-        }
+          type,
+        },
       });
     },
-    
+
     hideToast: () => {
       updateState({
         toast: {
           ...state.toast,
-          visible: false
-        }
+          visible: false,
+        },
       });
-    }
+    },
   };
 
   return [state, actions];

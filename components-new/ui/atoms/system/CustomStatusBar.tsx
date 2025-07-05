@@ -7,10 +7,10 @@ interface CustomStatusBarProps extends StatusBarProps {
 
 /**
  * CustomStatusBar component
- * 
+ *
  * Composant qui gère l'apparence de la barre de statut en fonction du thème.
  * Transparence et style adaptatif en fonction du mode sombre/clair.
- * 
+ *
  * Reproduction fidèle des spécifications Figma sans modification personnelle.
  */
 const CustomStatusBar: React.FC<CustomStatusBarProps> = ({
@@ -18,13 +18,16 @@ const CustomStatusBar: React.FC<CustomStatusBarProps> = ({
   ...restProps
 }) => {
   const barStyle = darkMode ? 'light-content' : 'dark-content';
-  
+
   // Sur iOS, nous avons besoin d'une StatusBar translucide
-  const iosProps = Platform.OS === 'ios' ? {
-    translucent: true,
-    backgroundColor: 'transparent',
-  } : {};
-  
+  const iosProps =
+    Platform.OS === 'ios'
+      ? {
+          translucent: true,
+          backgroundColor: 'transparent',
+        }
+      : {};
+
   return (
     <StatusBar
       barStyle={barStyle}

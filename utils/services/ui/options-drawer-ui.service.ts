@@ -17,7 +17,7 @@ class OptionsDrawerUIService implements OptionsDrawerServiceInterface {
     } catch (error) {
       logger.error(LogCategory.UI, 'Error viewing details', {
         error: error instanceof Error ? error.message : String(error),
-        itemId
+        itemId,
       });
     }
   }
@@ -29,7 +29,7 @@ class OptionsDrawerUIService implements OptionsDrawerServiceInterface {
     } catch (error) {
       logger.error(LogCategory.UI, 'Error editing item', {
         error: error instanceof Error ? error.message : String(error),
-        itemId
+        itemId,
       });
     }
   }
@@ -41,7 +41,7 @@ class OptionsDrawerUIService implements OptionsDrawerServiceInterface {
     } catch (error) {
       logger.error(LogCategory.UI, 'Error deleting item', {
         error: error instanceof Error ? error.message : String(error),
-        itemId
+        itemId,
       });
     }
   }

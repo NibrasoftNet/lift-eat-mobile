@@ -1,5 +1,11 @@
 import * as React from 'react';
-import Svg, { Path, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface LemonEmojiProps {
   size?: number;
@@ -20,7 +26,7 @@ export const LemonEmoji: React.FC<LemonEmojiProps> = ({ size = 100 }) => {
           <Stop stopColor="#FFF176" />
           <Stop offset="1" stopColor="#FFC107" />
         </RadialGradient>
-        
+
         <LinearGradient
           id="paint1_linear_lemon_highlight"
           x1="35"
@@ -40,7 +46,7 @@ export const LemonEmoji: React.FC<LemonEmojiProps> = ({ size = 100 }) => {
         fill="url(#paint0_radial_lemon)"
         transform="rotate(45 50 50)"
       />
-      
+
       {/* Extrémités du citron */}
       <Path
         d="M20 50C20 50 25 40 30 35"
@@ -48,14 +54,14 @@ export const LemonEmoji: React.FC<LemonEmojiProps> = ({ size = 100 }) => {
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       <Path
         d="M80 50C80 50 75 60 70 65"
         stroke="#FFA000"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Reflet sur le citron */}
       <Path
         d="M35 35C35 35 40 40 45 42.5C50 45 55 45 60 42.5"
@@ -63,7 +69,7 @@ export const LemonEmoji: React.FC<LemonEmojiProps> = ({ size = 100 }) => {
         strokeWidth="10"
         strokeLinecap="round"
       />
-      
+
       {/* Texture du citron */}
       <Path
         d="M35 35L65 65"
@@ -71,21 +77,21 @@ export const LemonEmoji: React.FC<LemonEmojiProps> = ({ size = 100 }) => {
         strokeWidth="0.5"
         strokeLinecap="round"
       />
-      
+
       <Path
         d="M30 50H70"
         stroke="#FFD54F"
         strokeWidth="0.5"
         strokeLinecap="round"
       />
-      
+
       <Path
         d="M35 65L65 35"
         stroke="#FFD54F"
         strokeWidth="0.5"
         strokeLinecap="round"
       />
-      
+
       <Path
         d="M50 30V70"
         stroke="#FFD54F"

@@ -18,8 +18,9 @@ import { CloseSquareRegularBoldIcon } from '@/assets/icons/figma/regular-bold/Cl
 
 // Enums & Services
 import { CountryTypeEnum, CountryLabelMap } from '@/utils/enum/meal.enum';
-import OpenFoodFactsService, { ProductResult } from '@/utils/api/OpenFoodFactsService';
-
+import OpenFoodFactsService, {
+  ProductResult,
+} from '@/utils/api/OpenFoodFactsService';
 
 import OpenFoodSearchCard from '@/components-new/ui/organisms/meal/OpenFoodSearchCard';
 import Divider from '@/components-new/ui/atoms/layout/Divider';
@@ -32,13 +33,15 @@ const countryOptions = Object.values(CountryTypeEnum).map((value) => ({
 
 export default function MealSearchScreen() {
   const { t } = useTranslation();
-  
+
   const theme = useAppTheme();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
   const router = useRouter();
 
   const [query, setQuery] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState<CountryTypeEnum>(CountryTypeEnum.FRANCE);
+  const [selectedCountry, setSelectedCountry] = useState<CountryTypeEnum>(
+    CountryTypeEnum.FRANCE,
+  );
 
   const {
     data: results,
@@ -65,39 +68,55 @@ export default function MealSearchScreen() {
   return (
     <Box flex={1} bg={theme.color('background')}>
       {/* Header */}
-      <TopBar 
+      <TopBar
         title={t('meal.search.title')}
-        leftIcon={<CloseSquareRegularBoldIcon size={24} color={theme.color('successLighter')} />}
+        leftIcon={
+          <CloseSquareRegularBoldIcon
+            size={24}
+            color={theme.color('successLighter')}
+          />
+        }
         onLeftIconPress={() => router.back()}
         containerStyle={{ flex: 0, backgroundColor: theme.color('background') }}
-        titleStyle={{ textAlign: 'center', flex: 6, marginLeft: 14, fontSize: 22, fontWeight: '600' }}
+        titleStyle={{
+          textAlign: 'center',
+          flex: 6,
+          marginLeft: 14,
+          fontSize: 22,
+          fontWeight: '600',
+        }}
         showStatusBar={false}
-        
       />
 
       {/* Body */}
       <Box px={theme.space('lg')} py={theme.space('md')}>
-
-          {/* Country selector */}
-          <Box mb={theme.space('md')}>
+        {/* Country selector */}
+        <Box mb={theme.space('md')}>
           <Dropdown
             placeholder={t('meal.search.selectCountry')}
             items={countryOptions}
             selectedValue={selectedCountry}
-           onSelect={(item) => setSelectedCountry(item.value as CountryTypeEnum)}
-        />
+            onSelect={(item) =>
+              setSelectedCountry(item.value as CountryTypeEnum)
+            }
+          />
         </Box>
 
         {/* Search bar + button row */}
         <Box row alignItems="center" mb={theme.space('md')}>
           <Box flex={1} mr={theme.space('sm')}>
             <Input
-          placeholder={t('meal.search.placeholder')}
-          leftIcon={<SearchRegularBoldIcon size={18} color={theme.color('blueGrey')} />}
-          value={query}
-          onChangeText={setQuery}
-          onSubmitEditing={handleSearch}
-        />
+              placeholder={t('meal.search.placeholder')}
+              leftIcon={
+                <SearchRegularBoldIcon
+                  size={18}
+                  color={theme.color('blueGrey')}
+                />
+              }
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={handleSearch}
+            />
           </Box>
           <Pressable
             style={({ pressed }) => [
@@ -109,9 +128,14 @@ export default function MealSearchScreen() {
           >
             <Box row alignItems="center" style={styles.searchbouton}>
               <SearchRegularBoldIcon size={16} color="#fff" />
-              <Text color="#fff" style={{ marginLeft: theme.space('xs') }}>{t('meal.search.button')}</Text>
+              <Text color="#fff" style={{ marginLeft: theme.space('xs') }}>
+                {t('meal.search.button')}
+              </Text>
               {(isLoading || isFetching) && (
-                <ActivityIndicator color="#fff" style={{ marginLeft: theme.space('sm') }} />
+                <ActivityIndicator
+                  color="#fff"
+                  style={{ marginLeft: theme.space('sm') }}
+                />
               )}
             </Box>
           </Pressable>
@@ -120,17 +144,22 @@ export default function MealSearchScreen() {
 
       {/* Results */}
       <Box flex={1} px={theme.space('lg')}>
-        {results && results.length > 0 && results.some(r => (r.calories || 0) > 0) ? (
+        {results &&
+        results.length > 0 &&
+        results.some((r) => (r.calories || 0) > 0) ? (
           <FlashList
-            data={results.filter(item => (item.calories || 0) > 0)}
-
+            data={results.filter((item) => (item.calories || 0) > 0)}
             estimatedItemSize={120}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item, index }) => (
               <OpenFoodSearchCard
                 product={item}
                 index={index}
-                onPress={() => router.push(`/(root)/(tabs)/meals/scanner/product/${item.code}`)}
+                onPress={() =>
+                  router.push(
+                    `/(root)/(tabs)/meals/scanner/product/${item.code}`,
+                  )
+                }
               />
             )}
             ItemSeparatorComponent={() => <Divider my={theme.space('2xl')} />}
@@ -139,7 +168,9 @@ export default function MealSearchScreen() {
           !isLoading &&
           !isFetching && (
             <Box flex={1} alignItems="center" justifyContent="center">
-              <Text color={theme.color('blueGrey')}>{t('meal.search.noResults')}</Text>
+              <Text color={theme.color('blueGrey')}>
+                {t('meal.search.noResults')}
+              </Text>
             </Box>
           )
         )}
@@ -170,6 +201,5 @@ const createStyles = (theme: ThemeInterface) =>
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
       elevation: 2,
-    }
-
+    },
   });

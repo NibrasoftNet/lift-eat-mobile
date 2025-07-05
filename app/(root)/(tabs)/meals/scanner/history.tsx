@@ -43,7 +43,12 @@ const ScannerHistoryScreen: React.FC = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
-            onPress={() => router.push({ pathname: '/meals/scanner/product/[code]', params: { code: item.barcode } })}
+            onPress={() =>
+              router.push({
+                pathname: '/meals/scanner/product/[code]',
+                params: { code: item.barcode },
+              })
+            }
           >
             <Text style={styles.itemCode}>{item.barcode}</Text>
             <Text style={styles.itemName}>{item.name}</Text>
@@ -63,7 +68,11 @@ const createStyles = (theme: any) =>
     item: { padding: 16 },
     itemCode: { fontSize: 14, color: theme.colors.textSecondary },
     itemName: { fontSize: 16, fontWeight: '500', color: theme.colors.text },
-    separator: { height: 1, backgroundColor: theme.colors.border, marginHorizontal: 16 },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.border,
+      marginHorizontal: 16,
+    },
   });
 
 export default ScannerHistoryScreen;

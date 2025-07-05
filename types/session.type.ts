@@ -1,11 +1,10 @@
-
 export type SessionProps = {
-    token: string | null;
-    tokenExpire: number | null;
-    user: UserSessionProps | null;
-}
+  token: string | null;
+  tokenExpire: number | null;
+  user: UserSessionProps | null;
+};
 
 export type UserSessionProps = {
-    id: number;
-    email: string;
-}
+  id: number;
+  email: string;
+};

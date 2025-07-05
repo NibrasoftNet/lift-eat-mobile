@@ -9,18 +9,36 @@ interface IconProps extends SvgProps {
 /**
  * ChartRegularLightBorderIcon component
  */
-export const ChartRegularLightBorderIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M16.6285 13.8268V17.0618" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M7.37121 10.2017V17.0618" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M12.0382 6.91907V17.0618" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M16.6857 2H7.31429C4.04762 2 2 4.31208 2 7.58516V16.4148C2 19.6879 4.0381 22 7.31429 22H16.6857C19.9619 22 22 19.6879 22 16.4148V7.58516C22 4.31208 19.9619 2 16.6857 2Z" fill={none} stroke={color} strokeWidth="1.5" />
+export const ChartRegularLightBorderIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M16.6285 13.8268V17.0618"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M7.37121 10.2017V17.0618"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M12.0382 6.91907V17.0618"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M16.6857 2H7.31429C4.04762 2 2 4.31208 2 7.58516V16.4148C2 19.6879 4.0381 22 7.31429 22H16.6857C19.9619 22 22 19.6879 22 16.4148V7.58516C22 4.31208 19.9619 2 16.6857 2Z"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </Svg>
 );
 

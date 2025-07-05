@@ -17,7 +17,7 @@ interface NameInputProps {
    * Fonction appelée lors du changement de nom
    */
   onNameChange: (name: string) => void;
-  
+
   /**
    * Texte placeholder du champ
    */
@@ -34,9 +34,8 @@ const NameInput: React.FC<NameInputProps> = ({
   dark = false,
   name,
   onNameChange,
-  placeholder = 'Andrew'
+  placeholder = 'Andrew',
 }) => {
-  
   // Styles based on dark mode
   const containerStyle = dark ? styles.containerDark : styles.containerLight;
   const textStyle = dark ? styles.textDark : styles.textLight;

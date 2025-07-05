@@ -34,7 +34,11 @@ const CACHE_KEY_PATTERNS: Record<DataType, string[]> = {
   [DataType.PROGRESS]: ['progress-', 'daily-progress-'],
   [DataType.PROGRESS_LIST]: ['progress-days', 'progressDays', 'progress-list'],
   [DataType.INGREDIENT]: ['ingredient-', 'ingredient:'],
-  [DataType.INGREDIENTS_LIST]: ['ingredients', 'ingredients-list', 'ingredient:list'],
+  [DataType.INGREDIENTS_LIST]: [
+    'ingredients',
+    'ingredients-list',
+    'ingredient:list',
+  ],
 };
 
 /**
@@ -46,13 +50,13 @@ interface InvalidateOptions {
    * Si fourni, seules les clés de cache contenant cet ID seront invalidées
    */
   id?: number | string;
-  
+
   /**
    * Opération exacte à invalider
    * Si fourni, seules les clés de cache correspondant exactement seront invalidées
    */
   exact?: string;
-  
+
   /**
    * Si true, invalide également les données qui dépendent du type spécifié
    * Par exemple, si on invalide un plan, on peut aussi vouloir invalider la liste des plans
@@ -64,7 +68,11 @@ interface InvalidateOptions {
  * Mappings des types de données liés pour l'invalidation en cascade
  */
 const RELATED_TYPES: Partial<Record<DataType, DataType[]>> = {
-  [DataType.PLAN]: [DataType.PLANS_LIST, DataType.DAILY_PLAN, DataType.PROGRESS_LIST],
+  [DataType.PLAN]: [
+    DataType.PLANS_LIST,
+    DataType.DAILY_PLAN,
+    DataType.PROGRESS_LIST,
+  ],
   [DataType.MEAL]: [DataType.MEALS_LIST],
   [DataType.USER]: [DataType.USER_PREFERENCES],
   [DataType.PROGRESS]: [DataType.PROGRESS_LIST],
@@ -73,7 +81,7 @@ const RELATED_TYPES: Partial<Record<DataType, DataType[]>> = {
 
 /**
  * Utilitaire pour invalider le cache React Query de manière standardisée
- * 
+ *
  * @param queryClient Client React Query
  * @param type Type de données à invalider
  * @param options Options d'invalidation
@@ -81,14 +89,17 @@ const RELATED_TYPES: Partial<Record<DataType, DataType[]>> = {
 export async function invalidateCache(
   queryClient: QueryClient,
   type: DataType,
-  options: InvalidateOptions = {}
+  options: InvalidateOptions = {},
 ): Promise<void> {
   const { id, exact, invalidateRelated = false } = options;
-  
-  logger.info(LogCategory.CACHE, `Invalidating cache for ${type}`, { 
-    type, id, exact, invalidateRelated 
+
+  logger.info(LogCategory.CACHE, `Invalidating cache for ${type}`, {
+    type,
+    id,
+    exact,
+    invalidateRelated,
   });
-  
+
   try {
     // Cas 1: Invalidation exacte d'une clé spécifique
     if (exact) {
@@ -96,54 +107,63 @@ export async function invalidateCache(
       logger.info(LogCategory.CACHE, `Invalidated exact cache key: ${exact}`);
       return;
     }
-    
+
     // Cas 2: Invalidation par type et ID
     if (id !== undefined) {
       const patterns = CACHE_KEY_PATTERNS[type];
-      
+
       // Pour chaque pattern, invalider les clés qui contiennent l'ID
       for (const pattern of patterns) {
         if (pattern.endsWith('-')) {
           // Pattern avec ID à la fin (ex: 'plan-123')
-          await queryClient.invalidateQueries({ 
-            queryKey: [`${pattern}${id}`] 
+          await queryClient.invalidateQueries({
+            queryKey: [`${pattern}${id}`],
           });
-          
+
           // Invalider aussi les clés où l'ID est un élément distinct du tableau
           // Ex: ['plan', 123]
           await queryClient.invalidateQueries({
             predicate: (query) => {
-              return query.queryKey.length > 1 && 
-                     query.queryKey[0] === pattern.replace('-', '') && 
-                     (query.queryKey[1] === id || query.queryKey[1]?.toString() === id.toString());
-            }
+              return (
+                query.queryKey.length > 1 &&
+                query.queryKey[0] === pattern.replace('-', '') &&
+                (query.queryKey[1] === id ||
+                  query.queryKey[1]?.toString() === id.toString())
+              );
+            },
           });
         } else {
-          // Invalider les queryKeys où l'ID est un élément distinct du tableau 
+          // Invalider les queryKeys où l'ID est un élément distinct du tableau
           // Ex: ['user', 123]
           await queryClient.invalidateQueries({
             predicate: (query) => {
-              return query.queryKey.length > 1 && 
-                     query.queryKey[0] === pattern && 
-                     (query.queryKey[1] === id || query.queryKey[1]?.toString() === id.toString());
-            }
+              return (
+                query.queryKey.length > 1 &&
+                query.queryKey[0] === pattern &&
+                (query.queryKey[1] === id ||
+                  query.queryKey[1]?.toString() === id.toString())
+              );
+            },
           });
         }
       }
-      
-      logger.info(LogCategory.CACHE, `Invalidated cache for ${type} with ID ${id}`);
-    } 
+
+      logger.info(
+        LogCategory.CACHE,
+        `Invalidated cache for ${type} with ID ${id}`,
+      );
+    }
     // Cas 3: Invalidation globale par type
     else {
       const patterns = CACHE_KEY_PATTERNS[type];
-      
+
       // Invalider toutes les clés qui commencent par l'un des patterns
       await queryClient.invalidateQueries({
         predicate: (query) => {
           // Si le premier élément est une chaîne et correspond à l'un des patterns
           if (typeof query.queryKey[0] === 'string') {
             const queryKeyString = query.queryKey[0];
-            return patterns.some(pattern => {
+            return patterns.some((pattern) => {
               if (pattern.endsWith('-')) {
                 return queryKeyString.startsWith(pattern);
               } else {
@@ -152,24 +172,24 @@ export async function invalidateCache(
             });
           }
           return false;
-        }
+        },
       });
-      
+
       logger.info(LogCategory.CACHE, `Invalidated all cache for ${type}`);
     }
-    
+
     // Invalider les types liés si demandé
     if (invalidateRelated && RELATED_TYPES[type]) {
       logger.info(LogCategory.CACHE, `Invalidating related types for ${type}`, {
-        relatedTypes: RELATED_TYPES[type]
+        relatedTypes: RELATED_TYPES[type],
       });
-      
+
       const relatedTypes = RELATED_TYPES[type] || [];
       for (const relatedType of relatedTypes) {
         // Appel récursif sans l'option invalidateRelated pour éviter les boucles infinies
-        await invalidateCache(queryClient, relatedType, { 
-          id, 
-          invalidateRelated: false 
+        await invalidateCache(queryClient, relatedType, {
+          id,
+          invalidateRelated: false,
         });
       }
     }
@@ -178,23 +198,23 @@ export async function invalidateCache(
       error: error instanceof Error ? error.message : String(error),
       type,
       id,
-      exact
+      exact,
     });
   }
 }
 
 /**
  * Utilitaire pour construire une clé de cache standardisée
- * 
+ *
  * @param type Type de données
  * @param id ID optionnel
  * @param subKey Sous-clé optionnelle (ex: 'details', 'list', etc.)
  * @returns Clé de cache formatée
  */
 export function buildCacheKey(
-  type: DataType, 
+  type: DataType,
   id?: number | string,
-  subKey?: string
+  subKey?: string,
 ): (string | number)[] {
   // Déterminer le préfixe de la clé en fonction du type
   let prefix: string;
@@ -225,19 +245,19 @@ export function buildCacheKey(
     default:
       prefix = type;
   }
-  
+
   // Construire le tableau de clé
   const key: (string | number)[] = [prefix];
-  
+
   // Ajouter l'ID s'il est fourni
   if (id !== undefined) {
     key.push(id);
   }
-  
+
   // Ajouter la sous-clé si elle est fournie
   if (subKey) {
     key.push(subKey);
   }
-  
+
   return key;
 }

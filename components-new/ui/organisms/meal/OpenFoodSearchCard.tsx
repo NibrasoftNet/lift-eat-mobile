@@ -21,26 +21,36 @@ const OpenFoodSearchCard: React.FC<Props> = ({ product, index, onPress }) => {
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable onPress={onPress} key={index} style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
+    <Pressable
+      onPress={onPress}
+      key={index}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    >
       {/* Left section: image + texts */}
       <Box style={styles.leftSection}>
         <Box style={styles.imageContainer}>
           {product.image ? (
             <Image
-              source={typeof product.image === 'string' ? { uri: product.image } : (product.image as any)}
+              source={
+                typeof product.image === 'string'
+                  ? { uri: product.image }
+                  : (product.image as any)
+              }
               style={styles.productImage}
             />
           ) : (
-            <Box style={styles.fallbackContainer} alignItems="center" justifyContent="center">
-              <Text style={styles.fallbackText}>{product.name.slice(0, 2).toUpperCase()}</Text>
+            <Box
+              style={styles.fallbackContainer}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text style={styles.fallbackText}>
+                {product.name.slice(0, 2).toUpperCase()}
+              </Text>
             </Box>
           )}
         </Box>
-        <Text
-          semibold
-          numberOfLines={1}
-          style={styles.productNameCentered}
-        >
+        <Text semibold numberOfLines={1} style={styles.productNameCentered}>
           {product.name}
         </Text>
       </Box>
@@ -71,11 +81,15 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
       paddingVertical: theme.space('sm'),
       paddingHorizontal: theme.space('md'),
       borderRadius: 0,
-
     },
     cardPressed: { opacity: 0.8 },
 
-    leftSection: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginRight: theme.space('md') },
+    leftSection: {
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: theme.space('md'),
+    },
 
     imageContainer: {
       width: 80,

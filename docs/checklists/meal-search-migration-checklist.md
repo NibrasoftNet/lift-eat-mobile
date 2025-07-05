@@ -27,21 +27,25 @@ Aucune logique métier à déplacer ; seules les dépendances d’UI changent.
 ## 3. Étapes de migration
 
 1. **Mettre en place le layout général (ordre visuel)** :
+
    - Ajouter un header `<TopBar>` avec titre & bouton "X" (`onClose` ⇒ `navigation.goBack`).
    - Remplacer le conteneur `VStack` racine par `<Box flex={1} bg={theme.color('background')}>`.
    - Convertir chaque `HStack`/`VStack` interne en `<Box row>` ou `<Box column>`.
    - Ordre final : **Header → Sélecteur de pays → Barre de recherche → Bouton Rechercher → Liste de résultats**.
 
 2. **Champ de recherche** :
+
    - Importer `Input` depuis `components-new/ui/atoms/inputs`.
    - Passer `leftIcon={<Search size={20} color={theme.color('textMuted')}/>`.
    - Utiliser prop `onSubmitEditing` conservée.
 
 3. **Sélecteur de pays** :
+
    - Utiliser `Dropdown` moléculaire (ou créer `CountryDropdown` si besoin).
    - Mapper les options déjà présentes (`CountryTypeEnum.*`).
 
 4. **Boutons** :
+
    - Remplacer appels `Button` + `ButtonText/Icon/Spinner` par :
      ```tsx
      <Button
@@ -55,21 +59,26 @@ Aucune logique métier à déplacer ; seules les dépendances d’UI changent.
    - Pour “Charger plus”, utiliser variante `outlined` + `rightIcon={<ChevronDown …/>}`.
 
 5. **Carte de résultat** :
+
    - Vérifier si `OpenFoodSearchCard` a déjà une version dans `components-new/ui/organisms/meal`.
    - Sinon, créer nouvelle carte selon Figma : image, nom, marques, grade nutritionnel.
 
 6. **Couleurs & Styles** :
+
    - Supprimer `StyleSheet` local → utiliser design tokens (`theme.space`, `theme.radius`).
    - Remplacer `Colors.light.text` par `theme.color('text')`.
 
 7. **Toast** :
+
    - Migrer vers `useAppToast` centralisé ; créer mapping toastType ↔ design tokens.
 
 8. **Nettoyage imports** :
+
    - Supprimer tous les `/ui/` anciens et pointer vers `components-new/ui`.
    - Vérifier qu’aucune dépendance Gluestack (`@/gluestack/*`) ne reste.
 
 9. **Tests manuels** :
+
    - i18n (EN/FR) fonctionne toujours.
    - Recherche, pagination et changement de pays OK.
    - Dark / light mode supporté.

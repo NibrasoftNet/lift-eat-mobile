@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import { Box } from '../../atoms/base';
 
 interface HeightSelectorProps {
@@ -8,17 +14,17 @@ interface HeightSelectorProps {
    * Correspond au variant "Dark" dans Figma
    */
   dark?: boolean;
-  
+
   /**
    * Hauteur initiale en cm
    */
   initialHeight?: number;
-  
+
   /**
    * Fonction appelée lors du changement de hauteur
    */
   onHeightChange?: (height: number, unit: 'cm' | 'ft') => void;
-  
+
   /**
    * Unité par défaut (cm ou ft)
    */
@@ -33,16 +39,16 @@ export const HeightSelector: React.FC<HeightSelectorProps> = ({
   dark = false,
   initialHeight = 170,
   initialUnit = 'cm',
-  onHeightChange
+  onHeightChange,
 }) => {
   // État pour la hauteur et l'unité
   const [height, setHeight] = useState(initialHeight);
   const [unit, setUnit] = useState<'cm' | 'ft'>(initialUnit);
-  
+
   // Constantes pour les hauteurs
-  const minHeight = 70;  // cm
+  const minHeight = 70; // cm
   const maxHeight = 220; // cm
-  
+
   // Valeurs prédéfinies pour sélection rapide
   const heightOptions = [
     { cm: 155, display: '155 cm' },
@@ -56,13 +62,13 @@ export const HeightSelector: React.FC<HeightSelectorProps> = ({
     { cm: 195, display: '195 cm' },
     { cm: 200, display: '200 cm' },
   ];
-  
+
   // Convertir cm en ft et vice versa
   const cmToFt = (cm: number): number => {
     const inches = cm / 2.54;
     return parseFloat((inches / 12).toFixed(1));
   };
-  
+
   // Obtenir la hauteur affichée selon l'unité
   const getDisplayHeight = (): string => {
     if (unit === 'cm') {
@@ -71,44 +77,44 @@ export const HeightSelector: React.FC<HeightSelectorProps> = ({
       return `${cmToFt(height).toFixed(1)}`;
     }
   };
-  
+
   // Changer l'unité
   const toggleUnit = (newUnit: 'cm' | 'ft') => {
     if (unit !== newUnit) {
       setUnit(newUnit);
-      
+
       if (onHeightChange) {
         onHeightChange(height, newUnit);
       }
     }
   };
-  
+
   // Changer la hauteur
   const changeHeight = (delta: number) => {
     const newHeight = Math.min(maxHeight, Math.max(minHeight, height + delta));
     setHeight(newHeight);
-    
+
     if (onHeightChange) {
       onHeightChange(newHeight, unit);
     }
   };
-  
+
   // Sélectionner une hauteur spécifique
   const selectHeight = (h: number) => {
     setHeight(h);
-    
+
     if (onHeightChange) {
       onHeightChange(h, unit);
     }
   };
-  
+
   // Couleurs selon le thème
   const backgroundColor = dark ? '#1F222A' : '#FAFAFA';
   const textColors = {
     primary: dark ? '#FFFFFF' : '#212121',
     unit: dark ? '#FFFFFF' : '#212121',
   };
-  
+
   return (
     <Box style={[styles.container, { backgroundColor }]}>
       {/* Sélecteur d'unité */}
@@ -150,16 +156,19 @@ export const HeightSelector: React.FC<HeightSelectorProps> = ({
           </Text>
         </Pressable>
       </View>
-      
+
       {/* Affichage de la valeur et boutons +/- */}
       <View style={styles.valueSection}>
-        <TouchableOpacity 
-          style={[styles.controlButton, { backgroundColor: dark ? '#35383F' : '#E0E0E0' }]} 
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            { backgroundColor: dark ? '#35383F' : '#E0E0E0' },
+          ]}
           onPress={() => changeHeight(-1)}
         >
           <Text style={styles.controlButtonText}>-</Text>
         </TouchableOpacity>
-        
+
         <View style={styles.valueDisplay}>
           <Text style={[styles.value, { color: textColors.primary }]}>
             {getDisplayHeight()}
@@ -168,34 +177,41 @@ export const HeightSelector: React.FC<HeightSelectorProps> = ({
             {unit}
           </Text>
         </View>
-        
-        <TouchableOpacity 
-          style={[styles.controlButton, { backgroundColor: dark ? '#35383F' : '#E0E0E0' }]} 
+
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            { backgroundColor: dark ? '#35383F' : '#E0E0E0' },
+          ]}
           onPress={() => changeHeight(1)}
         >
           <Text style={styles.controlButtonText}>+</Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Options de hauteur prédéfinies */}
       <View style={styles.quickOptions}>
         {heightOptions.map((option) => (
-          <TouchableOpacity 
-            key={option.cm} 
+          <TouchableOpacity
+            key={option.cm}
             style={[
               styles.heightOption,
-              height === option.cm && styles.selectedHeight, 
-              { borderColor: dark ? '#35383F' : '#E0E0E0' }
+              height === option.cm && styles.selectedHeight,
+              { borderColor: dark ? '#35383F' : '#E0E0E0' },
             ]}
             onPress={() => selectHeight(option.cm)}
           >
-            <Text 
+            <Text
               style={[
-                styles.heightOptionText, 
-                { color: height === option.cm ? '#A1CE50' : textColors.primary }
+                styles.heightOptionText,
+                {
+                  color: height === option.cm ? '#A1CE50' : textColors.primary,
+                },
               ]}
             >
-              {unit === 'cm' ? `${option.cm}` : `${cmToFt(option.cm).toFixed(1)}`}
+              {unit === 'cm'
+                ? `${option.cm}`
+                : `${cmToFt(option.cm).toFixed(1)}`}
             </Text>
           </TouchableOpacity>
         ))}

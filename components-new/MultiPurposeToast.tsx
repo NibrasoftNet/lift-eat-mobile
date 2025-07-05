@@ -32,35 +32,40 @@ const MultiPurposeToast: React.FC<MultiPurposeToastProps> = ({
     }
   }, [color, theme]);
 
-  const styles = useMemo(() =>
-    StyleSheet.create({
-      container: {
-        marginHorizontal: 16,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        backgroundColor,
-        shadowColor: '#000',
-        shadowOpacity: 0.12,
-        shadowRadius: 6,
-        elevation: 4,
-      },
-      title: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#FFFFFF',
-        marginBottom: description ? 4 : 0,
-      },
-      description: {
-        fontSize: 14,
-        color: '#FFFFFF',
-      },
-    }), [backgroundColor, description]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          marginHorizontal: 16,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          borderRadius: 8,
+          backgroundColor,
+          shadowColor: '#000',
+          shadowOpacity: 0.12,
+          shadowRadius: 6,
+          elevation: 4,
+        },
+        title: {
+          fontSize: 16,
+          fontWeight: '700',
+          color: '#FFFFFF',
+          marginBottom: description ? 4 : 0,
+        },
+        description: {
+          fontSize: 14,
+          color: '#FFFFFF',
+        },
+      }),
+    [backgroundColor, description],
+  );
 
   return (
     <View style={styles.container} testID={id}>
       <Text style={styles.title}>{title}</Text>
-      {description ? <Text style={styles.description}>{description}</Text> : null}
+      {description ? (
+        <Text style={styles.description}>{description}</Text>
+      ) : null}
     </View>
   );
 };

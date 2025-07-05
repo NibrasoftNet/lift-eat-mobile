@@ -1,5 +1,13 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, I18nManager, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  I18nManager,
+  Image,
+} from 'react-native';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { ThemeInterface } from '@/themeNew';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -15,52 +23,52 @@ interface MealListItemProps {
    * ID unique du repas
    */
   id: string;
-  
+
   /**
    * Nom du repas (ex: Petit-déjeuner, Déjeuner, etc.)
    */
   name: string;
-  
+
   /**
    * Nombre de calories du repas
    */
   calories: number;
-  
+
   /**
    * Poids du repas en grammes (optionnel)
    */
   weight?: number;
-  
+
   /**
    * Heure du repas (format: HH:MM)
    */
   time?: string;
-  
+
   /**
    * URL de l'image de l'aliment
    */
   imageUrl?: string;
-  
+
   /**
    * Mode d'affichage sombre
    */
   isDarkMode?: boolean;
-  
+
   /**
    * Fonction callback lorsqu'on clique sur l'élément
    */
   onPress?: (id: string) => void;
-  
+
   /**
    * Fonction callback lorsqu'on supprime l'élément
    */
   onDelete?: (id: string) => void;
-  
+
   /**
    * Indique si le bouton de suppression doit être affiché
    */
   showDeleteButton?: boolean;
-  
+
   /**
    * Si vrai, affiche une flèche sur la droite
    */
@@ -89,15 +97,18 @@ const MealListItem: React.FC<MealListItemProps> = ({
   const theme = useAppTheme();
   const swipeableRef = useRef<Swipeable>(null);
   const isDark = theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
-  
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
+
   // Gestionnaire d'événement du clic
   const handlePress = () => {
     if (onPress) {
       onPress(id);
     }
   };
-  
+
   // Gestionnaire d'événement de suppression
   const handleDelete = () => {
     if (onDelete) {
@@ -109,15 +120,18 @@ const MealListItem: React.FC<MealListItemProps> = ({
   };
 
   // Rendu du bouton de suppression (visible lors du swipe)
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
     if (!showDeleteButton) return null;
-    
+
     const trans = dragX.interpolate({
       inputRange: [-80, 0],
       outputRange: [0, 80],
       extrapolate: 'clamp',
     });
-    
+
     return (
       <Animated.View
         style={[
@@ -144,7 +158,10 @@ const MealListItem: React.FC<MealListItemProps> = ({
       rightThreshold={40}
     >
       <TouchableOpacity
-        style={[styles.container, { backgroundColor: styles.dynamicColors.background }]}
+        style={[
+          styles.container,
+          { backgroundColor: styles.dynamicColors.background },
+        ]}
         onPress={handlePress}
         activeOpacity={0.7}
       >
@@ -152,34 +169,45 @@ const MealListItem: React.FC<MealListItemProps> = ({
         <View style={styles.imageContainer}>
           {imageUrl ? (
             <Image
-              source={{ uri: imageUrl }}
+              source={resolveStaticImage(imageUrl, DEFAULT_MEAL_IMAGE)}
               style={styles.foodImage}
-              resizeMode='cover'
-              onError={() => console.error('Erreur lors du chargement de l\'image')}
+              resizeMode="cover"
+              onError={() =>
+                console.error("Erreur lors du chargement de l'image")
+              }
             />
           ) : (
             <Image
               source={DEFAULT_MEAL_IMAGE}
               style={styles.foodImage}
-              resizeMode='cover'
+              resizeMode="cover"
             />
           )}
         </View>
-        
+
         {/* Informations du repas */}
         <View style={styles.mealInfo}>
           <Text style={[styles.mealName, { color: styles.dynamicColors.text }]}>
             {name}
           </Text>
-          <Text style={[styles.mealDetails, { color: styles.dynamicColors.secondaryText }]}>
+          <Text
+            style={[
+              styles.mealDetails,
+              { color: styles.dynamicColors.secondaryText },
+            ]}
+          >
             {calories} kcal {weight ? `• ${weight} gram` : ''}
           </Text>
         </View>
-        
+
         {/* Flèche droite (si activée) */}
         {showRightArrow && (
           <View style={styles.arrowContainer}>
-            <ArrowRightCurvedBoldIcon width={20} height={20} color={styles.dynamicColors.secondaryText} />
+            <ArrowRightCurvedBoldIcon
+              width={20}
+              height={20}
+              color={styles.dynamicColors.secondaryText}
+            />
           </View>
         )}
       </TouchableOpacity>

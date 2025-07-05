@@ -60,8 +60,8 @@ Après une investigation détaillée, nous avons trouvé plusieurs éléments cl
 
 ## Solutions proposées (mises à jour)
 
-1. **Solution à court terme (sans modification de schéma)**: 
-   - [x] Modifier la méthode `getPlanNutritionGoals` pour récupérer spécifiquement les objectifs originaux *(déjà fait)*
+1. **Solution à court terme (sans modification de schéma)**:
+   - [x] Modifier la méthode `getPlanNutritionGoals` pour récupérer spécifiquement les objectifs originaux _(déjà fait)_
    - [ ] S'assurer que toutes les parties de l'interface utilisent la même source de données (utiliser partout `planPagesService.getPlanNutritionGoals`)
    - [ ] Uniformiser l'invalidation du cache en créant une fonction dédiée qui invalide toutes les requêtes associées à un plan
 

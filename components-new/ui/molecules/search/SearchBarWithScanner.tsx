@@ -22,7 +22,6 @@ interface SearchBarWithScannerProps {
   onChangeText?: (text: string) => void;
   /** Callback appelé lors du clic sur le bouton scanner */
   onScanPress?: () => void;
-
 }
 
 /**
@@ -35,37 +34,47 @@ const SearchBarWithScanner: React.FC<SearchBarWithScannerProps> = ({
   placeholder = undefined,
   onChangeText,
   onScanPress,
-
 }) => {
   const { t } = useTranslation();
   const theme = useAppTheme();
   const isDark = theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
 
   return (
     <View style={styles.container}>
       {/* Icône de recherche */}
       <View style={styles.searchIconContainer}>
-        <SearchRegularLightOutlineIcon width={18} height={18} color={isDark? '#CDCDCD':'#757575'} />
+        <SearchRegularLightOutlineIcon
+          width={18}
+          height={18}
+          color={isDark ? '#CDCDCD' : '#757575'}
+        />
       </View>
 
       {/* Champ de recherche */}
       <TextInput
-        style={[styles.input, { color: isDark? '#FFFFFF':'#212121' }]}
+        style={[styles.input, { color: isDark ? '#FFFFFF' : '#212121' }]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder || t('meal.search.placeholder')}
-        placeholderTextColor={isDark? '#A1A1A1':'#757575'}
+        placeholderTextColor={isDark ? '#A1A1A1' : '#757575'}
       />
 
       {/* Bouton scanner pour OpenFoodFacts */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.actionButton}
         onPress={onScanPress}
         activeOpacity={0.7}
         accessibilityLabel={t('meal.scanner.accessibility')}
       >
-        <ScanRegularBoldIcon width={22} height={22} color={isDark? '#CDCDCD':'#757575'} />
+        <ScanRegularBoldIcon
+          width={22}
+          height={22}
+          color={isDark ? '#CDCDCD' : '#757575'}
+        />
       </TouchableOpacity>
     </View>
   );

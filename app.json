@@ -42,7 +42,8 @@
       "expo-asset",
       "expo-secure-store",
       "expo-camera",
-      "expo-av"    ],
+      "expo-av"
+    ],
     "experiments": {
       "typedRoutes": true
     },

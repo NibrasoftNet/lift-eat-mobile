@@ -9,7 +9,15 @@ export default MealsScreen;
  */
 
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, RefreshControl, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  RefreshControl,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -37,7 +45,6 @@ import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { useTranslation } from 'react-i18next';
 
-
 // Types pour les données de repas
 type MealDisplay = {
   id: number;
@@ -60,14 +67,11 @@ interface FilterOption {
   isSelected: boolean;
 }
 
-
-
-
 /**
  * MealsScreen - Écran principal pour afficher et gérer les repas
  * Version améliorée conforme au design Figma
  */
- function MealsScreenLegacy() {
+function MealsScreenLegacy() {
   // Utiliser le thème de l'application pour les styles
   const theme = useAppTheme();
   const { t } = useTranslation();
@@ -79,41 +83,48 @@ interface FilterOption {
   const deleteConfirmDelete = t('meal.delete.delete');
 
   // Tabs pour la catégorisation des repas (dépendent de la langue)
-  const mealTabs = useMemo(() => [
-    { id: 'recent', label: t('meal.tabs.recent') },
-    { id: 'favorites', label: t('meal.tabs.favorites') },
-    { id: 'personal', label: t('meal.tabs.personal') },
-  ], [t]);
+  const mealTabs = useMemo(
+    () => [
+      { id: 'recent', label: t('meal.tabs.recent') },
+      { id: 'favorites', label: t('meal.tabs.favorites') },
+      { id: 'personal', label: t('meal.tabs.personal') },
+    ],
+    [t],
+  );
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('recent');
-  
+
   // États pour les filtres
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [selectedMealTypes, setSelectedMealTypes] = useState<MealTypeEnum[]>([]);
-  const [selectedCuisines, setSelectedCuisines] = useState<CuisineTypeEnum[]>([]);
+  const [selectedMealTypes, setSelectedMealTypes] = useState<MealTypeEnum[]>(
+    [],
+  );
+  const [selectedCuisines, setSelectedCuisines] = useState<CuisineTypeEnum[]>(
+    [],
+  );
   const filterPanelHeight = new Animated.Value(0);
 
   // Fonction pour convertir les images binaires en base64
   const convertBufferToBase64 = (buffer: Buffer | null) => {
     if (!buffer) return undefined;
-    
+
     try {
       // Vérifier si le buffer est déjà une chaîne complète avec un préfixe
       const bufferString = buffer.toString();
       if (bufferString.startsWith('data:image')) {
         return bufferString; // Retourner directement la chaîne si déjà formatée
       }
-      
+
       // Sinon, conversion normale du buffer en base64
       const base64String = buffer.toString('base64');
       return `data:image/jpeg;base64,${base64String}`;
     } catch (error) {
-      console.error('Erreur lors de la conversion de l\'image:', error);
+      console.error("Erreur lors de la conversion de l'image:", error);
       return undefined;
     }
   };
-  
+
   // Fonction pour convertir MealOrmProps en MealDisplay
   const convertToMealDisplay = (mealData: MealOrmProps): MealDisplay => {
     // Tenter de convertir l'image binaire en base64
@@ -123,10 +134,10 @@ interface FilterOption {
         imageBase64 = convertBufferToBase64(mealData.image);
       }
     } catch (error) {
-      console.error('Erreur lors de la conversion de l\'image:', error);
+      console.error("Erreur lors de la conversion de l'image:", error);
       // En cas d'erreur, l'image par défaut sera utilisée
     }
-    
+
     return {
       id: mealData.id,
       name: mealData.name,
@@ -137,33 +148,41 @@ interface FilterOption {
       imageBase64: imageBase64, // Peut être undefined si la conversion échoue
       type: mealData.type || MealTypeEnum.BREAKFAST,
       cuisine: mealData.cuisine || CuisineTypeEnum.GENERAL,
-      date: mealData.createdAt ? new Date(mealData.createdAt) : undefined
+      date: mealData.createdAt ? new Date(mealData.createdAt) : undefined,
     };
   };
-  
+
   // Fonction pour récupérer les repas avec filtrage
   const fetchMeals = useCallback(async () => {
-    logger.info(LogCategory.DATABASE, `Getting meals list via meal pages service`, {
-      cuisine: selectedCuisines,
-      mealType: selectedMealTypes,
-      search: searchQuery
-    });
-    
+    logger.info(
+      LogCategory.DATABASE,
+      `Getting meals list via meal pages service`,
+      {
+        cuisine: selectedCuisines,
+        mealType: selectedMealTypes,
+        search: searchQuery,
+      },
+    );
+
     try {
       // Utiliser le service de pages pour récupérer les repas avec filtrage
       const filters = {
         search: searchQuery,
-        mealType: selectedMealTypes.length > 0 ? selectedMealTypes[0] : undefined,
+        mealType:
+          selectedMealTypes.length > 0 ? selectedMealTypes[0] : undefined,
         cuisine: selectedCuisines.length > 0 ? selectedCuisines[0] : undefined,
         filter: activeTab as MealListFilter,
       };
       const result = await mealPagesService.getMealsList(filters);
-      
+
       if (!result.success || !result.data?.meals) {
-        logger.error(LogCategory.DATABASE, `Failed to get meals list: ${result.error || 'Unknown error'}`);
+        logger.error(
+          LogCategory.DATABASE,
+          `Failed to get meals list: ${result.error || 'Unknown error'}`,
+        );
         return [];
       }
-      
+
       // Convertir chaque repas au format d'affichage
       return result.data.meals.map(convertToMealDisplay);
     } catch (error) {
@@ -171,12 +190,13 @@ interface FilterOption {
       return [];
     }
   }, [searchQuery, selectedMealTypes, selectedCuisines, activeTab]);
-  
 
-  
   // Gestionnaire pour la navigation vers la page de détails d'un repas
   const handleMealPress = (mealId: string) => {
-    logger.info(LogCategory.USER, `Navigation vers les détails du repas: ${mealId}`);
+    logger.info(
+      LogCategory.USER,
+      `Navigation vers les détails du repas: ${mealId}`,
+    );
     // Navigation vers la page de détails du repas
     router.push(`/meals/my-meals/details/${mealId}`);
   };
@@ -186,12 +206,18 @@ interface FilterOption {
     data: meals = [],
     isLoading,
     isFetching,
-    refetch
+    refetch,
   } = useQuery<MealDisplay[]>({
-    queryKey: ['meals', activeTab, searchQuery, selectedMealTypes, selectedCuisines],
+    queryKey: [
+      'meals',
+      activeTab,
+      searchQuery,
+      selectedMealTypes,
+      selectedCuisines,
+    ],
     queryFn: fetchMeals,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,   // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Gestion des changements d'onglets
@@ -207,7 +233,10 @@ interface FilterOption {
 
   // Gestion de la création d'un nouveau repas
   const handleCreateMeal = () => {
-    logger.info(LogCategory.USER, 'handleCreateMeal invoked - navigating to create meal screen');
+    logger.info(
+      LogCategory.USER,
+      'handleCreateMeal invoked - navigating to create meal screen',
+    );
     // Navigation vers le nouvel écran de création de repas V2 (refactoré)
     router.push('/(root)/(tabs)/meals/my-meals/create-v2');
   };
@@ -235,21 +264,27 @@ interface FilterOption {
               // Actualiser la liste des repas
               refetch();
               // Journaliser le succès
-              logger.info(LogCategory.USER, `Repas supprimé avec succès: ${id}`);
+              logger.info(
+                LogCategory.USER,
+                `Repas supprimé avec succès: ${id}`,
+              );
             } catch (error) {
-              logger.error(LogCategory.DATABASE, `Error deleting meal: ${error}`);
+              logger.error(
+                LogCategory.DATABASE,
+                `Error deleting meal: ${error}`,
+              );
             }
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
   // Fonction pour gérer l'ouverture/fermeture du panneau de filtres
   const handleFilterPress = () => {
     setIsFilterPanelOpen(!isFilterPanelOpen);
-    
+
     // Animation pour ouvrir/fermer le panneau
     Animated.timing(filterPanelHeight, {
       toValue: isFilterPanelOpen ? 0 : 1,
@@ -260,9 +295,9 @@ interface FilterOption {
 
   // Fonction pour sélectionner/désélectionner un type de repas
   const toggleMealType = (type: MealTypeEnum) => {
-    setSelectedMealTypes(prev => {
+    setSelectedMealTypes((prev) => {
       if (prev.includes(type)) {
-        return prev.filter(t => t !== type);
+        return prev.filter((t) => t !== type);
       } else {
         return [...prev, type];
       }
@@ -271,9 +306,9 @@ interface FilterOption {
 
   // Fonction pour sélectionner/désélectionner un type de cuisine
   const toggleCuisine = (cuisine: CuisineTypeEnum) => {
-    setSelectedCuisines(prev => {
+    setSelectedCuisines((prev) => {
       if (prev.includes(cuisine)) {
-        return prev.filter(c => c !== cuisine);
+        return prev.filter((c) => c !== cuisine);
       } else {
         return [...prev, cuisine];
       }
@@ -287,7 +322,7 @@ interface FilterOption {
   };
 
   // Mise à jour des onglets pour refléter l'onglet actif
-  const updatedTabs = mealTabs.map(tab => ({
+  const updatedTabs = mealTabs.map((tab) => ({
     ...tab,
     isActive: tab.id === activeTab,
   }));
@@ -296,24 +331,24 @@ interface FilterOption {
     <View style={styles.container}>
       {/* Titre de l'écran */}
       <Text style={styles.screenTitle}>{t('meal.title')}</Text>
-      
+
       {/* Barre de recherche avec scanner */}
-      <SearchBarWithScanner 
+      <SearchBarWithScanner
         value={searchQuery}
         onChangeText={setSearchQuery}
         onScanPress={handleScanPress}
         placeholder={t('common.search')}
       />
-      
+
       {/* Rangée de boutons */}
       <View style={styles.buttonRow}>
         <FilterButton onPress={handleFilterPress} />
         <View style={styles.buttonSpacer} />
         <CreateMealButton onPress={handleCreateMeal} />
       </View>
-      
+
       {/* Panneau de filtres */}
-      <FilterPanel 
+      <FilterPanel
         isOpen={isFilterPanelOpen}
         selectedMealTypes={selectedMealTypes}
         selectedCuisines={selectedCuisines}
@@ -321,7 +356,7 @@ interface FilterOption {
         onCuisineToggle={toggleCuisine}
         onResetFilters={resetFilters}
       />
-      
+
       {/* Onglets segmentés */}
       <View style={styles.tabContainer}>
         <SegmentedTabButtons
@@ -330,17 +365,17 @@ interface FilterOption {
           onTabPress={handleTabChange}
         />
       </View>
-      
+
       {/* État de chargement des repas */}
       {isLoading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.successLighter} />
-          <Text variant="body" style={{marginTop: 16}}>
+          <Text variant="body" style={{ marginTop: 16 }}>
             {t('meal.loadingMeals')}
           </Text>
         </View>
       )}
-      
+
       {/* Liste des repas avec scrolling et fonctionalité de suppression */}
       <FlashList
         data={meals}
@@ -360,11 +395,14 @@ interface FilterOption {
               try {
                 router.navigate({
                   pathname: '/(root)/(tabs)/meals/my-meals/details/[id]',
-                  params: { id: item.id.toString() }
+                  params: { id: item.id.toString() },
                 });
               } catch (error) {
                 console.error('Navigation error:', error);
-                Alert.alert('Erreur', 'Impossible d\'accéder aux détails de ce repas.');
+                Alert.alert(
+                  'Erreur',
+                  "Impossible d'accéder aux détails de ce repas.",
+                );
               }
             }}
             onDelete={() => handleDeleteMeal(item.id)}
@@ -377,8 +415,8 @@ interface FilterOption {
         showsVerticalScrollIndicator={false}
         estimatedItemSize={100}
         refreshControl={
-          <RefreshControl 
-            refreshing={isFetching} 
+          <RefreshControl
+            refreshing={isFetching}
             onRefresh={refetch}
             colors={[theme.colors.successLighter]}
             tintColor={theme.colors.successLighter}
@@ -386,11 +424,14 @@ interface FilterOption {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text variant="body" style={{textAlign: 'center', marginBottom: 8}}>
+            <Text
+              variant="body"
+              style={{ textAlign: 'center', marginBottom: 8 }}
+            >
               {isLoading ? t('meal.loadingMeals') : t('meal.noMeals')}
             </Text>
             {!isLoading && (
-              <Text variant="caption" style={{textAlign: 'center'}}>
+              <Text variant="caption" style={{ textAlign: 'center' }}>
                 {t('meal.emptyHint')}
               </Text>
             )}
@@ -398,7 +439,7 @@ interface FilterOption {
         }
         scrollEnabled={true} // Activer explicitement le scrolling
       />
-      
+
       {/* Espace en bas pour le menu centralisé dans le layout */}
       <View style={styles.menuContainer} />
     </View>

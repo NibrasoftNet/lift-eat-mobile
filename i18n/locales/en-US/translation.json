@@ -112,10 +112,10 @@
       "title": "Scan a product",
       "error": "User not logged in.",
       "scanError": "Failed to scan the barcode. Please try again.",
-        "noNutrition": "No nutritional information available for this product.",
-        "accessibility": "Scan a barcode with OpenFoodFacts",
+      "noNutrition": "No nutritional information available for this product.",
+      "accessibility": "Scan a barcode with OpenFoodFacts",
       "scanning": "Scanning...",
-    "overlayInstruction": "Position the barcode inside the frame to scan",
+      "overlayInstruction": "Position the barcode inside the frame to scan",
       "history": {
         "title": "Scan History",
         "loadError": "Error loading scan history"
@@ -135,7 +135,7 @@
         "create": "Create Meal",
         "update": "Edit Meal"
       },
-            "add": "Add Ingredient",
+      "add": "Add Ingredient",
 
       "mealType": {
         "title": "Meal Type",
@@ -168,31 +168,31 @@
       "save": "Save Meal",
       "cancel": "Cancel",
       "nameLabel": "Name",
-        "namePlaceholder": "e.g. Salad, Omelette",
-        "descriptionLabel": "Preparation",
-        "descriptionPlaceholder": "e.g. Salad, Sandwich, etc.",
-        "selectType": "Select type",
-        "selectCuisine": "Select cuisine",
-        "addIngredients": "Add Ingredients",
-        "submit": {
-          "create": "Create meal",
-          "update": "Save changes"
+      "namePlaceholder": "e.g. Salad, Omelette",
+      "descriptionLabel": "Preparation",
+      "descriptionPlaceholder": "e.g. Salad, Sandwich, etc.",
+      "selectType": "Select type",
+      "selectCuisine": "Select cuisine",
+      "addIngredients": "Add Ingredients",
+      "submit": {
+        "create": "Create meal",
+        "update": "Save changes"
+      },
+      "validation": {
+        "name": {
+          "required": "Name is required",
+          "min": "Name must be at least 3 characters",
+          "max": "Name must be at most 50 characters"
         },
-        "validation": {
-          "name": {
-            "required": "Name is required",
-            "min": "Name must be at least 3 characters",
-            "max": "Name must be at most 50 characters"
-          },
-          "description": {
-            "required": "Description is required",
-            "min": "Description must be at least 3 characters"
-          },
-          "quantity": {
-            "min": "Quantity must be at least 1"
-          }
+        "description": {
+          "required": "Description is required",
+          "min": "Description must be at least 3 characters"
         },
-        "image": {
+        "quantity": {
+          "min": "Quantity must be at least 1"
+        }
+      },
+      "image": {
         "selectTitle": "Select image",
         "selectMessage": "Choose source",
         "gallery": "Gallery",

@@ -19,18 +19,25 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
   isDarkMode = false,
 }) => {
   const theme = useTheme();
-  
+
   // Texte pour l'affichage de la date
   const isToday = new Date().toDateString() === date.toDateString();
-  const formattedDate = isToday 
-    ? `Today, ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-    : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  
+  const formattedDate = isToday
+    ? `Today, ${date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      })}`
+    : date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
   // Couleurs exactes du design Figma
   const textColor = isDarkMode ? '#FFFFFF' : '#212121';
   const backIconColor = isDarkMode ? '#FFFFFF' : '#212121';
   const forwardIconColor = isDarkMode ? '#9E9E9E' : '#9E9E9E';
-  
+
   // Fonctions pour naviguer entre les dates
   const goToPreviousDay = () => {
     if (onDateChange) {
@@ -39,7 +46,7 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
       onDateChange(newDate);
     }
   };
-  
+
   const goToNextDay = () => {
     if (onDateChange) {
       const newDate = new Date(date);
@@ -51,20 +58,43 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={goToPreviousDay} style={styles.arrowButton}>
-        <ArrowLeft3CurvedBoldIcon width={24} height={24} color={backIconColor} />
+        <ArrowLeft3CurvedBoldIcon
+          width={24}
+          height={24}
+          color={backIconColor}
+        />
       </TouchableOpacity>
-      
+
       <View style={styles.dateContainer}>
-        <Text style={[styles.dateText, { color: textColor, fontFamily: theme.typography.urbanist.h3.fontFamily }]}>
+        <Text
+          style={[
+            styles.dateText,
+            {
+              color: textColor,
+              fontFamily: theme.typography.urbanist.h3.fontFamily,
+            },
+          ]}
+        >
           {formattedDate}
         </Text>
-        <TouchableOpacity onPress={onCalendarPress} style={styles.calendarButton}>
-          <CalendarCurvedBoldIcon width={20} height={20} color={backIconColor} />
+        <TouchableOpacity
+          onPress={onCalendarPress}
+          style={styles.calendarButton}
+        >
+          <CalendarCurvedBoldIcon
+            width={20}
+            height={20}
+            color={backIconColor}
+          />
         </TouchableOpacity>
       </View>
-      
+
       <TouchableOpacity onPress={goToNextDay} style={styles.arrowButton}>
-        <ArrowRight3CurvedBoldIcon width={24} height={24} color={forwardIconColor} />
+        <ArrowRight3CurvedBoldIcon
+          width={24}
+          height={24}
+          color={forwardIconColor}
+        />
       </TouchableOpacity>
     </View>
   );

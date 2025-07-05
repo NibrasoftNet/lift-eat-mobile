@@ -17,7 +17,6 @@ import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import MenuItemPlan from './MenuItemPlan';
 
-
 // Inline simple 3-dots icon (horizontal)
 const ThreeDotsIcon: React.FC<SvgProps> = (props) => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
@@ -26,7 +25,6 @@ const ThreeDotsIcon: React.FC<SvgProps> = (props) => (
     <Circle cx="20" cy="12" r="2" fill={props.color || '#000'} />
   </Svg>
 );
-
 
 import { PlanOrmProps } from '@/db/schema';
 
@@ -42,7 +40,11 @@ export interface PlanCardNewProps {
  * 2. Menu 3 points en overlay
  * 3. Infos + cercle macros + chips
  */
-const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress }) => {
+const PlanCardNew: React.FC<PlanCardNewProps> = ({
+  plan,
+  onPress,
+  onMenuPress,
+}) => {
   const theme = useTheme();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
@@ -84,7 +86,11 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title={`Cannot Delete Plan`}
-              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
+              description={
+                error instanceof Error
+                  ? error.message
+                  : 'An unexpected error occurred'
+              }
             />
           );
         },
@@ -136,27 +142,33 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
     deleteAsync()
       .then(() => setShowModal(false))
       .catch((error) => {
-      logger.error(LogCategory.DATABASE, `Error deleting plan: ${error.message}`);
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Erreur de suppression"
-              description={(error as Error).message}
-            />
-          );
-        },
+        logger.error(
+          LogCategory.DATABASE,
+          `Error deleting plan: ${error.message}`,
+        );
+        toast.show({
+          placement: 'top',
+          render: ({ id }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.ERROR}
+                title="Erreur de suppression"
+                description={(error as Error).message}
+              />
+            );
+          },
+        });
       });
-    });
   };
 
   const handleSetCurrentPlan = () => {
     setCurrentAsync().catch((error) => {
-      logger.error(LogCategory.DATABASE, `Error setting current plan: ${error.message}`);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error setting current plan: ${error.message}`,
+      );
       toast.show({
         placement: 'top',
         render: ({ id }) => {
@@ -175,9 +187,6 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
   };
 
   const handlePress = () => onPress?.(plan);
-
-
-
 
   return (
     <>
@@ -205,7 +214,10 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
             <Text variant="caption" style={styles.subLine}>
               {plan.initialWeight} {plan.unit} → {plan.targetWeight} {plan.unit}
             </Text>
-            <Text variant="caption" style={[styles.subLine, styles.durationText]}>
+            <Text
+              variant="caption"
+              style={[styles.subLine, styles.durationText]}
+            >
               {plan.durationWeeks} Semaines
             </Text>
           </View>
@@ -228,8 +240,6 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
         <View style={styles.borderCover} pointerEvents="none" />
       </TouchableOpacity>
 
-        
-
       {showActionMenu && (
         <MenuItemPlan
           disabledSelect={plan.current}
@@ -245,28 +255,33 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan, onPress, onMenuPress })
             setShowModal(true);
             setShowActionMenu(false);
           }}
-          style={{ position: 'absolute', right: theme.space('sm'), top: theme.space('sm') + 32, zIndex: 1000 }}
+          style={{
+            position: 'absolute',
+            right: theme.space('sm'),
+            top: theme.space('sm') + 32,
+            zIndex: 1000,
+          }}
         />
       )}
 
-    <PlanOptionsDrawer
-      visible={showOptionDrawer}
-      onClose={() => setShowOptionsDrawer(false)}
-      disableEdit={false}
-      disableDelete={false}
-      onDetail={() => router.push(`/plans/my-plans/details/${plan.id}`)}
-      onEdit={() => router.push(`/plans/my-plans/edit/${plan.id}`)}
-      onDelete={() => setShowModal(true)}
-    />
+      <PlanOptionsDrawer
+        visible={showOptionDrawer}
+        onClose={() => setShowOptionsDrawer(false)}
+        disableEdit={false}
+        disableDelete={false}
+        onDetail={() => router.push(`/plans/my-plans/details/${plan.id}`)}
+        onEdit={() => router.push(`/plans/my-plans/edit/${plan.id}`)}
+        onDelete={() => setShowModal(true)}
+      />
 
-    <DeleteConfirmationDrawer
-       open={showModal}
-       onConfirm={handlePlanDelete}
-       onCancel={() => setShowModal(false)}
-       title="Delete plan"
-       description="Are you sure you want to delete this plan? This action cannot be undone."
-       isLoading={isDeletePending}
-     />
+      <DeleteConfirmationDrawer
+        open={showModal}
+        onConfirm={handlePlanDelete}
+        onCancel={() => setShowModal(false)}
+        title="Delete plan"
+        description="Are you sure you want to delete this plan? This action cannot be undone."
+        isLoading={isDeletePending}
+      />
     </>
   );
 };
@@ -284,7 +299,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       shadowOffset: { width: 0, height: 4 },
       elevation: 2,
     },
-/* headerImage removed */
+    /* headerImage removed */
     headerImage: {
       width: '100%',
       height: 110,

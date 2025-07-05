@@ -3,9 +3,12 @@
  * Ces interfaces du00e9finissent les structures utilisu00e9es par les services de formulaire
  */
 
-import { GoalEnum } from "@/utils/enum/user-details.enum";
-import { GenderEnum, PhysicalActivityEnum } from "@/utils/enum/user-gender-activity.enum";
-import { SharedValue } from "react-native-reanimated";
+import { GoalEnum } from '@/utils/enum/user-details.enum';
+import {
+  GenderEnum,
+  PhysicalActivityEnum,
+} from '@/utils/enum/user-gender-activity.enum';
+import { SharedValue } from 'react-native-reanimated';
 
 /**
  * Interface pour les ru00e9sultats de validation
@@ -26,11 +29,15 @@ export interface FormInputServiceInterface {
    * @param options - Options de validation (min, max, requis)
    * @returns Le ru00e9sultat de la validation
    */
-  validateNumber(value: any, fieldName: string, options?: {
-    min?: number;
-    max?: number;
-    required?: boolean;
-  }): ValidationResult;
+  validateNumber(
+    value: any,
+    fieldName: string,
+    options?: {
+      min?: number;
+      max?: number;
+      required?: boolean;
+    },
+  ): ValidationResult;
 
   /**
    * Convertit une valeur en nombre
@@ -61,7 +68,7 @@ export interface GenderFormServiceInterface {
   initializeGenderAnimations(
     defaultGender: GenderEnum,
     maleBarWidth: SharedValue<number>,
-    femaleBarWidth: SharedValue<number>
+    femaleBarWidth: SharedValue<number>,
   ): void;
 
   /**
@@ -75,7 +82,7 @@ export interface GenderFormServiceInterface {
     selectedGender: GenderEnum,
     maleBarWidth: SharedValue<number>,
     femaleBarWidth: SharedValue<number>,
-    duration?: number
+    duration?: number,
   ): void;
 
   /**
@@ -84,7 +91,10 @@ export interface GenderFormServiceInterface {
    * @param targetGender - Le genre cible pour les styles
    * @returns Les classes CSS pour le bouton
    */
-  getGenderButtonStyles(currentGender: GenderEnum, targetGender: GenderEnum): {
+  getGenderButtonStyles(
+    currentGender: GenderEnum,
+    targetGender: GenderEnum,
+  ): {
     buttonClass: string;
     textClass: string;
   };
@@ -100,7 +110,10 @@ export interface GoalFormServiceInterface {
    * @param buttonGoal - L'objectif du bouton pour lequel obtenir les styles
    * @returns Les classes CSS pour le bouton et le texte
    */
-  getGoalButtonStyles(selectedGoal: GoalEnum, buttonGoal: GoalEnum): {
+  getGoalButtonStyles(
+    selectedGoal: GoalEnum,
+    buttonGoal: GoalEnum,
+  ): {
     buttonClass: string;
     textClass: string;
   };
@@ -127,7 +140,10 @@ export interface PhysicalActivityFormServiceInterface {
    * Obtient les options d'activitu00e9 physique disponibles
    * @returns Un tableau d'options d'activitu00e9 physique
    */
-  getPhysicalActivityOptions(): Array<{ level: PhysicalActivityEnum; description: string }>;
+  getPhysicalActivityOptions(): Array<{
+    level: PhysicalActivityEnum;
+    description: string;
+  }>;
 
   /**
    * Obtient l'image correspondant u00e0 un niveau d'activitu00e9 physique
@@ -142,7 +158,10 @@ export interface PhysicalActivityFormServiceInterface {
    * @param buttonActivity - L'activitu00e9 du bouton pour lequel obtenir les styles
    * @returns Les classes CSS pour l'indicateur d'activitu00e9
    */
-  getActivityIndicatorStyles(selectedActivity: PhysicalActivityEnum, buttonActivity: PhysicalActivityEnum): string;
+  getActivityIndicatorStyles(
+    selectedActivity: PhysicalActivityEnum,
+    buttonActivity: PhysicalActivityEnum,
+  ): string;
 
   /**
    * Obtient une description du niveau d'activitu00e9 physique
@@ -162,11 +181,14 @@ export interface WeightInputServiceInterface {
    * @param options - Options de validation (min, max, requis)
    * @returns Le ru00e9sultat de la validation
    */
-  validateWeight(value: any, options?: {
-    min?: number;
-    max?: number;
-    required?: boolean;
-  }): ValidationResult;
+  validateWeight(
+    value: any,
+    options?: {
+      min?: number;
+      max?: number;
+      required?: boolean;
+    },
+  ): ValidationResult;
 
   /**
    * Convertit une valeur en poids

@@ -24,7 +24,8 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 8.29,
     fat: 52.83,
     protein: 22.09,
-    image: '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Grillée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Grillée.jpg',
   },
 
   {
@@ -32,10 +33,11 @@ const grainesOleagineuses: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 578,
-    carbs: 9.30,
+    carbs: 9.3,
     fat: 50.64,
     protein: 21.26,
-    image: '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Naturelle.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Naturelle.jpg',
   },
 
   {
@@ -46,7 +48,8 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 10.84,
     fat: 49.66,
     protein: 23.68,
-    image: '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Salée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Salée.jpg',
   },
 
   {
@@ -57,7 +60,8 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 10.84,
     fat: 49.66,
     protein: 23.68,
-    image: '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Sans_Sel.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Sans_Sel.jpg',
   },
 
   {
@@ -67,8 +71,9 @@ const grainesOleagineuses: MealEntry[] = [
     calories: 594,
     carbs: 15.44,
     fat: 51.45,
-    protein: 17.30,
-    image: '../assets/images/seed/Graines-oléagineuses/Mélange_de_Fruits_Secs_Grillés.jpg',
+    protein: 17.3,
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Mélange_de_Fruits_Secs_Grillés.jpg',
   },
 
   {
@@ -98,10 +103,11 @@ const grainesOleagineuses: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 574,
-    carbs: 23.90,
+    carbs: 23.9,
     fat: 46.35,
     protein: 15.31,
-    image: '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Salée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Salée.jpg',
   },
 
   {
@@ -109,10 +115,11 @@ const grainesOleagineuses: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 574,
-    carbs: 23.90,
+    carbs: 23.9,
     fat: 46.35,
     protein: 15.31,
-    image: '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Non_Salée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Non_Salée.jpg',
   },
 
   {
@@ -127,23 +134,23 @@ const grainesOleagineuses: MealEntry[] = [
   },
 
   {
-    name: 'Pâte d\'Amande',
+    name: "Pâte d'Amande",
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 410,
     carbs: 54.38,
-    fat: 18.10,
-    protein: 7.40,
+    fat: 18.1,
+    protein: 7.4,
     image: '../assets/images/seed/Graines-oléagineuses/Pâte_d_Amande.jpg',
   },
 
   {
-    name: 'Pâte d\'Arachide',
+    name: "Pâte d'Arachide",
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 589,
     carbs: 10.36,
-    fat: 49.70,
+    fat: 49.7,
     protein: 25.07,
     image: '../assets/images/seed/Graines-oléagineuses/Pâte_d_Arachide.jpg',
   },
@@ -156,7 +163,8 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 17.22,
     fat: 45.97,
     protein: 21.35,
-    image: '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Salée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Salée.jpg',
   },
 
   {
@@ -167,7 +175,8 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 17.97,
     fat: 45.97,
     protein: 21.35,
-    image: '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Sans_Sel.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Sans_Sel.jpg',
   },
 
   {
@@ -175,9 +184,9 @@ const grainesOleagineuses: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 163,
-    carbs: 40.00,
-    fat: 0.30,
-    protein: 2.50,
+    carbs: 40.0,
+    fat: 0.3,
+    protein: 2.5,
     image: '../assets/images/seed/Graines-oléagineuses/Pruneau_Sec.jpg',
   },
 
@@ -186,9 +195,9 @@ const grainesOleagineuses: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 316,
-    carbs: 79.20,
-    fat: 0.40,
-    protein: 3.30,
+    carbs: 79.2,
+    fat: 0.4,
+    protein: 3.3,
     image: '../assets/images/seed/Graines-oléagineuses/Raisin_Sec.jpg',
   },
 
@@ -209,9 +218,10 @@ const grainesOleagineuses: MealEntry[] = [
     quantity: 100,
     calories: 582,
     carbs: 14.12,
-    fat: 49.80,
+    fat: 49.8,
     protein: 19.33,
-    image: '../assets/images/seed/Graines-oléagineuses/Tournesol_Graine_Salée.jpg',
+    image:
+      '../assets/images/seed/Graines-oléagineuses/Tournesol_Graine_Salée.jpg',
   },
 ];
 

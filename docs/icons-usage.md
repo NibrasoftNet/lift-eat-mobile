@@ -22,12 +22,14 @@ assets/
 ### ✅ À faire
 
 1. **Importation directe des icônes SVG**:
+
    ```tsx
    import { ArrowLeftRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/ArrowLeftRegularBoldIcon';
    import { CalendarRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/CalendarRegularBoldIcon';
    ```
 
 2. **Utilisation avec les props width, height et color**:
+
    ```tsx
    <ArrowLeftRegularBoldIcon width={24} height={24} color={textColor} />
    ```
@@ -35,14 +37,17 @@ assets/
 3. **Création de fonctions d'aide pour les sélecteurs d'icônes**:
    ```tsx
    // Exemple tiré de DrinkTypeSelector.tsx
-   const renderCupSizeIcon = (iconType: CupSize['icon'], isSelected: boolean) => {
+   const renderCupSizeIcon = (
+     iconType: CupSize['icon'],
+     isSelected: boolean,
+   ) => {
      const color = isSelected ? primaryColor : '#00A9F1';
      const iconProps = {
        width: 24,
        height: 24,
-       color
+       color,
      };
-     
+
      switch (iconType) {
        case 'waterGlass':
          return <WaterGlassRegularBoldIcon {...iconProps} />;
@@ -54,6 +59,7 @@ assets/
 ### ❌ À éviter
 
 1. **Ne pas utiliser le composant Icon avec une prop name**:
+
    ```tsx
    // INCORRECT
    <Icon name="arrowLeft" size={24} color={textColor} />

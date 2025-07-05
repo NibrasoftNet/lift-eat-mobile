@@ -39,11 +39,11 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 
 // Mappage des noms d'icônes aux composants d'icônes
 const iconMapping: Record<string, any> = {
-  'CircleHelp': CircleHelp,
-  'ShieldAlert': ShieldAlert,
-  'Newspaper': Newspaper,
-  'Earth': Earth,
-  'Settings': Settings,
+  CircleHelp: CircleHelp,
+  ShieldAlert: ShieldAlert,
+  Newspaper: Newspaper,
+  Earth: Earth,
+  Settings: Settings,
 };
 
 // Composant pour afficher un élément du menu des paramètres
@@ -55,10 +55,10 @@ const GeneralMenuItem = ({ item }: { item: GeneralSettingsMenuItem }) => {
       logger.info(LogCategory.UI, `Menu action '${item.action}' completed`);
     });
   }, [item.action]);
-  
+
   // Obtenir le composant d'icône correspondant au nom d'icône
   const IconComponent = iconMapping[item.icon] || Settings; // Fallback sur Settings si l'icône n'est pas trouvée
-  
+
   return (
     <Pressable
       onPress={handlePress}
@@ -79,7 +79,7 @@ function GeneralSettingsDrawer({
 }) {
   // État pour la langue sélectionnée
   const [selectedLanguage, setSelectedLanguage] = useState<string>('ux');
-  
+
   // Gestionnaire de changement de langue
   const handleLanguageChange = useCallback((lang: string) => {
     setSelectedLanguage(lang);
@@ -124,18 +124,26 @@ function GeneralSettingsDrawer({
                     <SelectDragIndicator />
                   </SelectDragIndicatorWrapper>
                   {/* Utiliser le service pour générer les options de langues */}
-                  {generalSettingsDrawerUIService.getAvailableLanguages().map((lang) => (
-                    <SelectItem key={lang.value} label={lang.label} value={lang.value} />
-                  ))}
+                  {generalSettingsDrawerUIService
+                    .getAvailableLanguages()
+                    .map((lang) => (
+                      <SelectItem
+                        key={lang.value}
+                        label={lang.label}
+                        value={lang.value}
+                      />
+                    ))}
                 </SelectContent>
               </SelectPortal>
             </Select>
           </Pressable>
-          
+
           {/* Utiliser le service pour générer les éléments du menu */}
-          {generalSettingsDrawerUIService.getGeneralMenuItems().map((item: GeneralSettingsMenuItem) => (
-            <GeneralMenuItem key={item.action} item={item} />
-          ))}
+          {generalSettingsDrawerUIService
+            .getGeneralMenuItems()
+            .map((item: GeneralSettingsMenuItem) => (
+              <GeneralMenuItem key={item.action} item={item} />
+            ))}
         </DrawerBody>
         <DrawerFooter>
           <Button

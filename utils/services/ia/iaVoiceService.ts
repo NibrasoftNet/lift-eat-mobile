@@ -30,7 +30,12 @@ export class IAVoiceService {
    */
   public setAutoRead(enabled: boolean): void {
     this.autoReadEnabled = enabled;
-    logger.info(LogCategory.IA, `IAVoiceService: Lecture automatique ${enabled ? 'activée' : 'désactivée'}`);
+    logger.info(
+      LogCategory.IA,
+      `IAVoiceService: Lecture automatique ${
+        enabled ? 'activée' : 'désactivée'
+      }`,
+    );
   }
 
   /**
@@ -51,7 +56,10 @@ export class IAVoiceService {
     pitch?: number;
   }): void {
     TTSService.configure(options);
-    logger.debug(LogCategory.IA, `IAVoiceService: Configuration vocale mise à jour`);
+    logger.debug(
+      LogCategory.IA,
+      `IAVoiceService: Configuration vocale mise à jour`,
+    );
   }
 
   /**
@@ -62,7 +70,7 @@ export class IAVoiceService {
    */
   public async generateResponseWithVoice(
     prompt: string,
-    readAloud: boolean = false
+    readAloud: boolean = false,
   ): Promise<{
     text: string;
     action?: {
@@ -75,25 +83,37 @@ export class IAVoiceService {
     try {
       // Générer une réponse standard via le service IA
       const response = await iaService.generateResponse(prompt);
-      
+
       // Lire la réponse à voix haute si demandé ou si la lecture automatique est activée
       const shouldReadAloud = readAloud || this.autoReadEnabled;
-      
+
       if (shouldReadAloud && response.text) {
-        this.speakText(response.text).catch(error => {
-          logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la lecture vocale: ${error instanceof Error ? error.message : String(error)}`);
+        this.speakText(response.text).catch((error) => {
+          logger.error(
+            LogCategory.IA,
+            `IAVoiceService: Erreur lors de la lecture vocale: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
         });
       }
-      
+
       return {
         ...response,
-        voiceOutput: shouldReadAloud
+        voiceOutput: shouldReadAloud,
       };
     } catch (error) {
-      logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la génération de réponse vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `IAVoiceService: Erreur lors de la génération de réponse vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return {
-        text: `Je suis désolé, mais j'ai rencontré un problème en traitant votre demande. Erreur: ${error instanceof Error ? error.message : String(error)}`,
-        voiceOutput: false
+        text: `Je suis désolé, mais j'ai rencontré un problème en traitant votre demande. Erreur: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        voiceOutput: false,
       };
     }
   }
@@ -113,31 +133,48 @@ export class IAVoiceService {
       allergies?: string[];
       specificRequirements?: string;
     },
-    readAloud: boolean = false
-  ): Promise<{ text: string; plan?: any; success: boolean; voiceOutput: boolean }> {
+    readAloud: boolean = false,
+  ): Promise<{
+    text: string;
+    plan?: any;
+    success: boolean;
+    voiceOutput: boolean;
+  }> {
     try {
       // Générer un plan nutritionnel via le service IA standard
       const response = await iaService.generateNutritionPlan(goal, preferences);
-      
+
       // Lire la réponse à voix haute si demandé ou si la lecture automatique est activée
       const shouldReadAloud = readAloud || this.autoReadEnabled;
-      
+
       if (shouldReadAloud && response.text) {
-        this.speakText(response.text).catch(error => {
-          logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la lecture vocale du plan: ${error instanceof Error ? error.message : String(error)}`);
+        this.speakText(response.text).catch((error) => {
+          logger.error(
+            LogCategory.IA,
+            `IAVoiceService: Erreur lors de la lecture vocale du plan: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
         });
       }
-      
+
       return {
         ...response,
-        voiceOutput: shouldReadAloud
+        voiceOutput: shouldReadAloud,
       };
     } catch (error) {
-      logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la génération du plan nutritionnel vocal: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `IAVoiceService: Erreur lors de la génération du plan nutritionnel vocal: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return {
-        text: `Désolé, une erreur s'est produite lors de la génération du plan nutritionnel: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Désolé, une erreur s'est produite lors de la génération du plan nutritionnel: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         success: false,
-        voiceOutput: false
+        voiceOutput: false,
       };
     }
   }
@@ -148,31 +185,43 @@ export class IAVoiceService {
    * @returns Texte de réponse et statut de l'opération
    */
   public async analyzeNutritionHabitsWithVoice(
-    readAloud: boolean = false
+    readAloud: boolean = false,
   ): Promise<{ text: string; success: boolean; voiceOutput: boolean }> {
     try {
       // Analyser les habitudes via le service IA standard
       const response = await iaService.analyzeNutritionHabits();
-      
+
       // Lire la réponse à voix haute si demandé ou si la lecture automatique est activée
       const shouldReadAloud = readAloud || this.autoReadEnabled;
-      
+
       if (shouldReadAloud && response.text) {
-        this.speakText(response.text).catch(error => {
-          logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la lecture vocale de l'analyse: ${error instanceof Error ? error.message : String(error)}`);
+        this.speakText(response.text).catch((error) => {
+          logger.error(
+            LogCategory.IA,
+            `IAVoiceService: Erreur lors de la lecture vocale de l'analyse: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
         });
       }
-      
+
       return {
         ...response,
-        voiceOutput: shouldReadAloud
+        voiceOutput: shouldReadAloud,
       };
     } catch (error) {
-      logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de l'analyse des habitudes nutritionnelles vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `IAVoiceService: Erreur lors de l'analyse des habitudes nutritionnelles vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return {
-        text: `Désolé, une erreur s'est produite lors de l'analyse de vos habitudes alimentaires: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Désolé, une erreur s'est produite lors de l'analyse de vos habitudes alimentaires: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
         success: false,
-        voiceOutput: false
+        voiceOutput: false,
       };
     }
   }
@@ -188,38 +237,52 @@ export class IAVoiceService {
       language?: string;
       rate?: number;
       pitch?: number;
-    }
+    },
   ): Promise<void> {
     try {
       // Vérifier si un texte est déjà en cours de lecture
       if (this.isSpeaking) {
         await this.stopSpeaking();
       }
-      
+
       // Marquer comme en cours de lecture
       this.isSpeaking = true;
-      
+
       // Nettoyer le texte pour une meilleure lecture
       const cleanedText = this.prepareTextForSpeech(text);
-      
+
       // Lire le texte avec les options spécifiées
       await TTSService.speak(cleanedText, {
         ...options,
         onStart: () => {
-          logger.debug(LogCategory.IA, `IAVoiceService: Début de la lecture vocale`);
+          logger.debug(
+            LogCategory.IA,
+            `IAVoiceService: Début de la lecture vocale`,
+          );
         },
         onDone: () => {
           this.isSpeaking = false;
-          logger.debug(LogCategory.IA, `IAVoiceService: Fin de la lecture vocale`);
+          logger.debug(
+            LogCategory.IA,
+            `IAVoiceService: Fin de la lecture vocale`,
+          );
         },
         onError: (error: any) => {
           this.isSpeaking = false;
-          logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la lecture vocale: ${error}`);
-        }
+          logger.error(
+            LogCategory.IA,
+            `IAVoiceService: Erreur lors de la lecture vocale: ${error}`,
+          );
+        },
       });
     } catch (error) {
       this.isSpeaking = false;
-      logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de la lecture vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `IAVoiceService: Erreur lors de la lecture vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       throw error;
     }
   }
@@ -231,9 +294,17 @@ export class IAVoiceService {
     try {
       await TTSService.stop();
       this.isSpeaking = false;
-      logger.info(LogCategory.IA, `IAVoiceService: Lecture vocale arrêtée manuellement`);
+      logger.info(
+        LogCategory.IA,
+        `IAVoiceService: Lecture vocale arrêtée manuellement`,
+      );
     } catch (error) {
-      logger.error(LogCategory.IA, `IAVoiceService: Erreur lors de l'arrêt de la lecture vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `IAVoiceService: Erreur lors de l'arrêt de la lecture vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     }
   }
 

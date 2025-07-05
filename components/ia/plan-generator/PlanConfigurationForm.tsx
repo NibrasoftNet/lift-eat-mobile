@@ -5,7 +5,10 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { MealTypeEnum, MealTypeArray } from '@/utils/enum/meal.enum';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
-import { PlanGeneratorFormType, DietaryRestrictionFormType } from '@/utils/validation/ia/planGeneratorForm.schema';
+import {
+  PlanGeneratorFormType,
+  DietaryRestrictionFormType,
+} from '@/utils/validation/ia/planGeneratorForm.schema';
 import { Input, InputField } from '@/components/ui/input';
 import { Check, ChevronDown, Plus, Minus } from 'lucide-react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -30,7 +33,7 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
   toggleDietaryRestriction,
   updateNumberOfDays,
   updateCaloriesPerDay,
-  updateTargetWeight
+  updateTargetWeight,
 }) => {
   // Couleurs du thème
   const textColor = useThemeColor({}, 'text');
@@ -38,44 +41,67 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
   const tintColor = useThemeColor({}, 'tint');
   const iconColor = useThemeColor({}, 'icon');
   const borderColor = useThemeColor({}, 'tabIconDefault');
-  const errorColor = useThemeColor({ light: '#ff3b30', dark: '#ff453a' }, 'text');
-  const lightBackgroundColor = useThemeColor({ light: '#f0f0f0', dark: '#333' }, 'background');
-  const whiteColor = useThemeColor({ light: 'white', dark: 'white' }, 'background');
-  const selectedBackgroundColor = useThemeColor({ light: '#f0f9ff', dark: '#0f3c5d' }, 'background');
+  const errorColor = useThemeColor(
+    { light: '#ff3b30', dark: '#ff453a' },
+    'text',
+  );
+  const lightBackgroundColor = useThemeColor(
+    { light: '#f0f0f0', dark: '#333' },
+    'background',
+  );
+  const whiteColor = useThemeColor(
+    { light: 'white', dark: 'white' },
+    'background',
+  );
+  const selectedBackgroundColor = useThemeColor(
+    { light: '#f0f9ff', dark: '#0f3c5d' },
+    'background',
+  );
 
   return (
     <ScrollView style={{ padding: 16, flex: 1 }}>
       <VStack space="lg">
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>Configuration du plan nutritionnel</Text>
-        
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
+          Configuration du plan nutritionnel
+        </Text>
+
         {/* Sélection de l'objectif */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Objectif</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Objectif
+          </Text>
           <Controller
             control={control}
             name="goal"
             render={({ field, fieldState }) => (
               <>
-                <Box 
+                <Box
                   style={{
                     borderWidth: 1,
                     borderRadius: 8,
                     padding: 12,
-                    borderColor: fieldState.error ? errorColor : borderColor
+                    borderColor: fieldState.error ? errorColor : borderColor,
                   }}
                 >
-                  <HStack style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                  <HStack
+                    style={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
                     <Text>{field.value}</Text>
                     <ChevronDown size={20} color={iconColor} />
                   </HStack>
                 </Box>
-                <Box style={{
-                  borderWidth: 1,
-                  borderRadius: 8,
-                  marginTop: 4,
-                  maxHeight: 200,
-                  borderColor
-                }}>
+                <Box
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    marginTop: 4,
+                    maxHeight: 200,
+                    borderColor,
+                  }}
+                >
                   <VStack>
                     {Object.values(GoalEnum).map((goal) => (
                       <Pressable
@@ -84,20 +110,32 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                           padding: 12,
                           borderBottomWidth: 1,
                           borderBottomColor: borderColor,
-                          backgroundColor: field.value === goal ? selectedBackgroundColor : undefined
+                          backgroundColor:
+                            field.value === goal
+                              ? selectedBackgroundColor
+                              : undefined,
                         }}
                         onPress={() => field.onChange(goal)}
                       >
-                        <HStack style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                        <HStack
+                          style={{
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
                           <Text>{goal}</Text>
-                          {field.value === goal && <Check size={20} color={tintColor} />}
+                          {field.value === goal && (
+                            <Check size={20} color={tintColor} />
+                          )}
                         </HStack>
                       </Pressable>
                     ))}
                   </VStack>
                 </Box>
                 {fieldState.error && (
-                  <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                  <Text
+                    style={{ fontSize: 12, marginTop: 4, color: errorColor }}
+                  >
                     {fieldState.error.message}
                   </Text>
                 )}
@@ -105,28 +143,32 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             )}
           />
         </VStack>
-        
+
         {/* Nombre de jours */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Nombre de jours</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Nombre de jours
+          </Text>
           <Controller
             control={control}
             name="numberOfDays"
             render={({ field, fieldState }) => (
               <>
-                <HStack style={{
-                  borderWidth: 1,
-                  borderRadius: 8,
-                  padding: 4,
-                  justifyContent: 'space-between',
-                  maxWidth: 200,
-                  borderColor
-                }}>
+                <HStack
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    padding: 4,
+                    justifyContent: 'space-between',
+                    maxWidth: 200,
+                    borderColor,
+                  }}
+                >
                   <Pressable
                     style={{
                       padding: 8,
                       borderRadius: 4,
-                      backgroundColor: lightBackgroundColor
+                      backgroundColor: lightBackgroundColor,
                     }}
                     onPress={() => {
                       const newValue = Math.max(1, field.value - 1);
@@ -136,12 +178,20 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                   >
                     <Minus size={20} color={iconColor} />
                   </Pressable>
-                  <Text style={{ fontSize: 18, fontWeight: 'bold', paddingHorizontal: 16 }}>{field.value}</Text>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      paddingHorizontal: 16,
+                    }}
+                  >
+                    {field.value}
+                  </Text>
                   <Pressable
                     style={{
                       padding: 8,
                       borderRadius: 4,
-                      backgroundColor: lightBackgroundColor
+                      backgroundColor: lightBackgroundColor,
                     }}
                     onPress={() => {
                       const newValue = Math.min(30, field.value + 1);
@@ -153,7 +203,9 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                   </Pressable>
                 </HStack>
                 {fieldState.error && (
-                  <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                  <Text
+                    style={{ fontSize: 12, marginTop: 4, color: errorColor }}
+                  >
                     {fieldState.error.message}
                   </Text>
                 )}
@@ -161,10 +213,12 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             )}
           />
         </VStack>
-        
+
         {/* Calories par jour */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Calories par jour (optionnel)</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Calories par jour (optionnel)
+          </Text>
           <Controller
             control={control}
             name="caloriesPerDay"
@@ -188,7 +242,9 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                   />
                 </Input>
                 {fieldState.error && (
-                  <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                  <Text
+                    style={{ fontSize: 12, marginTop: 4, color: errorColor }}
+                  >
                     {fieldState.error.message}
                   </Text>
                 )}
@@ -196,18 +252,24 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             )}
           />
         </VStack>
-        
+
         {/* Poids cible - Conditionnellement affiché selon l'objectif */}
         <Controller
           control={control}
           name="goal"
           render={({ field: goalField }) => {
-            const showTargetWeight = goalField.value === GoalEnum.WEIGHT_LOSS || goalField.value === GoalEnum.GAIN_MUSCLE;
-            
+            const showTargetWeight =
+              goalField.value === GoalEnum.WEIGHT_LOSS ||
+              goalField.value === GoalEnum.GAIN_MUSCLE;
+
             return (
               <Box style={{ display: showTargetWeight ? 'flex' : 'none' }}>
                 <VStack space="xs" style={{ marginBottom: 24 }}>
-                  <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Poids cible (kg)</Text>
+                  <Text
+                    style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}
+                  >
+                    Poids cible (kg)
+                  </Text>
                   <Controller
                     control={control}
                     name="targetWeight"
@@ -233,7 +295,13 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                           />
                         </Input>
                         {fieldState.error && (
-                          <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              marginTop: 4,
+                              color: errorColor,
+                            }}
+                          >
                             {fieldState.error.message}
                           </Text>
                         )}
@@ -245,20 +313,24 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             );
           }}
         />
-        
+
         {/* Types de repas */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Types de repas à inclure</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Types de repas à inclure
+          </Text>
           <Controller
             control={control}
             name="includedMealTypes"
             render={({ field, fieldState }) => (
               <>
-                <Box style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  marginTop: 8
-                }}>
+                <Box
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    marginTop: 8,
+                  }}
+                >
                   {MealTypeArray.map((mealType) => (
                     <Pressable
                       key={mealType}
@@ -269,17 +341,21 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                         borderRadius: 20,
                         marginRight: 8,
                         marginBottom: 8,
-                        backgroundColor: field.value.includes(mealType) ? tintColor : lightBackgroundColor
+                        backgroundColor: field.value.includes(mealType)
+                          ? tintColor
+                          : lightBackgroundColor,
                       }}
                       onPress={() => {
                         toggleMealType(mealType as MealTypeEnum);
                       }}
                     >
                       <HStack space="xs" style={{ alignItems: 'center' }}>
-                        <Text 
+                        <Text
                           style={{
                             marginRight: 4,
-                            color: field.value.includes(mealType) ? whiteColor : textColor
+                            color: field.value.includes(mealType)
+                              ? whiteColor
+                              : textColor,
                           }}
                         >
                           {mealType}
@@ -292,7 +368,9 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                   ))}
                 </Box>
                 {fieldState.error && (
-                  <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                  <Text
+                    style={{ fontSize: 12, marginTop: 4, color: errorColor }}
+                  >
                     {fieldState.error.message}
                   </Text>
                 )}
@@ -300,19 +378,23 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             )}
           />
         </VStack>
-        
+
         {/* Restrictions alimentaires */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Restrictions alimentaires</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Restrictions alimentaires
+          </Text>
           <Controller
             control={control}
             name="dietaryRestrictions"
             render={({ field }) => (
-              <Box style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                marginTop: 8
-              }}>
+              <Box
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  marginTop: 8,
+                }}
+              >
                 {dietaryRestrictions.map((restriction) => (
                   <Pressable
                     key={restriction.id || restriction.name}
@@ -323,15 +405,17 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                       borderRadius: 20,
                       marginRight: 8,
                       marginBottom: 8,
-                      backgroundColor: restriction.selected ? tintColor : lightBackgroundColor
+                      backgroundColor: restriction.selected
+                        ? tintColor
+                        : lightBackgroundColor,
                     }}
                     onPress={() => toggleDietaryRestriction(restriction)}
                   >
                     <HStack space="xs" style={{ alignItems: 'center' }}>
-                      <Text 
+                      <Text
                         style={{
                           marginRight: 4,
-                          color: restriction.selected ? whiteColor : textColor
+                          color: restriction.selected ? whiteColor : textColor,
                         }}
                       >
                         {restriction.name}
@@ -346,10 +430,12 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
             )}
           />
         </VStack>
-        
+
         {/* Exigences spécifiques */}
         <VStack space="xs" style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>Exigences spécifiques (optionnel)</Text>
+          <Text style={{ fontSize: 16, marginBottom: 8, fontWeight: '500' }}>
+            Exigences spécifiques (optionnel)
+          </Text>
           <Controller
             control={control}
             name="specificRequirements"
@@ -368,7 +454,9 @@ const PlanConfigurationForm: React.FC<PlanConfigurationFormProps> = ({
                   />
                 </Input>
                 {fieldState.error && (
-                  <Text style={{ fontSize: 12, marginTop: 4, color: errorColor }}>
+                  <Text
+                    style={{ fontSize: 12, marginTop: 4, color: errorColor }}
+                  >
                     {fieldState.error.message}
                   </Text>
                 )}

@@ -5,12 +5,26 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, StyleProp, ViewStyle, FlexAlignType, DimensionValue, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  FlexAlignType,
+  DimensionValue,
+  Dimensions,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import Box from './base/Box';
 
 export type AutoLayoutDirection = 'row' | 'column';
-export type AutoLayoutJustification = 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
+export type AutoLayoutJustification =
+  | 'flex-start'
+  | 'center'
+  | 'flex-end'
+  | 'space-between'
+  | 'space-around'
+  | 'space-evenly';
 export type AutoLayoutShadow = 'none' | 'small' | 'medium' | 'large';
 
 export interface AutoLayoutProps {
@@ -172,7 +186,7 @@ const AutoLayout: React.FC<AutoLayoutProps> = ({
         return {
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.30,
+          shadowOpacity: 0.3,
           shadowRadius: 4.65,
           elevation: 8,
         };
@@ -183,7 +197,9 @@ const AutoLayout: React.FC<AutoLayoutProps> = ({
   };
 
   // Convertir les valeurs de chaîne en nombres pour width et height si nécessaire
-  const getNumericValue = (value: string | number | undefined): DimensionValue | undefined => {
+  const getNumericValue = (
+    value: string | number | undefined,
+  ): DimensionValue | undefined => {
     if (typeof value === 'string') {
       // Pour éviter les erreurs de conversion des pourcentages
       if (value.endsWith('%')) {
@@ -209,30 +225,44 @@ const AutoLayout: React.FC<AutoLayoutProps> = ({
     } else {
       // Pour la direction column, on doit adapter certaines valeurs de justification
       switch (justify) {
-        case 'flex-start': return 'flex-start';
-        case 'center': return 'center';
-        case 'flex-end': return 'flex-end';
+        case 'flex-start':
+          return 'flex-start';
+        case 'center':
+          return 'center';
+        case 'flex-end':
+          return 'flex-end';
         // Ces valeurs ne sont pas valides pour alignItems, on utilise une valeur par défaut
         case 'space-between':
         case 'space-around':
         case 'space-evenly':
           return 'center';
-        default: return 'center';
+        default:
+          return 'center';
       }
     }
   };
 
-  const getJustifyContent = (): 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly' => {
+  const getJustifyContent = ():
+    | 'flex-start'
+    | 'flex-end'
+    | 'center'
+    | 'space-between'
+    | 'space-around'
+    | 'space-evenly' => {
     if (direction === 'row') {
       return justify;
     } else {
       // Pour la direction column, on doit adapter certaines valeurs d'alignement
       switch (align) {
-        case 'flex-start': return 'flex-start';
-        case 'center': return 'center';
-        case 'flex-end': return 'flex-end';
+        case 'flex-start':
+          return 'flex-start';
+        case 'center':
+          return 'center';
+        case 'flex-end':
+          return 'flex-end';
         // Ces valeurs ne sont pas valides pour justifyContent dans ce contexte
-        default: return 'flex-start';
+        default:
+          return 'flex-start';
       }
     }
   };
@@ -265,14 +295,10 @@ const AutoLayout: React.FC<AutoLayoutProps> = ({
 
   // Utiliser StyleSheet.create pour s'assurer que le style est correctement typé
   const styles = StyleSheet.create({
-    container: containerStyle as any
+    container: containerStyle as any,
   });
 
-  return (
-    <Box style={[styles.container, style]}>
-      {children}
-    </Box>
-  );
+  return <Box style={[styles.container, style]}>{children}</Box>;
 };
 
 export default AutoLayout;

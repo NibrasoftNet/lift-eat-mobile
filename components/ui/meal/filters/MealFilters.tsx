@@ -23,14 +23,14 @@ const mealTypeOptions = [
 
 const allCuisineOptions = [
   { label: 'All Cuisines', value: '' },
-  ...cuisineOptions
+  ...cuisineOptions,
 ];
 
-export function MealFilters({ 
-  selectedType, 
-  selectedCuisine, 
-  onTypeChange, 
-  onCuisineChange 
+export function MealFilters({
+  selectedType,
+  selectedCuisine,
+  onTypeChange,
+  onCuisineChange,
 }: MealFiltersProps) {
   return (
     <VStack space="md" className="mb-4">

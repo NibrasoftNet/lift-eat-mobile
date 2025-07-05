@@ -40,23 +40,30 @@ export default function CreateCaloriesCount() {
         throw new Error('No user ID found in session');
       }
 
-      logger.info(LogCategory.DATABASE, 'Fetching user data for calories calculation via user-pages service', {
-        userId: userId
-      });
+      logger.info(
+        LogCategory.DATABASE,
+        'Fetching user data for calories calculation via user-pages service',
+        {
+          userId: userId,
+        },
+      );
 
       // Utiliser le service userPagesService pour récupérer les détails de l'utilisateur
       const result = await userPagesService.getUserProfile(Number(userId));
-      
+
       if (!result.success) {
-        logger.error(LogCategory.DATABASE, `Failed to get user details: ${result.error}`);
+        logger.error(
+          LogCategory.DATABASE,
+          `Failed to get user details: ${result.error}`,
+        );
         throw new Error(result.error || `User with ID ${userId} not found`);
       }
-      
+
       if (!result.data?.user) {
         logger.warn(LogCategory.DATABASE, `User with ID ${userId} not found`);
         throw new Error(`User with ID ${userId} not found`);
       }
-      
+
       return result.data.user;
     },
     enabled: !!userId, // Requête activée uniquement si l'ID utilisateur est disponible

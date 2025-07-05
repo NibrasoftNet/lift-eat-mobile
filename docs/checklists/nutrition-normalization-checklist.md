@@ -5,11 +5,13 @@ Cette checklist identifie les problèmes actuels et propose des solutions pour s
 ## 1. Corrections des bugs d'affichage
 
 ### Incohérences dans les composants UI
+
 - [ ] **Corriger MealCard.tsx** : Retirer la prop `calories` redondante dans MacrosDetailsBox
   - Actuellement : `<MacrosDetailsBox calories={macros.calories} ...` (redondant avec NutritionBox)
   - Correction : `<MacrosDetailsBox carbs={macros.carbs} fats={macros.fat} ...` (sans calories)
 
 ### Problème de nommage
+
 - [ ] **Harmoniser l'utilisation de "fat" vs "fats"** :
   - Dans les composants : `fats` (pluriel)
   - Dans les données : `fat` (singulier)
@@ -17,20 +19,24 @@ Cette checklist identifie les problèmes actuels et propose des solutions pour s
   - Option B : Créer un adaptateur dans chaque composant (solution temporaire)
 
 ### Facteur d'ajustement
+
 - [ ] **Ajouter l'affichage du facteur d'ajustement**
   - Implémenter dans MealCard.tsx : `Ajustement: {nutritionData.adjustmentFactor.toFixed(2)}x`
 
 ## 2. Refactorisation des calculs nutritionnels
 
 ### Isoler les calculs des composants UI
+
 - [ ] **Déplacer les calculs nutritionnels de NutritionChart.tsx vers nutrition-core.service.ts**
-  - Remplacer : `const carbsCalories = Math.floor(normalizedMacros.carbs * 4);` 
+
+  - Remplacer : `const carbsCalories = Math.floor(normalizedMacros.carbs * 4);`
   - Par : appel à une méthode du service core
 
 - [ ] **Éliminer les calculs dans NutritionAdjuster.tsx**
   - Remplacer les transformations directes par des appels aux services
 
 ### Standardiser les hooks nutritionnels
+
 - [ ] **Refactoriser useNutritionCalculation.ts**
   - Déplacer la fonction `calculateDisplayMacros` vers nutrition-core.service.ts
   - Faire du hook un simple wrapper autour des services
@@ -38,16 +44,19 @@ Cette checklist identifie les problèmes actuels et propose des solutions pour s
 ## 3. Aligner sur l'architecture MCP
 
 ### Modèle (M)
+
 - [ ] **Assurer la cohérence des interfaces**
   - Vérifier que MacroNutrientsBase utilise `fat` (singulier) partout
   - Documenter clairement cette convention
 
 ### Contrôleur (C)
+
 - [ ] **Centraliser tous les calculs dans nutrition-core.service.ts**
   - Implémenter une fonction unifiée `calculateCalorieDistribution`
   - Déplacer toutes les transformations de données des composants UI
 
 ### Présentateur (P)
+
 - [ ] **Nettoyer nutrition-pages.service.ts**
   - S'assurer qu'il ne fait qu'orchestrer les appels aux services core
   - Éliminer toute logique métier duplicative
@@ -55,6 +64,7 @@ Cette checklist identifie les problèmes actuels et propose des solutions pour s
 ## 4. Tests et validation
 
 - [ ] **Créer des tests unitaires pour les fonctions de normalisation**
+
   - Tester les cas limites (poids très faibles, très élevés)
   - Vérifier la cohérence des résultats
 
@@ -65,6 +75,7 @@ Cette checklist identifie les problèmes actuels et propose des solutions pour s
 ## 5. Documentation
 
 - [ ] **Mettre à jour la documentation technique**
+
   - Documenter clairement la convention "pour 100g"
   - Expliquer la normalisation dans le guide de développement
 

@@ -75,21 +75,21 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
       onComplete,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const theme = useAppTheme();
     const inputRef = useRef<TextInput>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [internalState, setInternalState] = useState<InputForm2State>(state);
-    
+
     // Forwarder la référence
     React.useImperativeHandle(ref, () => inputRef.current as TextInput);
-    
+
     // Mettre à jour l'état interne lorsque l'état externe change
     useEffect(() => {
       setInternalState(state);
     }, [state]);
-    
+
     // Mettre à jour l'état complet lorsqu'on atteint la longueur maximale
     useEffect(() => {
       if (value.length === numFields && onComplete) {
@@ -99,12 +99,12 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
         }
       }
     }, [value, numFields, onComplete, state]);
-    
+
     // Déterminer les dimensions selon la taille (valeurs exactes du Figma)
     let fieldSize = 48;
     let fontSize = 16;
     let separatorHeight = 2;
-    
+
     switch (size) {
       case 'small':
         fieldSize = 40;
@@ -120,13 +120,13 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
       default:
         break;
     }
-    
+
     // Déterminer les couleurs selon l'état
     let backgroundColor = darkMode ? theme.color('background') : 'white';
     let textColor = darkMode ? 'white' : theme.color('primary');
     let separatorColor = theme.color('blueGrey');
     let labelColor = theme.color('blueGrey');
-    
+
     switch (internalState) {
       case 'focus':
         separatorColor = theme.color('primary');
@@ -138,50 +138,50 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
         separatorColor = theme.color('error');
         break;
       case 'disabled':
-        backgroundColor = darkMode 
-          ? theme.color('background') + '80' 
+        backgroundColor = darkMode
+          ? theme.color('background') + '80'
           : theme.color('backgroundGrey');
         separatorColor = theme.color('blueGrey') + '40';
         textColor = theme.color('blueGrey');
         break;
     }
-    
+
     // Gérer le focus/blur
     const handleFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       setIsFocused(true);
       if (internalState === 'default') setInternalState('focus');
     };
-    
+
     const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       setIsFocused(false);
       if (internalState === 'focus') setInternalState('default');
     };
-    
+
     // Focus sur l'input quand on clique sur le conteneur
     const handlePress = () => {
       if (internalState !== 'disabled' && inputRef.current) {
         inputRef.current.focus();
       }
     };
-    
+
     // Générer les éléments visuels des champs
     const renderFields = () => {
       const fields = [];
       const valueArray = value.split('');
-      
+
       for (let i = 0; i < numFields; i++) {
         const isActive = i === value.length && isFocused;
         const hasValue = i < value.length;
-        
+
         fields.push(
-          <View 
+          <View
             key={i}
             style={[
               styles.fieldContainer,
               {
                 width: fieldSize,
                 height: fieldSize,
-              }
+              },
             ]}
           >
             {/* Texte du champ */}
@@ -192,45 +192,50 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
                   fontSize,
                   color: hasValue ? textColor : 'transparent',
                   opacity: internalState === 'disabled' ? 0.5 : 1,
-                }
+                },
               ]}
             >
               {valueArray[i] || (isActive ? '|' : '')}
             </Text>
-            
+
             {/* Séparateur / ligne de base */}
             <View
               style={[
                 styles.separator,
                 {
                   backgroundColor: separatorColor,
-                  height: (internalState === 'success' || internalState === 'error') ? 2 : separatorHeight, // 2px pour succès et erreur selon Figma
+                  height:
+                    internalState === 'success' || internalState === 'error'
+                      ? 2
+                      : separatorHeight, // 2px pour succès et erreur selon Figma
                   opacity: internalState === 'disabled' ? 0.5 : 1,
                   flex: isActive || hasValue ? 1 : 0.8, // Remplace les pourcentages par des valeurs flex
-                }
+                },
               ]}
             />
-          </View>
+          </View>,
         );
       }
-      
+
       return fields;
     };
-    
+
     return (
       <Box style={[containerStyle as ViewStyle]}>
         {/* Label */}
         {label && (
           <Text
             variant="caption"
-            color={internalState === 'disabled' ? labelColor + '80' : labelColor}
+            color={
+              internalState === 'disabled' ? labelColor + '80' : labelColor
+            }
             mb={theme.space('xs')}
             medium
           >
             {label}
           </Text>
         )}
-        
+
         {/* Conteneur principal */}
         <TouchableOpacity
           activeOpacity={0.8}
@@ -239,29 +244,32 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
         >
           <View style={styles.container}>
             {/* Champs visuels */}
-            <View style={styles.fieldsContainer}>
-              {renderFields()}
-            </View>
-            
+            <View style={styles.fieldsContainer}>{renderFields()}</View>
+
             {/* Input invisible */}
             <TextInput
               ref={inputRef}
               value={value}
               onChangeText={(text) => {
                 // Filtrer uniquement les chiffres
-                const filtered = fieldType === 'number' || fieldType === 'pin' 
-                  ? text.replace(/[^0-9]/g, '')
-                  : text;
-                
+                const filtered =
+                  fieldType === 'number' || fieldType === 'pin'
+                    ? text.replace(/[^0-9]/g, '')
+                    : text;
+
                 // Limiter à numFields caractères
                 const limited = filtered.slice(0, numFields);
-                
+
                 if (onChangeText) {
                   onChangeText(limited);
                 }
               }}
               style={styles.hiddenInput}
-              keyboardType={fieldType === 'pin' || fieldType === 'number' ? 'numeric' : 'default'}
+              keyboardType={
+                fieldType === 'pin' || fieldType === 'number'
+                  ? 'numeric'
+                  : 'default'
+              }
               secureTextEntry={fieldType === 'pin'}
               maxLength={numFields}
               onFocus={handleFocus}
@@ -271,7 +279,7 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
             />
           </View>
         </TouchableOpacity>
-        
+
         {/* Messages d'aide avec icônes */}
         {internalState === 'error' && errorMessage && (
           <View style={styles.messageContainer}>
@@ -285,10 +293,13 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
             </Text>
           </View>
         )}
-        
+
         {internalState === 'success' && successMessage && (
           <View style={styles.messageContainer}>
-            <TickSquareRegularBoldIcon size={16} color={theme.color('success')} />
+            <TickSquareRegularBoldIcon
+              size={16}
+              color={theme.color('success')}
+            />
             <Text
               variant="caption"
               color={theme.color('success')}
@@ -300,7 +311,7 @@ const InputForm2 = forwardRef<TextInput, InputForm2Props>(
         )}
       </Box>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

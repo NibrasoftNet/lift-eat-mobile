@@ -20,7 +20,7 @@ export const BananaEmoji: React.FC<BananaEmojiProps> = ({ size = 100 }) => {
           <Stop stopColor="#FFE566" />
           <Stop offset="1" stopColor="#FFCE31" />
         </LinearGradient>
-        
+
         <LinearGradient
           id="paint1_linear_banana_inner"
           x1="30"
@@ -32,7 +32,7 @@ export const BananaEmoji: React.FC<BananaEmojiProps> = ({ size = 100 }) => {
           <Stop stopColor="#FFFFFF" stopOpacity="0.3" />
           <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </LinearGradient>
-        
+
         <LinearGradient
           id="paint2_linear_banana_tip"
           x1="13"
@@ -51,13 +51,13 @@ export const BananaEmoji: React.FC<BananaEmojiProps> = ({ size = 100 }) => {
         d="M13 25C13 25 5 35 20 50C35 65 60 80 80 75C87 73 90 65 85 60C80 55 70 55 50 40C30 25 13 25 13 25Z"
         fill="url(#paint0_linear_banana_outer)"
       />
-      
+
       {/* Reflet sur la banane */}
       <Path
         d="M30 40C30 40 40 55 65 70C65 70 55 55 30 40Z"
         fill="url(#paint1_linear_banana_inner)"
       />
-      
+
       {/* Pointe de la banane */}
       <Path
         d="M13 25C13 25 10 30 15 32.5C20 35 25 30 20 27.5C15 25 13 25 13 25Z"

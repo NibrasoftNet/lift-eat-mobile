@@ -14,10 +14,10 @@ const StepCounter: React.FC<StepCounterProps> = ({
   steps = 4205, // Valeur par défaut selon Figma
   goal = 6000, // Valeur par défaut selon Figma
   size = 160,
-  strokeWidth = 20, 
+  strokeWidth = 20,
   startAngle = -240, // Correspond à 5.76 radians dans le fichier JSON Figma
   dashedStrokeWidth = 8,
-  dashedStrokePattern = "2 35", // Exactement comme dans Figma
+  dashedStrokePattern = '2 35', // Exactement comme dans Figma
   gapDegrees = 60, // Angle d'ouverture en bas pour le bouton play
   bottomOffset = 20, // Décalage vertical pour positionner le bouton play
   isDarkMode = false,
@@ -26,10 +26,10 @@ const StepCounter: React.FC<StepCounterProps> = ({
   style,
 }) => {
   const theme = useAppTheme();
-  
+
   // Calcul du pourcentage de progression
   const progressPercentage = Math.min(100, (steps / goal) * 100);
-  
+
   // Couleurs basées sur le thème (fidèles au design Figma)
   const colors = {
     baseColor: isDarkMode ? '#35383F' : '#EEEEEE',
@@ -42,14 +42,20 @@ const StepCounter: React.FC<StepCounterProps> = ({
     refreshButtonColor: '#FF981F',
     refreshIconColor: isDarkMode ? '#FFFFFF' : '#FFFFFF',
   };
-  
+
   // Formatage des nombres pour l'affichage avec virgule comme séparateur de milliers
   // Utilisation explicite de la virgule comme séparateur pour correspondre au design Figma
-  const formattedSteps = steps.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  const formattedGoal = goal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formattedSteps = steps.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const formattedGoal = goal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundColor, borderRadius: 8 }, style]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.backgroundColor, borderRadius: 8 },
+        style,
+      ]}
+    >
       <View style={[styles.progressContainer, { width: size, height: size }]}>
         {/* Cercle de progression */}
         <CircularProgressBase
@@ -66,23 +72,28 @@ const StepCounter: React.FC<StepCounterProps> = ({
           gapDegrees={gapDegrees}
           bottomOffset={bottomOffset}
         />
-        
+
         {/* Bouton de rafraîchissement au bas du cercle */}
-        <TouchableOpacity 
-          style={[styles.refreshButton, { backgroundColor: colors.refreshButtonColor }]}
+        <TouchableOpacity
+          style={[
+            styles.refreshButton,
+            { backgroundColor: colors.refreshButtonColor },
+          ]}
         >
           <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-            <Path 
-              d="M8.74733 5.08083L16.747 11.0808C17.079 11.314 17.079 11.686 16.747 11.9193L8.74733 17.9193C8.35733 18.1885 7.83333 17.9076 7.83333 17.4233V5.57684C7.83333 5.09245 8.35733 4.81162 8.74733 5.08083Z" 
-              fill={colors.refreshIconColor} 
+            <Path
+              d="M8.74733 5.08083L16.747 11.0808C17.079 11.314 17.079 11.686 16.747 11.9193L8.74733 17.9193C8.35733 18.1885 7.83333 17.9076 7.83333 17.4233V5.57684C7.83333 5.09245 8.35733 4.81162 8.74733 5.08083Z"
+              fill={colors.refreshIconColor}
             />
           </Svg>
         </TouchableOpacity>
-        
+
         {/* Contenu central (texte) */}
         <View style={styles.contentContainer}>
           {/* Texte "Steps" au-dessus du nombre */}
-          <Text style={[styles.stepsLabel, { color: colors.secondaryTextColor }]}>
+          <Text
+            style={[styles.stepsLabel, { color: colors.secondaryTextColor }]}
+          >
             Steps
           </Text>
           <Text style={[styles.stepsText, { color: colors.textColor }]}>
@@ -93,7 +104,7 @@ const StepCounter: React.FC<StepCounterProps> = ({
           </Text>
         </View>
       </View>
-      
+
       {/* Étiquette en dessous - uniquement si demandé */}
       {/* La capture d'écran ne montre pas cette étiquette dans le composant lui-même */}
       {/* Mais nous la conservons pour compatibilité */}

@@ -13,32 +13,34 @@ class WeightInputUIService implements WeightInputServiceInterface {
     try {
       // Supprimer les espaces et remplacer la virgule par un point
       const cleanValue = value.trim().replace(',', '.');
-      
+
       // Si vide, retourner undefined
       if (!cleanValue) {
         return undefined;
       }
-      
+
       // Convertir en nombre
       const numValue = parseFloat(cleanValue);
-      
+
       // Vérifier si c'est un nombre valide
       if (isNaN(numValue)) {
         logger.warn(LogCategory.UI, 'Invalid weight value', { value });
         return undefined;
       }
-      
+
       // Vérifier si le poids est dans une plage valide
       if (!this.validateWeight(numValue)) {
-        logger.warn(LogCategory.UI, 'Weight value out of range', { value: numValue });
+        logger.warn(LogCategory.UI, 'Weight value out of range', {
+          value: numValue,
+        });
         return undefined;
       }
-      
+
       return numValue;
     } catch (error) {
       logger.error(LogCategory.UI, 'Error parsing weight value', {
         error: error instanceof Error ? error.message : String(error),
-        value
+        value,
       });
       return undefined;
     }
@@ -51,16 +53,16 @@ class WeightInputUIService implements WeightInputServiceInterface {
       if (value === undefined || !this.validateWeight(value)) {
         return '';
       }
-      
+
       // Formater avec 1 décimale si nécessaire
       return value.toLocaleString('fr-FR', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 1
+        maximumFractionDigits: 1,
       });
     } catch (error) {
       logger.error(LogCategory.UI, 'Error formatting weight value', {
         error: error instanceof Error ? error.message : String(error),
-        value
+        value,
       });
       return '';
     }

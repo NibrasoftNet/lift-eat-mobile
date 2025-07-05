@@ -1,5 +1,11 @@
 import * as React from 'react';
-import Svg, { Path, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Circle,
+  Defs,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface PizzaEmojiProps {
   size?: number;
@@ -20,7 +26,7 @@ export const PizzaEmoji: React.FC<PizzaEmojiProps> = ({ size = 100 }) => {
           <Stop stopColor="#FFECB3" />
           <Stop offset="1" stopColor="#E6A938" />
         </LinearGradient>
-        
+
         <LinearGradient
           id="paint1_linear_pizza_sauce"
           x1="50"
@@ -32,7 +38,7 @@ export const PizzaEmoji: React.FC<PizzaEmojiProps> = ({ size = 100 }) => {
           <Stop stopColor="#E57373" />
           <Stop offset="1" stopColor="#C62828" />
         </LinearGradient>
-        
+
         <LinearGradient
           id="paint2_linear_pizza_cheese"
           x1="50"
@@ -51,25 +57,25 @@ export const PizzaEmoji: React.FC<PizzaEmojiProps> = ({ size = 100 }) => {
         d="M80 70C75 75 66.5 80 50 80C33.5 80 25 75 20 70L50 20L80 70Z"
         fill="url(#paint0_linear_pizza_crust)"
       />
-      
+
       {/* Sauce tomate */}
       <Path
         d="M75 65C71.25 70 62.5 75 50 75C37.5 75 28.75 70 25 65L50 25L75 65Z"
         fill="url(#paint1_linear_pizza_sauce)"
       />
-      
+
       {/* Fromage */}
       <Path
         d="M70 60C67.5 65 60 70 50 70C40 70 32.5 65 30 60L50 30L70 60Z"
         fill="url(#paint2_linear_pizza_cheese)"
       />
-      
+
       {/* Pepperoni */}
       <Circle cx="45" cy="40" r="5" fill="#C62828" />
       <Circle cx="60" cy="50" r="5" fill="#C62828" />
       <Circle cx="40" cy="55" r="5" fill="#C62828" />
       <Circle cx="55" cy="65" r="5" fill="#C62828" />
-      
+
       {/* Basilic */}
       <Path
         d="M35 45C35 45 33 43 35 42C37 41 39 43 39 43"

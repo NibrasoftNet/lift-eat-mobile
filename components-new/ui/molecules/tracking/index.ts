@@ -26,4 +26,3 @@ export { default as StepCounter } from './StepCounter';
 export { default as StepsHistoryList } from './StepsHistoryList';
 
 // Versions Tailwind CSS
-

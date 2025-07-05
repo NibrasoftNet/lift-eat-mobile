@@ -21,13 +21,18 @@ export const getImageFromPicker = async (source: 'camera' | 'gallery') => {
     if (source === 'camera') {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        alert('Nous avons besoin de permissions pour accéder à votre appareil photo');
+        alert(
+          'Nous avons besoin de permissions pour accéder à votre appareil photo',
+        );
         return null;
       }
     } else {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        alert('Nous avons besoin de permissions pour accéder à votre bibliothèque d\'images');
+        alert(
+          "Nous avons besoin de permissions pour accéder à votre bibliothèque d'images",
+        );
         return null;
       }
     }
@@ -48,8 +53,8 @@ export const getImageFromPicker = async (source: 'camera' | 'gallery') => {
       return await ImagePicker.launchImageLibraryAsync(options);
     }
   } catch (error) {
-    console.error('Erreur lors de la sélection de l\'image:', error);
-    alert('Une erreur est survenue lors de la sélection de l\'image');
+    console.error("Erreur lors de la sélection de l'image:", error);
+    alert("Une erreur est survenue lors de la sélection de l'image");
     return null;
   }
 };

@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { Text } from '../../../../../../components-new/ui/atoms/base';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
@@ -27,27 +33,25 @@ const MealDetailsScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  
-  
   // Récupération de l'ID du repas depuis les paramètres d'URL
   const { id } = useLocalSearchParams();
   const mealId = Array.isArray(id) ? id[0] : id;
-  
+
   // État pour le mode sombre
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isFavorite, setIsFavorite] = useState<boolean | undefined>(undefined);
-  
+
   // Requête pour charger les détails du repas
-  const { 
-    data: mealData, 
-    isLoading, 
+  const {
+    data: mealData,
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useQuery({
     queryKey: ['meal', mealId],
     queryFn: () => mealPagesService.getMealDetails(Number(mealId)),
   });
-  
+
   // Extraction des données du repas depuis le résultat de l'API
   const meal = mealData?.data?.meal;
 
@@ -66,12 +70,13 @@ const MealDetailsScreen = () => {
         console.log('[MealDetails] Screen focused – refetching meal details');
         refetch();
       }
-    }, [mealId, refetch])
+    }, [mealId, refetch]),
   );
-  
+
   // Mutation pour mettre à jour le favori
   const toggleFavoriteMutation = useMutation({
-    mutationFn: (newStatus: boolean) => mealPagesService.toggleMealFavorite(Number(mealId), newStatus),
+    mutationFn: (newStatus: boolean) =>
+      mealPagesService.toggleMealFavorite(Number(mealId), newStatus),
     onSuccess: () => {
       // Invalider la requête des détails pour récupérer la valeur mise à jour
       queryClient.invalidateQueries({ queryKey: ['meal', mealId] });
@@ -97,51 +102,44 @@ const MealDetailsScreen = () => {
     },
     onError: (error) => {
       console.error('Erreur lors de la suppression:', error);
-      Alert.alert(
-        t('meal.error.title'),
-        t('meal.error.delete'),
-      );
-    }
+      Alert.alert(t('meal.error.title'), t('meal.error.delete'));
+    },
   });
-  
+
   // Gestionnaire pour la suppression du repas
   const handleDeleteMeal = () => {
-    Alert.alert(
-      t('meal.delete.title'),
-      t('meal.delete.confirm'),
-      [
-        {
-          text: t('common.cancel'),
-          style: "cancel"
-        },
-        { 
-          text: t('common.delete'), 
-          onPress: () => deleteMeal(),
-          style: "destructive"
-        }
-      ]
-    );
+    Alert.alert(t('meal.delete.title'), t('meal.delete.confirm'), [
+      {
+        text: t('common.cancel'),
+        style: 'cancel',
+      },
+      {
+        text: t('common.delete'),
+        onPress: () => deleteMeal(),
+        style: 'destructive',
+      },
+    ]);
   };
-  
+
   // Gestionnaire pour la navigation vers l'édition du repas
   // Gestionnaire de bascule favori
-const handleToggleFavorite = () => {
-  console.log('[Favorite] Toggle requested. Current isFavorite:', isFavorite);
-  const newStatus = !isFavorite; // If undefined, treats as true
-  console.log('[Favorite] New status to send:', newStatus);
+  const handleToggleFavorite = () => {
+    console.log('[Favorite] Toggle requested. Current isFavorite:', isFavorite);
+    const newStatus = !isFavorite; // If undefined, treats as true
+    console.log('[Favorite] New status to send:', newStatus);
 
-  toggleFavoriteMutation.mutate(newStatus, {
-    onSuccess: (data) => {
-      console.log('[Favorite] Mutation success. Response:', data);
-    },
-    onError: (error) => {
-      console.log('[Favorite] Mutation error (override):', error);
-    }
-  });
-  setIsFavorite(newStatus);
-};
+    toggleFavoriteMutation.mutate(newStatus, {
+      onSuccess: (data) => {
+        console.log('[Favorite] Mutation success. Response:', data);
+      },
+      onError: (error) => {
+        console.log('[Favorite] Mutation error (override):', error);
+      },
+    });
+    setIsFavorite(newStatus);
+  };
 
-const handleEditMeal = () => {
+  const handleEditMeal = () => {
     router.push(`/(root)/(tabs)/meals/my-meals/edit/${mealId}`);
   };
 
@@ -150,7 +148,7 @@ const handleEditMeal = () => {
     if (!image) {
       return 'https://via.placeholder.com/400x250?text=No+Image';
     }
-    
+
     try {
       // Si c'est déjà une chaîne au format data URI
       if (typeof image === 'string') {
@@ -160,40 +158,50 @@ const handleEditMeal = () => {
         // Si c'est une chaîne base64 sans le préfixe data URI
         return `data:image/jpeg;base64,${image}`;
       }
-      
+
       // Si c'est un Buffer
       if (image.toString) {
         return `data:image/jpeg;base64,${image.toString('base64')}`;
       }
-      
-      console.log('Format d\'image non pris en charge:', typeof image);
+
+      console.log("Format d'image non pris en charge:", typeof image);
       return 'https://via.placeholder.com/400x250?text=Format+Error';
     } catch (error) {
-      console.error('Erreur lors du traitement de l\'image:', error);
+      console.error("Erreur lors du traitement de l'image:", error);
       return 'https://via.placeholder.com/400x250?text=Error';
     }
   };
-  
+
   // Affichage pendant le chargement
   if (isLoading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
-  
+
   // Affichage en cas d'erreur
   if (error || !meal) {
     return (
-      <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[
+          styles.errorContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <Text style={[styles.errorText, { color: theme.colors.error }]}>
           {t('meal.error.loading')}
         </Text>
       </View>
     );
   }
-  
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: '#FFFFFF' }]}
@@ -213,7 +221,7 @@ const handleEditMeal = () => {
         onEdit={handleEditMeal}
         onDelete={handleDeleteMeal}
       />
-      
+
       {/* Informations nutritionnelles */}
       {meal && (
         <CircularNutritionProgress
@@ -225,27 +233,29 @@ const handleEditMeal = () => {
           size={110}
         />
       )}
-      
+
       {/* Type de repas et cuisine */}
       <GeneralInfoSection
         mealType={meal?.type || t('common.notSpecified')}
         cuisineType={meal?.cuisine || t('common.notSpecified')}
         isDarkMode={isDarkMode}
       />
-      
+
       {/* Liste des ingrédients */}
       <IngredientsList
-        ingredients={ingredients.map(ing => ({
+        ingredients={ingredients.map((ing) => ({
           id: ing.id?.toString() || '',
           name: ing.ingredient?.name || '', // Utilisation de la propriété ingredient qui contient les détails
           quantity: ing.quantity || 0,
           unit: ing.ingredient?.unit || 'g',
-          imageUrl: ing.ingredient?.image ? getImageUrl(ing.ingredient.image) : undefined, // Ajout de l'image de l'ingrédient
+          imageUrl: ing.ingredient?.image
+            ? getImageUrl(ing.ingredient.image)
+            : undefined, // Ajout de l'image de l'ingrédient
         }))}
         showDeleteButtons={false}
         isDarkMode={isDarkMode}
       />
-      
+
       {/* Instructions de préparation (utilise le champ description) */}
       <InstructionsSection
         instructions={meal?.description || ''}

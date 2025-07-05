@@ -7,7 +7,7 @@ import { useAppTheme } from '@/utils/providers/ThemeProvider';
 export default function NotFoundScreen() {
   // Utilisation du thème de l'application
   const theme = useAppTheme();
-  
+
   // Styles dynamiques basés sur le thème
   const successColor = theme.color('successLighter');
   const dynamicStyles = {
@@ -25,15 +25,17 @@ export default function NotFoundScreen() {
     },
     buttonText: {
       color: theme.colors.background,
-    }
+    },
   };
-  
+
   return (
     <>
-      <Stack.Screen options={{ 
-        title: 'Page introuvable',
-        headerShown: false
-      }} />
+      <Stack.Screen
+        options={{
+          title: 'Page introuvable',
+          headerShown: false,
+        }}
+      />
       <View style={[styles.container, dynamicStyles.container]}>
         <View style={styles.contentContainer}>
           {/* Élément visuel 404 */}
@@ -45,34 +47,32 @@ export default function NotFoundScreen() {
             >
               404
             </Text>
-            <View style={[styles.visualLine, { backgroundColor: successColor }]} />
+            <View
+              style={[styles.visualLine, { backgroundColor: successColor }]}
+            />
           </View>
-          
+
           {/* Texte principal */}
-          <Text 
-            variant="h1" 
-            bold
-            style={dynamicStyles.title}
-          >
+          <Text variant="h1" bold style={dynamicStyles.title}>
             Oups, page introuvable!
           </Text>
-          
-          <Text 
-            variant="body" 
+
+          <Text
+            variant="body"
             style={[styles.subtitle, dynamicStyles.subtitle]}
           >
             La page que vous recherchez n'existe pas ou a été déplacée.
           </Text>
-          
+
           {/* Bouton pour retourner à la page précédente */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.button, dynamicStyles.button]}
             onPress={() => router.back()}
           >
             <View style={styles.buttonContent}>
               <ArrowLeft size={20} color={theme.colors.background} />
-              <Text 
-                variant="button" 
+              <Text
+                variant="button"
                 semibold
                 style={[styles.buttonText, dynamicStyles.buttonText]}
               >

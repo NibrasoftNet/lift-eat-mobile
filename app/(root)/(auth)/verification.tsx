@@ -6,7 +6,13 @@
 
 import React, { useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSignUp } from '@clerk/clerk-expo';
@@ -32,17 +38,19 @@ export default function Verification() {
   const toast = useToast();
   const [verificationCode, setVerificationCode] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
+
   // Récupérer le contexte utilisateur pour le mettre à jour
   const userContext = useContext(UserContext);
   if (!userContext) {
-    throw new Error('UserContext doit être utilisé dans un UserContextProvider');
+    throw new Error(
+      'UserContext doit être utilisé dans un UserContextProvider',
+    );
   }
   const { setCurrentUser } = userContext;
-  
+
   // Clerk hooks pour la vérification
   const { isLoaded, signUp, setActive } = useSignUp();
-  
+
   // Fonction pour gérer la soumission du code
   const handleVerify = async () => {
     if (!isLoaded) {
@@ -62,7 +70,7 @@ export default function Verification() {
       });
       return;
     }
-    
+
     if (!verificationCode || verificationCode.length < 6) {
       toast.show({
         placement: 'top',
@@ -80,72 +88,85 @@ export default function Verification() {
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      console.log('[DEBUG - VERIFICATION] Tentative de vérification avec code:', verificationCode);
-      console.log('[DEBUG - VERIFICATION] État actuel de signUp:', { 
+      console.log(
+        '[DEBUG - VERIFICATION] Tentative de vérification avec code:',
+        verificationCode,
+      );
+      console.log('[DEBUG - VERIFICATION] État actuel de signUp:', {
         status: signUp.status,
         emailAddress: signUp.emailAddress,
-        createdUserId: signUp.createdUserId
+        createdUserId: signUp.createdUserId,
       });
-      
+
       // Vérifier le code avec Clerk
-      console.log('[DEBUG - VERIFICATION] Appel de attemptEmailAddressVerification');
+      console.log(
+        '[DEBUG - VERIFICATION] Appel de attemptEmailAddressVerification',
+      );
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: verificationCode,
       });
-      
+
       console.log('[DEBUG - VERIFICATION] Résultat de verification:', {
         status: completeSignUp.status,
-        createdSessionId: completeSignUp.createdSessionId || 'non disponible'
+        createdSessionId: completeSignUp.createdSessionId || 'non disponible',
       });
-      
+
       if (completeSignUp.status !== 'complete') {
         // La vérification a échoué
-        throw new Error("Échec de la vérification. Veuillez réessayer avec un code valide.");
+        throw new Error(
+          'Échec de la vérification. Veuillez réessayer avec un code valide.',
+        );
       }
-      
+
       // 1. Après la vérification réussie, vérifier si nous avons l'ID Clerk
       const clerkUserId = signUp.createdUserId;
       if (!clerkUserId) {
-        throw new Error('ID utilisateur Clerk non disponible après vérification');
+        throw new Error(
+          'ID utilisateur Clerk non disponible après vérification',
+        );
       }
 
       // 2. Activer la session pour l'utilisateur authentifié
       try {
         await setActive({ session: completeSignUp.createdSessionId });
-        logger.info(LogCategory.AUTH, 'Session activée pour l\'utilisateur', {
+        logger.info(LogCategory.AUTH, "Session activée pour l'utilisateur", {
           clerkId: clerkUserId,
-          email: signUp.emailAddress
+          email: signUp.emailAddress,
         });
       } catch (error) {
         console.warn("Erreur lors de l'activation de la session:", error);
         logger.warn(LogCategory.AUTH, 'Erreur activation session', {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
         // Continuer le processus même si l'activation échoue
       }
-      
+
       // 3. Utiliser le service d'inscription pour finaliser le processus
       // IMPORTANT: C'est ICI que nous synchronisons avec SQLite, après que le code OTP est confirmé
-      const registrationResult = await authRegistrationService.finalizeRegistration(
-        clerkUserId,
-        signUp.emailAddress || '',
-        '' // Le nom sera généré à partir de l'email par le service
-      );
-      
+      const registrationResult =
+        await authRegistrationService.finalizeRegistration(
+          clerkUserId,
+          signUp.emailAddress || '',
+          '', // Le nom sera généré à partir de l'email par le service
+        );
+
       // Vérifier le résultat de l'inscription
       if (!registrationResult.success || !registrationResult.userId) {
         // Log détaillé pour débogage
-        console.error('[DEBUG - VERIFICATION] Échec finalisation inscription:', registrationResult);
+        console.error(
+          '[DEBUG - VERIFICATION] Échec finalisation inscription:',
+          registrationResult,
+        );
         logger.error(LogCategory.AUTH, 'Échec finalisation inscription', {
           error: registrationResult.error,
           result: JSON.stringify(registrationResult),
-          clerkId: clerkUserId
+          clerkId: clerkUserId,
         });
-        
+
         // Afficher une alerte mais continuer (l'utilisateur est authentifié dans Clerk)
         toast.show({
           placement: 'top',
@@ -163,74 +184,93 @@ export default function Verification() {
         });
       } else {
         // SUCCÈS : Mettre à jour le contexte utilisateur avec l'ID SQLite valide
-        console.log('[DEBUG - VERIFICATION] Utilisateur créé avec succès:', { 
+        console.log('[DEBUG - VERIFICATION] Utilisateur créé avec succès:', {
           sqliteId: registrationResult.userId,
-          clerkId: clerkUserId 
+          clerkId: clerkUserId,
         });
-        
+
         setCurrentUser({
           id: registrationResult.userId,
           name: registrationResult.name || '',
           email: registrationResult.email || '',
-          clerkId: registrationResult.clerkId // Ajouter le clerkId au contexte utilisateur
+          clerkId: registrationResult.clerkId, // Ajouter le clerkId au contexte utilisateur
         });
-        
+
         // Persister l'ID dans AsyncStorage pour les futures sessions
         try {
           // 1. Sauvegarder dans AsyncStorage
-          await AsyncStorage.setItem('userId', String(registrationResult.userId));
-          console.log('[DEBUG - VERIFICATION] ID utilisateur sauvegardé dans AsyncStorage:', registrationResult.userId);
-          
+          await AsyncStorage.setItem(
+            'userId',
+            String(registrationResult.userId),
+          );
+          console.log(
+            '[DEBUG - VERIFICATION] ID utilisateur sauvegardé dans AsyncStorage:',
+            registrationResult.userId,
+          );
+
           // 2. Mettre à jour le SessionStore Zustand (CRUCIAL pour synchroniser toutes les sources d'état)
           try {
             // Importer useSessionStore si ce n'est pas déjà fait
-            const useSessionStore = require('@/utils/store/sessionStore').default;
-            
+            const useSessionStore =
+              require('@/utils/store/sessionStore').default;
+
             // Mettre à jour le user dans le store de session avec le nouvel ID
             useSessionStore.setState({
               user: {
                 id: registrationResult.userId,
-                email: registrationResult.email || ''
-              }
+                email: registrationResult.email || '',
+              },
             });
-            
-            console.log('[DEBUG - VERIFICATION] Session store (Zustand) mis à jour avec ID utilisateur:', registrationResult.userId);
+
+            console.log(
+              '[DEBUG - VERIFICATION] Session store (Zustand) mis à jour avec ID utilisateur:',
+              registrationResult.userId,
+            );
           } catch (sessionError) {
-            console.error('[DEBUG - VERIFICATION] Erreur lors de la mise à jour du session store:', sessionError);
+            console.error(
+              '[DEBUG - VERIFICATION] Erreur lors de la mise à jour du session store:',
+              sessionError,
+            );
             // Ne pas interrompre le flux même si la mise à jour du store échoue
           }
-          
-          logger.info(LogCategory.AUTH, 'ID utilisateur sauvegardé dans AsyncStorage', {
-            userId: registrationResult.userId
-          });
+
+          logger.info(
+            LogCategory.AUTH,
+            'ID utilisateur sauvegardé dans AsyncStorage',
+            {
+              userId: registrationResult.userId,
+            },
+          );
         } catch (error) {
-          console.error('[DEBUG - VERIFICATION] Erreur lors de la sauvegarde de l\'ID utilisateur:', error);
+          console.error(
+            "[DEBUG - VERIFICATION] Erreur lors de la sauvegarde de l'ID utilisateur:",
+            error,
+          );
           logger.error(LogCategory.AUTH, 'Erreur sauvegarde ID utilisateur', {
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
           // Continuer malgré l'erreur de stockage
         }
-      
-      // Afficher un message de succès
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title="Vérification réussie"
-              description="Votre compte a été vérifié avec succès!"
-            />
-          );
-        },
-      });
+
+        // Afficher un message de succès
+        toast.show({
+          placement: 'top',
+          render: ({ id }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title="Vérification réussie"
+                description="Votre compte a été vérifié avec succès!"
+              />
+            );
+          },
+        });
       }
-      
+
       // Rediriger vers le processus d'onboarding
       setTimeout(() => router.replace('/onboarding/onboarding-step1'), 1500);
-      
     } catch (error: any) {
       // Afficher l'erreur
       toast.show({
@@ -242,7 +282,10 @@ export default function Verification() {
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title="Erreur"
-              description={error.message || "Une erreur est survenue lors de la vérification"}
+              description={
+                error.message ||
+                'Une erreur est survenue lors de la vérification'
+              }
             />
           );
         },
@@ -251,27 +294,27 @@ export default function Verification() {
       setIsSubmitting(false);
     }
   };
-  
+
   // Fonction pour renvoyer un nouveau code
   const handleResendCode = async () => {
     if (!isLoaded) {
       console.log('[DEBUG - RESEND] Service Clerk non chargé');
       return;
     }
-    
+
     console.log('[DEBUG - RESEND] Tentative de renvoi du code OTP');
-    console.log('[DEBUG - RESEND] État actuel de signUp:', { 
+    console.log('[DEBUG - RESEND] État actuel de signUp:', {
       status: signUp.status,
       emailAddress: signUp.emailAddress,
-      createdUserId: signUp.createdUserId
+      createdUserId: signUp.createdUserId,
     });
-    
+
     try {
       // Préparer une nouvelle vérification d'email
       console.log('[DEBUG - RESEND] Appel de prepareEmailAddressVerification');
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       console.log('[DEBUG - RESEND] Nouveau code OTP envoyé avec succès');
-      
+
       toast.show({
         placement: 'top',
         render: ({ id }) => {
@@ -296,7 +339,9 @@ export default function Verification() {
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title="Erreur"
-              description={error.message || "Impossible d'envoyer un nouveau code"}
+              description={
+                error.message || "Impossible d'envoyer un nouveau code"
+              }
             />
           );
         },
@@ -309,53 +354,55 @@ export default function Verification() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           {/* Bouton retour */}
-          <TouchableOpacity 
-            style={styles.backButton} 
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={() => router.back()}
           >
             <ArrowLeftRegularBoldIcon width={24} height={24} color="#000" />
           </TouchableOpacity>
-          
+
           {/* En-tête avec titre et description */}
-          <TitleAndDescription 
-            title="Verification Code" 
-            description="Please enter the verification code sent to your email address to complete your registration." 
+          <TitleAndDescription
+            title="Verification Code"
+            description="Please enter the verification code sent to your email address to complete your registration."
           />
-          
+
           {/* Champ de code de vérification */}
           <View style={styles.formContainer}>
             <Text style={styles.inputLabel}>Verification Code</Text>
-            
+
             {/* Nouveau composant OTP avec cases individuelles */}
             <View style={styles.otpContainer}>
               {/* Génération de 6 cases pour le code OTP */}
-              {Array(6).fill(0).map((_, index) => {
-                // Récupérer le chiffre à cette position (s'il existe)
-                const digit = verificationCode[index] || '';
-                // Déterminer si cette case est active (la dernière avec une valeur ou la prochaine vide)
-                const isActive = index === verificationCode.length;
-                // Déterminer si cette case a une valeur
-                const hasValue = index < verificationCode.length;
-                
-                return (
-                  <TouchableOpacity 
-                    key={index}
-                    style={[
-                      styles.otpDigitContainer,
-                      isActive && styles.otpDigitContainerActive,
-                      hasValue && styles.otpDigitContainerFilled
-                    ]}
-                    // Focus sur le TextInput quand on touche une case
-                    onPress={() => {
-                      // Le TextInput invisible pourrait être référencé ici pour un focus
-                    }}
-                  >
-                    <Text style={styles.otpDigitText}>{digit}</Text>
-                  </TouchableOpacity>
-                );
-              })}
+              {Array(6)
+                .fill(0)
+                .map((_, index) => {
+                  // Récupérer le chiffre à cette position (s'il existe)
+                  const digit = verificationCode[index] || '';
+                  // Déterminer si cette case est active (la dernière avec une valeur ou la prochaine vide)
+                  const isActive = index === verificationCode.length;
+                  // Déterminer si cette case a une valeur
+                  const hasValue = index < verificationCode.length;
+
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.otpDigitContainer,
+                        isActive && styles.otpDigitContainerActive,
+                        hasValue && styles.otpDigitContainerFilled,
+                      ]}
+                      // Focus sur le TextInput quand on touche une case
+                      onPress={() => {
+                        // Le TextInput invisible pourrait être référencé ici pour un focus
+                      }}
+                    >
+                      <Text style={styles.otpDigitText}>{digit}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
             </View>
-            
+
             {/* Input invisible qui gère le clavier et la saisie */}
             <TextInput
               style={styles.hiddenInput}
@@ -365,7 +412,7 @@ export default function Verification() {
               onChangeText={setVerificationCode}
               autoFocus
             />
-            
+
             {/* Lien pour renvoyer le code */}
             <View style={styles.resendContainer}>
               <Text style={styles.normalText}>Didn't receive a code? </Text>
@@ -376,10 +423,10 @@ export default function Verification() {
           </View>
         </View>
       </ScrollView>
-      
+
       {/* Bouton Verify (fixed en bas) */}
       <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.verifyButton}
           onPress={handleVerify}
           activeOpacity={0.7}

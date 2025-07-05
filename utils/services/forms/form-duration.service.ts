@@ -3,10 +3,10 @@
  * Fournit des fonctionnalités pour la validation et le formatage des valeurs de durée
  */
 
-import { ValidationResult } from "@/utils/interfaces/form-input.interface";
-import { logger } from "@/utils/services/common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
-import { formInputService } from "@/utils/services/forms/form-input.service";
+import { ValidationResult } from '@/utils/interfaces/form-input.interface';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { formInputService } from '@/utils/services/forms/form-input.service';
 
 /**
  * Interface pour le service de gestion du formulaire de durée
@@ -18,11 +18,14 @@ export interface DurationFormServiceInterface {
    * @param options - Options de validation (min, max, requis)
    * @returns Le résultat de la validation
    */
-  validateDuration(value: any, options?: {
-    min?: number;
-    max?: number;
-    required?: boolean;
-  }): ValidationResult;
+  validateDuration(
+    value: any,
+    options?: {
+      min?: number;
+      max?: number;
+      required?: boolean;
+    },
+  ): ValidationResult;
 
   /**
    * Convertit une valeur en durée
@@ -50,11 +53,14 @@ class DurationFormService implements DurationFormServiceInterface {
    * @param options - Options de validation (min, max, requis)
    * @returns Le résultat de la validation
    */
-  validateDuration(value: any, options: {
-    min?: number;
-    max?: number;
-    required?: boolean;
-  } = {}): ValidationResult {
+  validateDuration(
+    value: any,
+    options: {
+      min?: number;
+      max?: number;
+      required?: boolean;
+    } = {},
+  ): ValidationResult {
     try {
       // Extraction des options
       const { min, max, required } = options;
@@ -74,17 +80,25 @@ class DurationFormService implements DurationFormServiceInterface {
 
       // Vérifications des contraintes min/max
       if (min !== undefined && numericValue < min) {
-        return formInputService.createValidationError(`La durée doit être d'au moins ${min} semaine(s)`);
+        return formInputService.createValidationError(
+          `La durée doit être d'au moins ${min} semaine(s)`,
+        );
       }
 
       if (max !== undefined && numericValue > max) {
-        return formInputService.createValidationError(`La durée ne peut pas dépasser ${max} semaine(s)`);
+        return formInputService.createValidationError(
+          `La durée ne peut pas dépasser ${max} semaine(s)`,
+        );
       }
 
       // Si toutes les vérifications sont passées, on retourne un succès
       return formInputService.createValidationSuccess();
     } catch (error) {
-      logger.error(LogCategory.FORM, 'Erreur lors de la validation de la durée', { error });
+      logger.error(
+        LogCategory.FORM,
+        'Erreur lors de la validation de la durée',
+        { error },
+      );
       return formInputService.createValidationError('Format de durée invalide');
     }
   }
@@ -111,7 +125,11 @@ class DurationFormService implements DurationFormServiceInterface {
       // Pour les autres types, on retourne la valeur par défaut
       return defaultValue;
     } catch (error) {
-      logger.error(LogCategory.FORM, 'Erreur lors de la conversion de la durée', { error });
+      logger.error(
+        LogCategory.FORM,
+        'Erreur lors de la conversion de la durée',
+        { error },
+      );
       return defaultValue;
     }
   }
@@ -125,11 +143,13 @@ class DurationFormService implements DurationFormServiceInterface {
     try {
       // Arrondir à 1 décimale
       const roundedValue = Math.round(value * 10) / 10;
-      
+
       // Formater avec l'unité appropriée
       return `${roundedValue} semaine${roundedValue !== 1 ? 's' : ''}`;
     } catch (error) {
-      logger.error(LogCategory.FORM, 'Erreur lors du formatage de la durée', { error });
+      logger.error(LogCategory.FORM, 'Erreur lors du formatage de la durée', {
+        error,
+      });
       return '0 semaine';
     }
   }

@@ -8,7 +8,7 @@ const AsyncStorage = require('@react-native-async-storage/async-storage');
 const resetOnboarding = async () => {
   try {
     await AsyncStorage.removeItem('hasSeenOnboarding');
-    console.log('✅ Statut d\'onboarding réinitialisé avec succès');
+    console.log("✅ Statut d'onboarding réinitialisé avec succès");
   } catch (error) {
     console.error('❌ Erreur lors de la réinitialisation:', error);
   }

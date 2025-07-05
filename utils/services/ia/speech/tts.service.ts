@@ -42,7 +42,7 @@ export class TTSService {
     logger.debug(LogCategory.IA, `TTSService: Configuration mise à jour`, {
       language: this.language,
       rate: this.rate,
-      pitch: this.pitch
+      pitch: this.pitch,
     });
   }
 
@@ -54,7 +54,12 @@ export class TTSService {
       const voices = await Speech.getAvailableVoicesAsync();
       return voices.length > 0;
     } catch (error) {
-      logger.error(LogCategory.IA, `TTSService: Erreur lors de la vérification de disponibilité: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `TTSService: Erreur lors de la vérification de disponibilité: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return false;
     }
   }
@@ -74,7 +79,7 @@ export class TTSService {
       onStart?: () => void;
       onDone?: () => void;
       onError?: (error: any) => void;
-    }
+    },
   ): Promise<void> {
     try {
       // Si déjà en train de parler, arrêter la synthèse en cours
@@ -91,7 +96,10 @@ export class TTSService {
         rate: options?.rate || this.rate,
         pitch: options?.pitch || this.pitch,
         onStart: () => {
-          logger.debug(LogCategory.IA, `TTSService: Début de la synthèse vocale`);
+          logger.debug(
+            LogCategory.IA,
+            `TTSService: Début de la synthèse vocale`,
+          );
           options?.onStart?.();
         },
         onDone: () => {
@@ -103,14 +111,23 @@ export class TTSService {
         onError: (error: any) => {
           this.isSpeaking = false;
           this.currentUtteranceId = null;
-          logger.error(LogCategory.IA, `TTSService: Erreur lors de la synthèse vocale: ${error}`);
+          logger.error(
+            LogCategory.IA,
+            `TTSService: Erreur lors de la synthèse vocale: ${error}`,
+          );
           options?.onError?.(error);
         },
       };
 
       // Démarrer la synthèse vocale
-      logger.info(LogCategory.IA, `TTSService: Synthèse vocale démarrée pour le texte: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
-      
+      logger.info(
+        LogCategory.IA,
+        `TTSService: Synthèse vocale démarrée pour le texte: "${text.substring(
+          0,
+          50,
+        )}${text.length > 50 ? '...' : ''}"`,
+      );
+
       // Stocker l'ID de l'énoncé en cours pour pouvoir l'arrêter si nécessaire
       // Speech.speak peut retourner différents types selon la plateforme
       this.currentUtteranceId = await Speech.speak(text, speechOptions);
@@ -130,7 +147,12 @@ export class TTSService {
     } catch (error) {
       this.isSpeaking = false;
       this.currentUtteranceId = null;
-      logger.error(LogCategory.IA, `TTSService: Erreur lors de la synthèse vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `TTSService: Erreur lors de la synthèse vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       throw error;
     }
   }
@@ -147,7 +169,12 @@ export class TTSService {
         logger.debug(LogCategory.IA, `TTSService: Synthèse vocale arrêtée`);
       }
     } catch (error) {
-      logger.error(LogCategory.IA, `TTSService: Erreur lors de l'arrêt de la synthèse vocale: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `TTSService: Erreur lors de l'arrêt de la synthèse vocale: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     }
   }
 
@@ -158,7 +185,12 @@ export class TTSService {
     try {
       return await Speech.isSpeakingAsync();
     } catch (error) {
-      logger.error(LogCategory.IA, `TTSService: Erreur lors de la vérification de l'état de la synthèse: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `TTSService: Erreur lors de la vérification de l'état de la synthèse: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return false;
     }
   }
@@ -170,7 +202,12 @@ export class TTSService {
     try {
       return await Speech.getAvailableVoicesAsync();
     } catch (error) {
-      logger.error(LogCategory.IA, `TTSService: Erreur lors de la récupération des voix disponibles: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.IA,
+        `TTSService: Erreur lors de la récupération des voix disponibles: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return [];
     }
   }

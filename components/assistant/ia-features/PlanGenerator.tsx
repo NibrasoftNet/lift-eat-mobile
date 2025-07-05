@@ -39,13 +39,18 @@ const PlanGenerator: React.FC<PlanGeneratorProps> = ({ onPlanGenerated }) => {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Générateur de Plan Nutritionnel</ThemedText>
+        <ThemedText style={styles.headerTitle}>
+          Générateur de Plan Nutritionnel
+        </ThemedText>
         <ThemedText style={styles.headerSubtitle}>
           Créez un programme alimentaire adapté à vos objectifs
         </ThemedText>
       </ThemedView>
-      
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         <UnifiedPlanGeneratorForm onPlanGenerated={handlePlanGenerated} />
       </ScrollView>
     </ThemedView>

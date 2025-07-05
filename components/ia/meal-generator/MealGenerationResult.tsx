@@ -11,10 +11,10 @@ interface MealGenerationResultProps {
   error: { message: string } | null;
 }
 
-const MealGenerationResult: React.FC<MealGenerationResultProps> = ({ 
-  meal, 
+const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
+  meal,
   loading,
-  error 
+  error,
 }) => {
   if (loading) {
     return (
@@ -28,7 +28,7 @@ const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
         }}
       >
         <VStack space="md">
-          <Text 
+          <Text
             style={{
               fontSize: 18,
               fontWeight: 'bold',
@@ -38,7 +38,8 @@ const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
             Génération en cours...
           </Text>
           <Text>
-            L'IA est en train de préparer votre repas. Cela peut prendre quelques secondes.
+            L'IA est en train de préparer votre repas. Cela peut prendre
+            quelques secondes.
           </Text>
         </VStack>
       </Box>
@@ -58,7 +59,7 @@ const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
         }}
       >
         <VStack space="md">
-          <Text 
+          <Text
             style={{
               fontSize: 18,
               fontWeight: 'bold',
@@ -67,9 +68,7 @@ const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
           >
             Une erreur est survenue
           </Text>
-          <Text style={{ color: '#FF5252' }}>
-            {error.message}
-          </Text>
+          <Text style={{ color: '#FF5252' }}>{error.message}</Text>
         </VStack>
       </Box>
     );
@@ -90,7 +89,7 @@ const MealGenerationResult: React.FC<MealGenerationResultProps> = ({
       }}
     >
       <VStack space="md">
-        <Text 
+        <Text
           style={{
             fontSize: 18,
             fontWeight: 'bold',

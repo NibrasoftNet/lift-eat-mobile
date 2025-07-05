@@ -25,26 +25,26 @@ export const SocialLoginGroup: React.FC<SocialLoginGroupProps> = ({
   onFacebookPress,
 }) => {
   const theme = useAppTheme();
-  
+
   // Pour le RegisterScreen, nous n'avons besoin que de Google et Apple
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.socialButton} 
+      <TouchableOpacity
+        style={styles.socialButton}
         onPress={onGooglePress}
         activeOpacity={0.7}
       >
         <GoogleIcon />
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.socialButton} 
+
+      <TouchableOpacity
+        style={styles.socialButton}
         onPress={onApplePress}
         activeOpacity={0.7}
       >
         <AppleIcon />
       </TouchableOpacity>
-      
+
       {showFacebook && (
         <TouchableOpacity
           style={styles.socialButton}

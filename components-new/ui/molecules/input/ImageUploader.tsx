@@ -4,7 +4,13 @@
  */
 
 import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, Image, Platform, Alert } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Platform,
+  Alert,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 
@@ -27,7 +33,7 @@ export interface ImageUploaderProps {
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   imageUri,
   onImageChange,
-  placeholder = "Ajouter une image",
+  placeholder = 'Ajouter une image',
   size = 120,
 }) => {
   const theme = useAppTheme();
@@ -36,12 +42,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   // Demander les permissions pour accéder à la galerie
   const requestGalleryPermission = async () => {
     if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
           'Permission requise',
           'Nous avons besoin de votre permission pour accéder à votre galerie de photos.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
         return false;
       }
@@ -58,7 +65,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         Alert.alert(
           'Permission requise',
           'Nous avons besoin de votre permission pour accéder à votre caméra.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
         return false;
       }
@@ -85,8 +92,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         onImageChange(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Erreur lors de la sélection d\'image:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection de l\'image.');
+      console.error("Erreur lors de la sélection d'image:", error);
+      Alert.alert(
+        'Erreur',
+        "Une erreur est survenue lors de la sélection de l'image.",
+      );
     } finally {
       setLoading(false);
     }
@@ -110,7 +120,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       }
     } catch (error) {
       console.error('Erreur lors de la prise de photo:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la prise de photo.');
+      Alert.alert(
+        'Erreur',
+        'Une erreur est survenue lors de la prise de photo.',
+      );
     } finally {
       setLoading(false);
     }
@@ -118,42 +131,38 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   // Afficher les options (caméra ou galerie)
   const showOptions = () => {
-    Alert.alert(
-      'Ajouter une image',
-      'Choisissez une source',
-      [
-        {
-          text: 'Prendre une photo',
-          onPress: takePhoto
-        },
-        {
-          text: 'Choisir depuis la galerie',
-          onPress: pickImage
-        },
-        {
-          text: 'Annuler',
-          style: 'cancel'
-        }
-      ]
-    );
+    Alert.alert('Ajouter une image', 'Choisissez une source', [
+      {
+        text: 'Prendre une photo',
+        onPress: takePhoto,
+      },
+      {
+        text: 'Choisir depuis la galerie',
+        onPress: pickImage,
+      },
+      {
+        text: 'Annuler',
+        style: 'cancel',
+      },
+    ]);
   };
 
   // Supprimer l'image sélectionnée
   const removeImage = () => {
     Alert.alert(
-      'Supprimer l\'image',
+      "Supprimer l'image",
       'Êtes-vous sûr de vouloir supprimer cette image ?',
       [
         {
           text: 'Annuler',
-          style: 'cancel'
+          style: 'cancel',
         },
         {
           text: 'Supprimer',
           onPress: () => onImageChange(null),
-          style: 'destructive'
-        }
-      ]
+          style: 'destructive',
+        },
+      ],
     );
   };
 
@@ -168,7 +177,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             width: size,
             height: size,
             borderColor: theme.colors.blueGrey,
-            backgroundColor: imageUri ? 'transparent' : theme.colors.backgroundGrey,
+            backgroundColor: imageUri
+              ? 'transparent'
+              : theme.colors.backgroundGrey,
           },
         ]}
         disabled={loading}
@@ -183,10 +194,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         ) : (
           // Affichage du placeholder
           <Box flex={1} alignItems="center" justifyContent="center" p={3}>
-            <ImageRegularBoldIcon 
-              width={size * 0.4} 
-              height={size * 0.4} 
-              color={theme.colors.blueGrey} 
+            <ImageRegularBoldIcon
+              width={size * 0.4}
+              height={size * 0.4}
+              color={theme.colors.blueGrey}
             />
             <Text
               variant="caption"
@@ -206,14 +217,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           onPress={showOptions}
           style={[
             styles.cameraButton,
-            { backgroundColor: theme.colors.primary }
+            { backgroundColor: theme.colors.primary },
           ]}
         >
-          <CameraRegularBoldIcon
-            width={20}
-            height={20}
-            color="white"
-          />
+          <CameraRegularBoldIcon width={20} height={20} color="white" />
         </TouchableOpacity>
       )}
     </Box>
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-  }
+  },
 });
 
 export default ImageUploader;

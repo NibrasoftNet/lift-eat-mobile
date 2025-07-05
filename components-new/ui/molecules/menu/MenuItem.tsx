@@ -21,30 +21,26 @@ interface MenuItemProps {
  * Composant MenuItem conforme au design Figma
  * Extrait du Figma Kit: node-id=3404-17376
  */
-const MenuItem: React.FC<MenuItemProps> = ({ 
-  icon: Icon, 
-  label, 
-  isActive = false, 
-  onPress 
+const MenuItem: React.FC<MenuItemProps> = ({
+  icon: Icon,
+  label,
+  isActive = false,
+  onPress,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs du design Figma
   const iconColor = isActive ? theme.color('primary') : '#9E9E9E';
 
   return (
-    <Pressable 
-      style={styles.pressable} 
-      onPress={onPress}
-    >
+    <Pressable style={styles.pressable} onPress={onPress}>
       <View style={styles.container}>
-        <Icon 
-          width={24}
-          height={24}
-          color={iconColor} 
-        />
-        <Text 
-          style={[styles.label, isActive ? styles.activeLabel : styles.inactiveLabel]}
+        <Icon width={24} height={24} color={iconColor} />
+        <Text
+          style={[
+            styles.label,
+            isActive ? styles.activeLabel : styles.inactiveLabel,
+          ]}
         >
           {label.toUpperCase()}
         </Text>

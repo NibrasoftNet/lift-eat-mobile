@@ -10,7 +10,9 @@ const MIN_WEIGHT = 0.01; // Poids minimum en grammes
  * Vérifie si une valeur nutritionnelle est valide
  */
 export const isValidNutritionalValue = (value: number): boolean => {
-  return typeof value === 'number' && value >= 0 && !isNaN(value) && isFinite(value);
+  return (
+    typeof value === 'number' && value >= 0 && !isNaN(value) && isFinite(value)
+  );
 };
 
 /**
@@ -83,7 +85,7 @@ export const validateNutritionalValues = (
 
   // Calculer les calories à partir des macros
   const calculatedCalories = carbs * 4 + fat * 9 + protein * 4;
-  
+
   // Permettre une marge d'erreur de 5% pour les arrondis
   const margin = calories * 0.05;
   return Math.abs(calculatedCalories - calories) <= margin;
@@ -115,7 +117,12 @@ export const calculateMacrosFromWeight = (
  */
 export const calculateProportionalMacros = (
   standardQuantity: number,
-  standardMacros: { calories: number; carbs: number; fat: number; protein: number },
+  standardMacros: {
+    calories: number;
+    carbs: number;
+    fat: number;
+    protein: number;
+  },
   newQuantity: number,
 ) => {
   // Vérification des entrées
@@ -136,7 +143,11 @@ export const calculateProportionalMacros = (
   if (!isValidCalories(newCalories)) {
     throw new Error('Calories calculées invalides');
   }
-  if (!isValidMacro(newCarbs) || !isValidMacro(newFat) || !isValidMacro(newProtein)) {
+  if (
+    !isValidMacro(newCarbs) ||
+    !isValidMacro(newFat) ||
+    !isValidMacro(newProtein)
+  ) {
     throw new Error('Macronutriments calculés invalides');
   }
 
@@ -150,7 +161,12 @@ export const calculateProportionalMacros = (
 
 // Utilisation d'un cache pour éviter les calculs redondants
 type AdjustmentKey = string;
-type AdjustmentValue = { calories: number; carbs: number; fat: number; protein: number };
+type AdjustmentValue = {
+  calories: number;
+  carbs: number;
+  fat: number;
+  protein: number;
+};
 const macroAdjustmentCache = new Map<AdjustmentKey, AdjustmentValue>();
 
 // Configuration des logs
@@ -177,14 +193,16 @@ export const adjustMacrosByFinalWeight = (
   finalMealWeight: number,
 ) => {
   logNutrition('[NUTRITION] === AJUSTEMENT MACROS ===');
-  logNutrition(`[NUTRITION] Poids total des ingrédients: ${totalIngredientsWeight}g`);
+  logNutrition(
+    `[NUTRITION] Poids total des ingrédients: ${totalIngredientsWeight}g`,
+  );
   logNutrition(`[NUTRITION] Poids final demandé: ${finalMealWeight}g`);
   logNutrition('[NUTRITION] Macros originales:', macros);
-  
+
   // Vérifier si le résultat est déjà en cache
   const cacheKey = `${macros.calories}-${macros.carbs}-${macros.fat}-${macros.protein}-${totalIngredientsWeight}-${finalMealWeight}`;
   if (macroAdjustmentCache.has(cacheKey)) {
-    logNutrition('[NUTRITION] Utilisation du cache pour l\'ajustement');
+    logNutrition("[NUTRITION] Utilisation du cache pour l'ajustement");
     return macroAdjustmentCache.get(cacheKey)!;
   }
   // Cas spécial: si l'un des poids est nul ou trop faible, retourner des macros à zéro
@@ -194,7 +212,7 @@ export const adjustMacrosByFinalWeight = (
       calories: 0,
       carbs: 0,
       fat: 0,
-      protein: 0
+      protein: 0,
     };
   }
 
@@ -203,7 +221,9 @@ export const adjustMacrosByFinalWeight = (
     // Si totalIngredientsWeight = 300g et finalMealWeight = 100g,
     // le facteur = 0.33 (ce qui signifie qu'on prend 1/3 des macros originales)
     const adjustmentFactor = finalMealWeight / totalIngredientsWeight;
-    logNutrition(`[NUTRITION] Facteur d'ajustement: ${adjustmentFactor.toFixed(3)}`);
+    logNutrition(
+      `[NUTRITION] Facteur d'ajustement: ${adjustmentFactor.toFixed(3)}`,
+    );
 
     // Ajustement et arrondissement des valeurs
     const adjustedMacros = {
@@ -213,7 +233,7 @@ export const adjustMacrosByFinalWeight = (
       protein: Math.round(macros.protein * adjustmentFactor),
     };
     logNutrition('[NUTRITION] Macros ajustées:', adjustedMacros);
-    
+
     // Stocker dans le cache pour éviter les calculs futurs
     const cacheKey = `${macros.calories}-${macros.carbs}-${macros.fat}-${macros.protein}-${totalIngredientsWeight}-${finalMealWeight}`;
     macroAdjustmentCache.set(cacheKey, adjustedMacros);
@@ -222,7 +242,11 @@ export const adjustMacrosByFinalWeight = (
     if (!isValidCalories(adjustedMacros.calories)) {
       return macros; // Retourner les macros originales si les calories ajustées sont invalides
     }
-    if (!isValidMacro(adjustedMacros.carbs) || !isValidMacro(adjustedMacros.fat) || !isValidMacro(adjustedMacros.protein)) {
+    if (
+      !isValidMacro(adjustedMacros.carbs) ||
+      !isValidMacro(adjustedMacros.fat) ||
+      !isValidMacro(adjustedMacros.protein)
+    ) {
       return macros; // Retourner les macros originales si les macros ajustées sont invalides
     }
 

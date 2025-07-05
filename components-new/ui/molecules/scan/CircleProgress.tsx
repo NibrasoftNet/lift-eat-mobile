@@ -43,7 +43,7 @@ const CircleProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        
+
         {/* Carbs */}
         <Circle
           cx={size / 2}
@@ -56,7 +56,7 @@ const CircleProgress = ({
           strokeDashoffset={getStrokeDashoffset(carbs)}
           strokeLinecap="round"
         />
-        
+
         {/* Protein */}
         <Circle
           cx={size / 2}
@@ -69,7 +69,7 @@ const CircleProgress = ({
           strokeDashoffset={getStrokeDashoffset(protein)}
           strokeLinecap="round"
         />
-        
+
         {/* Fat */}
         <Circle
           cx={size / 2}
@@ -83,7 +83,7 @@ const CircleProgress = ({
           strokeLinecap="round"
         />
       </Svg>
-      
+
       {/* Calories au centre */}
       <View style={styles.caloriesContainer}>
         <Text style={styles.caloriesText}>{calories}</Text>

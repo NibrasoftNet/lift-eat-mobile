@@ -59,7 +59,8 @@ export const useMealList = ({
       const filter = {
         search: searchQuery || undefined,
         type: selectedMealTypes.length === 1 ? selectedMealTypes[0] : undefined,
-        cuisine: selectedCuisines.length === 1 ? selectedCuisines[0] : undefined,
+        cuisine:
+          selectedCuisines.length === 1 ? selectedCuisines[0] : undefined,
         filter: activeTab,
       } as const;
       const result = await mealPagesService.getMealsList(filter);
@@ -72,7 +73,13 @@ export const useMealList = ({
   }, [searchQuery, selectedMealTypes, selectedCuisines, activeTab]);
 
   return useQuery<MealDisplay[]>({
-    queryKey: ['meals', activeTab, searchQuery, selectedMealTypes, selectedCuisines],
+    queryKey: [
+      'meals',
+      activeTab,
+      searchQuery,
+      selectedMealTypes,
+      selectedCuisines,
+    ],
     queryFn: fetchMeals,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

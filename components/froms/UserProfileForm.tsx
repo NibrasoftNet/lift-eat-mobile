@@ -15,14 +15,14 @@ import {
   FormControlHelper,
   FormControlHelperText,
   FormControlLabel,
-  FormControlLabelText
+  FormControlLabelText,
 } from '../ui/form-control';
 import { Input, InputField } from '../ui/input';
 import { AlertCircleIcon, Icon } from '../ui/icon';
 import {
   UserProfileFormData,
   UserProfileDefaultValuesProps,
-  userProfileSchema
+  userProfileSchema,
 } from '@/utils/validation/user/user-profile.validation';
 import { User, Images, Camera } from 'lucide-react-native';
 import { Pressable } from '@/components/ui/pressable';
@@ -33,7 +33,7 @@ import {
   ActionsheetDragIndicator,
   ActionsheetDragIndicatorWrapper,
   ActionsheetItem,
-  ActionsheetItemText
+  ActionsheetItemText,
 } from '@/components/ui/actionsheet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components-new/MultiPurposeToast';
@@ -60,24 +60,27 @@ export default function UserProfileForm({
   const toast = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
-  
+
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   // Préparer les valeurs par défaut normalisées via le service
-  const normalizedDefaultValues = useMemo(() => 
-    userProfileFormService.prepareDefaultValues(defaultValues), 
-  [defaultValues]);
-  
+  const normalizedDefaultValues = useMemo(
+    () => userProfileFormService.prepareDefaultValues(defaultValues),
+    [defaultValues],
+  );
+
   // Vérifier l'accès de l'utilisateur via le service
   useEffect(() => {
-    if (!userProfileFormService.validateUserAccess(
-      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
-      userId ? String(userId) : null, 
-      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
-      String(defaultValues.id), 
-      toast
-    )) {
+    if (
+      !userProfileFormService.validateUserAccess(
+        // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+        userId ? String(userId) : null,
+        // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+        String(defaultValues.id),
+        toast,
+      )
+    ) {
       router.back();
     }
   }, [userId, defaultValues.id, toast, router]);
@@ -102,18 +105,23 @@ export default function UserProfileForm({
 
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setActionSheetOpen(false); // Close the action sheet
-    
+
     try {
       // Déléguer au service la sélection d'image
       const result = await userProfileFormService.handleImageSelection(source);
-      
+
       if (!result?.canceled) {
         const base64Image = `data:image/jpeg;base64,${result?.assets[0].base64}`;
         setValue('profileImage', base64Image);
         setPhoto(base64Image);
       }
     } catch (error) {
-      logger.error(LogCategory.USER, `Error selecting image: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.USER,
+        `Error selecting image: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       toast.show({
         placement: 'top',
         render: ({ id }) => {
@@ -135,48 +143,61 @@ export default function UserProfileForm({
     mutationFn: async (data: UserProfileFormData) => {
       // Vérifier que l'utilisateur est authentifié
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when updating profile');
+        logger.error(
+          LogCategory.AUTH,
+          'User not authenticated when updating profile',
+        );
         throw new Error('You must be logged in to update your profile');
       }
-      
-      logger.info(LogCategory.USER, `Submitting profile update for user ${userId}`);
-      
+
+      logger.info(
+        LogCategory.USER,
+        `Submitting profile update for user ${userId}`,
+      );
+
       // Déléguer au service de formulaire pour préparer et valider les données
       const serviceResult = await userProfileFormService.submitForm(
         data,
         // Convertir l'ID numérique en chaîne pour respecter l'interface du service
-        userId ? String(userId) : ''
+        userId ? String(userId) : '',
       );
-      
+
       if (!serviceResult.success) {
         throw serviceResult.error || new Error(serviceResult.message);
       }
-      
+
       // Utiliser le service MCP via userPagesService pour la persistance
       // C'est l'architecture MCP en couches: UI -> PageService -> BusinessService -> MCPServer
       const updateResult = await userPagesService.updateUserProfileData(
         userId,
-        serviceResult.data
+        serviceResult.data,
       );
-      
+
       if (!updateResult.success) {
-        logger.error(LogCategory.DATABASE, 'Failed to update user profile via MCP', { 
-          userId, 
-          error: updateResult.error 
-        });
+        logger.error(
+          LogCategory.DATABASE,
+          'Failed to update user profile via MCP',
+          {
+            userId,
+            error: updateResult.error,
+          },
+        );
         throw new Error(updateResult.error || 'Failed to update profile');
       }
-      
-      logger.info(LogCategory.USER, `Successfully updated profile for user ${userId}`);
+
+      logger.info(
+        LogCategory.USER,
+        `Successfully updated profile for user ${userId}`,
+      );
       return { success: true };
     },
     onSuccess: async () => {
       // Utiliser l'utilitaire standardisé d'invalidation du cache
-      await invalidateCache(queryClient, DataType.USER, { 
+      await invalidateCache(queryClient, DataType.USER, {
         id: userId || undefined, // Gérer le cas où userId pourrait être null
-        invalidateRelated: true 
+        invalidateRelated: true,
       });
-      
+
       // Afficher le toast de succès
       toast.show({
         placement: 'top',
@@ -192,10 +213,13 @@ export default function UserProfileForm({
           );
         },
       });
-      
+
       // Ajouter un délai court pour permettre au toast d'être visible
       // puis rediriger automatiquement l'utilisateur vers la page précédente
-      logger.info(LogCategory.NAVIGATION, 'Redirection automatique après mise à jour du profil');
+      logger.info(
+        LogCategory.NAVIGATION,
+        'Redirection automatique après mise à jour du profil',
+      );
       setTimeout(() => {
         router.back();
       }, 1500); // Attendre 1.5 secondes pour que le toast soit visible
@@ -211,7 +235,11 @@ export default function UserProfileForm({
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title={t('profile.toast.updateErrorTitle')}
-              description={error instanceof Error ? error.message : t('profile.toast.updateErrorDescription')}
+              description={
+                error instanceof Error
+                  ? error.message
+                  : t('profile.toast.updateErrorDescription')
+              }
             />
           );
         },
@@ -221,11 +249,19 @@ export default function UserProfileForm({
 
   const onSubmit = async (data: UserProfileFormData) => {
     try {
-      logger.debug(LogCategory.FORM, 'Component initiating profile update submission');
+      logger.debug(
+        LogCategory.FORM,
+        'Component initiating profile update submission',
+      );
       await mutateAsync(data);
     } catch (error) {
       // L'erreur est déjà gérée par onError du useMutation
-      logger.error(LogCategory.FORM, `Unhandled error in profile form submission: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.FORM,
+        `Unhandled error in profile form submission: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     }
   };
 

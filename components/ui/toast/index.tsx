@@ -51,11 +51,11 @@ const toastTitleStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -122,11 +122,11 @@ const toastDescriptionStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -157,7 +157,7 @@ const Toast = React.forwardRef<React.ElementRef<typeof Root>, IToastProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 type IToastTitleProps = React.ComponentProps<typeof Text> & {
@@ -174,9 +174,8 @@ const ToastTitle = React.forwardRef<
     // Issue from react-native side
     // Hack for now, will fix this later
     if (children !== undefined && children !== null) {
-      const accessibilityMessage = typeof children === 'string' 
-        ? children 
-        : 'Notification';
+      const accessibilityMessage =
+        typeof children === 'string' ? children : 'Notification';
       AccessibilityInfo.announceForAccessibility(accessibilityMessage);
     }
   }, [children]);

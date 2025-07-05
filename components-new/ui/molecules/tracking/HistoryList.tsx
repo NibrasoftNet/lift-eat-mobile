@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, FlatList, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Image,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box } from '../../atoms/base';
 import { ArrowRightRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/ArrowRightRegularBoldIcon';
@@ -25,16 +32,26 @@ import { CupSizeMediumGlassRegularBoldIcon } from '../../../../assets/icons/figm
 import { CupSizeLargeGlassRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/CupSizeLargeGlassRegularBoldIcon';
 
 // Types pour les boissons dans l'historique
-export type DrinkType = 
+export type DrinkType =
   // Types d'eau
-  | 'waterGlass' | 'waterBottle' | 'waterGlassFlask' | 'waterBottlePointer'
-  | 'waterTumbler' | 'waterJug' 
+  | 'waterGlass'
+  | 'waterBottle'
+  | 'waterGlassFlask'
+  | 'waterBottlePointer'
+  | 'waterTumbler'
+  | 'waterJug'
   // Types de jus
-  | 'juice' | 'juiceStraw' 
+  | 'juice'
+  | 'juiceStraw'
   // Types de boissons chaudes
-  | 'tea' | 'coffee' | 'coffeeMug' | 'thermos' | 'chocolateDrink'
+  | 'tea'
+  | 'coffee'
+  | 'coffeeMug'
+  | 'thermos'
+  | 'chocolateDrink'
   // Autres types de boissons
-  | 'smoothie' | 'drinkBottle' 
+  | 'smoothie'
+  | 'drinkBottle'
   // Valeur par défaut pour compatibilité arrière
   | 'water';
 
@@ -73,7 +90,7 @@ interface HistoryListProps {
 /**
  * Composant HistoryList du Water Tracker
  * Affiche l'historique des consommations de boissons
- * 
+ *
  * node-id=48501:24041 (Dark=True)
  */
 export const HistoryList: React.FC<HistoryListProps> = ({
@@ -81,38 +98,38 @@ export const HistoryList: React.FC<HistoryListProps> = ({
   date,
   entries,
   onViewAll,
-  onEntryMenuPress
+  onEntryMenuPress,
 }) => {
   const theme = useAppTheme();
-  
+
   // Utilisation correcte du thème selon la structure vérifiée
   // Utilisation des tokens Figma pour les couleurs et styles
   const backgroundColor = dark
     ? '#121212' // Fond sombre basé sur le token Figma fill_1009XX
-    : theme.color('background');    // Fond clair par défaut
-    
+    : theme.color('background'); // Fond clair par défaut
+
   const textColor = dark
-    ? '#FFFFFF'                     // Texte blanc pour le mode sombre (style_HJ1Z6Y)
-    : '#212121';                    // Texte foncé pour le mode clair (style_HJ1Z6Y)
-  
+    ? '#FFFFFF' // Texte blanc pour le mode sombre (style_HJ1Z6Y)
+    : '#212121'; // Texte foncé pour le mode clair (style_HJ1Z6Y)
+
   const textSecondaryColor = dark
-    ? 'rgba(255, 255, 255, 0.7)'    // Texte secondaire en mode sombre avec opacité
-    : 'rgba(33, 33, 33, 0.7)';      // Texte secondaire en mode clair avec opacité
-  
+    ? 'rgba(255, 255, 255, 0.7)' // Texte secondaire en mode sombre avec opacité
+    : 'rgba(33, 33, 33, 0.7)'; // Texte secondaire en mode clair avec opacité
+
   const dividerColor = dark
-    ? 'rgba(255, 255, 255, 0.1)'  // Séparateur subtil en mode sombre (stroke_PKDIYC)
-    : 'rgba(0, 0, 0, 0.05)';      // Séparateur subtil en mode clair (stroke_PKDIYC)
-  
+    ? 'rgba(255, 255, 255, 0.1)' // Séparateur subtil en mode sombre (stroke_PKDIYC)
+    : 'rgba(0, 0, 0, 0.05)'; // Séparateur subtil en mode clair (stroke_PKDIYC)
+
   const accentColor = theme.color('primary'); // Couleur d'accent fill_DBR66N (#1A96F0)
-  
+
   // Rendu de l'icône correspondant au type de boisson selon les spécifications Figma
   const renderDrinkIcon = (type: DrinkType) => {
     const iconProps = {
       width: 24,
       height: 24,
-      style: styles.drinkIcon
+      style: styles.drinkIcon,
     };
-    
+
     switch (type) {
       // Types d'eau
       case 'water':
@@ -158,7 +175,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
         return <WaterGlassRegularBoldIcon {...iconProps} />;
     }
   };
-  
+
   // Rendu d'un élément de la liste
   const renderItem = ({ item }: { item: DrinkHistoryEntry }) => (
     <View style={styles.entryContainer}>
@@ -173,7 +190,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.entryRightSection}>
         <Text style={[styles.entryAmount, { color: textColor }]}>
           {item.amount} mL
@@ -191,29 +208,24 @@ export const HistoryList: React.FC<HistoryListProps> = ({
       </View>
     </View>
   );
-  
+
   return (
-    <Box
-      style={[
-        styles.container,
-        { backgroundColor }
-      ]}
-    >
+    <Box style={[styles.container, { backgroundColor }]}>
       {/* Date Header */}
-      <Text style={[styles.dateHeader, { color: textColor }]}>
-        {date}
-      </Text>
-      
+      <Text style={[styles.dateHeader, { color: textColor }]}>{date}</Text>
+
       {/* History Header Section */}
       <View style={styles.header}>
         <Text style={[styles.title, { color: textColor }]}>History</Text>
-        
+
         <TouchableOpacity
           style={styles.viewAllButton}
           onPress={onViewAll}
           activeOpacity={0.7}
         >
-          <Text style={[styles.viewAllText, { color: accentColor }]}>View All</Text>
+          <Text style={[styles.viewAllText, { color: accentColor }]}>
+            View All
+          </Text>
           <ArrowRightRegularBoldIcon
             width={16}
             height={16}
@@ -222,7 +234,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
           />
         </TouchableOpacity>
       </View>
-      
+
       {/* List of entries */}
       <FlatList
         data={entries}
@@ -241,7 +253,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16, // Basé sur la variable Figma rectangleCornerRadii
-    padding: 16,      // Basé sur la variable Figma paddingAll
+    padding: 16, // Basé sur la variable Figma paddingAll
     marginVertical: 8,
     overflow: 'hidden',
     borderWidth: 1,
@@ -251,79 +263,79 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Urbanist-Medium',
     marginBottom: 12,
-    opacity: 0.7
+    opacity: 0.7,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 16,
   },
   title: {
     fontSize: 17,
     fontFamily: 'Urbanist-SemiBold',
-    fontWeight: '600'
+    fontWeight: '600',
   },
   viewAllButton: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   viewAllText: {
     fontSize: 14,
     fontFamily: 'Urbanist-Medium',
-    marginRight: 4
+    marginRight: 4,
   },
   icon: {
-    marginLeft: 2
+    marginLeft: 2,
   },
   listContent: {
-    paddingTop: 4
+    paddingTop: 4,
   },
   divider: {
     height: 1,
     flex: 1, // Remplace width: '100%' pour éviter les erreurs de conversion
-    marginVertical: 12
+    marginVertical: 12,
   },
   entryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   entryLeftSection: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   drinkIcon: {
     width: 24,
     height: 24,
     marginRight: 12,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   entryTextContainer: {
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   drinkType: {
     fontSize: 15,
-    fontFamily: 'Urbanist-SemiBold'
+    fontFamily: 'Urbanist-SemiBold',
   },
   entryTime: {
     fontSize: 12,
     fontFamily: 'Urbanist-Regular',
-    marginTop: 2
+    marginTop: 2,
   },
   entryRightSection: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   entryAmount: {
     fontSize: 15,
     fontFamily: 'Urbanist-SemiBold',
-    marginRight: 8
+    marginRight: 8,
   },
   menuButton: {
-    padding: 4
-  }
+    padding: 4,
+  },
 });
 
 export default HistoryList;

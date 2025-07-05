@@ -80,7 +80,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   // Mettre à jour les éléments sélectionnés lorsque selectedValue change
   useEffect(() => {
     if (!multiple) {
-      const selected = items.find(item => item.value === selectedValue);
+      const selected = items.find((item) => item.value === selectedValue);
       setSelectedItems(selected ? [selected] : []);
     }
   }, [selectedValue, items, multiple]);
@@ -108,17 +108,21 @@ const Dropdown: React.FC<DropdownProps> = ({
   const handleSelect = (item: DropdownItem) => {
     if (type === 'checkbox' && multiple) {
       // En mode multiple, on ajoute ou supprime l'élément de la sélection
-      const isSelected = selectedItems.some(selected => selected.value === item.value);
+      const isSelected = selectedItems.some(
+        (selected) => selected.value === item.value,
+      );
       let newSelectedItems;
-      
+
       if (isSelected) {
         // Supprimer l'élément s'il est déjà sélectionné
-        newSelectedItems = selectedItems.filter(selected => selected.value !== item.value);
+        newSelectedItems = selectedItems.filter(
+          (selected) => selected.value !== item.value,
+        );
       } else {
         // Ajouter l'élément s'il n'est pas déjà sélectionné
         newSelectedItems = [...selectedItems, item];
       }
-      
+
       setSelectedItems(newSelectedItems);
       onSelect(item);
     } else {
@@ -131,7 +135,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   // Vérifier si un élément est sélectionné
   const isSelected = (item: DropdownItem) => {
-    return selectedItems.some(selected => selected.value === item.value);
+    return selectedItems.some((selected) => selected.value === item.value);
   };
 
   // Afficher le texte du bouton
@@ -149,7 +153,9 @@ const Dropdown: React.FC<DropdownProps> = ({
   const backgroundColor = darkMode ? theme.color('background') : 'white';
   const textColor = darkMode ? 'white' : theme.color('primary');
   const dropdownBackgroundColor = darkMode ? '#262A35' : 'white'; // Couleur exacte du Figma
-  const dividerColor = darkMode ? 'rgba(255, 255, 255, 0.1)' : theme.color('blueGrey') + '20';
+  const dividerColor = darkMode
+    ? 'rgba(255, 255, 255, 0.1)'
+    : theme.color('blueGrey') + '20';
 
   return (
     <Box style={containerStyle as ViewStyle}>
@@ -166,11 +172,8 @@ const Dropdown: React.FC<DropdownProps> = ({
       )}
 
       {/* Bouton du dropdown */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={toggleDropdown}
-      >
-        <View 
+      <TouchableOpacity activeOpacity={0.8} onPress={toggleDropdown}>
+        <View
           ref={buttonRef}
           style={[
             styles.button,
@@ -178,18 +181,20 @@ const Dropdown: React.FC<DropdownProps> = ({
               backgroundColor,
               borderColor: theme.color('blueGrey') + '40',
               borderRadius: 12, // Valeur exacte du Figma
-            }
+            },
           ]}
         >
-          <Text 
-            color={selectedItems.length > 0 ? textColor : theme.color('blueGrey')} 
+          <Text
+            color={
+              selectedItems.length > 0 ? textColor : theme.color('blueGrey')
+            }
             style={styles.buttonText}
           >
             {buttonText()}
           </Text>
-          <ArrowDown2RegularBoldIcon 
-            size={20} 
-            color={theme.color('blueGrey')} 
+          <ArrowDown2RegularBoldIcon
+            size={20}
+            color={theme.color('blueGrey')}
             style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
           />
         </View>
@@ -202,10 +207,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <Pressable 
-          style={styles.overlay} 
-          onPress={() => setIsOpen(false)}
-        >
+        <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
           <View
             style={[
               styles.dropdown,
@@ -216,7 +218,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 backgroundColor: dropdownBackgroundColor,
                 borderRadius: 10, // Valeur exacte du Figma
                 // Ombre exacte du Figma
-                shadowColor: "#000",
+                shadowColor: '#000',
                 shadowOffset: {
                   width: 0,
                   height: 20,
@@ -225,10 +227,10 @@ const Dropdown: React.FC<DropdownProps> = ({
                 shadowRadius: 100,
                 elevation: 5,
               },
-              dropdownStyle as ViewStyle
+              dropdownStyle as ViewStyle,
             ]}
           >
-            <ScrollView 
+            <ScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollContent}
@@ -238,35 +240,40 @@ const Dropdown: React.FC<DropdownProps> = ({
                   <TouchableOpacity
                     style={[
                       styles.item,
-                      { 
-                        backgroundColor: isSelected(item) && type === 'simple' 
-                          ? (darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)') 
-                          : 'transparent'
-                      }
+                      {
+                        backgroundColor:
+                          isSelected(item) && type === 'simple'
+                            ? darkMode
+                              ? 'rgba(255, 255, 255, 0.05)'
+                              : 'rgba(0, 0, 0, 0.05)'
+                            : 'transparent',
+                      },
                     ]}
                     onPress={() => handleSelect(item)}
                   >
-                    {item.icon && <View style={styles.iconContainer}>{item.icon}</View>}
-                    
-                    <Text 
-                      color={textColor} 
-                      style={styles.itemText}
-                    >
+                    {item.icon && (
+                      <View style={styles.iconContainer}>{item.icon}</View>
+                    )}
+
+                    <Text color={textColor} style={styles.itemText}>
                       {item.label}
                     </Text>
-                    
+
                     {type === 'checkbox' && isSelected(item) && (
-                      <TickSquareRegularBoldIcon size={20} color={theme.color('success')} />
+                      <TickSquareRegularBoldIcon
+                        size={20}
+                        color={theme.color('success')}
+                      />
                     )}
                   </TouchableOpacity>
-                  
+
                   {/* Séparateur (sauf pour le dernier élément) */}
                   {index < items.length - 1 && (
-                    <View 
+                    <View
                       style={[
-                        styles.divider, 
-                        { backgroundColor: dividerColor }
-                      ]} 
+                        styles.divider,
+                        { backgroundColor: dividerColor },
+                      ]}
                     />
                   )}
                 </React.Fragment>

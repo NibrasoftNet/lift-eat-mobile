@@ -5,13 +5,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, StyleProp, ViewStyle, Platform } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import Box from './base/Box';
 
@@ -33,22 +27,17 @@ const HomeIndicator: React.FC<HomeIndicatorProps> = ({
   indicatorStyle,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer la couleur selon le thème
   const indicatorColor = dark ? '#35383F' : '#E0E0E0'; // Couleurs exactes du Figma
-  
+
   // Ne pas afficher sur Android
   if (Platform.OS === 'android') {
     return null;
   }
-  
+
   return (
-    <Box
-      style={[
-        styles.container,
-        containerStyle as ViewStyle,
-      ]}
-    >
+    <Box style={[styles.container, containerStyle as ViewStyle]}>
       <View
         style={[
           styles.indicator,

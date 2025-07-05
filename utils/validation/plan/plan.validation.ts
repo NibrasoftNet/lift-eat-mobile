@@ -8,14 +8,35 @@ import { GoalEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 export const planSchema = z.object({
   name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères'),
   goal: z.nativeEnum(GoalEnum),
-  initialWeight: z.coerce.number().min(1, 'Le poids initial doit être d\'au moins 1'),
-  targetWeight: z.coerce.number().min(1, 'Le poids cible doit être d\'au moins 1'),
+  initialWeight: z.coerce
+    .number()
+    .min(1, "Le poids initial doit être d'au moins 1"),
+  targetWeight: z.coerce
+    .number()
+    .min(1, "Le poids cible doit être d'au moins 1"),
   unit: z.nativeEnum(WeightUnitEnum),
-  durationWeeks: z.coerce.number().min(1, 'La durée doit être d\'au moins 1 semaine'),
-  calories: z.coerce.number().min(0, 'Les calories ne peuvent pas être négatives').optional(),
-  carbs: z.coerce.number().min(0, 'Les glucides doivent être au moins 0%').max(100, 'Les glucides ne peuvent pas dépasser 100%').optional(),
-  protein: z.coerce.number().min(0, 'Les protéines doivent être au moins 0%').max(100, 'Les protéines ne peuvent pas dépasser 100%').optional(),
-  fat: z.coerce.number().min(0, 'Les lipides doivent être au moins 0%').max(100, 'Les lipides ne peuvent pas dépasser 100%').optional(),
+  durationWeeks: z.coerce
+    .number()
+    .min(1, "La durée doit être d'au moins 1 semaine"),
+  calories: z.coerce
+    .number()
+    .min(0, 'Les calories ne peuvent pas être négatives')
+    .optional(),
+  carbs: z.coerce
+    .number()
+    .min(0, 'Les glucides doivent être au moins 0%')
+    .max(100, 'Les glucides ne peuvent pas dépasser 100%')
+    .optional(),
+  protein: z.coerce
+    .number()
+    .min(0, 'Les protéines doivent être au moins 0%')
+    .max(100, 'Les protéines ne peuvent pas dépasser 100%')
+    .optional(),
+  fat: z.coerce
+    .number()
+    .min(0, 'Les lipides doivent être au moins 0%')
+    .max(100, 'Les lipides ne peuvent pas dépasser 100%')
+    .optional(),
 });
 
 /**

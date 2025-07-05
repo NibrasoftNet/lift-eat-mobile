@@ -6,10 +6,10 @@
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DrawerServiceInterface } from '@/utils/interfaces/drawer.interface';
-import { 
+import {
   DEFAULT_DEBOUNCE_DELAY,
   DEFAULT_PAGINATION_THRESHOLD,
-  DEFAULT_ESTIMATED_ITEM_SIZE 
+  DEFAULT_ESTIMATED_ITEM_SIZE,
 } from '@/utils/constants/ui-constants';
 
 /**
@@ -19,7 +19,7 @@ import {
 class DrawerUIService implements DrawerServiceInterface {
   // Stockage des timers pour le debounce
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
-  
+
   /**
    * Debounce un terme de recherche pour éviter trop d'appels à l'API
    * @param searchTerm - Le terme de recherche à debouncer
@@ -29,26 +29,26 @@ class DrawerUIService implements DrawerServiceInterface {
   debounceSearchTerm(
     searchTerm: string,
     callback: (term: string) => void,
-    delay: number = DEFAULT_DEBOUNCE_DELAY
+    delay: number = DEFAULT_DEBOUNCE_DELAY,
   ): void {
     // Identifiant unique pour ce callback
     const callbackId = `search-${Date.now()}`;
-    
+
     // Annuler le timer existant s'il existe
     if (this.debounceTimers.has(callbackId)) {
       clearTimeout(this.debounceTimers.get(callbackId));
     }
-    
+
     // Définir un nouveau timer
     const timer = setTimeout(() => {
       callback(searchTerm);
       this.debounceTimers.delete(callbackId);
     }, delay);
-    
+
     // Stocker le timer
     this.debounceTimers.set(callbackId, timer);
   }
-  
+
   /**
    * Génère un identifiant unique pour un élément de liste
    * @param prefix - Le préfixe pour l'identifiant (ex: 'ing' pour ingrédients)
@@ -61,7 +61,7 @@ class DrawerUIService implements DrawerServiceInterface {
     prefix: string,
     id: number,
     pageParam: number,
-    index: number
+    index: number,
   ): string {
     return `${prefix}-${id}-p${pageParam}-i${index}`;
   }
@@ -74,7 +74,7 @@ class DrawerUIService implements DrawerServiceInterface {
    */
   createEndReachedHandler(
     hasNextPage: boolean | undefined,
-    fetchNextPage: () => Promise<any>
+    fetchNextPage: () => Promise<any>,
   ): () => void {
     return () => {
       if (hasNextPage) {
@@ -92,10 +92,10 @@ class DrawerUIService implements DrawerServiceInterface {
     return {
       estimatedItemSize: DEFAULT_ESTIMATED_ITEM_SIZE,
       onEndReachedThreshold: DEFAULT_PAGINATION_THRESHOLD,
-      estimatedListSize: {height: 500, width: 400},
+      estimatedListSize: { height: 500, width: 400 },
       initialNumToRender: 10,
       maxToRenderPerBatch: 5,
-      windowSize: 5
+      windowSize: 5,
     };
   }
 

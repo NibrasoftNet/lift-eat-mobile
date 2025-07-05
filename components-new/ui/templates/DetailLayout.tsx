@@ -18,13 +18,13 @@ interface DetailLayoutProps {
 
 /**
  * DetailLayout component
- * 
+ *
  * Template dédié aux écrans de détail avec:
  * - HeaderBar avec titre et navigation back
  * - Support optionnel pour une image d'en-tête (ex: photo du repas)
  * - Zone de contenu scrollable
  * - Icône d'action optionnelle à droite
- * 
+ *
  * Reproduit fidèlement le design Figma sans aucune modification personnelle.
  */
 const DetailLayout: React.FC<DetailLayoutProps> = ({
@@ -47,7 +47,7 @@ const DetailLayout: React.FC<DetailLayoutProps> = ({
         backgroundColor="transparent"
         translucent
       />
-      
+
       <View className={`flex-1 ${bgColor}`}>
         <HeaderBar
           title={title}
@@ -57,13 +57,9 @@ const DetailLayout: React.FC<DetailLayoutProps> = ({
           onRightIconPress={onRightIconPress}
           darkMode={darkMode}
         />
-        
-        {headerImage && (
-          <View className="w-full">
-            {headerImage}
-          </View>
-        )}
-        
+
+        {headerImage && <View className="w-full">{headerImage}</View>}
+
         <ScrollView
           className="flex-1"
           contentContainerStyle={styles.scrollContent}

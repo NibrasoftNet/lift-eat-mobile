@@ -101,9 +101,15 @@ const Chips: React.FC<ChipsProps> = ({
       borderWidth = 1.5; // Valeur exacte du Figma
       break;
     case 'disabled':
-      backgroundColor = darkMode ? 'rgba(53, 56, 63, 0.5)' : 'rgba(224, 224, 224, 0.5)';
-      borderColor = darkMode ? 'rgba(53, 56, 63, 0.5)' : 'rgba(224, 224, 224, 0.5)';
-      textColor = darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(189, 189, 189, 0.5)';
+      backgroundColor = darkMode
+        ? 'rgba(53, 56, 63, 0.5)'
+        : 'rgba(224, 224, 224, 0.5)';
+      borderColor = darkMode
+        ? 'rgba(53, 56, 63, 0.5)'
+        : 'rgba(224, 224, 224, 0.5)';
+      textColor = darkMode
+        ? 'rgba(255, 255, 255, 0.5)'
+        : 'rgba(189, 189, 189, 0.5)';
       break;
     case 'close':
       backgroundColor = darkMode ? '#35383F' : '#E0E0E0';
@@ -113,17 +119,14 @@ const Chips: React.FC<ChipsProps> = ({
     case 'default':
     default:
       backgroundColor = darkMode ? '#35383F' : '#E0E0E0'; // Valeurs exactes du Figma
-      borderColor = darkMode ? '#35383F' : '#E0E0E0';     // Valeurs exactes du Figma
+      borderColor = darkMode ? '#35383F' : '#E0E0E0'; // Valeurs exactes du Figma
       textColor = darkMode ? 'white' : theme.color('primary');
       break;
   }
-  
+
   // Définir l'icône de fermeture si le type est 'close'
   const closeIcon = (
-    <CloseSquareRegularBoldIcon
-      size={iconSize}
-      color={textColor}
-    />
+    <CloseSquareRegularBoldIcon size={iconSize} color={textColor} />
   );
 
   // Rendre le composant inactif si désactivé
@@ -148,9 +151,7 @@ const Chips: React.FC<ChipsProps> = ({
       activeOpacity={0.7}
     >
       {/* Icône à gauche */}
-      {iconPosition === 'left' && icon && (
-        <Box mr={8}>{icon}</Box>
-      )}
+      {iconPosition === 'left' && icon && <Box mr={8}>{icon}</Box>}
 
       {/* Label */}
       <Text
@@ -160,7 +161,7 @@ const Chips: React.FC<ChipsProps> = ({
             color: textColor,
             fontSize,
             fontFamily: 'Urbanist', // Police exacte du Figma
-            fontWeight: '600',       // Poids exact du Figma
+            fontWeight: '600', // Poids exact du Figma
           },
           labelStyle as TextStyle,
         ]}
@@ -169,10 +170,8 @@ const Chips: React.FC<ChipsProps> = ({
       </Text>
 
       {/* Icône à droite ou icône de fermeture */}
-      {(iconPosition === 'right' && icon) && (
-        <Box ml={8}>{icon}</Box>
-      )}
-      
+      {iconPosition === 'right' && icon && <Box ml={8}>{icon}</Box>}
+
       {/* Icône de fermeture pour type 'close' */}
       {type === 'close' && (
         <Box ml={8}>

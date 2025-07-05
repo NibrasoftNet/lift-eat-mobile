@@ -3,13 +3,13 @@ import { View, StyleSheet } from 'react-native';
 import SearchBarWithScanner from '@/components-new/ui/molecules/search/SearchBarWithScanner';
 import FilterButton from '@/components-new/ui/molecules/interaction/FilterButton';
 import CreateMealButton from '@/components-new/ui/molecules/interaction/CreateMealButton';
-import SegmentedTabButtons, { TabOption } from '@/components-new/ui/molecules/navigation/SegmentedTabButtons';
+import SegmentedTabButtons, {
+  TabOption,
+} from '@/components-new/ui/molecules/navigation/SegmentedTabButtons';
 import { Text } from '@/components-new/ui/atoms/base';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { ThemeInterface } from '@/themeNew';
 import { useTranslation } from 'react-i18next';
-
-
 
 interface MealHeaderProps {
   searchQuery: string;
@@ -35,15 +35,15 @@ const MealHeader: FC<MealHeaderProps> = ({
   const { t } = useTranslation();
   const theme = useAppTheme();
   const isDark = theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
-
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
 
   return (
-
-    
     <View style={styles.container}>
       {/* Titre de l'écran */}
-          <Text style={styles.screenTitle}>{t('meal.title')}</Text>
+      <Text style={styles.screenTitle}>{t('meal.title')}</Text>
 
       <SearchBarWithScanner
         value={searchQuery}

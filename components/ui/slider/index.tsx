@@ -166,7 +166,7 @@ const Slider = React.forwardRef<
       isReversed = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <UISlider
@@ -182,7 +182,7 @@ const Slider = React.forwardRef<
         context={{ size, orientation, isReversed }}
       />
     );
-  }
+  },
 );
 
 type ISliderThumbProps = React.ComponentProps<typeof UISlider.Thumb> &

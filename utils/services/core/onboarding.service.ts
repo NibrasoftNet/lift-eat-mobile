@@ -29,19 +29,22 @@ export class OnboardingService {
     try {
       // Récupérer les données existantes
       const existingDataStr = await AsyncStorage.getItem(this.STORAGE_KEY);
-      const existingData: Partial<UserOnboardingData> = existingDataStr 
-        ? JSON.parse(existingDataStr) 
+      const existingData: Partial<UserOnboardingData> = existingDataStr
+        ? JSON.parse(existingDataStr)
         : {};
-      
+
       // Fusionner les données existantes avec les nouvelles
       const updatedData = { ...existingData, ...data };
-      
+
       // Enregistrer les données mises à jour
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedData));
-      
-      console.log('Données d\'onboarding sauvegardées avec succès');
+
+      console.log("Données d'onboarding sauvegardées avec succès");
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde des données d\'onboarding:', error);
+      console.error(
+        "Erreur lors de la sauvegarde des données d'onboarding:",
+        error,
+      );
       throw error;
     }
   }
@@ -53,10 +56,13 @@ export class OnboardingService {
     try {
       const dataStr = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (!dataStr) return null;
-      
+
       return JSON.parse(dataStr) as Partial<UserOnboardingData>;
     } catch (error) {
-      console.error('Erreur lors de la récupération des données d\'onboarding:', error);
+      console.error(
+        "Erreur lors de la récupération des données d'onboarding:",
+        error,
+      );
       return null;
     }
   }
@@ -69,7 +75,10 @@ export class OnboardingService {
       const userData = await this.getUserData();
       return userData?.onboardingCompleted === true;
     } catch (error) {
-      console.error('Erreur lors de la vérification du statut d\'onboarding:', error);
+      console.error(
+        "Erreur lors de la vérification du statut d'onboarding:",
+        error,
+      );
       return false;
     }
   }
@@ -87,23 +96,31 @@ export class OnboardingService {
   static async clearUserData(): Promise<void> {
     try {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
-      console.log('Données d\'onboarding effacées');
+      console.log("Données d'onboarding effacées");
     } catch (error) {
-      console.error('Erreur lors de la suppression des données d\'onboarding:', error);
+      console.error(
+        "Erreur lors de la suppression des données d'onboarding:",
+        error,
+      );
     }
   }
 
   /**
    * Calcule l'IMC (Indice de Masse Corporelle) basé sur les données utilisateur
    */
-  static calculateBMI(height: number, weight: number, heightUnit: 'cm' | 'ft', weightUnit: 'kg' | 'lbs'): number {
+  static calculateBMI(
+    height: number,
+    weight: number,
+    heightUnit: 'cm' | 'ft',
+    weightUnit: 'kg' | 'lbs',
+  ): number {
     // Convertir en unités métriques si nécessaire
     const heightInM = heightUnit === 'cm' ? height / 100 : height * 0.3048;
     const weightInKg = weightUnit === 'kg' ? weight : weight * 0.453592;
-    
+
     // Formule IMC = poids (kg) / taille² (m)
     const bmi = weightInKg / (heightInM * heightInM);
-    
+
     return parseFloat(bmi.toFixed(1));
   }
 }

@@ -20,19 +20,21 @@ export const useGemini = (): UseGeminiReturn => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Récupérer l'ID utilisateur courant et le définir pour IAService
       const userId = await getCurrentUserId();
       if (userId) {
         iaService.setCurrentUserId(userId);
       }
-      
+
       // Utiliser IAService qui enrichit le prompt avec le contexte utilisateur
       const result = await iaService.generateResponse(prompt);
       setResponse(result.text); // IAService retourne un objet avec text et action
       return result.text;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(
+        err instanceof Error ? err.message : 'An unknown error occurred',
+      );
       console.error('Error in useGemini hook:', err);
       return 'Désolé, une erreur est survenue lors du traitement de votre demande.';
     } finally {

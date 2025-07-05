@@ -15,12 +15,15 @@ interface CancelButtonProps {
  * CancelButton – pill-shaped secondary button for delete drawer.
  * Dimensions: 183×58, padding 16, fully rounded, subtle light surface background.
  */
-const CancelButton: React.FC<CancelButtonProps> = ({ shadow, onPress, label = 'Cancel' }) => {
-
+const CancelButton: React.FC<CancelButtonProps> = ({
+  shadow,
+  onPress,
+  label = 'Cancel',
+}) => {
   return (
     <Button
       variant="filled"
-      color="#F7FBF1"           /* light surface */
+      color="#F7FBF1" /* light surface */
       textColor="#000000"
       rounded="round"
       px={16}

@@ -28,25 +28,28 @@ const MealGenerator: React.FC<MealGeneratorProps> = ({ onMealGenerated }) => {
     logger.info(`Repas généré reçu dans MealGenerator`, 'handleMealGenerated', {
       mealName: meal.name,
       mealType: meal.type,
-      hasIngredients: meal.ingredients && meal.ingredients.length > 0
+      hasIngredients: meal.ingredients && meal.ingredients.length > 0,
     });
 
     // Empêcher l'affichage de multiples toasts dans un court intervalle (2 secondes)
     const now = Date.now();
     const elapsedSinceLastToast = now - lastToastTimeRef.current;
     const shouldShowToast = elapsedSinceLastToast > 2000;
-    
+
     if (shouldShowToast) {
       // Mettre à jour le temps du dernier toast
       lastToastTimeRef.current = now;
-      
+
       // Afficher le toast unique
       toast.show({
         placement: 'top',
         render: ({ id }) => {
           // Log de debug pour le toast
-          logger.debug(`Rendering toast with id ${id}`, 'handleMealGenerated.toast');
-          
+          logger.debug(
+            `Rendering toast with id ${id}`,
+            'handleMealGenerated.toast',
+          );
+
           return (
             <MultiPurposeToast
               id={id}
@@ -61,42 +64,50 @@ const MealGenerator: React.FC<MealGeneratorProps> = ({ onMealGenerated }) => {
 
     // Callback pour le composant parent
     if (onMealGenerated) {
-      logger.info('Appel du callback onMealGenerated du parent', 'handleMealGenerated');
+      logger.info(
+        'Appel du callback onMealGenerated du parent',
+        'handleMealGenerated',
+      );
       onMealGenerated(meal);
     }
   };
 
   return (
-    <Box style={{
-      flex: 1,
-      backgroundColor: '#FFFFFF',
-    }}>
-      <Box style={{
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-      }}>
+    <Box
+      style={{
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+      }}
+    >
+      <Box
+        style={{
+          padding: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: '#EEEEEE',
+        }}
+      >
         <VStack space="xs">
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            marginBottom: 8,
-          }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              marginBottom: 8,
+            }}
+          >
             Générateur de Repas IA
           </Text>
-          <Text style={{
-            fontSize: 14,
-            opacity: 0.7,
-          }}>
+          <Text
+            style={{
+              fontSize: 14,
+              opacity: 0.7,
+            }}
+          >
             Créez des repas personnalisés adaptés à vos besoins nutritionnels
           </Text>
         </VStack>
       </Box>
-      
-      <ScrollView 
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16 }}
-      >
+
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         <MealGeneratorForm onMealGenerated={handleMealGenerated} />
       </ScrollView>
     </Box>

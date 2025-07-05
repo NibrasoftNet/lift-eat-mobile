@@ -16,67 +16,67 @@ export interface TextInputFieldProps {
    * Valeur du champ
    */
   value: string;
-  
+
   /**
    * Callback appelé quand la valeur change
    */
   onChangeText: (text: string) => void;
-  
+
   /**
    * Label du champ
    */
   label?: string;
-  
+
   /**
    * Texte d'indication quand le champ est vide
    */
   placeholder?: string;
-  
+
   /**
    * Message d'erreur à afficher
    */
   error?: string;
-  
+
   /**
    * Largeur du champ
    */
   width?: number;
-  
+
   /**
    * Style de variante (outline, filled, etc.)
    */
   variant?: 'outline' | 'filled' | 'filledLight' | 'underlined';
-  
+
   /**
    * Taille du champ
    */
   size?: 'sm' | 'md' | 'lg';
-  
+
   /**
    * Si le champ est désactivé
    */
   isDisabled?: boolean;
-  
+
   /**
    * Si le champ est en lecture seule
    */
   isReadOnly?: boolean;
-  
+
   /**
    * Callback pour effacer le contenu
    */
   onClear?: () => void;
-  
+
   /**
    * Si le champ a un bouton pour effacer le contenu
    */
   isClearable?: boolean;
-  
+
   /**
    * Arrondi des coins
    */
   rounded?: RadiiKeys | number;
-  
+
   /**
    * Espacements
    */
@@ -112,12 +112,12 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   ml,
 }) => {
   const theme = useAppTheme();
-  
+
   // Créer une fonction onClear si isClearable est true et qu'aucune fonction onClear n'est fournie
-  const handleClear = isClearable 
+  const handleClear = isClearable
     ? onClear || (() => onChangeText(''))
     : undefined;
-  
+
   return (
     <Box m={m} mt={mt} mr={mr} mb={mb} ml={ml}>
       <Input

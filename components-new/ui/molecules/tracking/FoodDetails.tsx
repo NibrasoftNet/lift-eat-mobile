@@ -32,7 +32,7 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({
   isDarkMode = false,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs exactes du design Figma
   const backgroundColor = isDarkMode ? '#212121' : '#FFFFFF';
   const textPrimaryColor = isDarkMode ? '#FFFFFF' : '#212121';
@@ -44,17 +44,15 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View style={styles.emojiContainer}>
-            {emoji === '🍔' ? 
-            <HamburgerEmoji size={30} /> : 
-            <Text style={[styles.emoji, { color: textPrimaryColor }]}>{emoji}</Text>
-          }
+            {emoji === '🍔' ? (
+              <HamburgerEmoji size={30} />
+            ) : (
+              <Text style={[styles.emoji, { color: textPrimaryColor }]}>
+                {emoji}
+              </Text>
+            )}
           </View>
-          <Text 
-            style={[
-              styles.foodName, 
-              { color: textPrimaryColor }
-            ]}
-          >
+          <Text style={[styles.foodName, { color: textPrimaryColor }]}>
             {foodName}
           </Text>
         </View>
@@ -105,21 +103,13 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={styles.expandButton} 
-        onPress={onExpandPress}
-      >
-        <Text 
-          style={[
-            styles.expandText,
-            { color: textSecondaryColor }
-          ]}
-        >
+      <TouchableOpacity style={styles.expandButton} onPress={onExpandPress}>
+        <Text style={[styles.expandText, { color: textSecondaryColor }]}>
           Expand for more details
         </Text>
-        <ArrowDownCurvedBoldIcon 
-          width={16} 
-          height={16} 
+        <ArrowDownCurvedBoldIcon
+          width={16}
+          height={16}
           color={textSecondaryColor}
         />
       </TouchableOpacity>

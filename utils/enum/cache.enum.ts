@@ -10,5 +10,5 @@ export enum DataType {
   USER_DETAILS = 'user-details',
   USER_PREFERENCES = 'user-preferences',
   USER_CONTEXT = 'user-context',
-  MEAL = 'meal'
+  MEAL = 'meal',
 }

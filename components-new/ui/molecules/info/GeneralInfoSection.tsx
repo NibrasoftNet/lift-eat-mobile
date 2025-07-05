@@ -36,7 +36,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 }) => {
   const theme = useTheme();
   const isDark = isDarkMode || theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
 
   // Couleurs selon le thème
   const textColor = isDark ? '#FFFFFF' : '#212121';
@@ -46,48 +49,37 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   // Préparation des items d'information
   const infoItems: GeneralInfoItem[] = [
     {
-      icon: (
-        <ChartRegularBoldIcon 
-          width={20} 
-          height={20} 
-          color= '#A4C73B' 
-        />
-      ),
+      icon: <ChartRegularBoldIcon width={20} height={20} color="#A4C73B" />,
       label: 'Type',
       value: mealType,
     },
     {
       icon: (
-        <CategoryRegularBoldIcon 
-          width={20} 
-          height={20} 
-          color={'#A4C73B'} 
-        />
+        <CategoryRegularBoldIcon width={20} height={20} color={'#A4C73B'} />
       ),
       label: 'Cuisine',
       value: cuisineType,
     },
   ];
-  
+
   return (
     <View style={styles.container}>
       {infoItems.map((item, index) => (
-        <View 
-          key={`info-item-${index}`} 
+        <View
+          key={`info-item-${index}`}
           style={[
             styles.itemContainer,
             index < infoItems.length - 1 ? styles.itemWithDivider : null,
           ]}
         >
-          <View style={styles.iconContainer}>
-            {item.icon}
-          </View>
+          <View style={styles.iconContainer}>{item.icon}</View>
           <View style={styles.textContainer}>
             <Text style={[styles.label, { color: secondaryTextColor }]}>
               {item.label}
             </Text>
             <Text style={[styles.value, { color: textColor }]}>
-              {item.value}{item.unit || ''}
+              {item.value}
+              {item.unit || ''}
             </Text>
           </View>
         </View>

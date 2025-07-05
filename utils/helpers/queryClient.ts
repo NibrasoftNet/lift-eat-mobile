@@ -1,6 +1,6 @@
 /**
  * Helper pour accéder au queryClient global
- * 
+ *
  * Ce fichier permet d'accéder à l'instance QueryClient depuis n'importe où
  * dans l'application, même en dehors des composants React.
  */

@@ -1,9 +1,9 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useToast, Toast, ToastDescription } from "@gluestack-ui/themed";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useToast, Toast, ToastDescription } from '@gluestack-ui/themed';
 import {
   Modal,
   ModalBackdrop,
@@ -12,16 +12,16 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-} from "@/components/ui/modal";
-import { Button, ButtonText } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
-import { Heading } from "@/components/ui/heading";
-import { CloseIcon } from "@/components/ui/icon";
-import { forgetSchema } from "../../utils/validation/auth/forget-schema.validation";
-import { ResetPasswordData } from "../../utils/interfaces/auth.interface";
-import { useModalContext } from "../../utils/providers/ModalProvider";
-import { forgetPasswordModalUIService } from "../../utils/services/ui/forget-password-modal-ui.service";
-import { FormInput } from "../forms/FormInput";
+} from '@/components/ui/modal';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { Heading } from '@/components/ui/heading';
+import { CloseIcon } from '@/components/ui/icon';
+import { forgetSchema } from '../../utils/validation/auth/forget-schema.validation';
+import { ResetPasswordData } from '../../utils/interfaces/auth.interface';
+import { useModalContext } from '../../utils/providers/ModalProvider';
+import { forgetPasswordModalUIService } from '../../utils/services/ui/forget-password-modal-ui.service';
+import { FormInput } from '../forms/FormInput';
 
 export function ForgetPasswordModal() {
   const router = useRouter();
@@ -77,7 +77,8 @@ export function ForgetPasswordModal() {
         </ModalHeader>
         <ModalBody>
           <Text>
-            Entrez votre email pour recevoir les instructions de réinitialisation
+            Entrez votre email pour recevoir les instructions de
+            réinitialisation
           </Text>
           <FormInput
             control={control}

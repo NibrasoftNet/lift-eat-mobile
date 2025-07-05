@@ -12,16 +12,14 @@ const TitleDivider: React.FC<TitleDividerProps> = ({
   isDarkMode = false,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs exactes du design Figma
   const textColor = '#9E9E9E'; // Gris moyen pour le texte
   const lineColor = '#EEEEEE'; // Gris clair pour la ligne
-  
+
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: textColor }]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: textColor }]}>{title}</Text>
       <View style={[styles.line, { backgroundColor: lineColor }]} />
     </View>
   );

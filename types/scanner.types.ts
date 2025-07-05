@@ -3,7 +3,7 @@ import { ScanHistoryItem } from '@/types/scanhistory.types';
 
 // Type intermédiaire pour le résultat du scan avec le code-barres
 export interface ScanResultWithCode extends ScanResult {
-  productResult: ProductResult & { code: string } | null;
+  productResult: (ProductResult & { code: string }) | null;
 }
 
 // Type pour le composant ScannerScreen

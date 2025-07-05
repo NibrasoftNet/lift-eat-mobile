@@ -12,7 +12,7 @@ export const VoiceSettings = () => {
   const { autoReadEnabled, setAutoReadEnabled, configureVoice } = useIAVoice();
   const [rate, setRate] = useState<number>(1.0);
   const [pitch, setPitch] = useState<number>(1.0);
-  
+
   // Créer des PanResponders pour les sliders
   const ratePanResponder = React.useRef(
     PanResponder.create({
@@ -20,47 +20,65 @@ export const VoiceSettings = () => {
       onPanResponderMove: (evt, gestureState) => {
         // Obtenir l'élément parent pour calculer la position relative
         const element = evt.currentTarget as any;
-        element.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
-          // Calculer la position relative du toucher par rapport à l'élément
-          const touchX = evt.nativeEvent.pageX - pageX;
-          // Calculer la valeur du slider basée sur la position du toucher
-          const newValue = 0.5 + (touchX / width) * 1.0;
-          // Limiter la valeur entre 0.5 et 1.5
-          const clampedValue = Math.max(0.5, Math.min(1.5, newValue));
-          // Arrondir à 0.1 près
-          const roundedValue = Math.round(clampedValue * 10) / 10;
-          setRate(roundedValue);
-        });
+        element.measure(
+          (
+            x: number,
+            y: number,
+            width: number,
+            height: number,
+            pageX: number,
+            pageY: number,
+          ) => {
+            // Calculer la position relative du toucher par rapport à l'élément
+            const touchX = evt.nativeEvent.pageX - pageX;
+            // Calculer la valeur du slider basée sur la position du toucher
+            const newValue = 0.5 + (touchX / width) * 1.0;
+            // Limiter la valeur entre 0.5 et 1.5
+            const clampedValue = Math.max(0.5, Math.min(1.5, newValue));
+            // Arrondir à 0.1 près
+            const roundedValue = Math.round(clampedValue * 10) / 10;
+            setRate(roundedValue);
+          },
+        );
       },
-    })
+    }),
   ).current;
-  
+
   const pitchPanResponder = React.useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (evt, gestureState) => {
         // Obtenir l'élément parent pour calculer la position relative
         const element = evt.currentTarget as any;
-        element.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
-          // Calculer la position relative du toucher par rapport à l'élément
-          const touchX = evt.nativeEvent.pageX - pageX;
-          // Calculer la valeur du slider basée sur la position du toucher
-          const newValue = 0.5 + (touchX / width) * 1.0;
-          // Limiter la valeur entre 0.5 et 1.5
-          const clampedValue = Math.max(0.5, Math.min(1.5, newValue));
-          // Arrondir à 0.1 près
-          const roundedValue = Math.round(clampedValue * 10) / 10;
-          setPitch(roundedValue);
-        });
+        element.measure(
+          (
+            x: number,
+            y: number,
+            width: number,
+            height: number,
+            pageX: number,
+            pageY: number,
+          ) => {
+            // Calculer la position relative du toucher par rapport à l'élément
+            const touchX = evt.nativeEvent.pageX - pageX;
+            // Calculer la valeur du slider basée sur la position du toucher
+            const newValue = 0.5 + (touchX / width) * 1.0;
+            // Limiter la valeur entre 0.5 et 1.5
+            const clampedValue = Math.max(0.5, Math.min(1.5, newValue));
+            // Arrondir à 0.1 près
+            const roundedValue = Math.round(clampedValue * 10) / 10;
+            setPitch(roundedValue);
+          },
+        );
       },
-    })
+    }),
   ).current;
 
   // Appliquer les changements de configuration
   useEffect(() => {
     configureVoice({
       rate,
-      pitch
+      pitch,
     });
   }, [rate, pitch, configureVoice]);
 
@@ -76,8 +94,8 @@ export const VoiceSettings = () => {
             value={autoReadEnabled}
             onValueChange={(value) => setAutoReadEnabled(value)}
             trackColor={{
-              false: "#D1D5DB",
-              true: "#4F46E5",
+              false: '#D1D5DB',
+              true: '#4F46E5',
             }}
             thumbColor="#FFFFFF"
           />
@@ -88,14 +106,24 @@ export const VoiceSettings = () => {
           <Text style={styles.settingLabel}>Vitesse de lecture</Text>
           <View style={styles.controlRow}>
             <Volume size={18} color="#666" />
-            <View 
+            <View
               style={styles.sliderContainer}
               {...ratePanResponder.panHandlers}
             >
               <View style={styles.sliderTrack}>
-                <View style={[styles.sliderFilled, { width: `${((rate - 0.5) / 1) * 100}%` }]} />
+                <View
+                  style={[
+                    styles.sliderFilled,
+                    { width: `${((rate - 0.5) / 1) * 100}%` },
+                  ]}
+                />
               </View>
-              <View style={[styles.sliderThumb, { left: `${((rate - 0.5) / 1) * 100}%` }]} />
+              <View
+                style={[
+                  styles.sliderThumb,
+                  { left: `${((rate - 0.5) / 1) * 100}%` },
+                ]}
+              />
             </View>
             <Volume2 size={18} color="#666" />
           </View>
@@ -107,14 +135,24 @@ export const VoiceSettings = () => {
           <Text style={styles.settingLabel}>Hauteur de la voix</Text>
           <View style={styles.controlRow}>
             <Volume1 size={18} color="#666" />
-            <View 
+            <View
               style={styles.sliderContainer}
               {...pitchPanResponder.panHandlers}
             >
               <View style={styles.sliderTrack}>
-                <View style={[styles.sliderFilled, { width: `${((pitch - 0.5) / 1) * 100}%` }]} />
+                <View
+                  style={[
+                    styles.sliderFilled,
+                    { width: `${((pitch - 0.5) / 1) * 100}%` },
+                  ]}
+                />
               </View>
-              <View style={[styles.sliderThumb, { left: `${((pitch - 0.5) / 1) * 100}%` }]} />
+              <View
+                style={[
+                  styles.sliderThumb,
+                  { left: `${((pitch - 0.5) / 1) * 100}%` },
+                ]}
+              />
             </View>
             <Volume2 size={18} color="#666" />
           </View>
@@ -122,7 +160,8 @@ export const VoiceSettings = () => {
         </View>
 
         <Text style={styles.hint}>
-          La lecture automatique permet à l'assistant de lire à voix haute ses réponses dès qu'elles sont reçues.
+          La lecture automatique permet à l'assistant de lire à voix haute ses
+          réponses dès qu'elles sont reçues.
         </Text>
       </View>
     </View>
@@ -214,7 +253,6 @@ const styles = StyleSheet.create({
     top: -6,
     marginLeft: -8,
   },
-
 });
 
 export default VoiceSettings;

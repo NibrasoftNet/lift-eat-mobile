@@ -8,7 +8,10 @@ const AnalyticsScreen: React.FC = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button title="Open Plan Options" onPress={() => setDrawerVisible(true)} />
+      <Button
+        title="Open Plan Options"
+        onPress={() => setDrawerVisible(true)}
+      />
 
       <PlanOptionsDrawer
         visible={drawerVisible}

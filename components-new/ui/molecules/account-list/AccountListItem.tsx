@@ -27,7 +27,7 @@ const AccountListItem: React.FC<AccountListItemProps> = ({
   style,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs selon le thème (fidèles au design Figma)
   const colors = {
     background: isDarkMode ? '#1F222A' : theme.colors.background,
@@ -39,7 +39,7 @@ const AccountListItem: React.FC<AccountListItemProps> = ({
     chevron: isDarkMode ? '#EEEEEE' : '#616161',
     border: isDarkMode ? '#35383F' : theme.colors.backgroundGrey,
   };
-  
+
   // On utilisera AvatarSharpBulkIcon si pas d'avatar fourni
 
   return (
@@ -47,17 +47,20 @@ const AccountListItem: React.FC<AccountListItemProps> = ({
       onPress={onPress}
       style={[
         styles.container,
-        { backgroundColor: colors.background, borderBottomColor: colors.border },
-        style
+        {
+          backgroundColor: colors.background,
+          borderBottomColor: colors.border,
+        },
+        style,
       ]}
       activeOpacity={0.7}
       disabled={!onPress}
     >
       {/* Avatar */}
       {avatar ? (
-        <Avatar 
-          source={{ uri: avatar }} 
-          size="medium" 
+        <Avatar
+          source={{ uri: avatar }}
+          size="medium"
           type="default"
           containerStyle={{ marginRight: 12 }}
         />
@@ -66,58 +69,42 @@ const AccountListItem: React.FC<AccountListItemProps> = ({
           <AvatarSharpBulkIcon size={40} color={colors.text} />
         </View>
       )}
-      
+
       {/* Contenu textuel */}
       <View style={styles.content}>
-        <Text 
-          variant="body" 
-          color={colors.text} 
-          bold
-          mb={2}
-        >
+        <Text variant="body" color={colors.text} bold mb={2}>
           {title}
         </Text>
-        
+
         {subtitle && (
-          <Text 
-            variant="caption" 
-            color={colors.subtext}
-          >
+          <Text variant="caption" color={colors.subtext}>
             {subtitle}
           </Text>
         )}
       </View>
-      
+
       {/* Partie droite (badge, texte, chevron) */}
       <View style={styles.rightContainer}>
         {rightText && (
-          <Text 
-            variant="caption" 
-            color={colors.rightText}
-            medium
-          >
+          <Text variant="caption" color={colors.rightText} medium>
             {rightText}
           </Text>
         )}
-        
+
         {showBadge && (
           <View style={[styles.badge, { backgroundColor: colors.badge }]}>
-            <Text 
-              variant="caption" 
-              color={colors.badgeText} 
-              medium
-            >
+            <Text variant="caption" color={colors.badgeText} medium>
               {badgeCount > 99 ? '99+' : badgeCount}
             </Text>
           </View>
         )}
-        
+
         {showChevron && (
           <View style={styles.chevronContainer}>
-            <ArrowRightRegularBoldIcon 
-              width={8} 
-              height={12} 
-              color={colors.chevron} 
+            <ArrowRightRegularBoldIcon
+              width={8}
+              height={12}
+              color={colors.chevron}
             />
           </View>
         )}
