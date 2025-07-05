@@ -76,8 +76,8 @@ const ScannerIndexScreen: React.FC = () => {
 const createStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
-    header: { padding: 16, backgroundColor: theme.colors.surface, flexDirection: 'row', alignItems: 'center' },
-    title: { fontSize: 24, fontWeight: '600', color: theme.colors.text, marginLeft: 65, padding: 10 },
+    header: { padding: 22, backgroundColor: theme.colors.surface, flexDirection: 'row', alignItems: 'center' },
+    title: { fontSize: 24, fontWeight: '600', color: theme.colors.text, marginLeft: 30, padding: 10 },
     cameraContainer: { flex: 1 },
     errorContainer: { backgroundColor: theme.colors.error, padding: 12, margin: 16, borderRadius: 8 },
     errorText: { color: '#fff', textAlign: 'center' },

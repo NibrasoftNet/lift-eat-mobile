@@ -38,6 +38,7 @@ const CameraViewScanner: React.FC<CameraViewProps> = ({ onBarCodeScanned }) => {
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
+          opacity: 0.6,
         },
         flashButton: {
           position: 'absolute',

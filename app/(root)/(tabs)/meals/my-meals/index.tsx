@@ -67,7 +67,7 @@ interface FilterOption {
  * MealsScreen - Écran principal pour afficher et gérer les repas
  * Version améliorée conforme au design Figma
  */
-function MealsNewScreenLegacy() {
+ function MealsScreenLegacy() {
   // Utiliser le thème de l'application pour les styles
   const theme = useAppTheme();
   const { t } = useTranslation();
