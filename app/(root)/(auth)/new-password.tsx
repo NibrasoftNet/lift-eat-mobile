@@ -96,7 +96,10 @@ export default function NewPasswordNew() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Bouton retour */}
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <ArrowLeftRegularBoldIcon
             width={24}
             height={24}
@@ -191,7 +194,9 @@ export default function NewPasswordNew() {
                 onChangeText={onChange}
                 error={errors.confirmNewPassword?.message}
                 rightIcon={
-                  <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                  <TouchableOpacity
+                    onPress={() => setShowConfirm(!showConfirm)}
+                  >
                     {showConfirm ? (
                       <HideRegularBoldIcon
                         width={20}

@@ -1,11 +1,19 @@
 import * as React from 'react';
-import Svg, { Path, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface FootprintsEmojiProps {
   size?: number;
 }
 
-export const FootprintsEmoji: React.FC<FootprintsEmojiProps> = ({ size = 100 }) => {
+export const FootprintsEmoji: React.FC<FootprintsEmojiProps> = ({
+  size = 100,
+}) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">
       <Defs>
@@ -20,7 +28,7 @@ export const FootprintsEmoji: React.FC<FootprintsEmojiProps> = ({ size = 100 }) 
           <Stop stopColor="#FFD773" />
           <Stop offset="1" stopColor="#EAB253" />
         </LinearGradient>
-        
+
         <RadialGradient
           id="paint1_radial_footprints"
           cx="0"

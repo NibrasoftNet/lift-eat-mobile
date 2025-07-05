@@ -6,7 +6,7 @@ import DeleteButton from '@/components-new/ui/organisms/DeleteDrawer/DeleteButto
 export interface DeleteConfirmationDrawerProps {
   open: boolean;
   title?: string;
-  description?: string;          // alias de confirmationText
+  description?: string; // alias de confirmationText
   additionalText?: string;
   subject?: string;
   /** Show loading state on Delete button */
@@ -23,7 +23,7 @@ const DeleteConfirmationDrawer: React.FC<DeleteConfirmationDrawerProps> = ({
   subject = 'item',
   onCancel,
   onConfirm,
-isLoading,
+  isLoading,
 }) => {
   const computedTitle = title ?? `Delete ${subject}`;
   const computedConfirmation =

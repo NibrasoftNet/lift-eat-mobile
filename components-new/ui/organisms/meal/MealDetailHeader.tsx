@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, ImageBackground, TouchableOpacity, Image as RNImage, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Image as RNImage,
+  ActivityIndicator,
+} from 'react-native';
 import { Text } from '../../atoms/base';
 import { useTheme, ThemeInterface } from '../../../../themeNew';
 import { CloseSquareRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/CloseSquareRegularBoldIcon';
@@ -50,16 +57,16 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
 }) => {
   const theme = useTheme();
   const router = useRouter();
-  
+
   // Couleurs
   const textColor = '#FFFFFF';
   const iconColor = '#FFFFFF';
-  
+
   // Gestionnaire pour le retour en arrière
   const handleGoBack = () => {
     router.back();
   };
-  
+
   // Gestionnaire pour l'édition du repas
   const handleEdit = () => {
     if (onEdit) {
@@ -69,14 +76,14 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
       router.push(`/(root)/(tabs)/meals/my-meals/edit/${mealId}`);
     }
   };
-  
+
   // Gestionnaire pour la suppression du repas
   const handleDelete = () => {
     if (onDelete) {
       onDelete();
     }
   };
-  
+
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   return (
@@ -87,7 +94,7 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
         <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <CloseSquareRegularBoldIcon width={24} height={24} color="#8BC255" />
         </TouchableOpacity>
-        
+
         {/* Boutons d'action à droite (éditer, favoris, supprimer) */}
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton} onPress={handleEdit}>
@@ -95,11 +102,17 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => { console.log('[FavoriteIcon] Press detected'); onToggleFavorite(); }}
+            onPress={() => {
+              console.log('[FavoriteIcon] Press detected');
+              onToggleFavorite();
+            }}
             disabled={favoriteLoading}
           >
             {favoriteLoading ? (
-              <ActivityIndicator size="small" color={isFavorite ? '#A4C73B' : '#BDBDBD'} />
+              <ActivityIndicator
+                size="small"
+                color={isFavorite ? '#A4C73B' : '#BDBDBD'}
+              />
             ) : (
               <HeartRegularBoldIcon
                 width={24}
@@ -113,7 +126,7 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-      
+
       {/* Image centrée */}
       <View style={styles.imageContainer}>
         <RNImage
@@ -122,12 +135,10 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
           resizeMode="contain"
         />
       </View>
-      
+
       {/* Titre centré */}
       <View style={styles.titleContainerCentered}>
-        <Text style={styles.title}>
-          {title}
-        </Text>
+        <Text style={styles.title}>{title}</Text>
       </View>
     </View>
   );
@@ -163,7 +174,7 @@ const createStyles = (theme: ThemeInterface) => {
       alignSelf: 'center',
       marginBottom: 16,
       overflow: 'hidden',
-      marginTop:20,
+      marginTop: 20,
     },
     centeredImage: {
       width: '100%',

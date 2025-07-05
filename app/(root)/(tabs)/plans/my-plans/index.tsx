@@ -22,25 +22,30 @@ export default function MyPlansScreenNew() {
   const itemsPerPage = 10;
 
   // Fetch plans list
-  const {
-    data,
-    isPending,
-    isFetching,
-    isRefetching,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['plans-list-new', searchQuery, currentPage, itemsPerPage],
-    queryFn: async () => {
-      const filters = { search: searchQuery, page: currentPage, limit: itemsPerPage };
-      const result = await planPagesService.getPlansList(filters);
-      if (!result.success) {
-        console.error('Erreur lors de la récupération des plans:', result.error);
-        return { plans: [], totalCount: 0, pageInfo: { currentPage: 1, totalPages: 1 } };
-      }
-      return result.data;
-    },
-  });
+  const { data, isPending, isFetching, isRefetching, isLoading, refetch } =
+    useQuery({
+      queryKey: ['plans-list-new', searchQuery, currentPage, itemsPerPage],
+      queryFn: async () => {
+        const filters = {
+          search: searchQuery,
+          page: currentPage,
+          limit: itemsPerPage,
+        };
+        const result = await planPagesService.getPlansList(filters);
+        if (!result.success) {
+          console.error(
+            'Erreur lors de la récupération des plans:',
+            result.error,
+          );
+          return {
+            plans: [],
+            totalCount: 0,
+            pageInfo: { currentPage: 1, totalPages: 1 },
+          };
+        }
+        return result.data;
+      },
+    });
 
   const plansList = data?.plans || [];
 
@@ -55,7 +60,9 @@ export default function MyPlansScreenNew() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.color('background') }]}>      
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.color('background') }]}
+    >
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text variant="h3" style={styles.headerTitle}>
@@ -67,7 +74,10 @@ export default function MyPlansScreenNew() {
       <SearchPlanNew
         value={searchQuery}
         onChangeText={handleSearch}
-        style={{ marginHorizontal: theme.space('xl'), marginBottom: theme.space('lg') }}
+        style={{
+          marginHorizontal: theme.space('xl'),
+          marginBottom: theme.space('lg'),
+        }}
       />
 
       <QueryStateHandler
@@ -108,7 +118,9 @@ export default function MyPlansScreenNew() {
             isFetching ? null : (
               <View style={styles.emptyContainer}>
                 <Text variant="body" style={styles.emptyText}>
-                  {searchQuery ? 'Aucun plan trouvé' : 'Aucun plan nutritionnel disponible'}
+                  {searchQuery
+                    ? 'Aucun plan trouvé'
+                    : 'Aucun plan nutritionnel disponible'}
                 </Text>
               </View>
             )
@@ -117,8 +129,18 @@ export default function MyPlansScreenNew() {
       </QueryStateHandler>
 
       {/* CTA */}
-      <View style={[styles.ctaContainer, { paddingHorizontal: theme.space('xl'), paddingBottom: theme.space('2xl') }]}>
-        <CreatePlanButton onPress={() => router.push('/plans/my-plans/create')} />
+      <View
+        style={[
+          styles.ctaContainer,
+          {
+            paddingHorizontal: theme.space('xl'),
+            paddingBottom: theme.space('2xl'),
+          },
+        ]}
+      >
+        <CreatePlanButton
+          onPress={() => router.push('/plans/my-plans/create')}
+        />
       </View>
     </SafeAreaView>
   );

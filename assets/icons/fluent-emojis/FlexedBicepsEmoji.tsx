@@ -1,11 +1,19 @@
 import * as React from 'react';
-import Svg, { Path, Defs, RadialGradient, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Path,
+  Defs,
+  RadialGradient,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface FlexedBicepsEmojiProps {
   size?: number;
 }
 
-export const FlexedBicepsEmoji: React.FC<FlexedBicepsEmojiProps> = ({ size = 100 }) => {
+export const FlexedBicepsEmoji: React.FC<FlexedBicepsEmojiProps> = ({
+  size = 100,
+}) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">
       <Defs>
@@ -20,7 +28,7 @@ export const FlexedBicepsEmoji: React.FC<FlexedBicepsEmojiProps> = ({ size = 100
           <Stop stopColor="#FFCC66" />
           <Stop offset="1" stopColor="#FFB55F" />
         </LinearGradient>
-        
+
         <RadialGradient
           id="paint1_radial_biceps_highlight"
           cx="0"

@@ -5,11 +5,15 @@ import { ConvexProvider } from 'convex/react';
 import { ConvexReactClient } from 'convex/react';
 import Constants from 'expo-constants';
 
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL as string);
+const convex = new ConvexReactClient(
+  process.env.EXPO_PUBLIC_CONVEX_URL as string,
+);
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}>
+    <ClerkProvider
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
+    >
       <ConvexProvider client={convex}>
         <Stack
           screenOptions={{

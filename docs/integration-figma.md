@@ -2,7 +2,8 @@
 
 _Architecture cible_ : **M-C-P** (Model – Controller – Presenter)  
 _Figma Kit_ : **Nutrio – Calorie Counter App UI Kit** (`fileKey: EokifkV4EzLIJ1zaU0nAsJ`)
-_Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**  
+_Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
+
 > Tailwind CSS retiré le 26/05/2025
 
 > Dernière mise à jour : 08/06/2025
@@ -14,7 +15,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Préparation initiale et configuration
 
 - [x] **Créer** la branche `feature/figma-presenter`
-- [x] **Tagger** l'état actuel : `git tag ui-before-figma` 
+- [x] **Tagger** l'état actuel : `git tag ui-before-figma`
 - [x] Vérifier les dépendances Expo : `expo doctor`
 - [x] **Supprimer** les dépendances Gluestack : `npm uninstall @gluestack-*`
 - [x] Générer / vérifier le **token Figma API** `FIGMA_API_KEY`
@@ -54,6 +55,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Composants Molecules
 
 - [x] Analyser et lister les molecules depuis Figma (✅ Intégré le 18/05/2025)
+
   - [x] Section Navigation & Controls (TopBar, NavigationItem, Toolbar)
   - [x] Section Forms & Inputs (InputForm, Search, Dropdown)
   - [x] Section Progress & Stats (InsightCharts, ProgressBar, CircularProgress)
@@ -97,24 +99,27 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [x] Goals percentage (node-id=46495-32349, Frame: Elements) (✅ 20/05/2025)
   - [ ] Date & Progress (node-id=24498-52421, Frame: Elements)
   - [ ] Payment Methods (node-id=28524-46860, Frame: Elements)
-  
+
   ## Sous-composants Calorie Tracker (Approche modulaire)
+
   - [x] Calorie Circle Progress (node-id=48469-23065) (✅ 20/05/2025)
   - [x] Liste des composants déjà implémentés en tant que molecules
+
     - [x] Macronutrient Indicators (implémenté dans MacronutrientDistributionBar - 21/05/2025)
     - [x] Meal List Item (node-id=48500-29904) (✅ 20/05/2025)
     - [x] Meal Nutritional Values (node-id=48488-31442) (✅ 20/05/2025)
     - [x] Quantity Selector (node-id=48485-28633) (✅ 20/05/2025)
     - [x] Food List (implémenté dans FoodList - 21/05/2025)
-  
+
   - [✅] Calorie Tracker principal (node-id=48453-12171 light mode et 48453-12170 dark mode) - Implémentation pixel par pixel (21/05/2025)
+
     - [✅] DateNavigationHeader - En-tête avec navigation de date
     - [✅] MainProgressCircle - Section principale avec cercle de progression
     - [✅] TitleDivider - Séparateurs avec titre pour les sections
     - [✅] MacronutrientDistributionBar - Distribution complète des macronutriments
     - [✅] CaloriesBurnedSection - Section des calories brûlées
     - [✅] FoodList - Liste des aliments consommés
-  
+
   - [ ] Écrans complémentaires du Calorie Tracker (en cours d'implémentation)
     - [✅] Food Details (node-id=48469-23065 dark mode, node-id=48468-22898 light mode) - Implémenté le 21/05/2025
     - [✅] Food Image Picker - Composant pour la sélection d'images de repas (implémenté le 21/05/2025)
@@ -131,6 +136,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Onboarding Components (✅ 28/05/2025)
 
 - [✅] **Composants de formulaire Onboarding**
+
   - [✅] AgeSelector - Sélecteur d'âge simplifié avec options de sélection rapide
   - [✅] HeightSelector - Sélecteur de taille avec visualisation intuitive
   - [✅] CurrentWeightSelector - Sélecteur de poids actuel avec options
@@ -148,6 +154,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Migration StyleSheet (✅ 26/05/2025)
 
 - [x] **Suppression des composants Tailwind**
+
   - [x] Suppression de tous les fichiers avec suffixe 'TW'
   - [x] Vérification et nettoyage des imports
   - [x] Suppression de tailwind-components.ts
@@ -157,8 +164,6 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [x] Vérification des composants existants
     - [x] BottomBarButtonAction.tsx - déjà en StyleSheet
     - [x] CategoryMenu.tsx - déjà en StyleSheet
-
-
 
 ### Composants Organisms
 
@@ -171,16 +176,18 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Écrans terminés
 
 - [x] Écrans d'onboarding (implémentés le 22/05/2025) ✅
+
   - [x] Splash Screen (node-id=3821-124001)
   - [x] Walkthrough 1 (node-id=4237-8611)
   - [x] Walkthrough 2 (node-id=4238-13767)
   - [x] Walkthrough 3 (node-id=4238-13801)
 
 - [x] Welcome (`app/(root)/(auth)/welcome.tsx`) - Terminé ✅ (21/05/2025)
+
   - [x] Persistance immédiate de l'ID utilisateur après SSO + mise à jour du `sessionStore`
   - [x] Redirection automatique si utilisateur déjà authentifié
   - [x] Gestion de l'erreur Clerk « You're already signed in »
-  - [x] Logo et titre 
+  - [x] Logo et titre
   - [x] Boutons de connexion sociale (Google, Apple, Facebook)
 
 - [x] Login (`app/(root)/(auth)/loginNew.tsx`) et LoginTW (`app/(root)/(auth)/loginTW.tsx`) - Terminé ✅ (22/05/2025)
@@ -198,9 +205,10 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Mises à jour récentes (08/06/2025)
 
 ### 7.1 Correction des erreurs de navigation Expo Router (02/06/2025)
+
 - [x] Correction des routes dans `app/(root)/(tabs)/_layout.tsx` pour résoudre les avertissements "No route named X exists in nested children"
   - [x] Modification de `assistant` → `assistant/index`
-  - [x] Modification de `progress` → `progress/index` 
+  - [x] Modification de `progress` → `progress/index`
   - [x] Modification de `analytics` → `analytics/index`
 - [x] Résolution de la boucle infinie de rafraîchissement des données utilisateur
   - [x] Ajout d'une variable `isInitialized` pour éviter les appels multiples
@@ -208,11 +216,13 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [x] Ajout d'une condition pour ne rafraîchir que si l'ID utilisateur a changé
 
 ### 7.2 Correction des composants d'ingrédients
+
 - [x] Correction de la propriété `ingredientsStandard` dans le composant `IngredientCard` pour l'affichage correct des images et noms d'ingrédients
 - [x] Ajout de logs de débogage pour vérifier la structure des données
 - [x] Amélioration de l'espacement entre les éléments (photo du repas et son nom)
 
 ### 7.2 Adaptation de la palette de couleurs
+
 - [x] Changement des éléments bleus (#6C5CE7) vers la couleur verte primaire (#A1CE50) pour:
   - [x] Bordures d'images (Avatar)
   - [x] Boutons et actions
@@ -221,12 +231,15 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 - [x] Conservation des couleurs originales pour les éléments nutritionnels (cercles et indicateurs)
 
 ### 7.3 Vérification et documentation
+
 - [x] Audit des fichiers de documentation pour garantir leur cohérence
 - [x] Mise à jour des statuts d'implémentation dans les documents de suivi
 - [x] Vérification de la conformité visuelle avec les designs Figma
 
 ### 7.4 Migration vers Tailwind CSS (25/05/2025)
+
 - [x] Migration complète des composants de sélection d'aliments vers Tailwind CSS
+
   - [x] CuisineTypeFilterTW (node-id=3167-91902)
   - [x] FoodImagePickerTW
   - [x] IngredientCardTW
@@ -246,6 +259,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Haute priorité - Compléter les composants UI critiques
 
 - [x] Composants du Menu Bar (Priorité 1) ✅ (30/05/2025)
+
   - [x] Menu Bar (node-id=3404-17376) avec variantes
   - [x] Home Menu Item avec icône (node-id=44443:22604)
   - [x] Tracker Menu Item avec icône (node-id=48453:12903)
@@ -254,11 +268,13 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [x] Account Menu Item avec icône (node-id=48453:15801)
 
 - [ ] Organisms essentiels (Priorité 1)
+
   - [x] BottomNavigation ✅ (26/05/2025)
   - [x] HeaderBar ✅ (26/05/2025)
   - [ ] Listes avec recherche et filtres
 
 - [x] Templates principaux (Priorité 1) ✅ (26/05/2025)
+
   - [x] `components/ui/templates/MainLayout.tsx` (avec navigation bottom)
   - [x] `components/ui/templates/AuthLayout.tsx` (pour écrans connexion/inscription)
   - [x] `components/ui/templates/FormLayout.tsx` (pour formulaires)
@@ -283,17 +299,20 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Écrans d'authentification et d'onboarding (✅ 28/05/2025)
 
 - [✅] LoginNew (`app/(root)/(auth)/loginNew.tsx`) (node-id=40432-41582)
+
   - [✅] Implémentation complète conforme au design Figma
   - [✅] Intégration avec Clerk pour l'authentification
   - [✅] Gestion des erreurs et validation des formulaires
 
 - [✅] RegisterNew (`app/(root)/(auth)/registerNew.tsx`) (node-id=40432-39018)
+
   - [✅] Implémentation complète conforme au design Figma
   - [✅] Intégration avec Clerk pour la création de compte
   - [✅] Redirection vers la vérification email
   - [✅] Logs détaillés pour le débogage
 
 - [✅] Verification (`app/(root)/(auth)/verification.tsx`)
+
   - [✅] Nouveau composant OTP amélioré avec design cercles/cases
   - [✅] Gestion des erreurs et resend code
   - [✅] Redirection vers onboarding après succès
@@ -307,7 +326,6 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 
 ### Priorité moyenne - Écrans d'authentification restants
 
-
 - [ ] Reset Password (`app/(root)/(auth)/reset-password.tsx`) (Basse Priorité - Planifié pour Octobre 2025)
   - [ ] Écran de demande d'email
   - [ ] Écran de vérification du code
@@ -317,6 +335,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ### Écrans principaux (Tabs)
 
 #### Écrans implémentés ✅
+
 - [x] **MealsNew** (`app/(root)/(tabs)/MealsNew/index.tsx`) (30/05/2025)
   - [x] Liste des repas avec filtres par cuisine et type
   - [x] Navigation vers les détails du repas
@@ -326,6 +345,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 #### Écrans à implémenter (Juin 2025) 🟡
 
 ##### Tracking & Analyse
+
 - [ ] **Analytics Dashboard** (`app/(root)/(tabs)/analytics.tsx`)
   - [ ] Graphiques d'évolution (poids, calories, macros)
   - [ ] Résumé hebdomadaire et mensuel
@@ -334,6 +354,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] Badges et récompenses
 
 ##### Trackers spécifiques
+
 - [ ] **Water Tracker** (`app/(root)/(tabs)/(tracker)/water.tsx`)
   - [ ] Ajout/suppression de consommation d'eau
   - [ ] Personnalisation des tailles de verre
@@ -342,12 +363,13 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] Historique des pas
 
 ##### Gestion des repas (Juillet 2025)
+
 - [x] **Meal Search** (`app/(root)/(tabs)/meals/search.tsx`)
   - [x] Recherche par nom/ingrédient (OpenFoodFacts)
   - [x] Filtres avancés (cuisine, type de repas, etc.) - 10/06/2025
 - [x] **My Meals List** (`app/(root)/(tabs)/meals/my-meals/index.tsx`)
   - [x] Liste des repas personnels avec filtres (type & cuisine)
-  - [x] Actions rapides (éditer, supprimer, dupliquer*)
+  - [x] Actions rapides (éditer, supprimer, dupliquer\*)
 - [x] **Create Meal** (`app/(root)/(tabs)/meals/my-meals/create-v2.tsx`)
   - [x] Formulaire de création avec ajout d'ingrédients
   - [x] Upload d'image (gallerie/appareil photo) - 10/06/2025
@@ -362,12 +384,14 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 #### Fonctionnalités secondaires (Septembre 2025) 🔵
 
 ##### Outils avancés
+
 - [ ] **Assistant IA** (`app/(root)/(tabs)/assistant.tsx`)
   - [ ] Recommandations personnalisées
   - [ ] Ajustements de plan automatiques
   - [ ] Conseils nutritionnels contextuels
 
 ##### Outils de suivi
+
 - [ ] **Weight Tracker** (`app/(root)/(tabs)/(tracker)/weight.tsx`)
   - [ ] Saisie manuelle du poids
   - [ ] Graphique d'évolution
@@ -384,6 +408,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 #### Plans nutritionnels (Août 2025) 🔵
 
 ##### Gestion des plans
+
 - [ ] **Plans List** (`app/(root)/(tabs)/plans/my-plans/index.tsx`)
   - [ ] Liste des plans personnels
   - [ ] Statistiques d'adhérence au plan
@@ -398,6 +423,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] Suivi des progrès
 
 ##### Plans communautaires
+
 - [ ] **Community Plans** (`app/(root)/(tabs)/plans/community.tsx`)
   - [ ] Parcourir les plans de la communauté
   - [ ] Filtres par objectif et popularité
@@ -408,6 +434,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 #### Profil utilisateur (Septembre 2025) 🔵
 
 ##### Informations personnelles
+
 - [ ] **User Profile** (`app/(root)/(user)/profile/[id].tsx`)
   - [ ] Affichage du profil utilisateur
   - [ ] Stats et tendances personnelles
@@ -420,6 +447,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] Mise en page conforme au design Figma
 
 ##### Paramètres et configuration
+
 - [ ] **Settings** (node-id=48445:41342)
   - [ ] Options d'application
   - [ ] Préférences d'affichage
@@ -435,6 +463,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ## ⚙️ Tests et qualité (transversal)
 
 ### Architecture MCP
+
 - [ ] **Séparation stricte des responsabilités**
   - [x] Model: Schémas dans `db/schema.ts`
   - [x] Controller: Services core dans `utils/services/core`
@@ -445,6 +474,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] S'assurer que les validations sont dans la couche Controller
 
 ### Tests
+
 - [ ] **Tests unitaires**
   - [ ] Créer des tests pour chaque molecule/organism
   - [ ] Tester les services individuellement
@@ -459,6 +489,7 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [ ] Tester le processus d'authentification
 
 ### Performance
+
 - [ ] **Optimisation des rendus**
   - [ ] Identifier et corriger les re-renders inutiles
   - [ ] Utiliser React.memo et useCallback où nécessaire
@@ -485,7 +516,9 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 - [ ] Guide d'utilisation des composants pour les développeurs (Priorité 2)
 
 ---
+
 **Important :**
+
 - Respecter l'isolation des couches MCP : le Presenter _ne doit pas_ contenir de logique métier ou de persistance.
 - Maintenir la cohérence des calculs nutritionnels via `nutrition-core.service.ts` – ne pas dupliquer la logique dans l'UI.
 - Standardiser l'approche de style sans bibliothèque tierce : utiliser une composition cohérente de styles (StyleSheet.create ou direct) et éviter le style inline ad hoc.
@@ -493,30 +526,35 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 ## 🔄 Mises à jour récentes (08/06/2025)
 
 ### Palette et composants
+
 - 🎨 **Nouvelle couleur d’action primaire** `#8BC255` avec texte/icônes blancs.
-  - Appliquée aux boutons **CreateMealButton** et **FilterButton** (écran *My Meals*).
-- ♻️ Migration complète des composants de l’écran *My Meals* vers `ThemeProvider` :
+  - Appliquée aux boutons **CreateMealButton** et **FilterButton** (écran _My Meals_).
+- ♻️ Migration complète des composants de l’écran _My Meals_ vers `ThemeProvider` :
   - `SearchBarWithScanner`, `FilterButton`, `CreateMealButton`, `MealListItem`.
   - Suppression des couleurs codées en dur, bordures dynamiques selon mode light/dark.
-- 🚫 Désactivation de la suppression d’ingrédient dans la vue détail (*[id].tsx*).
+- 🚫 Désactivation de la suppression d’ingrédient dans la vue détail (_[id].tsx_).
 
 ### Règles d’icônes SVG
+
 - Utilisation **obligatoire** des icônes via import direct (`assets/icons/figma/...`) – voir mémoire projet.
 
 ## 8. Nettoyage & finalisation
+
 - [ ] Supprimer les composants legacy
 - [ ] Retirer les imports non utilisés avec `pnpm ts-prune`
 - [ ] Mettre à jour la documentation
-  - [ ] Actualiser `docs/mcp/` 
+  - [ ] Actualiser `docs/mcp/`
   - [ ] Actualiser `README.md`
 - [ ] Préparer le déploiement
   - [ ] Mettre à jour `CHANGELOG.md`
   - [ ] Tag et release : `git tag vX.Y.0-figma-presenter`
 
 ---
+
 ### Suivi visuel d'avancement
 
 #### Phase 1: Design Tokens (✅ Terminé 20/05/2025)
+
 - [x] Tokens – Couleurs (16/05/2025)
 - [x] Tokens – Typographie (16/05/2025)
 - [x] Tokens – Spacing (16/05/2025)
@@ -526,18 +564,21 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
 - [x] Normaliser les unités typographiques (20/05/2025)
 
 #### Phase 2: Configuration Thème (✅ Terminé 18/05/2025)
+
 - [x] Hook useTheme() (18/05/2025)
 - [x] ThemeProvider Custom (18/05/2025)
 - [x] Chargement des polices (18/05/2025)
 - [x] Utils – applyStyles (18/05/2025)
 
 #### Phase 3: Fondations (✅ Terminé 18/05/2025)
+
 - [x] Création de la nouvelle structure (18/05/2025)
 - [x] Composants Atoms - Box, Text, Button, Icon (18/05/2025)
 - [x] Composants Atoms - Input, Divider, Badge (18/05/2025)
 - [x] Plan de migration (18/05/2025)
 
 #### Phase 4: Composants complexes (🟡 En cours)
+
 - [x] Analyse des composants Figma (Molecules & Organisms) (18/05/2025)
 - [x] Molecules - Navbar (node-id=1644-48374) (19/05/2025)
 - [x] Molecules - Menu Bar (node-id=3404-17376) (19/05/2025)
@@ -559,24 +600,30 @@ _Approche style_ : **Custom styling** (StyleSheet.create) + **ThemeProvider**
   - [x] Templates – MainLayout (03/06/2025)
 
 #### Phase 5: Presenters (🟡 En cours)
+
 - [x] Presenter - MealsNew (30/05/2025)
 - [ ] Presenter – Home
 - [x] Presenter – MealDetail avec affichage d'images d'ingrédients (03/06/2025)
 
 #### Phase 6: Tests et qualité
+
 - [x] Tests unitaires - Nutrition core (06/06/2025)
 - [ ] Tests E2E
 - [ ] Optimisation performances
 
 ---
+
 **Important :**
+
 - Respecter l'isolation des couches MCP : le Presenter _ne doit pas_ contenir de logique métier ou de persistance.
 - Maintenir la cohérence des calculs nutritionnels via `nutrition-core.service.ts` – ne pas dupliquer la logique dans l'UI.
 - Standardiser l'approche de style sans bibliothèque tierce : utiliser une composition cohérente de styles (StyleSheet.create ou direct) et éviter le style inline ad hoc.
 - Les composants de repas (MealCard, MealListItem, NutritionCard) sont maintenant intégrés avec succès dans l'UI.
 
 ---
+
 **Important :**
+
 - Respecter l'isolation des couches MCP : le Presenter _ne doit pas_ contenir de logique métier ou de persistance.
 - Maintenir la cohérence des calculs nutritionnels via `nutrition-core.service.ts` – ne pas dupliquer la logique dans l'UI.
 - Standardiser l'approche de style sans bibliothèque tierce : utiliser une composition cohérente de styles (StyleSheet.create ou direct) et éviter le style inline ad hoc.

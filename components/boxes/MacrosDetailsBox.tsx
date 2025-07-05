@@ -21,7 +21,7 @@ interface MacrosDetailsBoxProps {
 
 /**
  * Composant MacrosDetailsBox - Affiche les macronutriments dans des boîtes colorées
- * 
+ *
  * Ce composant est purement présentationnel et n'effectue aucun calcul ou normalisation.
  * Il affiche simplement les valeurs qui lui sont fournies.
  */
@@ -32,13 +32,13 @@ const MacrosDetailsBox: React.FC<MacrosDetailsBoxProps> = ({
   unit,
   calories = 0,
   areValuesInGrams = true,
-  showDividers = true
+  showDividers = true,
 }) => {
   // Convertir les pourcentages en grammes si nécessaire
   let displayCarbs = carbs;
   let displayFats = fats;
   let displayProtein = protein;
-  
+
   // Si les valeurs sont en pourcentages (généralement < 100) et qu'on a des calories
   if (!areValuesInGrams && calories > 0) {
     // Même logique que dans getPlanNutritionGoals

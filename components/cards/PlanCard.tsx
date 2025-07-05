@@ -49,7 +49,9 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
    * @param plan - Plan à consulter
    */
   const handlePlanCardPress = (plan: PlanOrmProps) => {
-    logger.info(LogCategory.USER, `User viewing plan details: ${plan.name}`, { planId: plan.id });
+    logger.info(LogCategory.USER, `User viewing plan details: ${plan.name}`, {
+      planId: plan.id,
+    });
     router.push(`/plans/my-plans/details/${plan.id}`);
   };
 
@@ -87,7 +89,11 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title={`Cannot Delete Plan`}
-              description={error instanceof Error ? error.message : 'An unexpected error occurred'}
+              description={
+                error instanceof Error
+                  ? error.message
+                  : 'An unexpected error occurred'
+              }
             />
           );
         },
@@ -98,55 +104,61 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
   /**
    * Mutation pour définir le plan actuel
    */
-  const { mutateAsync: setCurrentAsync, isPending: isSetCurrentPending } = useMutation({
-    mutationFn: () => planPagesService.setCurrentPlan(item.id),
-    onSuccess: async () => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Plan set as current`}
-              description={`"${item.name}" is now your current plan`}
-            />
-          );
-        },
-      });
-      // Invalider à la fois les plans et les données de progression
-      // Invalider tous les plans car l'état 'actuel' a changé pour plusieurs plans
-      planPagesService.invalidatePlanCache(queryClient, item.id);
-      // Invalider aussi les autres plans (tous)
-      await queryClient.invalidateQueries({ queryKey: ['plans'] });
-      // Invalider les données de progression associées au plan
-      await queryClient.invalidateQueries({ queryKey: ['progress', item.id] });
-    },
-    onError: (error: any) => {
-      toast.show({
-        placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Failed to set plan as current`}
-              description={error.toString()}
-            />
-          );
-        },
-      });
-    },
-  });
+  const { mutateAsync: setCurrentAsync, isPending: isSetCurrentPending } =
+    useMutation({
+      mutationFn: () => planPagesService.setCurrentPlan(item.id),
+      onSuccess: async () => {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.SUCCESS}
+                title={`Plan set as current`}
+                description={`"${item.name}" is now your current plan`}
+              />
+            );
+          },
+        });
+        // Invalider à la fois les plans et les données de progression
+        // Invalider tous les plans car l'état 'actuel' a changé pour plusieurs plans
+        planPagesService.invalidatePlanCache(queryClient, item.id);
+        // Invalider aussi les autres plans (tous)
+        await queryClient.invalidateQueries({ queryKey: ['plans'] });
+        // Invalider les données de progression associées au plan
+        await queryClient.invalidateQueries({
+          queryKey: ['progress', item.id],
+        });
+      },
+      onError: (error: any) => {
+        toast.show({
+          placement: 'top',
+          render: ({ id }: { id: string }) => {
+            const toastId = 'toast-' + id;
+            return (
+              <MultiPurposeToast
+                id={toastId}
+                color={ToastTypeEnum.ERROR}
+                title={`Failed to set plan as current`}
+                description={error.toString()}
+              />
+            );
+          },
+        });
+      },
+    });
 
   /**
    * Gestion de la suppression du plan
    */
   const handlePlanDelete = () => {
     deleteAsync().catch((error) => {
-      logger.error(LogCategory.DATABASE, `Error deleting plan: ${error.message}`);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error deleting plan: ${error.message}`,
+      );
       // Afficher un toast d'erreur
       toast.show({
         placement: 'top',
@@ -156,11 +168,11 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title='Erreur de suppression'
+              title="Erreur de suppression"
               description={(error as Error).message}
             />
           );
-        }
+        },
       });
     });
   };
@@ -170,7 +182,10 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
    */
   const handleSetCurrentPlan = () => {
     setCurrentAsync().catch((error) => {
-      logger.error(LogCategory.DATABASE, `Error setting current plan: ${error.message}`);
+      logger.error(
+        LogCategory.DATABASE,
+        `Error setting current plan: ${error.message}`,
+      );
       // Afficher un toast d'erreur
       toast.show({
         placement: 'top',
@@ -180,11 +195,11 @@ const PlanCard: React.FC<{ item: PlanOrmProps; index: number }> = ({
             <MultiPurposeToast
               id={toastId}
               color={ToastTypeEnum.ERROR}
-              title='Erreur de configuration'
+              title="Erreur de configuration"
               description={(error as Error).message}
             />
           );
-        }
+        },
       });
     });
   };

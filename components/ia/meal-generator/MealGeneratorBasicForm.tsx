@@ -2,18 +2,23 @@ import React from 'react';
 import { FlatList } from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
 import { Controller, Control } from 'react-hook-form';
-import { MealTypeEnum, MealTypeArray, CuisineTypeEnum, CuisineTypeArray } from '@/utils/enum/meal.enum';
+import {
+  MealTypeEnum,
+  MealTypeArray,
+  CuisineTypeEnum,
+  CuisineTypeArray,
+} from '@/utils/enum/meal.enum';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
-import { 
-  Actionsheet, 
-  ActionsheetBackdrop, 
-  ActionsheetContent, 
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
   ActionsheetDragIndicatorWrapper,
-  ActionsheetDragIndicator
+  ActionsheetDragIndicator,
 } from '@/components/ui/actionsheet';
 import { MealGeneratorFormType } from '@/utils/validation/ia/mealGeneratorForm.schema';
 import { UiState, UiStateActions, ModalName } from '@/hooks/ia/useUiState';
@@ -31,7 +36,7 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
   uiState,
   uiActions,
   toggleMealType,
-  toggleCuisineType
+  toggleCuisineType,
 }) => {
   const renderMealTypeActionSheet = () => (
     <Actionsheet
@@ -43,12 +48,12 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
         <ActionsheetDragIndicatorWrapper>
           <ActionsheetDragIndicator />
         </ActionsheetDragIndicatorWrapper>
-        
+
         <Box style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
             Choisir un type de repas
           </Text>
-          
+
           <FlatList
             data={MealTypeArray}
             keyExtractor={(item) => item}
@@ -68,12 +73,16 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
                   control={control}
                   name="mealType"
                   render={({ field }) => (
-                    <HStack style={{
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
+                    <HStack
+                      style={{
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Text style={{ fontSize: 16 }}>{item}</Text>
-                      {field.value === item && <Check size={20} color="#2196F3" />}
+                      {field.value === item && (
+                        <Check size={20} color="#2196F3" />
+                      )}
                     </HStack>
                   )}
                 />
@@ -95,12 +104,12 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
         <ActionsheetDragIndicatorWrapper>
           <ActionsheetDragIndicator />
         </ActionsheetDragIndicatorWrapper>
-        
+
         <Box style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
             Choisir un type de cuisine
           </Text>
-          
+
           <FlatList
             data={CuisineTypeArray}
             keyExtractor={(item) => item}
@@ -120,12 +129,16 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
                   control={control}
                   name="cuisineType"
                   render={({ field }) => (
-                    <HStack style={{
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
+                    <HStack
+                      style={{
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Text style={{ fontSize: 16 }}>{item}</Text>
-                      {field.value === item && <Check size={20} color="#2196F3" />}
+                      {field.value === item && (
+                        <Check size={20} color="#2196F3" />
+                      )}
                     </HStack>
                   )}
                 />
@@ -139,20 +152,24 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
 
   return (
     <Box style={{ marginBottom: 16 }}>
-      <Text style={{
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12,
-      }}>
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: 12,
+        }}
+      >
         Informations de base
       </Text>
-      
+
       {/* Sélection du type de repas */}
       <VStack style={{ marginBottom: 12 }}>
-        <Text style={{
-          fontSize: 16,
-          marginBottom: 8,
-        }}>
+        <Text
+          style={{
+            fontSize: 16,
+            marginBottom: 8,
+          }}
+        >
           Type de repas
         </Text>
         <Controller
@@ -169,20 +186,24 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
                 }}
                 onPress={() => uiActions.showModal('mealType')}
               >
-                <HStack style={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
+                <HStack
+                  style={{
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <Text>{field.value}</Text>
                   <ChevronDown size={20} color="#333" />
                 </HStack>
               </Pressable>
               {fieldState.error && (
-                <Text style={{
-                  color: 'red',
-                  fontSize: 12,
-                  marginTop: 4,
-                }}>
+                <Text
+                  style={{
+                    color: 'red',
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                >
                   {fieldState.error.message}
                 </Text>
               )}
@@ -190,13 +211,15 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
           )}
         />
       </VStack>
-      
+
       {/* Sélection du type de cuisine */}
       <VStack style={{ marginBottom: 12 }}>
-        <Text style={{
-          fontSize: 16,
-          marginBottom: 8,
-        }}>
+        <Text
+          style={{
+            fontSize: 16,
+            marginBottom: 8,
+          }}
+        >
           Type de cuisine
         </Text>
         <Controller
@@ -213,20 +236,24 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
                 }}
                 onPress={() => uiActions.showModal('cuisineType')}
               >
-                <HStack style={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
+                <HStack
+                  style={{
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <Text>{field.value}</Text>
                   <ChevronDown size={20} color="#333" />
                 </HStack>
               </Pressable>
               {fieldState.error && (
-                <Text style={{
-                  color: 'red',
-                  fontSize: 12,
-                  marginTop: 4,
-                }}>
+                <Text
+                  style={{
+                    color: 'red',
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                >
                   {fieldState.error.message}
                 </Text>
               )}
@@ -234,7 +261,7 @@ const MealGeneratorBasicForm: React.FC<MealGeneratorBasicFormProps> = ({
           )}
         />
       </VStack>
-      
+
       {/* ActionSheets */}
       {renderMealTypeActionSheet()}
       {renderCuisineTypeActionSheet()}

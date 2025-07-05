@@ -41,7 +41,9 @@ export default function Community() {
           <Button
             key={name}
             onPress={() => changeLanguage(lang)}
-            className={`w-24 h-10 ${currentLanguage === lang ? 'bg-blue-500' : 'bg-gray-400'}`}
+            className={`w-24 h-10 ${
+              currentLanguage === lang ? 'bg-blue-500' : 'bg-gray-400'
+            }`}
           >
             <ButtonText className="text-white text-center">{name}</ButtonText>
           </Button>

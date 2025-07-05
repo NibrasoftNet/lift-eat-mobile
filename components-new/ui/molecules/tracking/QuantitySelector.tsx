@@ -11,27 +11,27 @@ interface QuantitySelectorProps {
    * Valeur actuelle de la quantité
    */
   value: number;
-  
+
   /**
    * Fonction appelée lors du changement de valeur
    */
   onChange: (value: number) => void;
-  
+
   /**
    * Valeur minimale (optionnelle, par défaut 0)
    */
   minValue?: number;
-  
+
   /**
    * Valeur maximale (optionnelle, par défaut 100)
    */
   maxValue?: number;
-  
+
   /**
    * Taille des boutons (optionnelle, par défaut 48)
    */
   buttonSize?: number;
-  
+
   /**
    * Mode d'affichage sombre
    */
@@ -128,14 +128,14 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
       >
         {/* Pour le bouton moins, nous utilisons l'icône Plus mais avec une rotation à 45 degrés */}
         <View style={{ transform: [{ rotate: '45deg' }] }}>
-          <PlusRegularBoldIcon 
-            width={iconSize} 
-            height={iconSize} 
-            color={iconColor} 
+          <PlusRegularBoldIcon
+            width={iconSize}
+            height={iconSize}
+            color={iconColor}
           />
         </View>
       </TouchableOpacity>
-      
+
       {/* Affichage / saisie de la valeur */}
       <TextInput
         style={[styles.valueText, { color: textColor, textAlign: 'center' }]}
@@ -144,8 +144,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         onChangeText={handleTextChange}
         maxLength={5}
       />
-      
-      
+
       {/* Bouton plus */}
       <TouchableOpacity
         style={[
@@ -154,17 +153,17 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
             width: buttonSize,
             height: buttonSize,
             backgroundColor: buttonBackground,
-          }
+          },
         ]}
         onPressIn={() => startContinuous(1)}
         onPressOut={clear}
         disabled={value >= maxValue}
         activeOpacity={0.7}
       >
-        <PlusRegularBoldIcon 
-          width={iconSize} 
-          height={iconSize} 
-          color={iconColor} 
+        <PlusRegularBoldIcon
+          width={iconSize}
+          height={iconSize}
+          color={iconColor}
         />
       </TouchableOpacity>
     </View>

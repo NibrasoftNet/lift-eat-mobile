@@ -14,7 +14,9 @@ const imageRegex = /image:\s*['"]([^'"]+)['"]/g;
 const imageSet = new Set<string>();
 
 // 1) Parcourir les fichiers seed (.ts) pour extraire les chemins déclarés dans la propriété `image`
-const files = glob.sync(path.join(seedDir, '**/*.ts')).filter((f) => !f.endsWith('ingredientImages.ts'));
+const files = glob
+  .sync(path.join(seedDir, '**/*.ts'))
+  .filter((f) => !f.endsWith('ingredientImages.ts'));
 
 files.forEach((file) => {
   const content = fs.readFileSync(file, 'utf-8');

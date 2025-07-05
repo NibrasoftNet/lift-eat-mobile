@@ -11,7 +11,6 @@ import { Text } from '../../atoms/base';
 import CircularNutritionProgress from '../../molecules/tracking/CircularNutritionProgress';
 import QuantitySelector from '../../molecules/tracking/QuantitySelector';
 
-
 export interface IngredientDetailsData {
   name: string;
   calories: number;
@@ -68,8 +67,6 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = ({
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
-
-
       {/* Quantity Selector synchronisé avec le store */}
       <QuantitySelector value={quantity} onChange={onQuantityChange} />
 
@@ -77,8 +74,13 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = ({
       {(() => {
         const raw = (ingredient as any).image ?? ingredient.imageUrl;
         if (raw) {
-          const uri = raw.startsWith('http') || raw.startsWith('data') ? raw : `data:image/png;base64,${raw}`;
-          return <Image source={{ uri }} resizeMode="contain" style={styles.image} />;
+          const uri =
+            raw.startsWith('http') || raw.startsWith('data')
+              ? raw
+              : `data:image/png;base64,${raw}`;
+          return (
+            <Image source={{ uri }} resizeMode="contain" style={styles.image} />
+          );
         }
         return (
           <View style={styles.placeholderImage}>
@@ -108,47 +110,48 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = ({
   );
 };
 
-const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 10,
-    backgroundColor: '#FFF', // Forcé blanc pour le détail
-    borderTopLeftRadius: theme.radius('md'),
-    borderTopRightRadius: theme.radius('md'),
-    padding: theme.space('md'),
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: -3 },
-    elevation: 2,
-  },
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    container: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 10,
+      backgroundColor: '#FFF', // Forcé blanc pour le détail
+      borderTopLeftRadius: theme.radius('md'),
+      borderTopRightRadius: theme.radius('md'),
+      padding: theme.space('md'),
+      shadowColor: '#000',
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: -3 },
+      elevation: 2,
+    },
 
-  image: {
-    width: 230,
-    height: 150,
-    borderRadius: theme.radius('md'),
-    alignSelf: 'center',
-  },
-  placeholderImage: {
-    width: 150,
-    height: 150,
-    borderRadius: theme.radius('md'),
-    alignSelf: 'center',
-    backgroundColor: theme.color('backgroundGrey'),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  divider: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: theme.color('successLighter'),
-    alignSelf: 'center',
-    marginTop: theme.space('sm'),
-    marginBottom: theme.space('md'),
-  },
-});
+    image: {
+      width: 230,
+      height: 150,
+      borderRadius: theme.radius('md'),
+      alignSelf: 'center',
+    },
+    placeholderImage: {
+      width: 150,
+      height: 150,
+      borderRadius: theme.radius('md'),
+      alignSelf: 'center',
+      backgroundColor: theme.color('backgroundGrey'),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    divider: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: theme.color('successLighter'),
+      alignSelf: 'center',
+      marginTop: theme.space('sm'),
+      marginBottom: theme.space('md'),
+    },
+  });
 
 export default IngredientDetails;

@@ -17,31 +17,27 @@ const CaloriesBurnedSection: React.FC<CaloriesBurnedSectionProps> = ({
   isDarkMode = false,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs exactes du design Figma
   const textDarkColor = '#212121';
   const textGrayColor = '#616161';
   const lineColor = '#EEEEEE';
   const buttonColor = '#A1CE50';
-  
+
   return (
     <View style={styles.container}>
       {/* Section Walking */}
       <View style={styles.column}>
-        <Text style={[styles.label, { color: textGrayColor }]}>
-          👣 Walking
-        </Text>
+        <Text style={[styles.label, { color: textGrayColor }]}>👣 Walking</Text>
         <Text style={[styles.amountText, { color: textDarkColor }]}>
           {walkingCalories}
         </Text>
-        <Text style={[styles.unitText, { color: textGrayColor }]}>
-          kcal
-        </Text>
+        <Text style={[styles.unitText, { color: textGrayColor }]}>kcal</Text>
       </View>
-      
+
       {/* Ligne de séparation verticale */}
       <View style={[styles.divider, { backgroundColor: lineColor }]} />
-      
+
       {/* Section Activity */}
       <View style={styles.column}>
         <Text style={[styles.label, { color: textGrayColor }]}>
@@ -50,10 +46,8 @@ const CaloriesBurnedSection: React.FC<CaloriesBurnedSectionProps> = ({
         <Text style={[styles.amountText, { color: textDarkColor }]}>
           {activityCalories}
         </Text>
-        <Text style={[styles.unitText, { color: textGrayColor }]}>
-          kcal
-        </Text>
-        
+        <Text style={[styles.unitText, { color: textGrayColor }]}>kcal</Text>
+
         {/* Bouton d'ajout d'activité */}
         <CircularAddButton
           size={40}

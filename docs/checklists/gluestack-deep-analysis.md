@@ -15,13 +15,13 @@
 
 ## 2. Synthèse chiffrée
 
-| Catégorie | Nb. de composants | Imports distincts | Complexité moyenne |
-|-----------|-------------------|-------------------|--------------------|
-| **UI de base** (`Box`, `Text`, `Pressable`, etc.) | ≈ 15 | 9 | **Basse** |
-| **Formulaires** (`Input`, `Select`, `Slider`, etc.) | 12 | 8 | **Moyenne** |
-| **Feedback / Overlay** (`Modal`, `Toast`, `Drawer`, etc.) | 10 | 6 | **Haute** |
-| **Personnalisés** (ex : `MealCard`, `RulerPicker`) | 8 | – | **Très haute** |
-| **Utilitaires** (`tva`, `withStyleContext`, Tailwind plugin) | 5 | – | **Critique** |
+| Catégorie                                                    | Nb. de composants | Imports distincts | Complexité moyenne |
+| ------------------------------------------------------------ | ----------------- | ----------------- | ------------------ |
+| **UI de base** (`Box`, `Text`, `Pressable`, etc.)            | ≈ 15              | 9                 | **Basse**          |
+| **Formulaires** (`Input`, `Select`, `Slider`, etc.)          | 12                | 8                 | **Moyenne**        |
+| **Feedback / Overlay** (`Modal`, `Toast`, `Drawer`, etc.)    | 10                | 6                 | **Haute**          |
+| **Personnalisés** (ex : `MealCard`, `RulerPicker`)           | 8                 | –                 | **Très haute**     |
+| **Utilitaires** (`tva`, `withStyleContext`, Tailwind plugin) | 5                 | –                 | **Critique**       |
 
 > Les chiffres sont issus d’un scan automatique (`grep '@gluestack-ui/' -R —count`).
 
@@ -31,25 +31,25 @@
 
 ### 3.1 UI de base
 
-| Composant Gluestack | Fonction(s) principale(s) | Équivalent Restyle | Observations migration |
-|---------------------|---------------------------|--------------------|------------------------|
-| `Box` | Container générique | `Box` (createBox) | 100 + occurrences – migration itérative possible |
-| `Text` | Affichage texte | `Text` (createText) | Variants typographiques à recréer via Figma tokens |
-| `Pressable` | Zones tap/click | `Pressable` (createRestyleComponent) | Vérifier ripple / feedback tactile |
-| `Icon` | Icônes SVG / PNG | `@shopify/restyle` + `react-native-svg` | Figma → SVG via MCP download |
+| Composant Gluestack | Fonction(s) principale(s) | Équivalent Restyle                      | Observations migration                             |
+| ------------------- | ------------------------- | --------------------------------------- | -------------------------------------------------- |
+| `Box`               | Container générique       | `Box` (createBox)                       | 100 + occurrences – migration itérative possible   |
+| `Text`              | Affichage texte           | `Text` (createText)                     | Variants typographiques à recréer via Figma tokens |
+| `Pressable`         | Zones tap/click           | `Pressable` (createRestyleComponent)    | Vérifier ripple / feedback tactile                 |
+| `Icon`              | Icônes SVG / PNG          | `@shopify/restyle` + `react-native-svg` | Figma → SVG via MCP download                       |
 
 ### 3.2 Formulaires
 
-| Composant | Spécificités | Risque | Remarques |
-|-----------|-------------|--------|-----------|
-| `Input` / `Textarea` | Validation, variants (`error`, `disabled`) | ⚠️ Élevé | Requiert une couche Formik/Yup existante |
-| `Select` | Implémenté en **ActionSheet** mobile | ⚠️ Très élevé | Restyle n’a pas de Select : à recréer |
-| `Slider` | Valeur continue, styling personnalisé | Moyen | Peut être remplacé par `react-native-slider` + Restyle |
+| Composant            | Spécificités                               | Risque        | Remarques                                              |
+| -------------------- | ------------------------------------------ | ------------- | ------------------------------------------------------ |
+| `Input` / `Textarea` | Validation, variants (`error`, `disabled`) | ⚠️ Élevé      | Requiert une couche Formik/Yup existante               |
+| `Select`             | Implémenté en **ActionSheet** mobile       | ⚠️ Très élevé | Restyle n’a pas de Select : à recréer                  |
+| `Slider`             | Valeur continue, styling personnalisé      | Moyen         | Peut être remplacé par `react-native-slider` + Restyle |
 
 ### 3.3 Feedback & Overlay
 
 | Composant     | Usage                    | Migration                              | Points d’attention           |
-|-----------    |-------                   |-----------                             |-------------------           |
+| ------------- | ------------------------ | -------------------------------------- | ---------------------------- |
 | `Modal`       | 9 occurrences            | Wrapper Restyle + `react-native-modal` | Gestion accessibilityFocus   |
 | `Drawer`      | 4 occurrences            | idem Modal (position = side)           | GestureHandler compat        |
 | `Toast`       | Hook global (`useToast`) | Restyle custom context                 | Adapter aux appels existants |
@@ -57,11 +57,11 @@
 
 ### 3.4 Composants personnalisés critiques
 
-| Composant | Dépendances | Rôle métier | Impact migration |
-|-----------|-------------|------------|------------------|
-| `MealCard` | `Box`, `Text`, `Pressable`, `Chip`, hooks nutrition | Affichage nutritionnel 100g | **Bloquant** : à refactoriser après création thème |
-| `MealFilters` | `Select`, `Chip`, services pages | UX filtre de repas | Adaptation après Select |
-| `RulerPicker` | `Slider`, `Svg`, animations | Sélection quantité | Risque : animations Expo 53 |
+| Composant     | Dépendances                                         | Rôle métier                 | Impact migration                                   |
+| ------------- | --------------------------------------------------- | --------------------------- | -------------------------------------------------- |
+| `MealCard`    | `Box`, `Text`, `Pressable`, `Chip`, hooks nutrition | Affichage nutritionnel 100g | **Bloquant** : à refactoriser après création thème |
+| `MealFilters` | `Select`, `Chip`, services pages                    | UX filtre de repas          | Adaptation après Select                            |
+| `RulerPicker` | `Slider`, `Svg`, animations                         | Sélection quantité          | Risque : animations Expo 53                        |
 
 ---
 
@@ -76,20 +76,20 @@
 
 ## 5. Dépendances & cycles
 
-| Cycle identifié | Modules impliqués | Impact | Action recommandée |
-|-----------------|------------------|--------|--------------------|
-| **Cycle #1** | `sqlite-server` ↔ `meal-handlers` ↔ `nutrition-core.service` | Warnings au démarrage | Séparer la couche UI de ce cycle avant migration |
-| **Cycle #2** | `sqlite-server` ↔ `userContext` ↔ UI services | Potentiel crash hot-reload | Introduire interfaces + injection dépendances |
+| Cycle identifié | Modules impliqués                                            | Impact                     | Action recommandée                               |
+| --------------- | ------------------------------------------------------------ | -------------------------- | ------------------------------------------------ |
+| **Cycle #1**    | `sqlite-server` ↔ `meal-handlers` ↔ `nutrition-core.service` | Warnings au démarrage      | Séparer la couche UI de ce cycle avant migration |
+| **Cycle #2**    | `sqlite-server` ↔ `userContext` ↔ UI services                | Potentiel crash hot-reload | Introduire interfaces + injection dépendances    |
 
 ---
 
 ## 6. Mapping Restyle / Figma tokens
 
-| Token Figma | Catégorie | Mapping Restyle | Exemple |
-|-------------|----------|-----------------|---------|
-| `Primary/500` | Couleur | `colors.primary` | `#00BFA6` |
-| `Spacing/M` | Spacing | `spacing.m` | `16` |
-| `Font/H1` | Typo | `textVariants.header` | `24/32 bold` |
+| Token Figma   | Catégorie | Mapping Restyle       | Exemple      |
+| ------------- | --------- | --------------------- | ------------ |
+| `Primary/500` | Couleur   | `colors.primary`      | `#00BFA6`    |
+| `Spacing/M`   | Spacing   | `spacing.m`           | `16`         |
+| `Font/H1`     | Typo      | `textVariants.header` | `24/32 bold` |
 
 > Un **script automatique** (MCP Figma → JSON → `theme.ts`) sera mis en place.
 
@@ -109,12 +109,12 @@
 
 ## 8. KPIs & contrôles qualité (« Toujours vérifier »)
 
-| KPI | Seuil | Outil de vérification |
-|-----|-------|----------------------|
-| Couverture des composants Restyle | ≥ 90 % | Storybook + tests visuels |
-| Régression visuelle | ≤ 2 % diff | Chromatic / Loki |
-| Performances (FPS) | ≥ 55 fps | React Dev Tools / Flipper |
-| Taille APK/IPA | +0 % max | EAS build size & diff |
+| KPI                               | Seuil      | Outil de vérification     |
+| --------------------------------- | ---------- | ------------------------- |
+| Couverture des composants Restyle | ≥ 90 %     | Storybook + tests visuels |
+| Régression visuelle               | ≤ 2 % diff | Chromatic / Loki          |
+| Performances (FPS)                | ≥ 55 fps   | React Dev Tools / Flipper |
+| Taille APK/IPA                    | +0 % max   | EAS build size & diff     |
 
 ---
 

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../../../themeNew';
@@ -19,16 +26,16 @@ export default function OnboardingStep1() {
   const theme = useTheme();
   const [name, setName] = useState('');
   const [selectedGender, setSelectedGender] = useState<Gender>(null);
-  
+
   // Fonctions de gestion des événements
   const handleNameChange = (newName: string) => {
     setName(newName);
   };
-  
+
   const handleGenderSelect = (gender: Gender) => {
     setSelectedGender(gender);
   };
-  
+
   // Charger les données sauvegardées au chargement du composant
   useEffect(() => {
     const loadSavedData = async () => {
@@ -40,10 +47,13 @@ export default function OnboardingStep1() {
           if (userData.gender) setSelectedGender(userData.gender);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des données d\'onboarding:', error);
+        console.error(
+          "Erreur lors du chargement des données d'onboarding:",
+          error,
+        );
       }
     };
-    
+
     loadSavedData();
   }, []);
 
@@ -60,39 +70,56 @@ export default function OnboardingStep1() {
         name,
         gender: selectedGender,
       });
-      
+
       if (result.success) {
         // Naviguer vers l'écran suivant
         router.push('/onboarding/onboarding-step2');
       } else {
-        console.error('Erreur lors de la sauvegarde des données d\'onboarding:', result.error);
+        console.error(
+          "Erreur lors de la sauvegarde des données d'onboarding:",
+          result.error,
+        );
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde des données d\'onboarding:', error);
+      console.error(
+        "Erreur lors de la sauvegarde des données d'onboarding:",
+        error,
+      );
     }
   };
 
   // Vérifier si les champs sont remplis pour activer le bouton
   const isButtonEnabled = name.trim() !== '' && selectedGender !== null;
-  
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.color('background') }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.color('background') }]}
+    >
       <StatusBar style="dark" />
-      
+
       {/* Header avec progression */}
       <View style={styles.progressHeader}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.backButtonText}>←</Text>
         </Pressable>
         <View style={styles.progressBar}>
-          <View style={[styles.progressIndicator, { backgroundColor: theme.color('successLighter') }]} />
+          <View
+            style={[
+              styles.progressIndicator,
+              { backgroundColor: theme.color('successLighter') },
+            ]}
+          />
         </View>
-        <Text style={[styles.progressText, { color: theme.color('primary') }]}>1 / 5</Text>
+        <Text style={[styles.progressText, { color: theme.color('primary') }]}>
+          1 / 5
+        </Text>
       </View>
-      
+
       {/* Titre principal */}
-      <Text style={[styles.title, { color: theme.color('primary') }]}>What's your name and gender?</Text>
-      
+      <Text style={[styles.title, { color: theme.color('primary') }]}>
+        What's your name and gender?
+      </Text>
+
       {/* Champ de nom */}
       <View style={styles.nameInputContainer}>
         <NameInput
@@ -101,55 +128,94 @@ export default function OnboardingStep1() {
           placeholder="Andrew"
         />
       </View>
-      
+
       {/* Sélection du genre */}
       <View style={styles.genderSelectionContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.genderOption,
-            selectedGender === 'male' && styles.selectedGender
+            selectedGender === 'male' && styles.selectedGender,
           ]}
           onPress={() => handleGenderSelect('male')}
         >
-          <View style={[styles.iconContainer, selectedGender === 'male' && { backgroundColor: theme.color('successLighter'), borderColor: theme.color('successLight') }]}>
-            <MaleIcon color={selectedGender === 'male' ? '#FFFFFF' : theme.color('primary')} size={60} />
+          <View
+            style={[
+              styles.iconContainer,
+              selectedGender === 'male' && {
+                backgroundColor: theme.color('successLighter'),
+                borderColor: theme.color('successLight'),
+              },
+            ]}
+          >
+            <MaleIcon
+              color={
+                selectedGender === 'male' ? '#FFFFFF' : theme.color('primary')
+              }
+              size={60}
+            />
           </View>
-          <Text style={[
-            styles.genderText,
-            { color: theme.color('primary') },
-            selectedGender === 'male' && [styles.selectedGenderText, { color: theme.color('successLighter') }]
-          ]}>
+          <Text
+            style={[
+              styles.genderText,
+              { color: theme.color('primary') },
+              selectedGender === 'male' && [
+                styles.selectedGenderText,
+                { color: theme.color('successLighter') },
+              ],
+            ]}
+          >
             Male
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[
             styles.genderOption,
-            selectedGender === 'female' && styles.selectedGender
+            selectedGender === 'female' && styles.selectedGender,
           ]}
           onPress={() => handleGenderSelect('female')}
         >
-          <View style={[styles.iconContainer, selectedGender === 'female' && { backgroundColor: theme.color('successLighter'), borderColor: theme.color('successLight') }]}>
-            <FemaleIcon color={selectedGender === 'female' ? '#FFFFFF' : theme.color('primary')} size={60} />
+          <View
+            style={[
+              styles.iconContainer,
+              selectedGender === 'female' && {
+                backgroundColor: theme.color('successLighter'),
+                borderColor: theme.color('successLight'),
+              },
+            ]}
+          >
+            <FemaleIcon
+              color={
+                selectedGender === 'female' ? '#FFFFFF' : theme.color('primary')
+              }
+              size={60}
+            />
           </View>
-          <Text style={[
-            styles.genderText,
-            { color: theme.color('primary') },
-            selectedGender === 'female' && [styles.selectedGenderText, { color: theme.color('successLighter') }]
-          ]}>
+          <Text
+            style={[
+              styles.genderText,
+              { color: theme.color('primary') },
+              selectedGender === 'female' && [
+                styles.selectedGenderText,
+                { color: theme.color('successLighter') },
+              ],
+            ]}
+          >
             Female
           </Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Bouton de continuation */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.continueButton,
           { backgroundColor: theme.color('successLighter') },
-          !isButtonEnabled && [styles.continueButtonDisabled, { backgroundColor: '#CCCCCC' }]
-        ]} 
+          !isButtonEnabled && [
+            styles.continueButtonDisabled,
+            { backgroundColor: '#CCCCCC' },
+          ],
+        ]}
         onPress={handleContinue}
         disabled={!isButtonEnabled}
       >
@@ -174,7 +240,6 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     marginRight: 8,
-
   },
   backButtonText: {
     fontSize: 35,

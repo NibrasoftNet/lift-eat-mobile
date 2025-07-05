@@ -16,15 +16,18 @@ const GoalTypeFormInput: React.FC<GoalTypeFormInputProps> = ({
 }) => {
   // Obtenir toutes les options d'objectifs du service
   const goalOptions = goalFormService.getGoalOptions();
-  
+
   return (
     <View>
       <Text className="text-gray-700 font-medium mb-2">Goal Type</Text>
       <View className="flex-row justify-between mb-4">
         {goalOptions.map((option) => {
           // Obtenir les styles pour ce bouton en fonction de l'objectif sélectionné
-          const styles = goalFormService.getGoalButtonStyles(selectedGoal, option.value);
-          
+          const styles = goalFormService.getGoalButtonStyles(
+            selectedGoal,
+            option.value,
+          );
+
           return (
             <Button
               key={option.value}

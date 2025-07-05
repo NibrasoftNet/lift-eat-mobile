@@ -225,8 +225,8 @@ const ScaleItem: React.FC<ScaleItemProps> = React.memo(
           index % 10 === 0
             ? styles.longLine
             : index % 1 === 0
-              ? styles.shortLine
-              : null,
+            ? styles.shortLine
+            : null,
         ]}
       />
       {index % 10 === 0 && (

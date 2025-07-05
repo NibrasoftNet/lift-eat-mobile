@@ -21,9 +21,19 @@ export interface PagesServiceInterface {
  * Interface pour le service de présentation des assistants IA
  */
 export interface AssistantPagesServiceInterface extends PagesServiceInterface {
-  generateMeal(criteria: IaMealType, userId: number): Promise<OperationResult<any>>;
-  generatePlan(criteria: IaPlanType, userId: number): Promise<OperationResult<any>>;
-  analyzeProgress(startDate: string, endDate: string, userId: number): Promise<OperationResult<any>>;
+  generateMeal(
+    criteria: IaMealType,
+    userId: number,
+  ): Promise<OperationResult<any>>;
+  generatePlan(
+    criteria: IaPlanType,
+    userId: number,
+  ): Promise<OperationResult<any>>;
+  analyzeProgress(
+    startDate: string,
+    endDate: string,
+    userId: number,
+  ): Promise<OperationResult<any>>;
   analyzeNutritionHabits(userId: number): Promise<OperationResult<any>>;
 }
 
@@ -39,28 +49,35 @@ export interface IngredientPagesServiceInterface extends PagesServiceInterface {
    * @param searchTerm Terme de recherche optionnel
    * @param pageSize Taille de la page
    */
-  getIngredientsList(searchTerm?: string, pageSize?: number): Promise<OperationResult<IngredientStandardOrmProps[]>>;
-  
+  getIngredientsList(
+    searchTerm?: string,
+    pageSize?: number,
+  ): Promise<OperationResult<IngredientStandardOrmProps[]>>;
+
   /**
    * Récupère une liste d'ingrédients formatée pour l'UI
    * @param params Paramètres de recherche et pagination
    */
-  getIngredientsForDisplay(params: GetIngredientsParams): Promise<OperationResult<GetIngredientsResult>>;
+  getIngredientsForDisplay(
+    params: GetIngredientsParams,
+  ): Promise<OperationResult<GetIngredientsResult>>;
 
   /**
    * Formate un ingrédient pour l'affichage dans l'UI
    * @param ingredient L'ingrédient à formater ou son ID
    */
   formatIngredientForDisplay(
-    ingredientIdOrObject: number | IngredientStandardOrmProps
+    ingredientIdOrObject: number | IngredientStandardOrmProps,
   ): { displayName: string; displayUnit: string };
-  
+
   /**
    * Ajoute un nouvel ingrédient
    * @param ingredientData Données de l'ingrédient à ajouter
    */
-  addIngredient(ingredientData: any): Promise<OperationResult<IngredientStandardOrmProps>>;
-  
+  addIngredient(
+    ingredientData: any,
+  ): Promise<OperationResult<IngredientStandardOrmProps>>;
+
   /**
    * Récupère la quantité actuelle d'un ingrédient
    * @param ingredientId ID de l'ingrédient standard
@@ -88,7 +105,11 @@ export interface PlanPagesServiceInterface extends PagesServiceInterface {
 export interface ProgressPagesServiceInterface extends PagesServiceInterface {
   getProgressHistory(days?: number): Promise<OperationResult<any[]>>;
   updateProgress(date: string, data: any): Promise<OperationResult<any>>;
-  markMealAsConsumed(mealId: number, date: string, quantity?: number): Promise<OperationResult<any>>;
+  markMealAsConsumed(
+    mealId: number,
+    date: string,
+    quantity?: number,
+  ): Promise<OperationResult<any>>;
 }
 
 /**
@@ -96,7 +117,17 @@ export interface ProgressPagesServiceInterface extends PagesServiceInterface {
  */
 export interface NutritionPagesServiceInterface extends PagesServiceInterface {
   calculateDailyCalorieIntake(userDetails: any): number;
-  formatMealNutritionForDisplay(macros: MacroNutrientsBase, weight: number): any;
-  getNutritionForQuantity(macros: MacroNutrientsBase, totalWeight: number, quantity: number): MacroNutrientsBase;
-  adjustNutritionByCookingMethod(macros: MacroNutrientsBase, method: string): MacroNutrientsBase;
+  formatMealNutritionForDisplay(
+    macros: MacroNutrientsBase,
+    weight: number,
+  ): any;
+  getNutritionForQuantity(
+    macros: MacroNutrientsBase,
+    totalWeight: number,
+    quantity: number,
+  ): MacroNutrientsBase;
+  adjustNutritionByCookingMethod(
+    macros: MacroNutrientsBase,
+    method: string,
+  ): MacroNutrientsBase;
 }

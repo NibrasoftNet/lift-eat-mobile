@@ -29,7 +29,9 @@ const MealsScreen: React.FC = () => {
     { id: 'favorites', label: t('meal.tabs.favorites') },
     { id: 'personal', label: t('meal.tabs.personal') },
   ];
-  const [activeTabId, setActiveTabId] = useState<MealListFilter>(tabs[0].id as MealListFilter);
+  const [activeTabId, setActiveTabId] = useState<MealListFilter>(
+    tabs[0].id as MealListFilter,
+  );
 
   // Filters hook (meal types, cuisines, panel toggle)
   const {
@@ -65,7 +67,10 @@ const MealsScreen: React.FC = () => {
   }, []);
 
   const handleMealPress = useCallback((mealId: string) => {
-    logger.info(LogCategory.USER, `Navigation vers les détails du repas: ${mealId}`);
+    logger.info(
+      LogCategory.USER,
+      `Navigation vers les détails du repas: ${mealId}`,
+    );
     try {
       router.push(`/meals/my-meals/details/${mealId}`);
     } catch (error) {
@@ -78,38 +83,46 @@ const MealsScreen: React.FC = () => {
     router.push('/meals/my-meals/create-v2');
   }, []);
 
-  const handleDeleteMeal = useCallback((mealId: number) => {
-    Alert.alert(
-      t('meal.delete.confirm'),
-      t('meal.delete.message'),
-      [
-        { text: t('meal.delete.cancel'), style: 'cancel' },
-        {
-          text: t('meal.delete.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await mealPagesService.deleteMeal(mealId);
-              logger.info(LogCategory.USER, `Meal deleted: ${mealId}`);
-              refetch();
-            } catch (error) {
-              logger.error(LogCategory.DATABASE, `Error deleting meal: ${error}`);
-            }
+  const handleDeleteMeal = useCallback(
+    (mealId: number) => {
+      Alert.alert(
+        t('meal.delete.confirm'),
+        t('meal.delete.message'),
+        [
+          { text: t('meal.delete.cancel'), style: 'cancel' },
+          {
+            text: t('meal.delete.delete'),
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await mealPagesService.deleteMeal(mealId);
+                logger.info(LogCategory.USER, `Meal deleted: ${mealId}`);
+                refetch();
+              } catch (error) {
+                logger.error(
+                  LogCategory.DATABASE,
+                  `Error deleting meal: ${error}`,
+                );
+              }
+            },
           },
-        },
-      ],
-      { cancelable: true }
-    );
-  }, [refetch, t]);
+        ],
+        { cancelable: true },
+      );
+    },
+    [refetch, t],
+  );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.color('background') }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.color('background') }]}
+    >
       {/* Header with search bar, actions & tabs */}
       <MealHeader
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onScanPress={handleScanPress}
-        onFilterPress={() => setIsFilterPanelOpen(prev => !prev)}
+        onFilterPress={() => setIsFilterPanelOpen((prev) => !prev)}
         onCreatePress={handleCreateMeal}
         tabs={tabs}
         activeTabId={activeTabId}

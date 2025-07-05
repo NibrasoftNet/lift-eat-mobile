@@ -9,8 +9,8 @@ export const newPasswordSchema = z
     confirmNewPassword: passwordSchema,
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmNewPassword"],
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmNewPassword'],
   });
 
 // Ensure this matches the interface from auth.interface.ts

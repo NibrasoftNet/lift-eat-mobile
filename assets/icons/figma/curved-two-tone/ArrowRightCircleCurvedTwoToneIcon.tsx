@@ -9,16 +9,24 @@ interface IconProps extends SvgProps {
 /**
  * ArrowRightCircleCurvedTwoToneIcon component
  */
-export const ArrowRightCircleCurvedTwoToneIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M12 21.25C18.937 21.25 21.25 18.937 21.25 12C21.25 5.063 18.937 2.75 12 2.75C5.063 2.75 2.75 5.063 2.75 12C2.75 18.937 5.063 21.25 12 21.25Z" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M10.5581 15.4717C10.5581 15.4717 14.0441 13.0797 14.0441 11.9997C14.0441 10.9197 10.5581 8.52968 10.5581 8.52968" fill={none} stroke={color} strokeWidth="1.5" />
+export const ArrowRightCircleCurvedTwoToneIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M12 21.25C18.937 21.25 21.25 18.937 21.25 12C21.25 5.063 18.937 2.75 12 2.75C5.063 2.75 2.75 5.063 2.75 12C2.75 18.937 5.063 21.25 12 21.25Z"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <Path
+      d="M10.5581 15.4717C10.5581 15.4717 14.0441 13.0797 14.0441 11.9997C14.0441 10.9197 10.5581 8.52968 10.5581 8.52968"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </Svg>
 );
 

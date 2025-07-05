@@ -20,7 +20,7 @@ export enum LogCategory {
   PERFORMANCE = 'PERFORMANCE',
   CACHE = 'CACHE',
   NAVIGATION = 'NAVIGATION',
-  APP = 'APP',  // Catégorie générale pour les logs liés à l'application
+  APP = 'APP', // Catégorie générale pour les logs liés à l'application
   USER = 'USER', // Logs liés à la gestion des utilisateurs
   INTEGRATION = 'INTEGRATION', // Logs liés aux intégrations d'API externes
   FORM = 'FORM', // Logs liés aux formulaires et à la validation des données

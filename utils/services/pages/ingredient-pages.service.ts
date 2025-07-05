@@ -10,7 +10,10 @@ import { ingredientCoreService } from '../core/ingredient-core.service';
 import { ingredientUIService } from '../ui/ingredient-ui.service';
 import { OperationResult } from '@/utils/interfaces/pages.interface';
 import { IngredientStandardOrmProps } from '@/db/schema';
-import { GetIngredientsParams, GetIngredientsResult } from '@/utils/interfaces/drawer.interface';
+import {
+  GetIngredientsParams,
+  GetIngredientsResult,
+} from '@/utils/interfaces/drawer.interface';
 
 import { IngredientPagesServiceInterface } from '@/utils/interfaces/pages-services.interface';
 import { Buffer } from 'buffer';
@@ -29,36 +32,50 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    * @param searchTerm Terme de recherche optionnel
    * @param pageSize Taille de la page
    */
-  async getIngredientsList(searchTerm?: string, pageSize: number = 20): Promise<OperationResult<IngredientStandardOrmProps[]>> {
+  async getIngredientsList(
+    searchTerm?: string,
+    pageSize: number = 20,
+  ): Promise<OperationResult<IngredientStandardOrmProps[]>> {
     try {
-      logger.info(LogCategory.DATABASE, 'Récupération de la liste des ingrédients', { searchTerm, pageSize });
-      
+      logger.info(
+        LogCategory.DATABASE,
+        'Récupération de la liste des ingrédients',
+        { searchTerm, pageSize },
+      );
+
       // Déléguer au service core
-      const result = await ingredientCoreService.getIngredientsList(searchTerm, pageSize);
-      
+      const result = await ingredientCoreService.getIngredientsList(
+        searchTerm,
+        pageSize,
+      );
+
       if (!result.success) {
         return {
           success: false,
           error: result.error || 'Échec de récupération des ingrédients',
-          data: []
+          data: [],
         };
       }
-      
+
       return {
         success: true,
-        data: result.ingredients || []
+        data: result.ingredients || [],
       };
     } catch (error) {
-      logger.error(LogCategory.DATABASE, 'Erreur lors de la récupération de la liste des ingrédients', {
-        error: error instanceof Error ? error.message : String(error),
-        searchTerm,
-        pageSize
-      });
-      
+      logger.error(
+        LogCategory.DATABASE,
+        'Erreur lors de la récupération de la liste des ingrédients',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          searchTerm,
+          pageSize,
+        },
+      );
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue',
-        data: []
+        data: [],
       };
     }
   }
@@ -67,88 +84,117 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    * Ajoute un nouvel ingrédient
    * @param ingredientData Données de l'ingrédient à ajouter
    */
-  async addIngredient(ingredientData: any): Promise<OperationResult<IngredientStandardOrmProps>> {
+  async addIngredient(
+    ingredientData: any,
+  ): Promise<OperationResult<IngredientStandardOrmProps>> {
     try {
-      logger.info(LogCategory.DATABASE, 'Ajout d\'un ingrédient', { ingredientData });
-      
+      logger.info(LogCategory.DATABASE, "Ajout d'un ingrédient", {
+        ingredientData,
+      });
+
       // Déléguer au service core
-      const result = await ingredientCoreService.createIngredient(ingredientData);
-      
+      const result = await ingredientCoreService.createIngredient(
+        ingredientData,
+      );
+
       return {
         success: true,
-        data: result
+        data: result,
       };
     } catch (error) {
-      logger.error(LogCategory.DATABASE, 'Erreur lors de l\'ajout d\'un ingrédient', {
-        error: error instanceof Error ? error.message : String(error),
-        ingredientData
-      });
-      
+      logger.error(
+        LogCategory.DATABASE,
+        "Erreur lors de l'ajout d'un ingrédient",
+        {
+          error: error instanceof Error ? error.message : String(error),
+          ingredientData,
+        },
+      );
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erreur inconnue'
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
       };
     }
   }
-  
+
   /**
    * Récupère une liste d'ingrédients formatée pour l'UI
    * @param params Paramètres de recherche et pagination
    */
-  async getIngredientsForDisplay(params: GetIngredientsParams): Promise<OperationResult<GetIngredientsResult>> {
+  async getIngredientsForDisplay(
+    params: GetIngredientsParams,
+  ): Promise<OperationResult<GetIngredientsResult>> {
     try {
       const { searchTerm, pageParam = 1, pageSize = 10 } = params;
-      
-      logger.info(LogCategory.UI, 'Récupération des ingrédients pour affichage (service pages)', { 
-        searchTerm, 
-        pageParam 
-      });
-      
+
+      logger.info(
+        LogCategory.UI,
+        'Récupération des ingrédients pour affichage (service pages)',
+        {
+          searchTerm,
+          pageParam,
+        },
+      );
+
       // Pour supporter la pagination, récupérer un nombre d'éléments cumulatif
       const fetchSize = pageParam * pageSize;
-      const result = await ingredientCoreService.getIngredientsList(searchTerm, fetchSize);
-      
+      const result = await ingredientCoreService.getIngredientsList(
+        searchTerm,
+        fetchSize,
+      );
+
       if (!result.success) {
         return {
           success: false,
-          error: result.error || 'Échec de la récupération des ingrédients'
+          error: result.error || 'Échec de la récupération des ingrédients',
         };
       }
-      
+
       // Calculer la fenêtre correspondant à la page courante
       const offset = (pageParam - 1) * pageSize;
-      const pageSlice = (result.ingredients || []).slice(offset, offset + pageSize);
-      
+      const pageSlice = (result.ingredients || []).slice(
+        offset,
+        offset + pageSize,
+      );
+
       // Formater les ingrédients pour l'affichage en utilisant le service core
       // Optimiser les données (ID unique, sélection, etc.)
-      const optimizedIngredients = ingredientCoreService.optimizeIngredientData(pageSlice, pageParam);
+      const optimizedIngredients = ingredientCoreService.optimizeIngredientData(
+        pageSlice,
+        pageParam,
+      );
 
       // Ajouter imageUrl converti depuis le buffer ou la chaîne
       const ingredientsWithImages = optimizedIngredients.map((ing) => ({
         ...ing,
-        imageUrl: getImageUrl(ing.image as any)
+        imageUrl: getImageUrl(ing.image as any),
       }));
-      
+
       // Il y a une page suivante si nous avons pu récupérer un nombre d'éléments égal à pageSize
       const hasNextPage = pageSlice.length === pageSize;
       const nextPage = hasNextPage ? pageParam + 1 : null;
-      
+
       return {
         success: true,
         data: {
           data: ingredientsWithImages,
-          nextPage
-        }
+          nextPage,
+        },
       };
     } catch (error) {
-      logger.error(LogCategory.UI, 'Erreur lors de la récupération des ingrédients pour affichage (service pages)', {
-        error: error instanceof Error ? error.message : String(error)
-      });
-      
+      logger.error(
+        LogCategory.UI,
+        'Erreur lors de la récupération des ingrédients pour affichage (service pages)',
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue',
-        data: { data: [], nextPage: null }
+        data: { data: [], nextPage: null },
       };
     }
   }
@@ -158,31 +204,44 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    * @param ingredientIdOrObject L'ingrédient à formater ou son ID
    */
   formatIngredientForDisplay(
-    ingredientIdOrObject: number | IngredientStandardOrmProps
+    ingredientIdOrObject: number | IngredientStandardOrmProps,
   ): { displayName: string; displayUnit: string } {
     try {
-      logger.info(LogCategory.UI, 'Formatage d\'un ingrédient pour affichage (service pages)');
+      logger.info(
+        LogCategory.UI,
+        "Formatage d'un ingrédient pour affichage (service pages)",
+      );
 
       // Déléguer au service UI
-      return ingredientUIService.formatIngredientForDisplay(ingredientIdOrObject);
+      return ingredientUIService.formatIngredientForDisplay(
+        ingredientIdOrObject,
+      );
     } catch (error) {
-      logger.error(LogCategory.UI, `Erreur lors du formatage de l'ingrédient pour affichage (service pages)`, {
-        error: error instanceof Error ? error.message : String(error),
-        ingredientId: typeof ingredientIdOrObject === 'number' ? ingredientIdOrObject : ingredientIdOrObject.id
-      });
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors du formatage de l'ingrédient pour affichage (service pages)`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          ingredientId:
+            typeof ingredientIdOrObject === 'number'
+              ? ingredientIdOrObject
+              : ingredientIdOrObject.id,
+        },
+      );
 
       // Retourner des valeurs par défaut en cas d'erreur
-      const defaultName = typeof ingredientIdOrObject === 'number'
-        ? `Ingrédient #${ingredientIdOrObject}`
-        : (ingredientIdOrObject.name || 'Ingrédient');
-      
+      const defaultName =
+        typeof ingredientIdOrObject === 'number'
+          ? `Ingrédient #${ingredientIdOrObject}`
+          : ingredientIdOrObject.name || 'Ingrédient';
+
       return {
         displayName: defaultName,
-        displayUnit: 'g'
+        displayUnit: 'g',
       };
     }
   }
-  
+
   /**
    * Récupère la quantité actuelle d'un ingrédient
    * @param ingredientId ID de l'ingrédient standard
@@ -190,18 +249,25 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    */
   getIngredientQuantity(ingredientId: number): number {
     try {
-      logger.info(LogCategory.UI, `Récupération de la quantité pour l'ingrédient ${ingredientId}`);
+      logger.info(
+        LogCategory.UI,
+        `Récupération de la quantité pour l'ingrédient ${ingredientId}`,
+      );
       // Déléguer au service core
       return ingredientCoreService.getIngredientQuantity(ingredientId);
     } catch (error) {
-      logger.error(LogCategory.UI, `Erreur lors de la récupération de la quantité d'ingrédient`, {
-        error: error instanceof Error ? error.message : String(error),
-        ingredientId
-      });
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors de la récupération de la quantité d'ingrédient`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          ingredientId,
+        },
+      );
       return 0;
     }
   }
-  
+
   /**
    * Incrémente la quantité d'un ingrédient
    * @param ingredientId ID de l'ingrédient standard
@@ -209,18 +275,25 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    */
   incrementIngredientQuantity(ingredientId: number, amount: number = 10): void {
     try {
-      logger.info(LogCategory.UI, `Incrémentation de la quantité pour l'ingrédient ${ingredientId} de ${amount}`);
+      logger.info(
+        LogCategory.UI,
+        `Incrémentation de la quantité pour l'ingrédient ${ingredientId} de ${amount}`,
+      );
       // Déléguer au service core
       ingredientCoreService.incrementIngredientQuantity(ingredientId, amount);
     } catch (error) {
-      logger.error(LogCategory.UI, `Erreur lors de l'incrémentation de la quantité d'ingrédient`, {
-        error: error instanceof Error ? error.message : String(error),
-        ingredientId,
-        amount
-      });
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors de l'incrémentation de la quantité d'ingrédient`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          ingredientId,
+          amount,
+        },
+      );
     }
   }
-  
+
   /**
    * Décrémente la quantité d'un ingrédient
    * @param ingredientId ID de l'ingrédient standard
@@ -228,15 +301,22 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
    */
   decrementIngredientQuantity(ingredientId: number, amount: number = 10): void {
     try {
-      logger.info(LogCategory.UI, `Décrémentation de la quantité pour l'ingrédient ${ingredientId} de ${amount}`);
+      logger.info(
+        LogCategory.UI,
+        `Décrémentation de la quantité pour l'ingrédient ${ingredientId} de ${amount}`,
+      );
       // Déléguer au service core
       ingredientCoreService.decrementIngredientQuantity(ingredientId, amount);
     } catch (error) {
-      logger.error(LogCategory.UI, `Erreur lors de la décrémentation de la quantité d'ingrédient`, {
-        error: error instanceof Error ? error.message : String(error),
-        ingredientId,
-        amount
-      });
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors de la décrémentation de la quantité d'ingrédient`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          ingredientId,
+          amount,
+        },
+      );
     }
   }
 }
@@ -246,8 +326,6 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
  * @param image Buffer | string | undefined
  */
 const getImageUrl = (image: any): string | undefined => {
-
-
   if (!image) return undefined;
 
   try {
@@ -263,20 +341,38 @@ const getImageUrl = (image: any): string | undefined => {
     }
 
     // Cas objet { type: 'Buffer', data: [...] } (format JSONisé d'un Buffer)
-    if (typeof image === 'object' && image?.type === 'Buffer' && Array.isArray(image.data)) {
+    if (
+      typeof image === 'object' &&
+      image?.type === 'Buffer' &&
+      Array.isArray(image.data)
+    ) {
       try {
-        return `data:image/jpeg;base64,${Buffer.from(image.data).toString('base64')}`;
+        return `data:image/jpeg;base64,${Buffer.from(image.data).toString(
+          'base64',
+        )}`;
       } catch (err) {
-        logger.warn(LogCategory.UI, `Impossible de convertir l'objet Buffer-like: ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(
+          LogCategory.UI,
+          `Impossible de convertir l'objet Buffer-like: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
 
     // ArrayBuffer -> data URI
     if (image instanceof ArrayBuffer) {
       try {
-        return `data:image/jpeg;base64,${Buffer.from(new Uint8Array(image)).toString('base64')}`;
+        return `data:image/jpeg;base64,${Buffer.from(
+          new Uint8Array(image),
+        ).toString('base64')}`;
       } catch (err) {
-        logger.warn(LogCategory.UI, `Impossible de convertir ArrayBuffer: ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(
+          LogCategory.UI,
+          `Impossible de convertir ArrayBuffer: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
 
@@ -293,7 +389,12 @@ const getImageUrl = (image: any): string | undefined => {
       return `data:image/jpeg;base64,${Buffer.from(image).toString('base64')}`;
     }
   } catch (err) {
-    logger.warn(LogCategory.UI, `Erreur lors de la conversion d'image en URL: ${err instanceof Error ? err.message : String(err)}`);
+    logger.warn(
+      LogCategory.UI,
+      `Erreur lors de la conversion d'image en URL: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
   }
 
   return undefined;

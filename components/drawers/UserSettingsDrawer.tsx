@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useMemo, useEffect, useCallback } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
 import {
   Drawer,
   DrawerBackdrop,
@@ -40,11 +46,11 @@ import { MenuItem } from '@/utils/interfaces/drawer.interface';
 // Utiliser le service pour obtenir les éléments du menu
 // Cette variable sert de mappage pour convertir les noms d'icônes en composants
 const iconMapping: Record<string, any> = {
-  'Compass': Compass,
-  'PencilRuler': PencilRuler,
-  'Weight': Weight,
-  'Drum': Drum,
-  'SquareAsterisk': SquareAsterisk,
+  Compass: Compass,
+  PencilRuler: PencilRuler,
+  Weight: Weight,
+  Drum: Drum,
+  SquareAsterisk: SquareAsterisk,
 };
 
 const MenuItemComponent = ({ item }: { item: MenuItem }) => {
@@ -55,14 +61,20 @@ const MenuItemComponent = ({ item }: { item: MenuItem }) => {
   const handleNavigation = useCallback(() => {
     // Vérifier l'authentification
     if (!userId) {
-      logger.warn(LogCategory.AUTH, 'Attempting to navigate to settings while not authenticated');
+      logger.warn(
+        LogCategory.AUTH,
+        'Attempting to navigate to settings while not authenticated',
+      );
       // Utiliser un chemin valide pour Expo Router au lieu de la racine simple
       router.push('/(root)/(auth)/login');
       return;
     }
-    
+
     // Utiliser le service pour obtenir l'URL de navigation
-    const navigationUrl = userSettingsDrawerUIService.getNavigationUrl(item.tag, userId);
+    const navigationUrl = userSettingsDrawerUIService.getNavigationUrl(
+      item.tag,
+      userId,
+    );
     // Utiliser la navigation type-safe de Expo Router
     if (item.tag === 'analytics') {
       router.push('/analytics' as any);
@@ -76,10 +88,10 @@ const MenuItemComponent = ({ item }: { item: MenuItem }) => {
       router.push('/new-password' as any);
     }
   }, [item.tag, userId, router]);
-  
+
   // Utiliser le mapping d'icônes pour obtenir le composant correspondant au nom d'icône
   const IconComponent = iconMapping[item.icon] || User; // Fallback sur User si l'icône n'est pas trouvée
-  
+
   return (
     <Pressable
       onPress={handleNavigation}
@@ -102,27 +114,34 @@ const UserSettingsDrawer = ({
 }) => {
   // Obtenir l'ID utilisateur de manière standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   // État local pour stocker les données utilisateur
-  const [user, setUser] = React.useState<UserOrmPros | null>(initialUser || null);
-  
+  const [user, setUser] = React.useState<UserOrmPros | null>(
+    initialUser || null,
+  );
+
   // Charger les données utilisateur quand le drawer s'ouvre et qu'il n'y a pas d'utilisateur initial
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) {
-        logger.warn(LogCategory.AUTH, 'User not authenticated when accessing settings drawer');
+        logger.warn(
+          LogCategory.AUTH,
+          'User not authenticated when accessing settings drawer',
+        );
         setShowUserSettingsDrawer(false);
         return;
       }
-      
+
       if (initialUser) {
         setUser(initialUser);
         return;
       }
-      
+
       try {
         // Utiliser le service pour récupérer les données utilisateur
-        const userData = await userSettingsDrawerUIService.fetchUserData(userId);
+        const userData = await userSettingsDrawerUIService.fetchUserData(
+          userId,
+        );
         if (userData) {
           setUser(userData);
         } else {
@@ -130,11 +149,16 @@ const UserSettingsDrawer = ({
           setShowUserSettingsDrawer(false);
         }
       } catch (error) {
-        logger.error(LogCategory.USER, `Error fetching user details: ${error instanceof Error ? error.message : String(error)}`);
+        logger.error(
+          LogCategory.USER,
+          `Error fetching user details: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
         setShowUserSettingsDrawer(false);
       }
     };
-    
+
     if (showUserSettingsDrawer) {
       fetchUserData();
     }
@@ -143,7 +167,7 @@ const UserSettingsDrawer = ({
   if (!user) {
     return null;
   }
-  
+
   return (
     <Drawer
       isOpen={showUserSettingsDrawer}

@@ -29,9 +29,9 @@ export interface ExternalApiInfo {
  */
 export class ApiVersionImpl implements ApiVersion {
   constructor(
-    public major: number, 
-    public minor: number, 
-    public patch: number
+    public major: number,
+    public minor: number,
+    public patch: number,
   ) {}
 
   toString(): string {

@@ -20,8 +20,11 @@ const StepMeter: React.FC<StepMeterProps> = ({
   showText = true,
 }) => {
   // Calculate percentage completion
-  const percentage = Math.min(Math.round((currentSteps / goalSteps) * 100), 100);
-  
+  const percentage = Math.min(
+    Math.round((currentSteps / goalSteps) * 100),
+    100,
+  );
+
   // SVG du compteur de pas - ici, un exemple simplifié d'un cercle de progression
   // Normalement, vous utiliseriez le contenu exact de votre fichier Step Meter.svg
   const svgXml = `
@@ -47,12 +50,12 @@ const StepMeter: React.FC<StepMeterProps> = ({
       </g>
     </svg>
   `;
-  
+
   return (
     <View style={[styles.container, style]}>
       {/* SVG Step Meter visualization */}
       <SvgXml xml={svgXml} width={150} height={150} />
-      
+
       {/* Step counts and percentage */}
       {showText && (
         <View style={styles.textContainer}>

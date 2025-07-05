@@ -26,36 +26,68 @@ export const MCPProvider = ({ children }: { children: ReactNode }) => {
     const initMCP = async () => {
       try {
         // Initialisation du serveur MCP avec la base de données SQLite
-        logger.info(LogCategory.DATABASE, 'Initialisation du MCP Server avec la base de données');
+        logger.info(
+          LogCategory.DATABASE,
+          'Initialisation du MCP Server avec la base de données',
+        );
         const success = await sqliteMCPServer.initializeWithDb(db);
-        
+
         if (success) {
           setIsInitialized(true);
           console.log('SQLite MCP Server initialized successfully');
-          logger.info(LogCategory.DATABASE, 'MCP Server initialisé avec succès');
-          
+          logger.info(
+            LogCategory.DATABASE,
+            'MCP Server initialisé avec succès',
+          );
+
           // Précharger les données essentielles UNIQUEMENT après initialisation réussie du MCP Server
           try {
-            logger.info(LogCategory.APP, "Démarrage du préchargement des données essentielles");
-            await prefetchEssentialData(queryClient, { 
+            logger.info(
+              LogCategory.APP,
+              'Démarrage du préchargement des données essentielles',
+            );
+            await prefetchEssentialData(queryClient, {
               silentErrors: true,
               verbose: true,
               onProgress: (current, total) => {
-                logger.debug(LogCategory.CACHE, `Préchargement: ${current}/${total} tâches terminées`);
-              }
+                logger.debug(
+                  LogCategory.CACHE,
+                  `Préchargement: ${current}/${total} tâches terminées`,
+                );
+              },
             });
-            logger.info(LogCategory.APP, "Préchargement des données essentielles terminé");
+            logger.info(
+              LogCategory.APP,
+              'Préchargement des données essentielles terminé',
+            );
           } catch (prefetchError) {
-            logger.error(LogCategory.APP, "Erreur lors du préchargement des données essentielles", { 
-              error: prefetchError instanceof Error ? prefetchError.message : String(prefetchError) 
-            });
+            logger.error(
+              LogCategory.APP,
+              'Erreur lors du préchargement des données essentielles',
+              {
+                error:
+                  prefetchError instanceof Error
+                    ? prefetchError.message
+                    : String(prefetchError),
+              },
+            );
           }
         } else {
-          logger.error(LogCategory.DATABASE, 'Échec de l\'initialisation du MCP Server');
-          console.error('Failed to initialize SQLite MCP Server: initialization returned false');
+          logger.error(
+            LogCategory.DATABASE,
+            "Échec de l'initialisation du MCP Server",
+          );
+          console.error(
+            'Failed to initialize SQLite MCP Server: initialization returned false',
+          );
         }
       } catch (error) {
-        logger.error(LogCategory.DATABASE, `Échec de l\'initialisation du MCP Server: ${error instanceof Error ? error.message : String(error)}`);
+        logger.error(
+          LogCategory.DATABASE,
+          `Échec de l\'initialisation du MCP Server: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
         console.error('Failed to initialize SQLite MCP Server:', error);
       }
     };

@@ -46,9 +46,7 @@ const IngredientAccordion: React.FC<{
                 <HStack className="flex-1 gap-2 items-center">
                   <Avatar>
                     <AvatarFallbackText>
-                      {item.ingredient?.name
-                        ?.slice(0, 2)
-                        .toUpperCase()}
+                      {item.ingredient?.name?.slice(0, 2).toUpperCase()}
                     </AvatarFallbackText>
                     {item.ingredient?.image ? (
                       <AvatarImage
@@ -92,8 +90,7 @@ const IngredientAccordion: React.FC<{
       <AccordionContent className="w-full">
         <VStack className="flex-1">
           <AccordionContentText className="font-semibold text-sm">
-            Values per: {item.ingredient?.quantity}{' '}
-            {item.ingredient?.unit}
+            Values per: {item.ingredient?.quantity} {item.ingredient?.unit}
           </AccordionContentText>
           <Divider
             orientation="horizontal"

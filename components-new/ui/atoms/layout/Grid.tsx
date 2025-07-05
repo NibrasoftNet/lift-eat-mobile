@@ -59,25 +59,26 @@ const Grid: React.FC<GridProps> & { Col: React.FC<ColProps> } = ({
 }) => {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
-  
+
   // Calculer la largeur disponible pour la grille
   const availableWidth = width;
-  
+
   // Calculer la largeur des colonnes
-  const columnWidth = type === 'fluid' 
-    ? (availableWidth - spacing * (columns - 1)) / columns
-    : 24; // Largeur fixe selon Figma pour les colonnes statiques
-  
+  const columnWidth =
+    type === 'fluid'
+      ? (availableWidth - spacing * (columns - 1)) / columns
+      : 24; // Largeur fixe selon Figma pour les colonnes statiques
+
   // Préparer les guides pour la visualisation
   const renderGuides = () => {
     if (!showGuides) return null;
-    
+
     // Créer un tableau de guides basé sur le nombre de colonnes
     const guides = [];
-    
+
     for (let i = 0; i < columns; i++) {
       const left = i * (columnWidth + spacing);
-      
+
       guides.push(
         <View
           key={i}
@@ -87,24 +88,20 @@ const Grid: React.FC<GridProps> & { Col: React.FC<ColProps> } = ({
               left,
               width: columnWidth,
               backgroundColor: guideColor,
-            }
+            },
           ]}
-        />
+        />,
       );
     }
-    
-    return (
-      <View style={styles.guideContainer}>
-        {guides}
-      </View>
-    );
+
+    return <View style={styles.guideContainer}>{guides}</View>;
   };
-  
+
   // Permet d'ajouter des propriétés de style de grille aux enfants
   const renderChildren = () => {
-    return React.Children.map(children, child => {
+    return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) return child;
-      
+
       // Si c'est un Col, on lui passe les propriétés nécessaires
       if (child.type === Grid.Col) {
         return React.cloneElement(child, {
@@ -114,20 +111,18 @@ const Grid: React.FC<GridProps> & { Col: React.FC<ColProps> } = ({
           _totalColumns: columns,
         });
       }
-      
+
       return child;
     });
   };
-  
+
   return (
     <View style={[styles.container, style as ViewStyle]}>
       {/* Guides (optionnels) */}
       {renderGuides()}
-      
+
       {/* Contenu de la grille */}
-      <View style={styles.content}>
-        {renderChildren()}
-      </View>
+      <View style={styles.content}>{renderChildren()}</View>
     </View>
   );
 };
@@ -135,11 +130,13 @@ const Grid: React.FC<GridProps> & { Col: React.FC<ColProps> } = ({
 /**
  * Grid.Col - Composant de colonne pour le système de grille
  */
-const Col: React.FC<ColProps & {
-  _columnWidth?: number;
-  _spacing?: number;
-  _totalColumns?: number;
-}> = ({
+const Col: React.FC<
+  ColProps & {
+    _columnWidth?: number;
+    _spacing?: number;
+    _totalColumns?: number;
+  }
+> = ({
   size = 1,
   style,
   children,
@@ -149,7 +146,7 @@ const Col: React.FC<ColProps & {
 }) => {
   // Calculer la largeur de cette colonne
   const width = size * _columnWidth + (size - 1) * _spacing;
-  
+
   return (
     <View
       style={[

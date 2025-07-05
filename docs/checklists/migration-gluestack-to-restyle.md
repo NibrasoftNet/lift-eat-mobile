@@ -89,7 +89,7 @@
 
 - [ ] Analyse des performances des composants Restyle
 - [ ] Optimisation des re-rendus avec mémoisation
-- [ ] Amélioration de l'homogénéité visuelle 
+- [ ] Amélioration de l'homogénéité visuelle
 - [ ] Renforcement de la typologie du système
 - [ ] Intégration des commentaires utilisateurs
 

@@ -1,7 +1,16 @@
-import { AuthPagesServiceInterface, OperationResult } from "../../interfaces/pages.interface";
-import { AuthenticationResult, LoginFormData, RegisterFormData, ResetPasswordData, UpdatePasswordData } from "../../interfaces/auth.interface";
-import { authCoreService } from "../core/auth-core.service";
-import { logger } from "../common/logging.service";
+import {
+  AuthPagesServiceInterface,
+  OperationResult,
+} from '../../interfaces/pages.interface';
+import {
+  AuthenticationResult,
+  LoginFormData,
+  RegisterFormData,
+  ResetPasswordData,
+  UpdatePasswordData,
+} from '../../interfaces/auth.interface';
+import { authCoreService } from '../core/auth-core.service';
+import { logger } from '../common/logging.service';
 
 /**
  * Service d'orchestration pour les pages d'authentification (UI)
@@ -12,11 +21,15 @@ class AuthPagesService implements AuthPagesServiceInterface {
     return authCoreService.findOrCreateUser(email);
   }
 
-  async login(data: LoginFormData): Promise<OperationResult<AuthenticationResult>> {
+  async login(
+    data: LoginFormData,
+  ): Promise<OperationResult<AuthenticationResult>> {
     return authCoreService.login(data);
   }
 
-  async register(data: RegisterFormData): Promise<OperationResult<AuthenticationResult>> {
+  async register(
+    data: RegisterFormData,
+  ): Promise<OperationResult<AuthenticationResult>> {
     return authCoreService.register(data);
   }
 
@@ -24,7 +37,10 @@ class AuthPagesService implements AuthPagesServiceInterface {
     return authCoreService.resetPassword(data);
   }
 
-  async updatePassword(data: UpdatePasswordData, token: string): Promise<OperationResult> {
+  async updatePassword(
+    data: UpdatePasswordData,
+    token: string,
+  ): Promise<OperationResult> {
     return authCoreService.updatePassword(data, token);
   }
 }

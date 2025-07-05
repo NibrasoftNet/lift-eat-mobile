@@ -20,28 +20,38 @@ interface PlanGeneratorFormProps {
   onPlanGenerated?: (plan: IaPlanType) => void;
 }
 
-const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }) => {
+const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({
+  onPlanGenerated,
+}) => {
   // État pour les restrictions alimentaires disponibles
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<DietaryRestrictionFormType[]>([]);
-  
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<
+    DietaryRestrictionFormType[]
+  >([]);
+
   // Initialisation des hooks
   const toast = useToast();
   const [uiState, uiActions] = useUiState();
-  const [formMethods, formActions] = usePlanGeneratorForm(uiActions, onPlanGenerated);
-  
+  const [formMethods, formActions] = usePlanGeneratorForm(
+    uiActions,
+    onPlanGenerated,
+  );
+
   // Couleurs du thème
   const primaryColor = useThemeColor({}, 'tint');
   const disabledColor = useThemeColor({}, 'tabIconDefault');
   const textColor = useThemeColor({}, 'text');
-  const whiteColor = useThemeColor({ light: 'white', dark: 'white' }, 'background');
-  
+  const whiteColor = useThemeColor(
+    { light: 'white', dark: 'white' },
+    'background',
+  );
+
   // Extraire les propriétés et méthodes nécessaires de react-hook-form
   const { handleSubmit, control, formState } = formMethods;
   const { errors } = formState;
-  
+
   // État pour stocker le plan généré
   const [generatedPlan, setGeneratedPlan] = useState<IaPlanType | null>(null);
-  
+
   // Charger les restrictions alimentaires disponibles
   useEffect(() => {
     const loadDietaryRestrictions = async () => {
@@ -58,16 +68,19 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
           { id: 7, name: 'Sans fruits de mer', selected: false },
           { id: 8, name: 'Sans noix', selected: false },
         ];
-        
+
         setDietaryRestrictions(restrictions);
       } catch (error) {
-        console.error('Erreur lors du chargement des restrictions alimentaires:', error);
+        console.error(
+          'Erreur lors du chargement des restrictions alimentaires:',
+          error,
+        );
       }
     };
-    
+
     loadDietaryRestrictions();
   }, []);
-  
+
   // Gérer la soumission du formulaire
   const onSubmit = async (data: any) => {
     try {
@@ -77,7 +90,7 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
       }
     } catch (error: any) {
       // L'erreur est déjà gérée dans le hook, donc pas besoin de la gérer ici
-      console.error("Erreur lors de la génération du plan", error);
+      console.error('Erreur lors de la génération du plan', error);
     }
   };
 
@@ -85,7 +98,7 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
   React.useEffect(() => {
     if (uiState.toast.visible) {
       let toastType: ToastTypeEnum;
-      
+
       switch (uiState.toast.type) {
         case 'success':
           toastType = ToastTypeEnum.SUCCESS;
@@ -99,28 +112,33 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
         default:
           toastType = ToastTypeEnum.INFOS;
       }
-      
+
       toast.show({
         render: ({ id }) => (
           <MultiPurposeToast
             id={id}
             color={toastType}
-            title={uiState.toast.type.charAt(0).toUpperCase() + uiState.toast.type.slice(1)}
+            title={
+              uiState.toast.type.charAt(0).toUpperCase() +
+              uiState.toast.type.slice(1)
+            }
             description={uiState.toast.message}
           />
-        )
+        ),
       });
-      
+
       // Masquer le toast après l'avoir affiché
       uiActions.hideToast();
     }
   }, [uiState.toast, toast, uiActions]);
 
   return (
-    <Box style={{
-      flex: 1,
-      padding: 16,
-    }}>
+    <Box
+      style={{
+        flex: 1,
+        padding: 16,
+      }}
+    >
       <ScrollView>
         {/* Formulaire de configuration du plan */}
         <PlanConfigurationForm
@@ -131,7 +149,7 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
           updateNumberOfDays={formActions.updateNumberOfDays}
           updateCaloriesPerDay={formActions.updateCaloriesPerDay}
         />
-        
+
         {/* Bouton de génération */}
         <Pressable
           style={{
@@ -141,10 +159,12 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
             alignItems: 'center',
             justifyContent: 'center',
             marginVertical: 24,
-            ...(uiState.loading || Object.keys(errors).length > 0 ? {
-              backgroundColor: disabledColor,
-              opacity: 0.7,
-            } : {})
+            ...(uiState.loading || Object.keys(errors).length > 0
+              ? {
+                  backgroundColor: disabledColor,
+                  opacity: 0.7,
+                }
+              : {}),
           }}
           onPress={handleSubmit(onSubmit)}
           disabled={uiState.loading || Object.keys(errors).length > 0}
@@ -152,14 +172,18 @@ const PlanGeneratorForm: React.FC<PlanGeneratorFormProps> = ({ onPlanGenerated }
           {uiState.loading ? (
             <ActivityIndicator size="small" color={whiteColor} />
           ) : (
-            <Text style={{
-              color: whiteColor,
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>Générer un plan nutritionnel</Text>
+            <Text
+              style={{
+                color: whiteColor,
+                fontSize: 16,
+                fontWeight: 'bold',
+              }}
+            >
+              Générer un plan nutritionnel
+            </Text>
           )}
         </Pressable>
-        
+
         {/* Afficher le résultat de la génération */}
         {(generatedPlan || uiState.loading || uiState.error) && (
           <PlanGenerationResult

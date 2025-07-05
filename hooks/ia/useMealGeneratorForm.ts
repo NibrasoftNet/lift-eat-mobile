@@ -1,13 +1,17 @@
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback } from 'react';
-import { useMealGeneration, MealGenerationCriteria, MealGenerationState } from './useMealGeneration';
+import {
+  useMealGeneration,
+  MealGenerationCriteria,
+  MealGenerationState,
+} from './useMealGeneration';
 import { createIaLogger } from '@/utils/services/ia/loggingEnhancer';
-import { 
-  mealGeneratorFormSchema, 
+import {
+  mealGeneratorFormSchema,
   MealGeneratorFormType,
   defaultMealGeneratorFormValues,
-  IngredientFormType
+  IngredientFormType,
 } from '@/utils/validation/ia/mealGeneratorForm.schema';
 import { IaMealType, IaIngredientType } from '@/utils/validation/ia/ia.schemas';
 import { UiStateActions } from './useUiState';
@@ -26,7 +30,7 @@ const logger = createIaLogger('MealGeneratorFormHook');
 export interface MealGeneratorFormActions {
   toggleMealType: (value: string) => void;
   toggleCuisineType: (value: string) => void;
-  addIngredient: (ingredient: { id: number, name: string }) => void;
+  addIngredient: (ingredient: { id: number; name: string }) => void;
   removeIngredient: (id: number) => void;
   updateIngredientQuantity: (id: number, quantity: number) => void;
   generateMeal: () => Promise<IaMealType | undefined>;
@@ -41,7 +45,7 @@ export interface MealGeneratorFormActions {
  */
 export function useMealGeneratorForm(
   uiActions: UiStateActions,
-  onMealGenerated?: (meal: IaMealType) => void
+  onMealGenerated?: (meal: IaMealType) => void,
 ): [UseFormReturn<MealGeneratorFormType>, MealGeneratorFormActions] {
   // Initialiser react-hook-form avec Zod resolver
   const formMethods = useForm<MealGeneratorFormType>({
@@ -51,7 +55,7 @@ export function useMealGeneratorForm(
   });
 
   const { setValue, getValues, reset } = formMethods;
-  
+
   // Hooks personnalisés pour la génération de repas
   const [mealGenerationState, mealGenerationActions] = useMealGeneration();
   const { generateMeal: apiGenerateMeal } = mealGenerationActions;
@@ -59,50 +63,65 @@ export function useMealGeneratorForm(
   // Actions du formulaire
   const formActions: MealGeneratorFormActions = {
     // Mettre à jour le type de repas
-    toggleMealType: useCallback((value: string) => {
-      setValue('mealType', value as any, { shouldValidate: true });
-    }, [setValue]),
+    toggleMealType: useCallback(
+      (value: string) => {
+        setValue('mealType', value as any, { shouldValidate: true });
+      },
+      [setValue],
+    ),
 
     // Mettre à jour le type de cuisine
-    toggleCuisineType: useCallback((value: string) => {
-      setValue('cuisineType', value as any, { shouldValidate: true });
-    }, [setValue]),
+    toggleCuisineType: useCallback(
+      (value: string) => {
+        setValue('cuisineType', value as any, { shouldValidate: true });
+      },
+      [setValue],
+    ),
 
     // Ajouter un ingrédient à la liste
-    addIngredient: useCallback((ingredient: { id: number, name: string }) => {
-      const currentIngredients = getValues('selectedIngredients') || [];
-      
-      // Vérifier si l'ingrédient existe déjà
-      if (!currentIngredients.some(item => item.id === ingredient.id)) {
-        setValue(
-          'selectedIngredients', 
-          [...currentIngredients, { ...ingredient, quantity: 100 }],
-          { shouldValidate: true }
-        );
-      }
-    }, [getValues, setValue]),
+    addIngredient: useCallback(
+      (ingredient: { id: number; name: string }) => {
+        const currentIngredients = getValues('selectedIngredients') || [];
+
+        // Vérifier si l'ingrédient existe déjà
+        if (!currentIngredients.some((item) => item.id === ingredient.id)) {
+          setValue(
+            'selectedIngredients',
+            [...currentIngredients, { ...ingredient, quantity: 100 }],
+            { shouldValidate: true },
+          );
+        }
+      },
+      [getValues, setValue],
+    ),
 
     // Supprimer un ingrédient de la liste
-    removeIngredient: useCallback((id: number) => {
-      const currentIngredients = getValues('selectedIngredients') || [];
-      setValue(
-        'selectedIngredients',
-        currentIngredients.filter(item => item.id !== id),
-        { shouldValidate: true }
-      );
-    }, [getValues, setValue]),
+    removeIngredient: useCallback(
+      (id: number) => {
+        const currentIngredients = getValues('selectedIngredients') || [];
+        setValue(
+          'selectedIngredients',
+          currentIngredients.filter((item) => item.id !== id),
+          { shouldValidate: true },
+        );
+      },
+      [getValues, setValue],
+    ),
 
     // Mettre à jour la quantité d'un ingrédient
-    updateIngredientQuantity: useCallback((id: number, quantity: number) => {
-      const currentIngredients = getValues('selectedIngredients') || [];
-      setValue(
-        'selectedIngredients',
-        currentIngredients.map(item => 
-          item.id === id ? { ...item, quantity } : item
-        ),
-        { shouldValidate: true }
-      );
-    }, [getValues, setValue]),
+    updateIngredientQuantity: useCallback(
+      (id: number, quantity: number) => {
+        const currentIngredients = getValues('selectedIngredients') || [];
+        setValue(
+          'selectedIngredients',
+          currentIngredients.map((item) =>
+            item.id === id ? { ...item, quantity } : item,
+          ),
+          { shouldValidate: true },
+        );
+      },
+      [getValues, setValue],
+    ),
 
     // Générer un repas en utilisant l'API
     generateMeal: useCallback(async () => {
@@ -110,19 +129,24 @@ export function useMealGeneratorForm(
         // Démarrer le chargement
         uiActions.startLoading();
         uiActions.clearError();
-        
+
         // Obtenir les valeurs actuelles du formulaire
         const formValues = getValues();
-        
+
         // Vérifier si le formulaire est valide
         const isValid = await formMethods.trigger();
         if (!isValid) {
-          uiActions.showToast("Veuillez compléter correctement le formulaire", "error");
+          uiActions.showToast(
+            'Veuillez compléter correctement le formulaire',
+            'error',
+          );
           return;
         }
 
         // Préparer les ingrédients au format attendu par l'API
-        const ingredients: IaIngredientType[] = (formValues.selectedIngredients || []).map(ing => ({
+        const ingredients: IaIngredientType[] = (
+          formValues.selectedIngredients || []
+        ).map((ing) => ({
           id: ing.id,
           name: ing.name,
           quantity: ing.quantity,
@@ -131,131 +155,189 @@ export function useMealGeneratorForm(
           calories: 0,
           carbs: 0,
           protein: 0,
-          fat: 0
+          fat: 0,
         }));
 
-        logger.info(`Génération d'un repas: ${formValues.mealType}, ${formValues.cuisineType}`, 'generateMeal');
-        
+        logger.info(
+          `Génération d'un repas: ${formValues.mealType}, ${formValues.cuisineType}`,
+          'generateMeal',
+        );
+
         // Créer les critères conformes à l'interface MealGenerationCriteria
         const mealCriteria: MealGenerationCriteria = {
           type: formValues.mealType,
           cuisine: formValues.cuisineType,
           additionalInstructions: formValues.specificRequirements || '',
           // Convertir les ingrédients sélectionnés en liste de noms pour includedIngredients
-          includedIngredients: ingredients.map(ing => ing.name)
+          includedIngredients: ingredients.map((ing) => ing.name),
         };
-        
+
         // Appeler l'API pour générer le repas
         await apiGenerateMeal(mealCriteria);
-        
+
         // Récupérer le repas généré depuis l'état
         const generatedMeal = mealGenerationState.meal;
 
         // Si la génération a réussi
         if (generatedMeal) {
-          logger.info(`Repas généré avec succès: ${generatedMeal.name}`, 'generateMeal');
-          
+          logger.info(
+            `Repas généré avec succès: ${generatedMeal.name}`,
+            'generateMeal',
+          );
+
           // Obtenir l'ID de l'utilisateur actuel
           const userId = getCurrentUserIdSync();
           if (!userId) {
-            logger.error("Impossible d'obtenir l'ID de l'utilisateur courant", 'generateMeal');
-            uiActions.showToast("Erreur lors de la sauvegarde du repas", "error");
+            logger.error(
+              "Impossible d'obtenir l'ID de l'utilisateur courant",
+              'generateMeal',
+            );
+            uiActions.showToast(
+              'Erreur lors de la sauvegarde du repas',
+              'error',
+            );
             return undefined;
           }
-          
+
           // Calculer le poids total du repas (somme des ingrédients)
           let totalWeight = 0;
-          if (generatedMeal.ingredients && generatedMeal.ingredients.length > 0) {
-            generatedMeal.ingredients.forEach(ing => {
+          if (
+            generatedMeal.ingredients &&
+            generatedMeal.ingredients.length > 0
+          ) {
+            generatedMeal.ingredients.forEach((ing) => {
               totalWeight += ing.quantity || 0;
             });
           } else {
             // Si aucun ingrédient n'est spécifié, nous utilisons un poids par défaut de 100g
             totalWeight = 100;
           }
-          
-          logger.info(`Poids total du repas avant normalisation: ${totalWeight}g`, 'generateMeal');
-          
+
+          logger.info(
+            `Poids total du repas avant normalisation: ${totalWeight}g`,
+            'generateMeal',
+          );
+
           // Si le poids total est différent de 100g, normaliser le repas et ses ingrédients à 100g
-          if (totalWeight > 0 && Math.abs(totalWeight - 100) > 1) { // Marge d'erreur de 1g
-            logger.info(`Normalisation du repas ${generatedMeal.name} à 100g (depuis ${totalWeight}g)`, 'generateMeal');
-            
+          if (totalWeight > 0 && Math.abs(totalWeight - 100) > 1) {
+            // Marge d'erreur de 1g
+            logger.info(
+              `Normalisation du repas ${generatedMeal.name} à 100g (depuis ${totalWeight}g)`,
+              'generateMeal',
+            );
+
             // Normaliser les macros du repas à 100g
             const normalizationResult = nutritionEngine.normalizeForDisplay(
               {
                 calories: generatedMeal.calories || 0,
                 protein: generatedMeal.protein || 0,
                 carbs: generatedMeal.carbs || 0,
-                fat: generatedMeal.fat || 0
+                fat: generatedMeal.fat || 0,
               },
               totalWeight,
-              NutritionDisplayMode.PER_100G
+              NutritionDisplayMode.PER_100G,
             );
-            
+
             // Mettre à jour les macros du repas avec les valeurs normalisées
             if (normalizationResult && normalizationResult.normalizedMacros) {
-              generatedMeal.calories = normalizationResult.normalizedMacros.calories;
-              generatedMeal.protein = normalizationResult.normalizedMacros.protein;
+              generatedMeal.calories =
+                normalizationResult.normalizedMacros.calories;
+              generatedMeal.protein =
+                normalizationResult.normalizedMacros.protein;
               generatedMeal.carbs = normalizationResult.normalizedMacros.carbs;
               generatedMeal.fat = normalizationResult.normalizedMacros.fat;
-              
+
               // Facteur de normalisation pour les ingrédients
-              const factor = normalizationResult.normalizationFactor || (100 / totalWeight);
-              
+              const factor =
+                normalizationResult.normalizationFactor || 100 / totalWeight;
+
               // Normaliser également les ingrédients
-              if (generatedMeal.ingredients && generatedMeal.ingredients.length > 0) {
-                generatedMeal.ingredients = generatedMeal.ingredients.map(ing => ({
-                  ...ing,
-                  quantity: Math.round((ing.quantity || 0) * factor * 10) / 10, // Arrondi à 0.1g près
-                  calories: Math.round((ing.calories || 0) * factor * 10) / 10,
-                  protein: Math.round((ing.protein || 0) * factor * 10) / 10,
-                  carbs: Math.round((ing.carbs || 0) * factor * 10) / 10,
-                  fat: Math.round((ing.fat || 0) * factor * 10) / 10
-                }));
+              if (
+                generatedMeal.ingredients &&
+                generatedMeal.ingredients.length > 0
+              ) {
+                generatedMeal.ingredients = generatedMeal.ingredients.map(
+                  (ing) => ({
+                    ...ing,
+                    quantity:
+                      Math.round((ing.quantity || 0) * factor * 10) / 10, // Arrondi à 0.1g près
+                    calories:
+                      Math.round((ing.calories || 0) * factor * 10) / 10,
+                    protein: Math.round((ing.protein || 0) * factor * 10) / 10,
+                    carbs: Math.round((ing.carbs || 0) * factor * 10) / 10,
+                    fat: Math.round((ing.fat || 0) * factor * 10) / 10,
+                  }),
+                );
               }
-              
-              logger.info(`Repas normalisé à 100g avec succès (facteur: ${factor.toFixed(2)}x)`, 'generateMeal');
+
+              logger.info(
+                `Repas normalisé à 100g avec succès (facteur: ${factor.toFixed(
+                  2,
+                )}x)`,
+                'generateMeal',
+              );
             }
           }
-          
+
           // Persister le repas en base de données
-          logger.info(`Persistance du repas ${generatedMeal.name} en base de données`, 'generateMeal');
-          const saveResult = await mealGenerationApiService.createMeal(generatedMeal, userId);
-          
+          logger.info(
+            `Persistance du repas ${generatedMeal.name} en base de données`,
+            'generateMeal',
+          );
+          const saveResult = await mealGenerationApiService.createMeal(
+            generatedMeal,
+            userId,
+          );
+
           if (!saveResult.success) {
-            logger.error(`Erreur lors de la persistance du repas: ${saveResult.error}`, 'generateMeal');
-            uiActions.showToast("Erreur lors de la sauvegarde du repas", "error");
+            logger.error(
+              `Erreur lors de la persistance du repas: ${saveResult.error}`,
+              'generateMeal',
+            );
+            uiActions.showToast(
+              'Erreur lors de la sauvegarde du repas',
+              'error',
+            );
             return undefined;
           }
-          
+
           // Mettre à jour l'ID du repas généré avec celui créé en DB
           if (saveResult.mealId) {
             generatedMeal.id = saveResult.mealId;
-            logger.info(`Repas persisté avec succès, ID: ${saveResult.mealId}`, 'generateMeal');
+            logger.info(
+              `Repas persisté avec succès, ID: ${saveResult.mealId}`,
+              'generateMeal',
+            );
           }
-          
-          uiActions.showToast("Repas généré et sauvegardé avec succès!", "success");
-          
+
+          uiActions.showToast(
+            'Repas généré et sauvegardé avec succès!',
+            'success',
+          );
+
           // Appeler le callback si fourni
           if (onMealGenerated) {
             onMealGenerated(generatedMeal);
           }
-          
+
           return generatedMeal;
         }
-        
+
         return undefined;
       } catch (error: any) {
-        logger.error(`Erreur lors de la génération du repas: ${error.message}`, 'generateMeal');
-        
+        logger.error(
+          `Erreur lors de la génération du repas: ${error.message}`,
+          'generateMeal',
+        );
+
         // Gérer l'erreur et afficher un toast
         if (error.type) {
           uiActions.setError(error);
-          uiActions.showToast(error.message, "error");
+          uiActions.showToast(error.message, 'error');
         } else {
-          uiActions.showToast("Une erreur inattendue s'est produite", "error");
+          uiActions.showToast("Une erreur inattendue s'est produite", 'error');
         }
-        
+
         return undefined;
       } finally {
         // Arrêter le chargement une fois terminé
@@ -266,7 +348,7 @@ export function useMealGeneratorForm(
     // Réinitialiser le formulaire
     reset: useCallback(() => {
       reset(defaultMealGeneratorFormValues);
-    }, [reset])
+    }, [reset]),
   };
 
   return [formMethods, formActions];

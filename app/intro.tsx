@@ -32,8 +32,19 @@ export default function Intro() {
         className="size-full object-cover"
         blurRadius={0}
       >
-        <Box flex={1} column justifyContent="space-between" alignItems="center" p={16}>
-          <Box row justifyContent="space-between" alignItems="center" style={{ width: '100%' }}>
+        <Box
+          flex={1}
+          column
+          justifyContent="space-between"
+          alignItems="center"
+          p={16}
+        >
+          <Box
+            row
+            justifyContent="space-between"
+            alignItems="center"
+            style={{ width: '100%' }}
+          >
             {step === IntroStepEnum.TWO && (
               <Button
                 color={theme.color('secondary')}
@@ -46,7 +57,11 @@ export default function Intro() {
               </Button>
             )}
             <Button
-              color={step === IntroStepEnum.ONE ? theme.color('secondary') : theme.color('violet')}
+              color={
+                step === IntroStepEnum.ONE
+                  ? theme.color('secondary')
+                  : theme.color('violet')
+              }
               onPress={() => {
                 if (step === IntroStepEnum.ONE) {
                   setStep(IntroStepEnum.TWO);

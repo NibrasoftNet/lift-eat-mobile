@@ -23,9 +23,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const theme = useTheme();
 
   return (
-    <ThemeContext.Provider value={theme}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );
 };
 

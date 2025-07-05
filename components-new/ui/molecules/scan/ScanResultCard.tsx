@@ -56,36 +56,50 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
       {/* Informations du produit */}
       <Box style={styles.infoContainer}>
         <Text style={styles.productName}>{product.name}</Text>
-        
+
         {/* Boutons */}
         <Box style={styles.buttonContainer}>
           {/* Bouton Details */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.secondary }]} 
+            style={[styles.button, { backgroundColor: theme.colors.secondary }]}
             onPress={onDetails}
           >
-            <InfoCircleRegularBoldIcon width={24} height={24} color={theme.colors.primary} />
-            <Text style={[styles.buttonText, { color: theme.colors.primary }]}>{t('common.details')}</Text>
+            <InfoCircleRegularBoldIcon
+              width={24}
+              height={24}
+              color={theme.colors.primary}
+            />
+            <Text style={[styles.buttonText, { color: theme.colors.primary }]}>
+              {t('common.details')}
+            </Text>
           </TouchableOpacity>
 
           {/* Bouton Favori */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.primary }]} 
+            style={[styles.button, { backgroundColor: theme.colors.primary }]}
             onPress={onToggleFavorite}
           >
-            <HeartRegularBoldIcon 
-              width={24} 
-              height={24} 
-              color={product.isFavorite ? theme.colors.primary : theme.colors.secondary} 
+            <HeartRegularBoldIcon
+              width={24}
+              height={24}
+              color={
+                product.isFavorite
+                  ? theme.colors.primary
+                  : theme.colors.secondary
+              }
             />
           </TouchableOpacity>
 
           {/* Bouton Add */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.success }]} 
+            style={[styles.button, { backgroundColor: theme.colors.success }]}
             onPress={onAdd}
           >
-            <Text style={[styles.buttonText, { color: theme.colors.secondary }]}>{t('common.add')}</Text>
+            <Text
+              style={[styles.buttonText, { color: theme.colors.secondary }]}
+            >
+              {t('common.add')}
+            </Text>
           </TouchableOpacity>
         </Box>
       </Box>

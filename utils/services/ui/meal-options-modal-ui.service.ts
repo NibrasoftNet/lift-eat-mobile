@@ -4,27 +4,41 @@ import { MealOrmProps } from '@/db/schema';
 import { Router } from 'expo-router';
 
 interface MealOptionsModalServiceInterface {
-  handleViewDetails: (meal: MealOrmProps, router: Router, onClose: () => void) => void;
-  handleDelete: (onDelete?: () => Promise<void>, onClose?: () => void) => Promise<void>;
+  handleViewDetails: (
+    meal: MealOrmProps,
+    router: Router,
+    onClose: () => void,
+  ) => void;
+  handleDelete: (
+    onDelete?: () => Promise<void>,
+    onClose?: () => void,
+  ) => Promise<void>;
 }
 
 class MealOptionsModalUIService implements MealOptionsModalServiceInterface {
-  handleViewDetails(meal: MealOrmProps, router: Router, onClose: () => void): void {
+  handleViewDetails(
+    meal: MealOrmProps,
+    router: Router,
+    onClose: () => void,
+  ): void {
     try {
       router.push({
         pathname: '/(root)/(tabs)/meals/my-meals/details/[id]',
-        params: { id: meal.id }
+        params: { id: meal.id },
       });
       onClose();
     } catch (error) {
       logger.error(LogCategory.NAVIGATION, 'Error navigating to meal details', {
         error: error instanceof Error ? error.message : String(error),
-        mealId: meal.id
+        mealId: meal.id,
       });
     }
   }
 
-  async handleDelete(onDelete?: () => Promise<void>, onClose?: () => void): Promise<void> {
+  async handleDelete(
+    onDelete?: () => Promise<void>,
+    onClose?: () => void,
+  ): Promise<void> {
     try {
       if (onDelete) {
         await onDelete();
@@ -34,7 +48,7 @@ class MealOptionsModalUIService implements MealOptionsModalServiceInterface {
       }
     } catch (error) {
       logger.error(LogCategory.DATABASE, 'Error in meal deletion handler', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

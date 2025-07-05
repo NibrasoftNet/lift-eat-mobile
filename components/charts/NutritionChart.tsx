@@ -23,7 +23,10 @@ const NutritionsChart = ({
   const progress = useMemo(() => {
     console.log('NutritionChart - Valeurs actuelles:', currentValues);
     console.log('NutritionChart - Objectifs:', goalValues);
-    const result = nutritionCoreService.calculateNutritionProgress(currentValues, goalValues);
+    const result = nutritionCoreService.calculateNutritionProgress(
+      currentValues,
+      goalValues,
+    );
     console.log('NutritionChart - Pourcentages calculés:', result.percentages);
     return result;
   }, [currentValues, goalValues]);
@@ -32,33 +35,34 @@ const NutritionsChart = ({
   const carbsCalories = Math.floor(currentValues.carbs * 4);
   const fatsCalories = Math.floor(currentValues.fat * 9);
   const proteinCalories = Math.floor(currentValues.protein * 4);
-  const totalCalories = currentValues.calories || (carbsCalories + fatsCalories + proteinCalories);
+  const totalCalories =
+    currentValues.calories || carbsCalories + fatsCalories + proteinCalories;
 
   const macroData = [
-    { 
+    {
       name: 'Protein',
       current: currentValues.protein,
       goal: goalValues.protein,
       calories: proteinCalories,
       color: Colors.blue.background,
-      percentage: progress.percentages.protein
+      percentage: progress.percentages.protein,
     },
-    { 
+    {
       name: 'Carbs',
       current: currentValues.carbs,
       goal: goalValues.carbs,
       calories: carbsCalories,
       color: Colors.amber.background,
-      percentage: progress.percentages.carbs
+      percentage: progress.percentages.carbs,
     },
-    { 
+    {
       name: 'Fats',
       current: currentValues.fat,
       goal: goalValues.fat,
       calories: fatsCalories,
       color: Colors.green.background,
-      percentage: progress.percentages.fat
-    }
+      percentage: progress.percentages.fat,
+    },
   ];
 
   return (
@@ -68,14 +72,17 @@ const NutritionsChart = ({
         <VStack className="items-center flex-1">
           <PieChart
             data={[
-              { 
-                value: Math.min(progress.percentages.calories, 100), 
-                color: progress.percentages.calories > 100 ? Colors.red.background : Colors.blue.background 
+              {
+                value: Math.min(progress.percentages.calories, 100),
+                color:
+                  progress.percentages.calories > 100
+                    ? Colors.red.background
+                    : Colors.blue.background,
               },
-              { 
-                value: Math.max(0, 100 - progress.percentages.calories), 
-                color: '#E5E7EB' 
-              }
+              {
+                value: Math.max(0, 100 - progress.percentages.calories),
+                color: '#E5E7EB',
+              },
             ]}
             donut
             radius={50}
@@ -86,7 +93,13 @@ const NutritionsChart = ({
                   {Math.floor(progress.percentages.calories)}%
                 </Text>
                 <Text className="text-xs text-gray-500">
-                  {nutritionEngine.formatForUI(currentValues.calories, 'calories')} / {nutritionEngine.formatForUI(goalValues.calories, 'calories')} KCal
+                  {nutritionEngine.formatForUI(
+                    currentValues.calories,
+                    'calories',
+                  )}{' '}
+                  /{' '}
+                  {nutritionEngine.formatForUI(goalValues.calories, 'calories')}{' '}
+                  KCal
                 </Text>
               </VStack>
             )}
@@ -98,17 +111,22 @@ const NutritionsChart = ({
           {macroData.map((macro, index) => (
             <VStack key={index} className="items-center mb-4">
               <HStack className="items-center justify-between w-full">
-                <Text className="text-sm font-ubuntu-medium w-20">{macro.name}</Text>
+                <Text className="text-sm font-ubuntu-medium w-20">
+                  {macro.name}
+                </Text>
                 <PieChart
                   data={[
-                    { 
-                      value: Math.min(macro.percentage, 100), 
-                      color: macro.percentage > 100 ? Colors.red.background : macro.color 
+                    {
+                      value: Math.min(macro.percentage, 100),
+                      color:
+                        macro.percentage > 100
+                          ? Colors.red.background
+                          : macro.color,
                     },
-                    { 
-                      value: Math.max(0, 100 - macro.percentage), 
-                      color: '#E5E7EB' 
-                    }
+                    {
+                      value: Math.max(0, 100 - macro.percentage),
+                      color: '#E5E7EB',
+                    },
                   ]}
                   donut
                   radius={20}
@@ -120,7 +138,8 @@ const NutritionsChart = ({
                   )}
                 />
                 <Text className="text-xs text-gray-500 w-24 text-right">
-                  {nutritionEngine.formatForUI(macro.current, 'protein')} / {nutritionEngine.formatForUI(macro.goal, 'protein')}g
+                  {nutritionEngine.formatForUI(macro.current, 'protein')} /{' '}
+                  {nutritionEngine.formatForUI(macro.goal, 'protein')}g
                 </Text>
               </HStack>
             </VStack>

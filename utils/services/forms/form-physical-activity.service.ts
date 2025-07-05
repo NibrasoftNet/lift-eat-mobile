@@ -3,30 +3,38 @@
  * Fournit des fonctionnalités pour la gestion des niveaux d'activité physique
  */
 
-import { PhysicalActivityEnum } from "@/utils/enum/user-gender-activity.enum";
-import { PhysicalActivityFormServiceInterface } from "@/utils/interfaces/form-input.interface";
-import { logger } from "@/utils/services/common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
-import { activityOptions } from "@/utils/constants/constant";
-import { GetPhysicalActivityImages } from "@/utils/utils";
+import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
+import { PhysicalActivityFormServiceInterface } from '@/utils/interfaces/form-input.interface';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { activityOptions } from '@/utils/constants/constant';
+import { GetPhysicalActivityImages } from '@/utils/utils';
 
 /**
  * Implémentation du service de gestion du formulaire d'activité physique
  */
-class PhysicalActivityFormService implements PhysicalActivityFormServiceInterface {
+class PhysicalActivityFormService
+  implements PhysicalActivityFormServiceInterface
+{
   /**
    * Obtient les options d'activité physique disponibles
    * @returns Un tableau d'options d'activité physique formattées avec descriptions
    */
-  getPhysicalActivityOptions(): Array<{ level: PhysicalActivityEnum; description: string }> {
+  getPhysicalActivityOptions(): Array<{
+    level: PhysicalActivityEnum;
+    description: string;
+  }> {
     try {
       // Ajouter les descriptions pour chaque niveau d'activité
-      return activityOptions.map(option => ({
+      return activityOptions.map((option) => ({
         level: option.level,
-        description: this.getActivityDescription(option.level)
+        description: this.getActivityDescription(option.level),
       }));
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting physical activity options: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting physical activity options: ${error}`,
+      );
       return [];
     }
   }
@@ -40,7 +48,10 @@ class PhysicalActivityFormService implements PhysicalActivityFormServiceInterfac
     try {
       return GetPhysicalActivityImages[level];
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting physical activity image: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting physical activity image: ${error}`,
+      );
       return null;
     }
   }
@@ -51,12 +62,20 @@ class PhysicalActivityFormService implements PhysicalActivityFormServiceInterfac
    * @param buttonActivity - L'activité du bouton pour lequel obtenir les styles
    * @returns Les classes CSS pour l'indicateur d'activité
    */
-  getActivityIndicatorStyles(selectedActivity: PhysicalActivityEnum, buttonActivity: PhysicalActivityEnum): string {
+  getActivityIndicatorStyles(
+    selectedActivity: PhysicalActivityEnum,
+    buttonActivity: PhysicalActivityEnum,
+  ): string {
     try {
       // Vérifier si le bouton correspond à l'activité sélectionnée
-      return buttonActivity === selectedActivity ? 'bg-primary-500' : 'bg-secondary-500';
+      return buttonActivity === selectedActivity
+        ? 'bg-primary-500'
+        : 'bg-secondary-500';
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting activity indicator styles: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting activity indicator styles: ${error}`,
+      );
       return 'bg-secondary-500'; // Style par défaut
     }
   }
@@ -82,7 +101,10 @@ class PhysicalActivityFormService implements PhysicalActivityFormServiceInterfac
           return 'Select an activity level';
       }
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting activity description: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting activity description: ${error}`,
+      );
       return 'Select an activity level';
     }
   }
@@ -93,25 +115,33 @@ class PhysicalActivityFormService implements PhysicalActivityFormServiceInterfac
    * @param buttonActivity - L'activité du bouton pour lequel obtenir les styles
    * @returns Les classes CSS pour le bouton et le texte
    */
-  getActivityButtonStyles(selectedActivity: PhysicalActivityEnum, buttonActivity: PhysicalActivityEnum): {
+  getActivityButtonStyles(
+    selectedActivity: PhysicalActivityEnum,
+    buttonActivity: PhysicalActivityEnum,
+  ): {
     buttonClass: string;
     textClass: string;
   } {
     try {
       // Classes de base
-      const baseButtonClass = "flex flex-col items-center justify-center w-full h-24 bg-transparent";
-      const baseTextClass = "text-white capitalize";
-      
+      const baseButtonClass =
+        'flex flex-col items-center justify-center w-full h-24 bg-transparent';
+      const baseTextClass = 'text-white capitalize';
+
       // Pas de modification nécessaire car les styles sont gérés par l'indicateur
       return {
         buttonClass: baseButtonClass,
-        textClass: baseTextClass
+        textClass: baseTextClass,
       };
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting activity button styles: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting activity button styles: ${error}`,
+      );
       return {
-        buttonClass: "flex flex-col items-center justify-center w-full h-24 bg-transparent",
-        textClass: "text-white capitalize"
+        buttonClass:
+          'flex flex-col items-center justify-center w-full h-24 bg-transparent',
+        textClass: 'text-white capitalize',
       };
     }
   }

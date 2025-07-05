@@ -103,20 +103,25 @@ class OpenFoodFactsService {
    * @param country Country for the search (default: France)
    * @returns Promise with product data
    */
-  async getProductByBarcode(barcode: string, country: CountryTypeEnum = this.defaultCountry): Promise<Product | null> {
+  async getProductByBarcode(
+    barcode: string,
+    country: CountryTypeEnum = this.defaultCountry,
+  ): Promise<Product | null> {
     try {
-      const response = await fetch(`${CountryConfig[country].url}/api/v0/product/${barcode}.json`);
-      
+      const response = await fetch(
+        `${CountryConfig[country].url}/api/v0/product/${barcode}.json`,
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
       }
-      
+
       const data: OpenFoodFactsResponse = await response.json();
-      
+
       if (data.status === 0 || !data.product) {
         return null;
       }
-      
+
       return data.product;
     } catch (error) {
       console.error('Error fetching product by barcode:', error);
@@ -157,7 +162,9 @@ class OpenFoodFactsService {
       if (!productResult) {
         return {
           isValid: false,
-          message: `Product "${product.product_name || 'no name'}" (barcode: ${barcode}) found but all nutritional values are zero. Try another product.`,
+          message: `Product "${
+            product.product_name || 'no name'
+          }" (barcode: ${barcode}) found but all nutritional values are zero. Try another product.`,
           productResult: null,
         };
       }
@@ -221,38 +228,39 @@ class OpenFoodFactsService {
     const formattedCalories = formatNutritionalValue(finalCalories);
     const formattedProtein = formatNutritionalValue(rawProtein);
     const formattedCarbs = formatNutritionalValue(rawCarbs);
-      const rawSugars = product.nutriments?.sugars_100g ?? 0;
-  const formattedSugars = formatNutritionalValue(rawSugars);
-  const formattedCategories = product.categories
-    ? product.categories
-        .split(',')
-        .map((tag) => tag.trim().split(':').pop())
-        .filter((s): s is string => Boolean(s))
-        .map((c) => c.replace(/_/g, ' '))
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(', ')
-    : undefined;
-  const formattedFats = formatNutritionalValue(rawFats);
+    const rawSugars = product.nutriments?.sugars_100g ?? 0;
+    const formattedSugars = formatNutritionalValue(rawSugars);
+    const formattedCategories = product.categories
+      ? product.categories
+          .split(',')
+          .map((tag) => tag.trim().split(':').pop())
+          .filter((s): s is string => Boolean(s))
+          .map((c) => c.replace(/_/g, ' '))
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(', ')
+      : undefined;
+    const formattedFats = formatNutritionalValue(rawFats);
 
     // Return a simplified object with product information
     return {
       code: product.code,
-      name: product.product_name || product.product_name_fr || 'Unknown Product',
+      name:
+        product.product_name || product.product_name_fr || 'Unknown Product',
       image: product.image_front_url ? { uri: product.image_front_url } : null,
       calories: formattedCalories,
       protein: formattedProtein,
       carbs: formattedCarbs,
       fats: formattedFats,
-    sugars: formattedSugars,
-    allergens: product.allergens
-      ? product.allergens
-          .split(',')
-          .map((tag) => tag.trim().split(':').pop())
-          .filter((s): s is string => Boolean(s))
-          .map((a) => a.replace(/_/g, ' '))
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(', ')
-      : undefined,
+      sugars: formattedSugars,
+      allergens: product.allergens
+        ? product.allergens
+            .split(',')
+            .map((tag) => tag.trim().split(':').pop())
+            .filter((s): s is string => Boolean(s))
+            .map((a) => a.replace(/_/g, ' '))
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(', ')
+        : undefined,
       brands: product.brands,
       categories: product.categories,
       nutriscore_grade: product.nutriscore_grade,
@@ -264,13 +272,11 @@ class OpenFoodFactsService {
    * @param params Search parameters
    * @returns Promise with search results
    */
-  async searchProducts(
-    params: SearchParams,
-  ): Promise<Product[]> {
+  async searchProducts(params: SearchParams): Promise<Product[]> {
     try {
       const country = params.country || this.defaultCountry;
       const searchParams = new URLSearchParams();
-      
+
       // Paramètres de base
       if (params.search_terms) {
         searchParams.append('search_terms', params.search_terms);
@@ -290,26 +296,28 @@ class OpenFoodFactsService {
       if (params.sort_by) {
         searchParams.append('sort_by', params.sort_by);
       }
-      
+
       // Langue par défaut selon le pays
       searchParams.append('lc', CountryConfig[country].code);
       searchParams.append('json', '1');
-      
+
       // Construction de l'URL avec le bon domaine selon le pays
-      const url = `${CountryConfig[country].url}/cgi/search.pl?${searchParams.toString()}`;
-      
+      const url = `${
+        CountryConfig[country].url
+      }/cgi/search.pl?${searchParams.toString()}`;
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
       }
-      
+
       const data: OpenFoodFactsResponse = await response.json();
-      
+
       if (!data.products || !Array.isArray(data.products)) {
         return [];
       }
-      
+
       return data.products;
     } catch (error) {
       console.error('Error searching products:', error);
@@ -503,9 +511,17 @@ class OpenFoodFactsService {
           product.product_name_fr || product.product_name || 'Produit sans nom';
 
         // Valeurs nutritionnelles (avec fallback à 0)
-        const calories = formatNutritionalValue(product.nutriments?.energy_value || product.nutriments?.energy_100g || 0);
-        const protein = formatNutritionalValue(product.nutriments?.proteins_100g || 0);
-        const carbs = formatNutritionalValue(product.nutriments?.carbohydrates_100g || 0);
+        const calories = formatNutritionalValue(
+          product.nutriments?.energy_value ||
+            product.nutriments?.energy_100g ||
+            0,
+        );
+        const protein = formatNutritionalValue(
+          product.nutriments?.proteins_100g || 0,
+        );
+        const carbs = formatNutritionalValue(
+          product.nutriments?.carbohydrates_100g || 0,
+        );
         const fats = formatNutritionalValue(product.nutriments?.fat_100g || 0);
 
         const formattedCategories = product.categories
@@ -548,7 +564,9 @@ class OpenFoodFactsService {
   async getAutocompleteSuggestions(term: string): Promise<string[]> {
     try {
       const response = await fetch(
-        `${CountryConfig[this.defaultCountry].url}/suggest/${encodeURIComponent(term)}`,
+        `${CountryConfig[this.defaultCountry].url}/suggest/${encodeURIComponent(
+          term,
+        )}`,
       );
 
       if (!response.ok) {
@@ -569,7 +587,9 @@ class OpenFoodFactsService {
    */
   async getCategories(): Promise<any> {
     try {
-      const response = await fetch(`${CountryConfig[this.defaultCountry].url}/categories.json`);
+      const response = await fetch(
+        `${CountryConfig[this.defaultCountry].url}/categories.json`,
+      );
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -589,7 +609,9 @@ class OpenFoodFactsService {
    */
   async getBrands(): Promise<any> {
     try {
-      const response = await fetch(`${CountryConfig[this.defaultCountry].url}/brands.json`);
+      const response = await fetch(
+        `${CountryConfig[this.defaultCountry].url}/brands.json`,
+      );
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);

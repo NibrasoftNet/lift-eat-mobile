@@ -17,20 +17,20 @@ interface ChatMessageProps {
   isThinking?: boolean;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ 
-  message, 
-  type, 
-  timestamp, 
+export const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  type,
+  timestamp,
   showIcon = true,
-  isThinking = false
+  isThinking = false,
 }) => {
   const isUser = type === 'user';
   const { speak, stop, isSpeaking } = useTTS();
-  
+
   const formatTime = (date: Date): string => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-  
+
   const handleSpeakMessage = () => {
     if (isSpeaking) {
       stop();
@@ -40,10 +40,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <Box 
+    <Box
       className={`my-1.5 p-3 rounded-xl max-w-[85%] ${
-        isUser 
-          ? 'self-end bg-blue-50 rounded-br-none' 
+        isUser
+          ? 'self-end bg-blue-50 rounded-br-none'
           : 'self-start bg-white rounded-bl-none'
       } shadow-sm`}
     >
@@ -55,11 +55,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               {isUser ? 'Vous' : 'Assistant IA'}
             </Text>
           </HStack>
-          
+
           {!isUser && !isThinking && (
             <Pressable
               onPress={handleSpeakMessage}
-              style={[styles.voiceButton, isSpeaking ? styles.voiceButtonActive : null]}
+              style={[
+                styles.voiceButton,
+                isSpeaking ? styles.voiceButtonActive : null,
+              ]}
             >
               {isSpeaking ? (
                 <VolumeX size={16} color="#4F46E5" />
@@ -74,9 +77,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {isThinking ? 'En train de réfléchir...' : message}
       </Text>
       <Box className="items-end mt-1">
-        <Text className="text-xs text-gray-500">
-          {formatTime(timestamp)}
-        </Text>
+        <Text className="text-xs text-gray-500">{formatTime(timestamp)}</Text>
       </Box>
     </Box>
   );
@@ -89,8 +90,8 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   voiceButtonActive: {
-    backgroundColor: '#E0E7FF' // Couleur lilas clair compatible avec le design Figma
-  }
+    backgroundColor: '#E0E7FF', // Couleur lilas clair compatible avec le design Figma
+  },
 });
 
 export default ChatMessage;

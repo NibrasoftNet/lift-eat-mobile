@@ -52,9 +52,7 @@ const PlanNameFormInput: React.FC<PlanNameFormInputProps> = ({
       {error && (
         <FormControlError>
           <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>
-            {error.message}
-          </FormControlErrorText>
+          <FormControlErrorText>{error.message}</FormControlErrorText>
         </FormControlError>
       )}
     </FormControl>

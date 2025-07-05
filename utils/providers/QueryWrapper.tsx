@@ -34,7 +34,9 @@ export const QueryStateHandler = <T,>({
       return (
         <View className="flex-1 w-full items-center justify-center gap-2">
           <ActivityIndicator size="large" color="#4F46E5" />
-          <Text variant="body" className="text-primary-500">Please wait…</Text>
+          <Text variant="body" className="text-primary-500">
+            Please wait…
+          </Text>
         </View>
       );
     }
@@ -44,9 +46,13 @@ export const QueryStateHandler = <T,>({
           <Text variant="h2" className="mb-1">
             Data Not Found
           </Text>
-          <Text variant="body" className="text-gray-500 dark:text-gray-400">No result has been found</Text>
+          <Text variant="body" className="text-gray-500 dark:text-gray-400">
+            No result has been found
+          </Text>
           <Link href="/intro">
-            <Text variant="body" className="text-primary-500 underline">Back to login</Text>
+            <Text variant="body" className="text-primary-500 underline">
+              Back to login
+            </Text>
           </Link>
         </View>
       </View>

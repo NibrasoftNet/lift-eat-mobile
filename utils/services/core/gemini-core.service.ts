@@ -5,12 +5,12 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Service d'orchestration pour les appels à l'API Gemini de Google (MCP)
- * 
+ *
  * Ce service est conservé comme une partie de l'architecture d'IA mais adapté pour
  * fonctionner avec le pattern MCP. Contrairement aux services accédant directement
  * à la base de données qui ont été migrés vers des handlers, ce service gère uniquement
  * des appels API externes et est utilisé comme une couche d'orchestration par iaService.
- * 
+ *
  * Il n'accède pas directement à la base de données et ne nécessite donc pas
  * une migration complète vers les handlers MCP.
  */
@@ -50,7 +50,7 @@ export class GeminiCoreService {
   public setCurrentUserId(userId: number): void {
     this.currentUserId = userId;
   }
-  
+
   /**
    * Configure le service avec l'ID utilisateur
    * Méthode alias pour une meilleure compatibilité avec l'architecture MCP
@@ -65,11 +65,14 @@ export class GeminiCoreService {
    * @param userContext Contexte utilisateur optionnel à ajouter au prompt
    * @returns La réponse textuelle générée
    */
-  public async generateResponse(prompt: string, userContext?: string): Promise<string> {
+  public async generateResponse(
+    prompt: string,
+    userContext?: string,
+  ): Promise<string> {
     try {
       // Valider et préparer l'entrée
       if (!prompt || prompt.trim().length === 0) {
-        return "Veuillez fournir une question ou un sujet.";
+        return 'Veuillez fournir une question ou un sujet.';
       }
 
       // Enrichir le prompt avec le contexte utilisateur si disponible
@@ -77,10 +80,10 @@ export class GeminiCoreService {
       if (userContext) {
         fullPrompt = `[Contexte utilisateur: ${userContext}]\n\nQuestion: ${prompt}`;
       }
-      
+
       // Préparer la requête à l'API
       const apiUrl = `${this.baseUrl}/generateContent?key=${this.apiKey}`;
-      
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -108,22 +111,32 @@ export class GeminiCoreService {
       // Vérifier et traiter la réponse
       if (!response.ok) {
         const errorText = await response.text();
-        logger.error(LogCategory.IA, 'Gemini API error', { status: response.status, error: errorText });
+        logger.error(LogCategory.IA, 'Gemini API error', {
+          status: response.status,
+          error: errorText,
+        });
         return "Désolé, je n'ai pas pu générer une réponse en ce moment. Veuillez réessayer plus tard.";
       }
 
       // Extraire le texte de réponse
-      const data = await response.json() as GeminiResponse;
-      
-      if (!data.candidates || data.candidates.length === 0 || 
-          !data.candidates[0].content || !data.candidates[0].content.parts || 
-          data.candidates[0].content.parts.length === 0) {
+      const data = (await response.json()) as GeminiResponse;
+
+      if (
+        !data.candidates ||
+        data.candidates.length === 0 ||
+        !data.candidates[0].content ||
+        !data.candidates[0].content.parts ||
+        data.candidates[0].content.parts.length === 0
+      ) {
         return "Désolé, aucune réponse n'a été générée. Veuillez reformuler votre question.";
       }
-      
+
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
-      logger.error(LogCategory.IA, 'Error generating Gemini response', { error, prompt });
+      logger.error(LogCategory.IA, 'Error generating Gemini response', {
+        error,
+        prompt,
+      });
       return "Une erreur s'est produite lors de la génération de la réponse.";
     }
   }

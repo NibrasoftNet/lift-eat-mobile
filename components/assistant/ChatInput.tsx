@@ -10,10 +10,10 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ 
-  onSendMessage, 
+export const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage,
   isLoading,
-  placeholder = "Posez une question..."
+  placeholder = 'Posez une question...',
 }) => {
   const [message, setMessage] = useState('');
 
@@ -36,7 +36,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         maxLength={500}
         editable={!isLoading}
       />
-      <Pressable 
+      <Pressable
         className={`w-11 h-11 rounded-full bg-green-500 items-center justify-center ${
           !message.trim() || isLoading ? 'opacity-50' : 'opacity-100'
         }`}
@@ -48,7 +48,5 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     </HStack>
   );
 };
-
-
 
 export default ChatInput;

@@ -9,15 +9,18 @@ interface IconProps extends SvgProps {
 /**
  * ArrowRight2SharpBrokenIcon component
  */
-export const ArrowRight2SharpBrokenIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 25 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M8.75 5L15.75 12L8.75 19" fill={none} stroke={color} strokeWidth="1.5" />
+export const ArrowRight2SharpBrokenIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
+    <Path
+      d="M8.75 5L15.75 12L8.75 19"
+      fill={none}
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </Svg>
 );
 

@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
-import { CameraView, BarcodeScanningResult, useCameraPermissions } from 'expo-camera';
+import {
+  CameraView,
+  BarcodeScanningResult,
+  useCameraPermissions,
+} from 'expo-camera';
 import type { FlashMode } from 'expo-camera';
 import { useTheme } from '@/themeNew';
 import Box from '@/components-new/ui/atoms/base/Box';
@@ -69,18 +73,23 @@ const CameraViewScanner: React.FC<CameraViewProps> = ({ onBarCodeScanned }) => {
     <Box style={styles.container}>
       <CameraView
         style={StyleSheet.absoluteFill}
-        barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'] }}
+        barcodeScannerSettings={{
+          barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'],
+        }}
         onBarcodeScanned={onBarCodeScanned}
         flash={flash}
       />
       {/* Overlay */}
       <ScanOverlay onScan={() => {}} scanning={false} />
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/meals/scanner/history')}>
-        <TimeSquareRegularBoldIcon width={24} height={24} color='#FFFFFF' />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push('/meals/scanner/history')}
+      >
+        <TimeSquareRegularBoldIcon width={24} height={24} color="#FFFFFF" />
       </TouchableOpacity>
       <Box style={styles.flashButton}>
         <TouchableOpacity onPress={toggleFlash}>
-          <FlashRegularBoldIcon width={28} height={28} color='#A4C73B' />
+          <FlashRegularBoldIcon width={28} height={28} color="#A4C73B" />
         </TouchableOpacity>
       </Box>
     </Box>

@@ -35,7 +35,9 @@ const IngredientCard: React.FC<{
   // Synchroniser l'état local avec la quantité du service
   useEffect(() => {
     // Mettre à jour l'état local si la quantité change dans le service/store
-    const quantity = ingredientPagesService.getIngredientQuantity(item.ingredientStandardId);
+    const quantity = ingredientPagesService.getIngredientQuantity(
+      item.ingredientStandardId,
+    );
     if (quantity !== newQuantity) {
       setNewQuantity(quantity);
     }
@@ -46,15 +48,24 @@ const IngredientCard: React.FC<{
    * @param operation - 'increase' pour augmenter, 'decrease' pour diminuer
    */
   const handleQuantityChange = (operation: 'increase' | 'decrease') => {
-    logger.info(LogCategory.USER, `Changing ingredient ${item.ingredientStandardId} quantity: ${operation}`);
-    
+    logger.info(
+      LogCategory.USER,
+      `Changing ingredient ${item.ingredientStandardId} quantity: ${operation}`,
+    );
+
     if (operation === 'increase') {
       // Utiliser le service Pages pour incrémenter la quantité
-      ingredientPagesService.incrementIngredientQuantity(item.ingredientStandardId, 10);
+      ingredientPagesService.incrementIngredientQuantity(
+        item.ingredientStandardId,
+        10,
+      );
       setNewQuantity((prev) => prev + 10);
     } else {
       // Utiliser le service Pages pour décrémenter la quantité
-      ingredientPagesService.decrementIngredientQuantity(item.ingredientStandardId, 10);
+      ingredientPagesService.decrementIngredientQuantity(
+        item.ingredientStandardId,
+        10,
+      );
       setNewQuantity((prev) => Math.max(0, prev - 10));
     }
   };
@@ -70,7 +81,9 @@ const IngredientCard: React.FC<{
             <Box className="flex-col items-center justify-center w-16 h-16">
               <Avatar>
                 <AvatarFallbackText>
-                  {(item.ingredientsStandard?.name || 'IG')?.slice(0, 2).toUpperCase()}
+                  {(item.ingredientsStandard?.name || 'IG')
+                    ?.slice(0, 2)
+                    .toUpperCase()}
                 </AvatarFallbackText>
                 {item.ingredientsStandard?.image ? (
                   <AvatarImage

@@ -4,7 +4,14 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Dimensions, StatusBar } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  StatusBar,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../../themeNew';
 import Text from '../../../components-new/ui/atoms/base/Text';
@@ -34,7 +41,7 @@ export default function Walkthrough2() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       {/* Fond avec ellipse gradient */}
       <View style={styles.backgroundContainer}>
         <View style={styles.ellipseGradient} />
@@ -55,7 +62,8 @@ export default function Walkthrough2() {
             Track Your Daily Nutrition
           </Text>
           <Text variant="body" color="#616161" style={styles.description}>
-            Set your nutrition goals and track your daily progress easily with detailed information
+            Set your nutrition goals and track your daily progress easily with
+            detailed information
           </Text>
         </View>
 
@@ -73,7 +81,7 @@ export default function Walkthrough2() {
               Skip
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity onPress={handleNext} style={styles.nextButton}>
             <Text variant="button" color="#FFFFFF">
               Next
@@ -103,7 +111,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: width * 1.5,
     height: width * 1.5,
-    borderRadius: width * 1.5 / 2,
+    borderRadius: (width * 1.5) / 2,
     backgroundColor: 'transparent',
     top: -width * 0.5,
     // Simule le gradient radial en utilisant des shadows

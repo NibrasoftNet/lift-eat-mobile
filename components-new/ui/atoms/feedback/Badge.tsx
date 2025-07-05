@@ -74,14 +74,14 @@ const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const theme = useAppTheme();
-  
+
   // Déterminer les styles selon la taille
   let minWidth: number;
   let minHeight: number;
   let paddingHorizontal: number;
   let paddingVertical: number;
   let fontSize: number;
-  
+
   switch (size) {
     case 'xs':
       minWidth = 16;
@@ -112,14 +112,14 @@ const Badge: React.FC<BadgeProps> = ({
       paddingVertical = 2;
       fontSize = 12;
   }
-  
+
   // Couleurs selon la variante
   const badgeColor = color || theme.color('primary');
   let backgroundColor;
   let textColor;
   let borderColor;
   let borderWidth = 0;
-  
+
   switch (variant) {
     case 'outline':
       backgroundColor = 'transparent';
@@ -139,17 +139,17 @@ const Badge: React.FC<BadgeProps> = ({
       textColor = '#FFFFFF';
       borderColor = 'transparent';
   }
-  
+
   // Déterminer le contenu à afficher
   let content = label;
-  
+
   if (count !== undefined) {
     if (count === 0 && !showZero) {
       return null;
     }
     content = count > max ? `${max}+` : `${count}`;
   }
-  
+
   // Position absolue si nécessaire
   let absolutePosition = {};
   if (isAbsolute) {
@@ -159,7 +159,7 @@ const Badge: React.FC<BadgeProps> = ({
       ...getPositionStyles(placement),
     };
   }
-  
+
   // Si le badge est utilisé comme wrapper, on place le badge relatif aux enfants
   if (children) {
     return (
@@ -176,7 +176,8 @@ const Badge: React.FC<BadgeProps> = ({
               minHeight,
               paddingHorizontal,
               paddingVertical,
-              borderRadius: typeof rounded === 'number' ? rounded : theme.radius(rounded),
+              borderRadius:
+                typeof rounded === 'number' ? rounded : theme.radius(rounded),
               ...absolutePosition,
             },
             width ? { width } : {},
@@ -197,16 +198,10 @@ const Badge: React.FC<BadgeProps> = ({
       </Box>
     );
   }
-  
+
   // Sinon, on affiche le badge seul
   return (
-    <Box
-      m={m}
-      mt={mt}
-      mr={mr}
-      mb={mb}
-      ml={ml}
-    >
+    <Box m={m} mt={mt} mr={mr} mb={mb} ml={ml}>
       <View
         style={[
           styles.badge,
@@ -218,7 +213,8 @@ const Badge: React.FC<BadgeProps> = ({
             minHeight,
             paddingHorizontal,
             paddingVertical,
-            borderRadius: typeof rounded === 'number' ? rounded : theme.radius(rounded),
+            borderRadius:
+              typeof rounded === 'number' ? rounded : theme.radius(rounded),
           },
           width ? { width } : {},
           height ? { height } : {},

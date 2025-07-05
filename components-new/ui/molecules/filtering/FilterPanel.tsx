@@ -1,5 +1,11 @@
 import React, { useRef } from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '@/components-new/ui/atoms/base';
 import FilterChipGroup from './FilterChipGroup';

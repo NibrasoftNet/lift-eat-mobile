@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import { Box } from '../../atoms/base';
 
 interface WeightSelectorProps {
@@ -8,17 +14,17 @@ interface WeightSelectorProps {
    * Correspond au variant "Dark" dans Figma
    */
   dark?: boolean;
-  
+
   /**
    * Poids initial en kg
    */
   initialWeight?: number;
-  
+
   /**
    * Fonction appelée lors du changement de poids
    */
   onWeightChange?: (weight: number, unit: 'kg' | 'lbs') => void;
-  
+
   /**
    * Unité par défaut (kg ou lbs)
    */
@@ -33,16 +39,16 @@ export const WeightSelector: React.FC<WeightSelectorProps> = ({
   dark = false,
   initialWeight = 70,
   initialUnit = 'kg',
-  onWeightChange
+  onWeightChange,
 }) => {
   // État pour le poids et l'unité
   const [weight, setWeight] = useState(initialWeight);
   const [unit, setUnit] = useState<'kg' | 'lbs'>(initialUnit);
-  
+
   // Constantes pour les poids
-  const minWeight = 30;  // kg
+  const minWeight = 30; // kg
   const maxWeight = 150; // kg
-  
+
   // Valeurs prédéfinies pour sélection rapide
   const weightOptions = [
     { kg: 50, display: '50 kg' },
@@ -56,12 +62,12 @@ export const WeightSelector: React.FC<WeightSelectorProps> = ({
     { kg: 90, display: '90 kg' },
     { kg: 95, display: '95 kg' },
   ];
-  
+
   // Convertir kg en lbs et vice versa
   const kgToLbs = (kg: number): number => {
     return parseFloat((kg * 2.20462).toFixed(1));
   };
-  
+
   // Obtenir le poids affiché selon l'unité
   const getDisplayWeight = (): string => {
     if (unit === 'kg') {
@@ -70,47 +76,50 @@ export const WeightSelector: React.FC<WeightSelectorProps> = ({
       return `${kgToLbs(weight).toFixed(1)}`;
     }
   };
-  
+
   // Changer l'unité
   const toggleUnit = (newUnit: 'kg' | 'lbs') => {
     if (unit !== newUnit) {
       setUnit(newUnit);
-      
+
       if (onWeightChange) {
         onWeightChange(weight, newUnit);
       }
     }
   };
-  
+
   // Changer le poids
   const changeWeight = (delta: number) => {
     // Incrément différent selon l'unité
     const increment = unit === 'kg' ? delta : delta / 2.20462;
-    
-    const newWeight = Math.min(maxWeight, Math.max(minWeight, Math.round(weight + increment)));
+
+    const newWeight = Math.min(
+      maxWeight,
+      Math.max(minWeight, Math.round(weight + increment)),
+    );
     setWeight(newWeight);
-    
+
     if (onWeightChange) {
       onWeightChange(newWeight, unit);
     }
   };
-  
+
   // Sélectionner un poids spécifique
   const selectWeight = (w: number) => {
     setWeight(w);
-    
+
     if (onWeightChange) {
       onWeightChange(w, unit);
     }
   };
-  
+
   // Couleurs selon le thème
   const backgroundColor = dark ? '#1F222A' : '#FAFAFA';
   const textColors = {
     primary: dark ? '#FFFFFF' : '#212121',
     unit: dark ? '#FFFFFF' : '#212121',
   };
-  
+
   return (
     <Box style={[styles.container, { backgroundColor }]}>
       {/* Sélecteur d'unité */}
@@ -152,16 +161,19 @@ export const WeightSelector: React.FC<WeightSelectorProps> = ({
           </Text>
         </Pressable>
       </View>
-      
+
       {/* Affichage de la valeur et boutons +/- */}
       <View style={styles.valueSection}>
-        <TouchableOpacity 
-          style={[styles.controlButton, { backgroundColor: dark ? '#35383F' : '#E0E0E0' }]} 
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            { backgroundColor: dark ? '#35383F' : '#E0E0E0' },
+          ]}
           onPress={() => changeWeight(-1)}
         >
           <Text style={styles.controlButtonText}>-</Text>
         </TouchableOpacity>
-        
+
         <View style={styles.valueDisplay}>
           <Text style={[styles.value, { color: textColors.primary }]}>
             {getDisplayWeight()}
@@ -170,34 +182,41 @@ export const WeightSelector: React.FC<WeightSelectorProps> = ({
             {unit}
           </Text>
         </View>
-        
-        <TouchableOpacity 
-          style={[styles.controlButton, { backgroundColor: dark ? '#35383F' : '#E0E0E0' }]} 
+
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            { backgroundColor: dark ? '#35383F' : '#E0E0E0' },
+          ]}
           onPress={() => changeWeight(1)}
         >
           <Text style={styles.controlButtonText}>+</Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Options de poids prédéfinies */}
       <View style={styles.quickOptions}>
         {weightOptions.map((option) => (
-          <TouchableOpacity 
-            key={option.kg} 
+          <TouchableOpacity
+            key={option.kg}
             style={[
               styles.weightOption,
-              weight === option.kg && styles.selectedWeight, 
-              { borderColor: dark ? '#35383F' : '#E0E0E0' }
+              weight === option.kg && styles.selectedWeight,
+              { borderColor: dark ? '#35383F' : '#E0E0E0' },
             ]}
             onPress={() => selectWeight(option.kg)}
           >
-            <Text 
+            <Text
               style={[
-                styles.weightOptionText, 
-                { color: weight === option.kg ? '#A1CE50' : textColors.primary }
+                styles.weightOptionText,
+                {
+                  color: weight === option.kg ? '#A1CE50' : textColors.primary,
+                },
               ]}
             >
-              {unit === 'kg' ? `${option.kg}` : `${kgToLbs(option.kg).toFixed(0)}`}
+              {unit === 'kg'
+                ? `${option.kg}`
+                : `${kgToLbs(option.kg).toFixed(0)}`}
             </Text>
           </TouchableOpacity>
         ))}

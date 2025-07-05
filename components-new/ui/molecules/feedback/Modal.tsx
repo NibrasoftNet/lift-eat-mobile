@@ -19,7 +19,6 @@ import {
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
 
-
 interface ModalProps {
   // État
   visible: boolean;
@@ -73,28 +72,28 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const appTheme = useAppTheme();
   const { width } = Dimensions.get('window');
-  
+
   // Couleurs selon le thème
   const backgroundColor = dark ? '#1F222A' : '#FFFFFF'; // Couleurs exactes du Figma
   const textColor = dark ? '#FFFFFF' : '#212121'; // Couleurs exactes du Figma
   const secondaryTextColor = dark ? '#9E9E9E' : '#757575'; // Couleurs exactes du Figma
   const primaryButtonBgColor = appTheme.color('primary'); // Couleur du thème
   const secondaryButtonBgColor = dark ? '#35383F' : '#F5F5F5'; // Couleurs exactes du Figma
-  
+
   // Largeur de la modale (340px selon Figma)
   const modalWidth = Math.min(340, width - 40);
-  
+
   // Gérer l'appui sur le fond
   const handleBackdropPress = () => {
     if (onBackdropPress) {
       onBackdropPress();
     }
   };
-  
+
   // Rendre les boutons d'action
   const renderButtons = () => {
     if (!primaryButtonText && !secondaryButtonText) return null;
-    
+
     return (
       <Box style={styles.buttonsContainer}>
         {secondaryButtonText && (
@@ -107,17 +106,12 @@ const Modal: React.FC<ModalProps> = ({
             onPress={onSecondaryButtonPress}
             activeOpacity={0.7}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                { color: textColor },
-              ]}
-            >
+            <Text style={[styles.buttonText, { color: textColor }]}>
               {secondaryButtonText}
             </Text>
           </TouchableOpacity>
         )}
-        
+
         {primaryButtonText && (
           <TouchableOpacity
             style={[
@@ -128,12 +122,7 @@ const Modal: React.FC<ModalProps> = ({
             onPress={onPrimaryButtonPress}
             activeOpacity={0.7}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                { color: '#FFFFFF' },
-              ]}
-            >
+            <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
               {primaryButtonText}
             </Text>
           </TouchableOpacity>
@@ -141,7 +130,7 @@ const Modal: React.FC<ModalProps> = ({
       </Box>
     );
   };
-  
+
   return (
     <RNModal
       visible={visible}
@@ -167,12 +156,8 @@ const Modal: React.FC<ModalProps> = ({
           <TouchableOpacity activeOpacity={1}>
             <Box style={styles.contentContainer}>
               {/* Icône (optionnelle) */}
-              {icon && (
-                <Box style={styles.iconContainer}>
-                  {icon}
-                </Box>
-              )}
-              
+              {icon && <Box style={styles.iconContainer}>{icon}</Box>}
+
               {/* Contenu principal */}
               <Box style={styles.mainContent}>
                 {/* Titre (optionnel) */}
@@ -187,7 +172,7 @@ const Modal: React.FC<ModalProps> = ({
                     {title}
                   </Text>
                 )}
-                
+
                 {/* Description (optionnelle) */}
                 {description && (
                   <Text
@@ -200,11 +185,11 @@ const Modal: React.FC<ModalProps> = ({
                     {description}
                   </Text>
                 )}
-                
+
                 {/* Contenu personnalisé (optionnel) */}
                 {children}
               </Box>
-              
+
               {/* Boutons d'action (optionnels) */}
               {renderButtons()}
             </Box>

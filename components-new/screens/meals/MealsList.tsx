@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  RefreshControl,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text } from '@/components-new/ui/atoms/base';
 import { MealDisplay } from '@/hooks/useMealList';
@@ -43,7 +48,7 @@ const MealsList: React.FC<MealsListProps> = ({
           showRightArrow
         />
       )}
-      keyExtractor={item => item.id.toString()}
+      keyExtractor={(item) => item.id.toString()}
       estimatedItemSize={100}
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}

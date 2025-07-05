@@ -5,10 +5,15 @@
  */
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
-
 
 // Types pour les variantes du composant BottomBarButtonAction
 export type ButtonActionVariant = 'primary' | 'secondary' | 'tertiary';
@@ -64,12 +69,12 @@ const BottomBarButtonAction: React.FC<BottomBarButtonActionProps> = ({
   disabled = false,
 }) => {
   const { color } = useAppTheme();
-  
+
   // Déterminer les dimensions selon la taille
   let buttonSize;
   let iconSize;
   let elevation;
-  
+
   switch (size) {
     case 'small':
       buttonSize = 48;
@@ -88,11 +93,11 @@ const BottomBarButtonAction: React.FC<BottomBarButtonActionProps> = ({
       elevation = 3;
       break;
   }
-  
+
   // Déterminer les couleurs selon la variante
   let backgroundColor;
   let textColor;
-  
+
   switch (variant) {
     case 'secondary':
       backgroundColor = color('secondary');
@@ -108,7 +113,7 @@ const BottomBarButtonAction: React.FC<BottomBarButtonActionProps> = ({
       textColor = color('background');
       break;
   }
-  
+
   // Ajuster les couleurs si le bouton est désactivé
   if (disabled) {
     backgroundColor = color('backgroundGrey');
@@ -146,20 +151,18 @@ const BottomBarButtonAction: React.FC<BottomBarButtonActionProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.container, containerStyle as ViewStyle || {}]}
+      style={[styles.container, (containerStyle as ViewStyle) || {}]}
       onPress={onPress}
       activeOpacity={0.8}
       disabled={disabled}
     >
-      <Box style={styles.iconContainer}>
-        {icon}
-      </Box>
-      
+      <Box style={styles.iconContainer}>{icon}</Box>
+
       {label && (
         <Text
           urbanist="caption"
           color={textColor}
-          style={[styles.label, textStyle as TextStyle || {}]}
+          style={[styles.label, (textStyle as TextStyle) || {}]}
         >
           {label}
         </Text>

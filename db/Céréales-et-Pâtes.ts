@@ -3,8 +3,8 @@ enum MealUnitEnum {
   MILLILITRES = 'MILLILITRES',
   PIECES = 'PIECES',
 }
-  
-  interface MealEntry {
+
+interface MealEntry {
   name: string;
   unit: MealUnitEnum;
   quantity: number;
@@ -32,9 +32,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 390,
-    carbs: 76.60,
-    fat: 6.30,
-    protein: 12.10,
+    carbs: 76.6,
+    fat: 6.3,
+    protein: 12.1,
     image: '../assets/images/seed/Céréales-et-Pâtes/Biscotte_Toast.jpg',
   },
 
@@ -43,9 +43,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 390,
-    carbs: 76.60,
-    fat: 6.30,
-    protein: 12.10,
+    carbs: 76.6,
+    fat: 6.3,
+    protein: 12.1,
     image: '../assets/images/seed/Céréales-et-Pâtes/Toast_Sans_Sel.jpg',
   },
 
@@ -65,9 +65,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 406,
-    carbs: 45.80,
-    fat: 21.00,
-    protein: 8.20,
+    carbs: 45.8,
+    fat: 21.0,
+    protein: 8.2,
     image: '../assets/images/seed/Céréales-et-Pâtes/Brioche.jpg',
   },
 
@@ -77,7 +77,7 @@ const cerealesEtPates: MealEntry[] = [
     quantity: 100,
     calories: 350,
     carbs: 73.98,
-    fat: 1.50,
+    fat: 1.5,
     protein: 13.44,
     image: '../assets/images/seed/Céréales-et-Pâtes/Couscous_Sec.jpg',
   },
@@ -87,9 +87,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 364,
-    carbs: 74.70,
-    fat: 1.20,
-    protein: 11.00,
+    carbs: 74.7,
+    fat: 1.2,
+    protein: 11.0,
     image: '../assets/images/seed/Céréales-et-Pâtes/Farine_Blanche.jpg',
   },
 
@@ -98,9 +98,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 380,
-    carbs: 76.00,
-    fat: 4.00,
-    protein: 12.00,
+    carbs: 76.0,
+    fat: 4.0,
+    protein: 12.0,
     image: '../assets/images/seed/Céréales-et-Pâtes/Farine Orge.jpg',
   },
 
@@ -142,7 +142,7 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 269,
-    carbs: 50.00,
+    carbs: 50.0,
     fat: 3.85,
     protein: 7.69,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pain_de_Mie(Beba).jpg',
@@ -153,9 +153,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 274,
-    carbs: 51.90,
-    fat: 3.00,
-    protein: 8.80,
+    carbs: 51.9,
+    fat: 3.0,
+    protein: 8.8,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Baguette.jpg',
   },
 
@@ -164,9 +164,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 250,
-    carbs: 46.40,
-    fat: 3.80,
-    protein: 10.00,
+    carbs: 46.4,
+    fat: 3.8,
+    protein: 10.0,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Complet.jpg',
   },
 
@@ -188,7 +188,7 @@ const cerealesEtPates: MealEntry[] = [
     calories: 262,
     carbs: 44.26,
     fat: 5.68,
-    protein: 7.10,
+    protein: 7.1,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Mlaoui.jpg',
   },
 
@@ -198,7 +198,7 @@ const cerealesEtPates: MealEntry[] = [
     quantity: 100,
     calories: 233,
     carbs: 46.06,
-    fat: 2.40,
+    fat: 2.4,
     protein: 7.94,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Orge.jpg',
   },
@@ -241,9 +241,9 @@ const cerealesEtPates: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 551,
-    carbs: 45.10,
-    fat: 38.10,
-    protein: 7.30,
+    carbs: 45.1,
+    fat: 38.1,
+    protein: 7.3,
     image: '../assets/images/seed/Céréales-et-Pâtes/Pâte_Feuilletée_Cru.jpg',
   },
 
@@ -275,10 +275,10 @@ const cerealesEtPates: MealEntry[] = [
     quantity: 100,
     calories: 339,
     carbs: 66.03,
-    fat: 3.30,
-    protein: 11.30,
+    fat: 3.3,
+    protein: 11.3,
     image: '../assets/images/seed/Céréales-et-Pâtes/Dro3.jpg',
   },
-]
+];
 
 export default cerealesEtPates;

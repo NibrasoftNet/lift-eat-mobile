@@ -4,13 +4,13 @@
  */
 
 import React, { ReactNode } from 'react';
-import { 
-  TouchableOpacity, 
-  StyleSheet, 
-  ViewStyle, 
+import {
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
   TextStyle,
   ActivityIndicator,
-  TouchableOpacityProps
+  TouchableOpacityProps,
 } from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import Box from '../base/Box';
@@ -83,16 +83,16 @@ const Button: React.FC<ButtonProps> = ({
   ...rest
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleur par défaut si non spécifiée
   const buttonColor = color || theme.color('primary');
-  
+
   // Déterminer les styles en fonction de la variante
   let backgroundColor: string | undefined;
   let borderColor: string | undefined;
   let borderWidth: number | undefined;
   let buttonTextColor: string;
-  
+
   switch (variant) {
     case 'filled':
       backgroundColor = buttonColor;
@@ -127,16 +127,26 @@ const Button: React.FC<ButtonProps> = ({
 
   // Appliquer l'opacité réduite si désactivé
   if (isDisabled) {
-    backgroundColor = backgroundColor ? `${backgroundColor}${Math.round(theme.opacity('disabled') * 255).toString(16)}` : undefined;
-    borderColor = borderColor ? `${borderColor}${Math.round(theme.opacity('disabled') * 255).toString(16)}` : undefined;
-    buttonTextColor = `${buttonTextColor}${Math.round(theme.opacity('disabled') * 255).toString(16)}`;
+    backgroundColor = backgroundColor
+      ? `${backgroundColor}${Math.round(
+          theme.opacity('disabled') * 255,
+        ).toString(16)}`
+      : undefined;
+    borderColor = borderColor
+      ? `${borderColor}${Math.round(theme.opacity('disabled') * 255).toString(
+          16,
+        )}`
+      : undefined;
+    buttonTextColor = `${buttonTextColor}${Math.round(
+      theme.opacity('disabled') * 255,
+    ).toString(16)}`;
   }
-  
+
   // Déterminer le padding en fonction de la taille
   let paddingHorizontal: number;
   let paddingVertical: number;
   let textSize: 'button' | 'caption' | 'body';
-  
+
   switch (size) {
     case 'xs':
       paddingHorizontal = theme.space('md');
@@ -168,11 +178,21 @@ const Button: React.FC<ButtonProps> = ({
       paddingVertical = theme.space('md');
       textSize = 'body';
   }
-  
+
   // Override padding if specified in props
-  const pxValue = px !== undefined ? (typeof px === 'number' ? px : theme.space(px)) : paddingHorizontal;
-  const pyValue = py !== undefined ? (typeof py === 'number' ? py : theme.space(py)) : paddingVertical;
-  
+  const pxValue =
+    px !== undefined
+      ? typeof px === 'number'
+        ? px
+        : theme.space(px)
+      : paddingHorizontal;
+  const pyValue =
+    py !== undefined
+      ? typeof py === 'number'
+        ? py
+        : theme.space(py)
+      : paddingVertical;
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -181,10 +201,20 @@ const Button: React.FC<ButtonProps> = ({
       style={[
         styles.baseButton,
         {
-          marginHorizontal: mx !== undefined ? (typeof mx === 'number' ? mx : theme.space(mx)) : undefined,
-          marginVertical: my !== undefined ? (typeof my === 'number' ? my : theme.space(my)) : undefined,
+          marginHorizontal:
+            mx !== undefined
+              ? typeof mx === 'number'
+                ? mx
+                : theme.space(mx)
+              : undefined,
+          marginVertical:
+            my !== undefined
+              ? typeof my === 'number'
+                ? my
+                : theme.space(my)
+              : undefined,
         },
-        style
+        style,
       ]}
       {...rest}
     >
@@ -206,9 +236,9 @@ const Button: React.FC<ButtonProps> = ({
           <>
             {leftIcon && <Box mr={theme.space('sm')}>{leftIcon}</Box>}
             {typeof children === 'string' ? (
-              <Text 
+              <Text
                 variant={textSize}
-                color={buttonTextColor} 
+                color={buttonTextColor}
                 style={textStyle}
                 semibold
               >

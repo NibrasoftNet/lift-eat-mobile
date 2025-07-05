@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Button from '@/components-new/ui/atoms/inputs/Button';
 import { ShadowKeys } from '@/themeNew/shadows';
@@ -24,9 +23,9 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
   return (
     <Button
       variant="filled"
-      color="#A1CE50"       /* Surface/Buttons/Brand */
-      textColor="#000000"   /* Absolute 900 */
-      rounded="round"        /* 1000px pill */
+      color="#A1CE50" /* Surface/Buttons/Brand */
+      textColor="#000000" /* Absolute 900 */
+      rounded="round" /* 1000px pill */
       px={16}
       py={16}
       style={{ width: 183, height: 58 }}

@@ -1,5 +1,12 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, SafeAreaView, Platform, Text } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+  Text,
+} from 'react-native';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
@@ -39,17 +46,18 @@ export default function WelcomeScreen() {
     strategy: 'oauth_google' | 'oauth_apple' | 'oauth_facebook',
   ) => {
     try {
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy,
-        redirectUrl: Linking.createURL('/'),
-      });
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy,
+          redirectUrl: Linking.createURL('/'),
+        });
 
       let email: string | undefined;
-      if ('emailAddress' in (signIn as any || {})) {
+      if ('emailAddress' in ((signIn as any) || {})) {
         // @ts-ignore
         email = signIn?.emailAddress;
       }
-      if (!email && 'emailAddress' in (signUp as any || {})) {
+      if (!email && 'emailAddress' in ((signUp as any) || {})) {
         // @ts-ignore
         email = signUp?.emailAddress;
       }
@@ -77,7 +85,7 @@ export default function WelcomeScreen() {
         }
       }
     } catch (error: any) {
-      if (error?.message?.includes("already signed in")) {
+      if (error?.message?.includes('already signed in')) {
         // Si l'utilisateur est déjà authentifié, rediriger simplement vers l'app principale
         router.replace('/(root)/(tabs)/meals/my-meals');
         return;
@@ -105,7 +113,9 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.color('background') }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.color('background') }]}
+    >
       <StatusBar style="dark" />
 
       <View style={styles.contentContainer}>
@@ -116,26 +126,34 @@ export default function WelcomeScreen() {
 
         {/* Titre et description */}
         <View style={styles.headerContainer}>
-          <Text style={[{
-            fontFamily: 'Urbanist',
-            fontWeight: '700',
-            fontSize: 32,
-            lineHeight: 38,
-            color: theme.color('primary'),
-            textAlign: 'center',
-            marginBottom: 8,
-          }]}>
+          <Text
+            style={[
+              {
+                fontFamily: 'Urbanist',
+                fontWeight: '700',
+                fontSize: 32,
+                lineHeight: 38,
+                color: theme.color('primary'),
+                textAlign: 'center',
+                marginBottom: 8,
+              },
+            ]}
+          >
             Let's Get Started!
           </Text>
-          <Text style={[{
-            fontFamily: 'Urbanist',
-            fontWeight: '400',
-            fontSize: 16,
-            lineHeight: 24,
-            color: theme.color('blueGrey'),
-            textAlign: 'center',
-            marginBottom: 8,
-          }]}>
+          <Text
+            style={[
+              {
+                fontFamily: 'Urbanist',
+                fontWeight: '400',
+                fontSize: 16,
+                lineHeight: 24,
+                color: theme.color('blueGrey'),
+                textAlign: 'center',
+                marginBottom: 8,
+              },
+            ]}
+          >
             Let's dive in into your account
           </Text>
         </View>
@@ -144,18 +162,32 @@ export default function WelcomeScreen() {
         <View style={styles.socialButtonsContainer}>
           {/* Bouton Google - fond blanc avec bordure */}
           <View style={styles.socialButtonWrapper}>
-            <TouchableOpacity 
-              style={[styles.socialButton, { backgroundColor: theme.color('background'), borderWidth: 0.5, borderColor: theme.color('blueGrey') }]}
+            <TouchableOpacity
+              style={[
+                styles.socialButton,
+                {
+                  backgroundColor: theme.color('background'),
+                  borderWidth: 0.5,
+                  borderColor: theme.color('blueGrey'),
+                },
+              ]}
               onPress={handleGoogleSignIn}
             >
               <View style={styles.socialButtonContent}>
                 <GoogleIcon size={30} />
-                <Text style={[{
-                  fontFamily: 'Urbanist',
-                  fontWeight: '600',
-                  fontSize: 16,
-                  lineHeight: 19,
-                }, styles.socialButtonText]}>Continue with Google</Text>
+                <Text
+                  style={[
+                    {
+                      fontFamily: 'Urbanist',
+                      fontWeight: '600',
+                      fontSize: 16,
+                      lineHeight: 19,
+                    },
+                    styles.socialButtonText,
+                  ]}
+                >
+                  Continue with Google
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -163,18 +195,32 @@ export default function WelcomeScreen() {
           {/* Bouton Apple - fond blanc avec bordure - uniquement sur iOS */}
           {Platform.OS === 'ios' && (
             <View style={styles.socialButtonWrapper}>
-              <TouchableOpacity 
-                style={[styles.socialButton, { backgroundColor: theme.color('background'), borderWidth: 0.5, borderColor: theme.color('blueGrey') }]}
+              <TouchableOpacity
+                style={[
+                  styles.socialButton,
+                  {
+                    backgroundColor: theme.color('background'),
+                    borderWidth: 0.5,
+                    borderColor: theme.color('blueGrey'),
+                  },
+                ]}
                 onPress={handleAppleSignIn}
               >
                 <View style={styles.socialButtonContent}>
                   <AppleIcon size={24} />
-                  <Text style={[{
-                    fontFamily: 'Urbanist',
-                    fontWeight: '600',
-                    fontSize: 16,
-                    lineHeight: 19,
-                  }, styles.socialButtonText]}>Continue with Apple</Text>
+                  <Text
+                    style={[
+                      {
+                        fontFamily: 'Urbanist',
+                        fontWeight: '600',
+                        fontSize: 16,
+                        lineHeight: 19,
+                      },
+                      styles.socialButtonText,
+                    ]}
+                  >
+                    Continue with Apple
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -182,18 +228,32 @@ export default function WelcomeScreen() {
 
           {/* Bouton Facebook - fond bleu */}
           <View style={styles.socialButtonWrapper}>
-            <TouchableOpacity 
-              style={[styles.socialButton, { backgroundColor: theme.color('background'), borderWidth: 0.5, borderColor: theme.color('blueGrey') }]}
+            <TouchableOpacity
+              style={[
+                styles.socialButton,
+                {
+                  backgroundColor: theme.color('background'),
+                  borderWidth: 0.5,
+                  borderColor: theme.color('blueGrey'),
+                },
+              ]}
               onPress={handleFacebookSignIn}
             >
               <View style={styles.socialButtonContent}>
                 <FacebookIcon size={40} />
-                <Text style={[{
-                  fontFamily: 'Urbanist',
-                  fontWeight: '600',
-                  fontSize: 16,
-                  lineHeight: 19,
-                }, styles.socialButtonText]}>Continue with Facebook</Text>
+                <Text
+                  style={[
+                    {
+                      fontFamily: 'Urbanist',
+                      fontWeight: '600',
+                      fontSize: 16,
+                      lineHeight: 19,
+                    },
+                    styles.socialButtonText,
+                  ]}
+                >
+                  Continue with Facebook
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -207,38 +267,60 @@ export default function WelcomeScreen() {
         </View>
 
         {/* Bouton de création de compte */}
-        <TouchableOpacity 
-          style={[styles.createAccountButton, { backgroundColor: theme.color('successLighter'), borderWidth: 0.5, borderColor: theme.color('successLight') }]}
+        <TouchableOpacity
+          style={[
+            styles.createAccountButton,
+            {
+              backgroundColor: theme.color('successLighter'),
+              borderWidth: 0.5,
+              borderColor: theme.color('successLight'),
+            },
+          ]}
           onPress={handleCreateAccount}
         >
-          <Text style={[{
-            fontFamily: 'Urbanist',
-            fontWeight: '600',
-            fontSize: 14,
-            lineHeight: 17,
-            letterSpacing: 0.1,
-            color: 'black',
-            textAlign: 'center'
-          }]}>
+          <Text
+            style={[
+              {
+                fontFamily: 'Urbanist',
+                fontWeight: '600',
+                fontSize: 14,
+                lineHeight: 17,
+                letterSpacing: 0.1,
+                color: 'black',
+                textAlign: 'center',
+              },
+            ]}
+          >
             Sign up
           </Text>
         </TouchableOpacity>
 
         {/* Lien de connexion */}
         <View style={styles.signInContainer}>
-          <TouchableOpacity 
-            style={[styles.createAccountButton, { backgroundColor: theme.color('green'), borderWidth: 0.5, borderColor: theme.color('lime') }]}
+          <TouchableOpacity
+            style={[
+              styles.createAccountButton,
+              {
+                backgroundColor: theme.color('green'),
+                borderWidth: 0.5,
+                borderColor: theme.color('lime'),
+              },
+            ]}
             onPress={handleSignIn}
           >
-            <Text style={[{
-              fontFamily: 'Urbanist',
-              fontWeight: '600',
-              fontSize: 14,
-              lineHeight: 17,
-              letterSpacing: 0.1,
-              color: 'black',
-              textAlign: 'center'
-            }]}>
+            <Text
+              style={[
+                {
+                  fontFamily: 'Urbanist',
+                  fontWeight: '600',
+                  fontSize: 14,
+                  lineHeight: 17,
+                  letterSpacing: 0.1,
+                  color: 'black',
+                  textAlign: 'center',
+                },
+              ]}
+            >
               Sign in
             </Text>
           </TouchableOpacity>

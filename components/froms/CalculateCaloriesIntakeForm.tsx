@@ -33,8 +33,11 @@ import GenderFormInput from '@/components/forms-input/GenderFormInput';
 import PhysicalActivityFormInput from '@/components/forms-input/PhysicalActivityFormInput';
 import MultiPurposeToast from '@/components-new/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import { GenderEnum, PhysicalActivityEnum } from "@/utils/enum/user-gender-activity.enum";
-import { HeightUnitEnum } from "@/utils/enum/user-details.enum";
+import {
+  GenderEnum,
+  PhysicalActivityEnum,
+} from '@/utils/enum/user-gender-activity.enum';
+import { HeightUnitEnum } from '@/utils/enum/user-details.enum';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
@@ -54,9 +57,10 @@ export default function CalculateCaloriesIntakeForm({
   const userId = useMemo(() => getCurrentUserIdSync(), []);
 
   // Préparer les valeurs par défaut normalisées via le service
-  const normalizedDefaultValues = useMemo(() =>
-    caloriesIntakeFormService.prepareDefaultValues(defaultValues),
-  [defaultValues]);
+  const normalizedDefaultValues = useMemo(
+    () => caloriesIntakeFormService.prepareDefaultValues(defaultValues),
+    [defaultValues],
+  );
 
   const {
     setValue,
@@ -70,11 +74,13 @@ export default function CalculateCaloriesIntakeForm({
 
   // Vérifier l'accès de l'utilisateur via le service
   useEffect(() => {
-    if (!caloriesIntakeFormService.validateUserAccess(
-      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
-      userId ? String(userId) : null,
-      toast
-    )) {
+    if (
+      !caloriesIntakeFormService.validateUserAccess(
+        // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+        userId ? String(userId) : null,
+        toast,
+      )
+    ) {
       // La gestion de la redirection est faite dans le service
       router.back();
     }
@@ -82,7 +88,10 @@ export default function CalculateCaloriesIntakeForm({
 
   const onSubmit = async (data: CalculateCaloriesIntakeFormData) => {
     try {
-      logger.debug(LogCategory.FORM, 'Component initiating calorie intake form submission');
+      logger.debug(
+        LogCategory.FORM,
+        'Component initiating calorie intake form submission',
+      );
 
       if (!userId) {
         return; // Déjà géré par validateUserAccess
@@ -92,7 +101,7 @@ export default function CalculateCaloriesIntakeForm({
       const serviceResult = await caloriesIntakeFormService.submitForm(
         data,
         // Convertir l'ID numérique en chaîne pour respecter l'interface du service
-        userId ? String(userId) : ''
+        userId ? String(userId) : '',
       );
 
       if (!serviceResult.success) {
@@ -100,10 +109,16 @@ export default function CalculateCaloriesIntakeForm({
       }
 
       // Utiliser le service MCP pour mettre à jour les préférences de l'utilisateur
-      const updateResult = await nutritionPagesService.updateUserNutritionPreferences(userId, serviceResult.data);
+      const updateResult =
+        await nutritionPagesService.updateUserNutritionPreferences(
+          userId,
+          serviceResult.data,
+        );
 
       if (!updateResult.success) {
-        throw new Error(updateResult.error || 'Failed to save calorie intake data');
+        throw new Error(
+          updateResult.error || 'Failed to save calorie intake data',
+        );
       }
 
       // Utilisation du queryClient pour invalider les données utilisateur en cache
@@ -128,7 +143,12 @@ export default function CalculateCaloriesIntakeForm({
         },
       });
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error in calorie intake form submission: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error in calorie intake form submission: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       toast.show({
         placement: 'top',
         render: ({ id }: { id: string }) => {
@@ -138,7 +158,11 @@ export default function CalculateCaloriesIntakeForm({
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title="Error"
-              description={error instanceof Error ? error.message : 'An error occurred while saving your data'}
+              description={
+                error instanceof Error
+                  ? error.message
+                  : 'An error occurred while saving your data'
+              }
             />
           );
         },
@@ -147,7 +171,7 @@ export default function CalculateCaloriesIntakeForm({
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ flexGrow: 1 }}
       className="bg-gray-50"
@@ -194,7 +218,9 @@ export default function CalculateCaloriesIntakeForm({
                     keyboardType="numeric"
                     placeholder="Enter your age"
                     onBlur={onBlur}
-                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
+                    onChangeText={(val) =>
+                      onChange(val ? parseInt(val, 10) : 0)
+                    }
                     value={value.toString()}
                     className="bg-gray-50"
                   />
@@ -204,13 +230,15 @@ export default function CalculateCaloriesIntakeForm({
             {errors.age && (
               <FormControlError>
                 <FormControlErrorIcon as={AlertCircleIcon} />
-                <FormControlErrorText>{errors.age.message}</FormControlErrorText>
+                <FormControlErrorText>
+                  {errors.age.message}
+                </FormControlErrorText>
               </FormControlError>
             )}
           </FormControl>
-          
+
           {/* Note: Le poids est recueilli dans le formulaire NutritionGoalForm */}
-          
+
           {/* Height Input */}
           <FormControl isInvalid={!!errors.height} className="mb-4">
             <FormControlLabel>
@@ -228,7 +256,9 @@ export default function CalculateCaloriesIntakeForm({
                       keyboardType="numeric"
                       placeholder="Entrez votre taille"
                       onBlur={onBlur}
-                      onChangeText={(val) => onChange(val ? parseFloat(val) : 0)}
+                      onChangeText={(val) =>
+                        onChange(val ? parseFloat(val) : 0)
+                      }
                       value={value?.toString() || ''}
                       className="bg-gray-50"
                     />
@@ -249,7 +279,7 @@ export default function CalculateCaloriesIntakeForm({
                         onChange(
                           value === HeightUnitEnum.CM
                             ? HeightUnitEnum.IN
-                            : HeightUnitEnum.CM
+                            : HeightUnitEnum.CM,
                         );
                       }}
                     >
@@ -262,11 +292,15 @@ export default function CalculateCaloriesIntakeForm({
             {errors.height && (
               <FormControlError>
                 <FormControlErrorIcon as={AlertCircleIcon} />
-                <FormControlErrorText>{errors.height.message}</FormControlErrorText>
+                <FormControlErrorText>
+                  {errors.height.message}
+                </FormControlErrorText>
               </FormControlError>
             )}
             <FormControlHelper>
-              <FormControlHelperText>La taille est nécessaire pour un calcul précis</FormControlHelperText>
+              <FormControlHelperText>
+                La taille est nécessaire pour un calcul précis
+              </FormControlHelperText>
             </FormControlHelper>
           </FormControl>
         </Card>

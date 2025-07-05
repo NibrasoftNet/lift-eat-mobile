@@ -40,17 +40,24 @@ export interface SearchProductParams {
 export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
   private static instance: OpenFoodFactsApiAdapter;
   private cacheTimeout: number = 30 * 60 * 1000; // 30 minutes
-  private productCache: Map<string, { product: Product | null, timestamp: number }> = new Map();
+  private productCache: Map<
+    string,
+    { product: Product | null; timestamp: number }
+  > = new Map();
 
   private constructor() {
     // Version actuelle de l'API OpenFoodFacts (2.0.0)
-    super('OpenFoodFacts', 'https://world.openfoodfacts.org/api', new ApiVersionImpl(2, 0, 0));
+    super(
+      'OpenFoodFacts',
+      'https://world.openfoodfacts.org/api',
+      new ApiVersionImpl(2, 0, 0),
+    );
 
     // Enregistrer les implémentations des versions précédentes
     this.registerVersionedMethod(
       'getProductByBarcode',
       new ApiVersionImpl(1, 0, 0),
-      this.getProductByBarcodeV1
+      this.getProductByBarcodeV1,
     );
   }
 
@@ -74,23 +81,34 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
       // Vérifier si le produit est dans le cache et si le cache est encore valide
       const cachedProduct = this.productCache.get(barcode);
       const now = Date.now();
-      
-      if (cachedProduct && (now - cachedProduct.timestamp < this.cacheTimeout)) {
-        logger.debug(LogCategory.INTEGRATION, `Using cached product for barcode ${barcode}`);
+
+      if (cachedProduct && now - cachedProduct.timestamp < this.cacheTimeout) {
+        logger.debug(
+          LogCategory.INTEGRATION,
+          `Using cached product for barcode ${barcode}`,
+        );
         return cachedProduct.product;
       }
-      
+
       // Valider le code-barres
       if (!barcode || barcode.trim() === '') {
         throw new Error('Invalid barcode format');
       }
 
-      logger.info(LogCategory.INTEGRATION, `Fetching product with barcode ${barcode} from OpenFoodFacts API`);
-      
-      const response = await fetch(`${this.apiInfo.baseUrl}/v2/product/${barcode}.json`);
+      logger.info(
+        LogCategory.INTEGRATION,
+        `Fetching product with barcode ${barcode} from OpenFoodFacts API`,
+      );
+
+      const response = await fetch(
+        `${this.apiInfo.baseUrl}/v2/product/${barcode}.json`,
+      );
 
       if (response.status === 404) {
-        logger.warn(LogCategory.INTEGRATION, `Product with barcode ${barcode} not found`);
+        logger.warn(
+          LogCategory.INTEGRATION,
+          `Product with barcode ${barcode} not found`,
+        );
         this.productCache.set(barcode, { product: null, timestamp: now });
         return null;
       }
@@ -102,19 +120,27 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
       const data = await response.json();
 
       if (!data.product) {
-        logger.warn(LogCategory.INTEGRATION, `No product data for barcode ${barcode}`);
+        logger.warn(
+          LogCategory.INTEGRATION,
+          `No product data for barcode ${barcode}`,
+        );
         this.productCache.set(barcode, { product: null, timestamp: now });
         return null;
       }
 
       const product = this.mapToProduct(data.product);
-      
+
       // Mettre le produit en cache
       this.productCache.set(barcode, { product, timestamp: now });
-      
+
       return product;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, `Error fetching product with barcode ${barcode}: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.INTEGRATION,
+        `Error fetching product with barcode ${barcode}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return null;
     }
   }
@@ -124,20 +150,30 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
    * @param barcode Code-barres du produit
    * @returns Produit ou null si non trouvé
    */
-  private async getProductByBarcodeV1(barcode: string): Promise<Product | null> {
+  private async getProductByBarcodeV1(
+    barcode: string,
+  ): Promise<Product | null> {
     try {
-      logger.info(LogCategory.INTEGRATION, `Using v1.0.0 implementation for barcode ${barcode}`);
-      
+      logger.info(
+        LogCategory.INTEGRATION,
+        `Using v1.0.0 implementation for barcode ${barcode}`,
+      );
+
       // Valider le code-barres
       if (!barcode || barcode.trim() === '') {
         throw new Error('Invalid barcode format');
       }
 
       // Format de requête pour l'API OpenFoodFacts v1.0.0
-      const response = await fetch(`https://world.openfoodfacts.org/api/v1/product/${barcode}.json`);
+      const response = await fetch(
+        `https://world.openfoodfacts.org/api/v1/product/${barcode}.json`,
+      );
 
       if (response.status === 404) {
-        logger.warn(LogCategory.INTEGRATION, `Product with barcode ${barcode} not found (v1.0.0)`);
+        logger.warn(
+          LogCategory.INTEGRATION,
+          `Product with barcode ${barcode} not found (v1.0.0)`,
+        );
         return null;
       }
 
@@ -148,14 +184,22 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
       const data = await response.json();
 
       if (!data.product) {
-        logger.warn(LogCategory.INTEGRATION, `No product data for barcode ${barcode} (v1.0.0)`);
+        logger.warn(
+          LogCategory.INTEGRATION,
+          `No product data for barcode ${barcode} (v1.0.0)`,
+        );
         return null;
       }
 
       // Convertir le format de réponse v1 en format actuel
       return this.mapToProductV1(data.product);
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, `Error fetching product with barcode ${barcode} (v1.0.0): ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.INTEGRATION,
+        `Error fetching product with barcode ${barcode} (v1.0.0): ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return null;
     }
   }
@@ -168,23 +212,26 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
   public async searchProducts(params: SearchProductParams): Promise<Product[]> {
     try {
       const { searchTerm, category, page = 1, pageSize = 10 } = params;
-      
+
       if (!searchTerm && !category) {
         throw new Error('Search term or category is required');
       }
 
       let url = `${this.apiInfo.baseUrl}/v2/search?fields=product_name,nutriments,image_url,image_front_url,image_small_url&page_size=${pageSize}&page=${page}`;
-      
+
       if (searchTerm) {
         url += `&search_terms=${encodeURIComponent(searchTerm)}`;
       }
-      
+
       if (category) {
         url += `&categories=${encodeURIComponent(category)}`;
       }
 
-      logger.info(LogCategory.INTEGRATION, `Searching products with term: ${searchTerm}, category: ${category}`);
-      
+      logger.info(
+        LogCategory.INTEGRATION,
+        `Searching products with term: ${searchTerm}, category: ${category}`,
+      );
+
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -197,9 +244,16 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
         return [];
       }
 
-      return data.products.map((product: any) => this.mapToProduct(product)).filter(Boolean);
+      return data.products
+        .map((product: any) => this.mapToProduct(product))
+        .filter(Boolean);
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, `Error searching products: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.INTEGRATION,
+        `Error searching products: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return [];
     }
   }
@@ -212,10 +266,10 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
   private mapToProduct(product: any): Product {
     // Extraire les informations nutritionnelles
     const nutriments = product.nutriments || {};
-    
+
     // Obtenir l'URL de l'image du produit
     let productImage: ImageSourcePropType | null = require('@/assets/images/image-non-disponible.jpg');
-    
+
     // Vérifier les images du produit par ordre de priorité
     if (product.image_url) {
       productImage = { uri: product.image_url };
@@ -224,7 +278,7 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
     } else if (product.image_small_url) {
       productImage = { uri: product.image_small_url };
     }
-    
+
     // Retourner un objet avec les informations du produit
     return {
       name: product.product_name || 'Produit sans nom',
@@ -247,17 +301,17 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
   private mapToProductV1(product: any): Product {
     // Extraire les informations nutritionnelles (format v1)
     const nutriments = product.nutriments || {};
-    
+
     // Obtenir l'URL de l'image du produit
     let productImage: ImageSourcePropType | null = require('@/assets/images/image-non-disponible.jpg');
-    
+
     // Vérifier les images du produit par ordre de priorité (format v1)
     if (product.image_url) {
       productImage = { uri: product.image_url };
     } else if (product.image_front_url) {
       productImage = { uri: product.image_front_url };
     }
-    
+
     // Retourner un objet avec les informations du produit
     return {
       name: product.product_name || 'Produit sans nom',
@@ -279,16 +333,19 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
   public async checkApiVersion(): Promise<ApiVersionImpl> {
     try {
       // Appel à un endpoint pour vérifier la version
-      logger.info(LogCategory.INTEGRATION, 'Checking OpenFoodFacts API version');
-      
+      logger.info(
+        LogCategory.INTEGRATION,
+        'Checking OpenFoodFacts API version',
+      );
+
       const response = await fetch(`${this.apiInfo.baseUrl}/info`);
-      
+
       if (!response.ok) {
         throw new Error(`OpenFoodFacts API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Extraire la version de la réponse (si disponible)
       if (data.version) {
         const versionString = String(data.version); // Assurer que c'est une chaîne
@@ -296,14 +353,19 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
         return new ApiVersionImpl(
           versionParts[0] || 2,
           versionParts[1] || 0,
-          versionParts[2] || 0
+          versionParts[2] || 0,
         );
       }
-      
+
       // Si la version n'est pas disponible, retourner la version par défaut
       return new ApiVersionImpl(2, 0, 0);
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, `Error checking OpenFoodFacts API version: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.INTEGRATION,
+        `Error checking OpenFoodFacts API version: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       // En cas d'erreur, on retourne la dernière version connue
       return this.apiInfo.currentVersion as ApiVersionImpl;
     }
@@ -317,16 +379,23 @@ export class OpenFoodFactsApiAdapter extends ExternalApiAdapter {
    */
   public async getProductByBarcodeWithVersion(
     barcode: string,
-    requiredVersion: ApiVersionImpl
+    requiredVersion: ApiVersionImpl,
   ): Promise<Product | null> {
-    return this.adaptApiCall<Product | null>('getProductByBarcode', requiredVersion, barcode);
+    return this.adaptApiCall<Product | null>(
+      'getProductByBarcode',
+      requiredVersion,
+      barcode,
+    );
   }
 
   /**
    * Vide le cache de produits
    */
   public clearCache(): void {
-    logger.info(LogCategory.INTEGRATION, 'Clearing OpenFoodFacts product cache');
+    logger.info(
+      LogCategory.INTEGRATION,
+      'Clearing OpenFoodFacts product cache',
+    );
     this.productCache.clear();
   }
 }

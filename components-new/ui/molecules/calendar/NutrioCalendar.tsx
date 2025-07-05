@@ -8,24 +8,86 @@ import { useTheme } from '../../../../themeNew';
 // Configuration de la locale pour le calendrier
 LocaleConfig.locales['fr'] = {
   monthNames: [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
   ],
-  monthNamesShort: ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'],
-  dayNames: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+  monthNamesShort: [
+    'Janv.',
+    'Févr.',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juil.',
+    'Août',
+    'Sept.',
+    'Oct.',
+    'Nov.',
+    'Déc.',
+  ],
+  dayNames: [
+    'Dimanche',
+    'Lundi',
+    'Mardi',
+    'Mercredi',
+    'Jeudi',
+    'Vendredi',
+    'Samedi',
+  ],
   dayNamesShort: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
-  today: "Aujourd'hui"
+  today: "Aujourd'hui",
 };
 
 LocaleConfig.locales['en'] = {
   monthNames: [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ],
-  monthNamesShort: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'],
-  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  monthNamesShort: [
+    'Jan.',
+    'Feb.',
+    'Mar.',
+    'Apr.',
+    'May',
+    'Jun.',
+    'Jul.',
+    'Aug.',
+    'Sep.',
+    'Oct.',
+    'Nov.',
+    'Dec.',
+  ],
+  dayNames: [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ],
   dayNamesShort: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-  today: 'Today'
+  today: 'Today',
 };
 
 // Définir la locale par défaut
@@ -81,10 +143,10 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
 }) => {
   const theme = useTheme();
   const [currentMonth, setCurrentMonth] = useState(initialDate);
-  
+
   // Configurer la locale
   LocaleConfig.defaultLocale = locale;
-  
+
   // Format de date: YYYY-MM-DD
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -104,7 +166,7 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
   const CustomHeader = ({ date }: { date: Date }) => {
     const formattedDate = date.toISOString().split('T')[0];
     const headerText = getMonthYearHeader(formattedDate);
-    
+
     const goToPreviousMonth = () => {
       const [year, month] = currentMonth.split('-');
       const prevMonth = new Date(parseInt(year), parseInt(month) - 2, 1);
@@ -115,12 +177,12 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
         const calendarMonth: CalendarMonth = {
           month: prevMonth.getMonth() + 1,
           year: prevMonth.getFullYear(),
-          dateString: formatted
+          dateString: formatted,
         };
         onMonthChange(calendarMonth);
       }
     };
-    
+
     const goToNextMonth = () => {
       const [year, month] = currentMonth.split('-');
       const nextMonth = new Date(parseInt(year), parseInt(month), 1);
@@ -131,20 +193,23 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
         const calendarMonth: CalendarMonth = {
           month: nextMonth.getMonth() + 1,
           year: nextMonth.getFullYear(),
-          dateString: formatted
+          dateString: formatted,
         };
         onMonthChange(calendarMonth);
       }
     };
-    
+
     return (
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={goToPreviousMonth} style={styles.arrowButton}>
+        <TouchableOpacity
+          onPress={goToPreviousMonth}
+          style={styles.arrowButton}
+        >
           <ArrowLeft2RegularBoldIcon width={24} height={24} color="#212121" />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerText}>{headerText}</Text>
-        
+
         <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
           <ArrowRight2RegularBoldIcon width={24} height={24} color="#212121" />
         </TouchableOpacity>
@@ -226,7 +291,7 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
       disabledText: {
         color: '#BDBDBD',
       },
-    }
+    },
   };
 
   return (
@@ -246,7 +311,10 @@ const NutrioCalendar: React.FC<NutrioCalendarProps> = ({
         markingType={'dot'}
         firstDay={0} // Dimanche comme premier jour
         onMonthChange={(month: CalendarMonth) => {
-          const formattedMonth = `${month.year}-${String(month.month).padStart(2, '0')}-01`;
+          const formattedMonth = `${month.year}-${String(month.month).padStart(
+            2,
+            '0',
+          )}-01`;
           setCurrentMonth(formattedMonth);
           onMonthChange && onMonthChange(month);
         }}

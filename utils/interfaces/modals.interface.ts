@@ -3,12 +3,12 @@
  * Ces interfaces définissent les contrats pour les services gérant les différents modaux
  */
 
-import { MealOrmProps } from "../../db/schema";
-import { MealFormData } from "../validation/meal/meal-schema.validation";
-import { MealTypeEnum } from "../enum/meal.enum";
-import { IaMealType } from "../validation/ia/ia.schemas";
-import { ResetPasswordData } from "./auth.interface";
-import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
+import { MealOrmProps } from '../../db/schema';
+import { MealFormData } from '../validation/meal/meal-schema.validation';
+import { MealTypeEnum } from '../enum/meal.enum';
+import { IaMealType } from '../validation/ia/ia.schemas';
+import { ResetPasswordData } from './auth.interface';
+import { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import * as schema from '../../db/schema';
 import { QueryClient } from '@tanstack/react-query';
 
@@ -33,28 +33,31 @@ export interface ForgetPasswordModalServiceInterface {
    * @returns Les valeurs par défaut pour le formulaire
    */
   getDefaultValues(): any;
-  
+
   /**
    * Soumet le formulaire de réinitialisation de mot de passe
    * @param data - Les données du formulaire
    * @returns Le résultat de l'opération
    */
   submitForm(data: any): Promise<ModalOperationResult>;
-  
+
   /**
    * Gère la navigation après une soumission réussie
    * @param router - Le router pour la navigation
    * @param setShowModal - Fonction pour modifier la visibilité du modal
    */
-  handleSuccessNavigation(router: any, setShowModal: (show: boolean) => void): void;
-  
+  handleSuccessNavigation(
+    router: any,
+    setShowModal: (show: boolean) => void,
+  ): void;
+
   /**
    * Gère l'affichage des erreurs
    * @param error - L'erreur à afficher
    * @param toast - Service toast pour afficher les messages
    */
   handleError(error: any, toast: ToastServiceType): void;
-  
+
   /**
    * Ferme le modal
    * @param setShowModal - Fonction pour modifier la visibilité du modal
@@ -82,16 +85,16 @@ export interface MealQuantityModalServiceInterface {
     quantity: number,
     onSuccess?: () => Promise<void>,
     queryClient?: QueryClient,
-    toast?: ToastServiceType
+    toast?: ToastServiceType,
   ): Promise<ModalOperationResult>;
-  
+
   /**
    * Gère le changement de quantité
    * @param value - Nouvelle valeur
    * @returns La nouvelle quantité validée
    */
   handleQuantityChange(value: string): number;
-  
+
   /**
    * Ajuste la quantité par incrémentation ou décrémentation
    * @param currentQuantity - Quantité actuelle
@@ -99,8 +102,12 @@ export interface MealQuantityModalServiceInterface {
    * @param step - Pas d'incrémentation/décrémentation
    * @returns La nouvelle quantité ajustée
    */
-  adjustQuantity(currentQuantity: number, increment: boolean, step?: number): number;
-  
+  adjustQuantity(
+    currentQuantity: number,
+    increment: boolean,
+    step?: number,
+  ): number;
+
   /**
    * Ferme le modal
    * @param onClose - Fonction de fermeture du modal
@@ -119,7 +126,7 @@ export interface MealOptionsModalServiceInterface {
    * @param onClose - Fonction de fermeture du modal
    */
   handleViewDetails(meal: MealOrmProps, router: any, onClose: () => void): void;
-  
+
   /**
    * Navigue vers la page de mise à jour d'un repas
    * @param meal - Le repas à mettre à jour
@@ -127,21 +134,27 @@ export interface MealOptionsModalServiceInterface {
    * @param onClose - Fonction de fermeture du modal
    */
   handleUpdate(meal: MealOrmProps, router: any, onClose: () => void): void;
-  
+
   /**
    * Gère la suppression d'un repas
    * @param onDelete - Fonction de suppression fournie par le parent
    * @param onClose - Fonction de fermeture du modal
    * @returns Une promesse résolue après la suppression
    */
-  handleDelete(onDelete?: () => Promise<void>, onClose?: () => void): Promise<void>;
-  
+  handleDelete(
+    onDelete?: () => Promise<void>,
+    onClose?: () => void,
+  ): Promise<void>;
+
   /**
    * Ouvre le modal de modification de quantité
    * @param setShowQuantityModal - Fonction pour modifier la visibilité du modal de quantité
    * @param onClose - Fonction de fermeture du modal d'options
    */
-  openQuantityModal(setShowQuantityModal: (show: boolean) => void, onClose: () => void): void;
+  openQuantityModal(
+    setShowQuantityModal: (show: boolean) => void,
+    onClose: () => void,
+  ): void;
 }
 
 /**
@@ -153,8 +166,11 @@ export interface DeletionModalServiceInterface {
    * @param handleDelete - Fonction de suppression à exécuter
    * @param setShowModal - Fonction pour fermer le modal
    */
-  handleConfirmDelete(handleDelete: () => void, setShowModal: (show: boolean) => void): Promise<void>;
-  
+  handleConfirmDelete(
+    handleDelete: () => void,
+    setShowModal: (show: boolean) => void,
+  ): Promise<void>;
+
   /**
    * Gère l'annulation de la suppression
    * @param setShowModal - Fonction pour fermer le modal
@@ -172,21 +188,24 @@ export interface ResetPasswordModalServiceInterface {
    * @returns Le résultat de l'opération
    */
   submitForm(data: ResetPasswordData): Promise<ModalOperationResult>;
-  
+
   /**
    * Gère la navigation après une soumission réussie
    * @param router - Le router pour la navigation
    * @param setShowModal - Fonction pour modifier la visibilité du modal
    */
-  handleSuccessNavigation(router: any, setShowModal: (show: boolean) => void): void;
-  
+  handleSuccessNavigation(
+    router: any,
+    setShowModal: (show: boolean) => void,
+  ): void;
+
   /**
    * Gère l'affichage des erreurs
    * @param error - L'erreur à afficher
    * @param toast - Service toast pour afficher les messages
    */
   handleError(error: any, toast: ToastServiceType): void;
-  
+
   /**
    * Ferme le modal
    * @param setShowModal - Fonction pour modifier la visibilité du modal
@@ -210,13 +229,13 @@ export interface ModalContextProps {
  * Enumération des types de modaux
  */
 export enum ModalType {
-  MEAL_FORM = "meal_form",
-  MEAL_DETAILS = "meal_details",
-  MEAL_DELETE = "meal_delete",
-  MEAL_EDIT = "meal_edit",
-  MEAL_GENERATE = "meal_generate",
-  FORGET_PASSWORD = "forget_password",
-  RESET_PASSWORD = "reset_password",
+  MEAL_FORM = 'meal_form',
+  MEAL_DETAILS = 'meal_details',
+  MEAL_DELETE = 'meal_delete',
+  MEAL_EDIT = 'meal_edit',
+  MEAL_GENERATE = 'meal_generate',
+  FORGET_PASSWORD = 'forget_password',
+  RESET_PASSWORD = 'reset_password',
 }
 
 /**

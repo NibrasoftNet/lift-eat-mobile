@@ -19,7 +19,8 @@ const PhysicalActivityFormInput = ({
   );
 
   // Utiliser le service pour obtenir les options d'activité
-  const activityOptions = physicalActivityFormService.getPhysicalActivityOptions();
+  const activityOptions =
+    physicalActivityFormService.getPhysicalActivityOptions();
 
   const handleActivityUnitChange = (level: PhysicalActivityEnum) => {
     setActivityUnit(level);
@@ -35,16 +36,23 @@ const PhysicalActivityFormInput = ({
       >
         {activityOptions.map((activity) => {
           // Obtenir l'image pour ce niveau d'activité
-          const activityImage = physicalActivityFormService.getPhysicalActivityImage(activity.level);
+          const activityImage =
+            physicalActivityFormService.getPhysicalActivityImage(
+              activity.level,
+            );
           // Obtenir les styles pour l'indicateur d'activité
-          const indicatorClass = physicalActivityFormService.getActivityIndicatorStyles(
-            activityUnit, activity.level
-          );
+          const indicatorClass =
+            physicalActivityFormService.getActivityIndicatorStyles(
+              activityUnit,
+              activity.level,
+            );
           // Obtenir les styles pour le bouton d'activité
-          const buttonStyles = physicalActivityFormService.getActivityButtonStyles(
-            activityUnit, activity.level
-          );
-          
+          const buttonStyles =
+            physicalActivityFormService.getActivityButtonStyles(
+              activityUnit,
+              activity.level,
+            );
+
           return (
             <GridItem
               key={activity.level}

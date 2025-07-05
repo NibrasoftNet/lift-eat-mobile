@@ -9,15 +9,16 @@ interface IconProps extends SvgProps {
 /**
  * PaperNegativeSharpBoldIcon component
  */
-export const PaperNegativeSharpBoldIcon = ({ color = "#212121", size = 24, ...props }: IconProps) => (
-  <Svg
-    width={size}
-    height={size}
-    viewBox="0 0 25 24"
-    fill="none"
-    {...props}
-  >
-    <Path d="M14.5401 8.341V3.681L19.0101 8.341H14.5401ZM8.49808 15.176H14.9381V13.676H8.49808V15.176ZM15.0301 2.25H4.08008V21.75H20.4201V7.87L15.0301 2.25Z" fill={color} />
+export const PaperNegativeSharpBoldIcon = ({
+  color = '#212121',
+  size = 24,
+  ...props
+}: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
+    <Path
+      d="M14.5401 8.341V3.681L19.0101 8.341H14.5401ZM8.49808 15.176H14.9381V13.676H8.49808V15.176ZM15.0301 2.25H4.08008V21.75H20.4201V7.87L15.0301 2.25Z"
+      fill={color}
+    />
   </Svg>
 );
 

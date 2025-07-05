@@ -1,5 +1,12 @@
 import React, { useRef, useMemo, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Image } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+} from 'react-native';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme, ThemeInterface } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
@@ -13,42 +20,42 @@ interface IngredientListItemProps {
    * ID unique de l'ingrédient
    */
   id: string;
-  
+
   /**
    * Nom de l'ingrédient
    */
   name: string;
-  
+
   /**
    * Quantité de l'ingrédient
    */
   quantity: number;
-  
+
   /**
    * Unité de mesure (g, ml, etc.)
    */
   unit: string;
-  
+
   /**
    * URL de l'image de l'ingrédient (optionnel)
    */
   imageUrl?: string;
-  
+
   /**
    * Mode d'affichage sombre
    */
   isDarkMode?: boolean;
-  
+
   /**
    * Fonction callback lorsqu'on clique sur l'élément
    */
   onPress?: (id: string) => void;
-  
+
   /**
    * Fonction callback lorsqu'on supprime l'élément
    */
   onDelete?: (id: string) => void;
-  
+
   /**
    * Indique si le bouton de suppression doit être affiché
    */
@@ -78,8 +85,16 @@ const IngredientListItem: React.FC<IngredientListItemProps> = ({
   // Debug : log de l'URL d'image reçue
   useEffect(() => {
     try {
-      console.debug('[IMG] IngredientListItem', { id, hasImage: !!imageUrl, len: imageUrl ? imageUrl.length : 0 });
-      if (imageUrl !== undefined && imageUrl !== null && imageUrl.length === 0) {
+      console.debug('[IMG] IngredientListItem', {
+        id,
+        hasImage: !!imageUrl,
+        len: imageUrl ? imageUrl.length : 0,
+      });
+      if (
+        imageUrl !== undefined &&
+        imageUrl !== null &&
+        imageUrl.length === 0
+      ) {
         console.warn('[IMG] Empty imageUrl for ingredient', id);
       }
     } catch (e) {
@@ -87,20 +102,20 @@ const IngredientListItem: React.FC<IngredientListItemProps> = ({
     }
   }, [imageUrl]);
   const swipeableRef = useRef<Swipeable>(null);
-  
+
   // Couleurs selon le thème
   const backgroundColor = theme.colors.background;
   const textColor = isDark ? '#FFFFFF' : '#212121';
   const secondaryTextColor = isDark ? '#CDCDCD' : '#757575';
   const deleteButtonColor = '#FF5252'; // Couleur rouge pour le bouton de suppression
-  
+
   // Gestionnaire d'événement du clic
   const handlePress = () => {
     if (onPress) {
       onPress(id);
     }
   };
-  
+
   // Gestionnaire d'événement de suppression
   const handleDelete = () => {
     if (onDelete) {
@@ -112,15 +127,18 @@ const IngredientListItem: React.FC<IngredientListItemProps> = ({
   };
 
   // Rendu du bouton de suppression (visible lors du swipe)
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
     if (!showDeleteButton) return null;
-    
+
     const trans = dragX.interpolate({
       inputRange: [-80, 0],
       outputRange: [0, 80],
       extrapolate: 'clamp',
     });
-    
+
     return (
       <Animated.View
         style={[
@@ -154,21 +172,25 @@ const IngredientListItem: React.FC<IngredientListItemProps> = ({
         {/* Image de l'ingrédient */}
         <View style={styles.imageContainer}>
           {imageUrl ? (
-            <Image 
-              source={{ uri: imageUrl }} 
-              style={styles.ingredientImage} 
-              resizeMode="cover" 
-              onError={() => console.error('Erreur lors du chargement de l\'image de l\'ingrédient')}
+            <Image
+              source={resolveStaticImage(imageUrl, DEFAULT_INGREDIENT_IMAGE)}
+              style={styles.ingredientImage}
+              resizeMode="cover"
+              onError={() =>
+                console.error(
+                  "Erreur lors du chargement de l'image de l'ingrédient",
+                )
+              }
             />
           ) : (
-            <Image 
-              source={DEFAULT_INGREDIENT_IMAGE} 
-              style={styles.ingredientImage} 
-              resizeMode="cover" 
+            <Image
+              source={DEFAULT_INGREDIENT_IMAGE}
+              style={styles.ingredientImage}
+              resizeMode="cover"
             />
           )}
         </View>
-        
+
         <View style={styles.ingredientInfo}>
           <Text style={[styles.ingredientName, { color: textColor }]}>
             {name}
@@ -236,6 +258,6 @@ const createStyles = (theme: ThemeInterface, isDark: boolean) =>
       alignItems: 'center',
       width: 80,
     },
-});
+  });
 
 export default IngredientListItem;

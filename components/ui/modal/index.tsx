@@ -108,7 +108,7 @@ const Modal = React.forwardRef<React.ElementRef<typeof UIModal>, IModalProps>(
       className={modalStyle({ size, class: className })}
       context={{ size }}
     />
-  )
+  ),
 );
 
 const ModalBackdrop = React.forwardRef<

@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle, TouchableOpacityProps } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
+  TouchableOpacityProps,
+} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 interface CircularAddButtonProps extends TouchableOpacityProps {
@@ -45,14 +50,19 @@ const CircularAddButton: React.FC<CircularAddButtonProps> = ({
       ]}
       {...rest}
     >
-      <Svg
-        width={iconSize}
-        height={iconSize}
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <Path d="M12 6V18" stroke={iconColor} strokeWidth={2} strokeLinecap="round" />
-        <Path d="M6 12H18" stroke={iconColor} strokeWidth={2} strokeLinecap="round" />
+      <Svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M12 6V18"
+          stroke={iconColor}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+        <Path
+          d="M6 12H18"
+          stroke={iconColor}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
       </Svg>
     </TouchableOpacity>
   );

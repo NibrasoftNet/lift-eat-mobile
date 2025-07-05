@@ -16,7 +16,10 @@ export interface CreatePlanButtonProps {
  * Destiné à remplacer l'ancien Fab « New Plan ».
  * Utilise le composant `Button` atom et les tokens du Design System.
  */
-const CreatePlanButton: React.FC<CreatePlanButtonProps> = ({ onPress, label = 'Créer un plan' }) => {
+const CreatePlanButton: React.FC<CreatePlanButtonProps> = ({
+  onPress,
+  label = 'Créer un plan',
+}) => {
   const theme = useTheme();
 
   // Couleur verte principale définie dans le Design System (successLighter)
@@ -26,8 +29,18 @@ const CreatePlanButton: React.FC<CreatePlanButtonProps> = ({ onPress, label = 'C
   // Icône plus (lignes) – même visuel que CircularAddButton
   const PlusIcon = (
     <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-      <Path d="M12 6V18" stroke={textColor} strokeWidth={2} strokeLinecap="round" />
-      <Path d="M6 12H18" stroke={textColor} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M12 6V18"
+        stroke={textColor}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M6 12H18"
+        stroke={textColor}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 

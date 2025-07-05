@@ -16,57 +16,57 @@ export interface TextAreaFieldProps {
    * Valeur du champ
    */
   value: string;
-  
+
   /**
    * Callback appelé quand la valeur change
    */
   onChangeText: (text: string) => void;
-  
+
   /**
    * Label du champ
    */
   label?: string;
-  
+
   /**
    * Texte d'indication quand le champ est vide
    */
   placeholder?: string;
-  
+
   /**
    * Message d'erreur à afficher
    */
   error?: string;
-  
+
   /**
    * Nombre de lignes à afficher
    */
   numberOfLines?: number;
-  
+
   /**
    * Hauteur minimale du champ
    */
   minHeight?: number;
-  
+
   /**
    * Largeur du champ
    */
   width?: number;
-  
+
   /**
    * Si le champ est désactivé
    */
   isDisabled?: boolean;
-  
+
   /**
    * Si le champ est en lecture seule
    */
   isReadOnly?: boolean;
-  
+
   /**
    * Arrondi des coins
    */
   rounded?: RadiiKeys | number;
-  
+
   /**
    * Espacements
    */
@@ -100,22 +100,29 @@ const TextAreaField: React.FC<TextAreaFieldProps> = ({
   ml,
 }) => {
   const theme = useAppTheme();
-  
+
   // Gérer les valeurs de rayon de bordure
-  const getRadiusValue = (value: RadiiKeys | number | undefined): number | undefined => {
+  const getRadiusValue = (
+    value: RadiiKeys | number | undefined,
+  ): number | undefined => {
     if (value === undefined) return undefined;
     return typeof value === 'number' ? value : theme.radius(value);
   };
 
   // Gérer les valeurs d'espacement
-  const getSpacingValue = (value: SpacingKeys | number | undefined): number | undefined => {
+  const getSpacingValue = (
+    value: SpacingKeys | number | undefined,
+  ): number | undefined => {
     if (value === undefined) return undefined;
     return typeof value === 'number' ? value : theme.space(value);
   };
-  
+
   return (
-    <Box 
-      style={{ width: typeof width === 'number' ? width : undefined, flex: width ? undefined : 1 }}
+    <Box
+      style={{
+        width: typeof width === 'number' ? width : undefined,
+        flex: width ? undefined : 1,
+      }}
       m={m}
       mt={mt}
       mr={mr}
@@ -133,7 +140,7 @@ const TextAreaField: React.FC<TextAreaFieldProps> = ({
           {label}
         </Text>
       )}
-      
+
       {/* TextArea */}
       <View
         style={[
@@ -142,8 +149,10 @@ const TextAreaField: React.FC<TextAreaFieldProps> = ({
             borderColor: error ? theme.colors.error : theme.colors.blueGrey,
             borderRadius: getRadiusValue(rounded),
             opacity: isDisabled ? 0.6 : 1,
-            backgroundColor: isDisabled ? theme.colors.backgroundGrey : 'transparent',
-          }
+            backgroundColor: isDisabled
+              ? theme.colors.backgroundGrey
+              : 'transparent',
+          },
         ]}
       >
         <TextInput
@@ -161,11 +170,11 @@ const TextAreaField: React.FC<TextAreaFieldProps> = ({
               color: isDisabled ? theme.colors.blueGrey : theme.colors.primary,
               textAlignVertical: 'top',
               paddingTop: getSpacingValue('sm'),
-            }
+            },
           ]}
         />
       </View>
-      
+
       {/* Error Message */}
       {error && (
         <Text

@@ -16,7 +16,7 @@ class PreferencesUIService {
       return this.preferences;
     } catch (error) {
       logger.error(LogCategory.UI, 'Error loading UI preferences', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return {};
     }
@@ -25,11 +25,14 @@ class PreferencesUIService {
   async savePreferences(preferences: Partial<UIPreferences>): Promise<void> {
     try {
       this.preferences = { ...this.preferences, ...preferences };
-      await AsyncStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify(this.preferences));
+      await AsyncStorage.setItem(
+        UI_PREFERENCES_KEY,
+        JSON.stringify(this.preferences),
+      );
       logger.info(LogCategory.UI, 'UI preferences saved', { preferences });
     } catch (error) {
       logger.error(LogCategory.UI, 'Error saving UI preferences', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

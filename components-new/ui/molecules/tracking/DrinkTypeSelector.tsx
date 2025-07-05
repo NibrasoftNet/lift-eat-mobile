@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 
 // Import des icônes pour les différents types de boissons
@@ -22,13 +28,32 @@ import { DrinkBottleRegularBoldIcon } from '../../../../assets/icons/figma/regul
 export type CupSize = {
   id: string;
   value: number;
-  icon: 'waterGlass' | 'waterBottle' | 'waterTumbler' | 'waterFlask' | 'waterJug' | 'coffeeMug' | 'plus';
+  icon:
+    | 'waterGlass'
+    | 'waterBottle'
+    | 'waterTumbler'
+    | 'waterFlask'
+    | 'waterJug'
+    | 'coffeeMug'
+    | 'plus';
 };
 
 export type DrinkType = {
   id: string;
   name: string;
-  icon: 'coffee' | 'tea' | 'juice' | 'sportDrink' | 'coconut' | 'smoothie' | 'chocolate' | 'carbonated' | 'soda' | 'wine' | 'beer' | 'liquor';
+  icon:
+    | 'coffee'
+    | 'tea'
+    | 'juice'
+    | 'sportDrink'
+    | 'coconut'
+    | 'smoothie'
+    | 'chocolate'
+    | 'carbonated'
+    | 'soda'
+    | 'wine'
+    | 'beer'
+    | 'liquor';
 };
 
 // Props du composant
@@ -70,7 +95,7 @@ interface DrinkTypeSelectorProps {
 /**
  * Composant DrinkTypeSelector du Water Tracker
  * Permet de sélectionner la taille du contenant et le type de boisson
- * 
+ *
  * node-id=48500:33104 (Dark=False)
  */
 export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
@@ -81,42 +106,35 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
   selectedDrinkTypeId,
   onSelectCupSize,
   onSelectDrinkType,
-  onAddNew
+  onAddNew,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs basées sur le design Figma
-  const backgroundColor = dark
-    ? '#121212'
-    : '#FFFFFF';
-  
-  const textColor = dark
-    ? '#FFFFFF'
-    : '#212121';
-    
-  const secondaryTextColor = dark
-    ? 'rgba(255, 255, 255, 0.7)'
-    : '#616161';
-    
-  const borderColor = dark
-    ? 'rgba(255, 255, 255, 0.1)'
-    : '#EEEEEE';
-    
-  const circleColor = dark
-    ? '#1E1E1E'
-    : '#FAFAFA';
-    
+  const backgroundColor = dark ? '#121212' : '#FFFFFF';
+
+  const textColor = dark ? '#FFFFFF' : '#212121';
+
+  const secondaryTextColor = dark ? 'rgba(255, 255, 255, 0.7)' : '#616161';
+
+  const borderColor = dark ? 'rgba(255, 255, 255, 0.1)' : '#EEEEEE';
+
+  const circleColor = dark ? '#1E1E1E' : '#FAFAFA';
+
   const primaryColor = theme.color('primary');
-  
+
   // Rendu de l'icône pour une taille de tasse
-  const renderCupSizeIcon = (iconType: CupSize['icon'], isSelected: boolean) => {
+  const renderCupSizeIcon = (
+    iconType: CupSize['icon'],
+    isSelected: boolean,
+  ) => {
     const color = isSelected ? primaryColor : '#00A9F1';
     const iconProps = {
       width: 24,
       height: 24,
-      color
+      color,
     };
-    
+
     switch (iconType) {
       case 'waterGlass':
         return <WaterGlassRegularBoldIcon {...iconProps} />;
@@ -131,21 +149,26 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
       case 'coffeeMug':
         return <CoffeeMugRegularBoldIcon {...iconProps} />;
       case 'plus':
-        return <PlusRegularBoldIcon {...iconProps} color={secondaryTextColor} />;
+        return (
+          <PlusRegularBoldIcon {...iconProps} color={secondaryTextColor} />
+        );
       default:
         return <WaterGlassRegularBoldIcon {...iconProps} />;
     }
   };
-  
+
   // Rendu de l'icône pour un type de boisson
-  const renderDrinkTypeIcon = (iconType: DrinkType['icon'], isSelected: boolean) => {
+  const renderDrinkTypeIcon = (
+    iconType: DrinkType['icon'],
+    isSelected: boolean,
+  ) => {
     const color = isSelected ? primaryColor : undefined;
     const iconProps = {
       width: 24,
       height: 24,
-      color
+      color,
     };
-    
+
     switch (iconType) {
       case 'coffee':
         return <CoffeeRegularBoldIcon {...iconProps} />;
@@ -175,12 +198,12 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
         return <WaterGlassRegularBoldIcon {...iconProps} />;
     }
   };
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* Section des tailles de tasses */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cupSizesScrollContent}
       >
@@ -191,22 +214,26 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
               key={size.id}
               style={[
                 styles.cupSizeItem,
-                { borderColor: isSelected ? primaryColor : borderColor }
+                { borderColor: isSelected ? primaryColor : borderColor },
               ]}
               onPress={() => onSelectCupSize(size.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconCircle, { backgroundColor: circleColor }]}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: circleColor }]}
+              >
                 {renderCupSizeIcon(size.icon, isSelected)}
               </View>
-              
+
               <View style={styles.sizeValueContainer}>
                 {size.id !== 'addNew' ? (
                   <>
                     <Text style={[styles.sizeValue, { color: textColor }]}>
                       {size.value}
                     </Text>
-                    <Text style={[styles.sizeUnit, { color: secondaryTextColor }]}>
+                    <Text
+                      style={[styles.sizeUnit, { color: secondaryTextColor }]}
+                    >
                       mL
                     </Text>
                   </>
@@ -220,17 +247,17 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
           );
         })}
       </ScrollView>
-      
+
       {/* Séparateur "Or Drink" */}
       <View style={styles.orDrinkContainer}>
         <Text style={[styles.orDrinkText, { color: secondaryTextColor }]}>
           Or Drink
         </Text>
       </View>
-      
+
       {/* Section des types de boissons */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.drinkTypesScrollContent}
       >
@@ -241,22 +268,26 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
               key={drink.id}
               style={[
                 styles.drinkTypeItem,
-                { borderColor: isSelected ? primaryColor : borderColor }
+                { borderColor: isSelected ? primaryColor : borderColor },
               ]}
               onPress={() => onSelectDrinkType(drink.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconCircle, { backgroundColor: circleColor }]}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: circleColor }]}
+              >
                 {renderDrinkTypeIcon(drink.icon, isSelected)}
               </View>
-              
-              <Text 
+
+              <Text
                 style={[
-                  styles.drinkTypeName, 
-                  { 
+                  styles.drinkTypeName,
+                  {
                     color: textColor,
-                    fontFamily: isSelected ? 'Urbanist-SemiBold' : 'Urbanist-Regular'
-                  }
+                    fontFamily: isSelected
+                      ? 'Urbanist-SemiBold'
+                      : 'Urbanist-Regular',
+                  },
                 ]}
                 numberOfLines={1}
               >

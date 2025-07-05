@@ -1,4 +1,8 @@
-import { UseQueryOptions, UseQueryResult, useQuery } from '@tanstack/react-query';
+import {
+  UseQueryOptions,
+  UseQueryResult,
+  useQuery,
+} from '@tanstack/react-query';
 import { OperationResult } from '@/utils/interfaces/pages.interface';
 import { getCacheConfig } from '@/utils/helpers/cacheConfig';
 import { DataType } from '@/utils/helpers/queryInvalidation';
@@ -19,53 +23,74 @@ export function useServiceQuery<TData, TError = Error>(
   dataType: DataType,
   queryKey: readonly unknown[],
   serviceFunction: () => Promise<OperationResult<TData>>,
-  options?: Omit<UseQueryOptions<TData, TError, TData, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<TData, TError, TData, readonly unknown[]>,
+    'queryKey' | 'queryFn'
+  >,
 ): UseQueryResult<TData, TError> {
   // Préparer les options de cache avec le type de données
   const cacheOptions = getCacheConfig(dataType);
-  
+
   return useQuery<TData, TError>({
     queryKey,
     queryFn: async () => {
       try {
         // Journaliser le début de la requête
-        logger.info(LogCategory.QUERY, `Démarrage de la requête pour ${dataType}`, {
-          queryKey: queryKey.join(',')
-        });
-        
+        logger.info(
+          LogCategory.QUERY,
+          `Démarrage de la requête pour ${dataType}`,
+          {
+            queryKey: queryKey.join(','),
+          },
+        );
+
         // Appeler la fonction de service
         const result = await serviceFunction();
-        
+
         // Vérifier le succès de l'opération
         if (!result.success || !result.data) {
-          logger.error(LogCategory.QUERY, `Échec de la requête pour ${dataType}`, {
-            queryKey: queryKey.join(','),
-            error: result.error
-          });
-          
-          throw new Error(result.error || `Échec de la requête pour ${dataType}`);
+          logger.error(
+            LogCategory.QUERY,
+            `Échec de la requête pour ${dataType}`,
+            {
+              queryKey: queryKey.join(','),
+              error: result.error,
+            },
+          );
+
+          throw new Error(
+            result.error || `Échec de la requête pour ${dataType}`,
+          );
         }
-        
+
         // Journaliser le succès de la requête
-        logger.info(LogCategory.QUERY, `Succès de la requête pour ${dataType}`, {
-          queryKey: queryKey.join(',')
-        });
-        
+        logger.info(
+          LogCategory.QUERY,
+          `Succès de la requête pour ${dataType}`,
+          {
+            queryKey: queryKey.join(','),
+          },
+        );
+
         // Retourner les données
         return result.data;
       } catch (error) {
         // Journaliser l'erreur
-        logger.error(LogCategory.QUERY, `Erreur lors de la requête pour ${dataType}`, {
-          queryKey: queryKey.join(','),
-          error: error instanceof Error ? error.message : String(error)
-        });
-        
+        logger.error(
+          LogCategory.QUERY,
+          `Erreur lors de la requête pour ${dataType}`,
+          {
+            queryKey: queryKey.join(','),
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+
         // Relancer l'erreur pour le gestionnaire de React Query
         throw error;
       }
     },
     ...cacheOptions,
-    ...options
+    ...options,
   });
 }
 
@@ -75,9 +100,17 @@ export function useServiceQuery<TData, TError = Error>(
 export function usePlanQuery<TData>(
   queryKey: readonly unknown[],
   serviceFunction: () => Promise<OperationResult<TData>>,
-  options?: Omit<UseQueryOptions<TData, Error, TData, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<TData, Error, TData, readonly unknown[]>,
+    'queryKey' | 'queryFn'
+  >,
 ) {
-  return useServiceQuery<TData>(DataType.PLAN, queryKey, serviceFunction, options);
+  return useServiceQuery<TData>(
+    DataType.PLAN,
+    queryKey,
+    serviceFunction,
+    options,
+  );
 }
 
 /**
@@ -86,9 +119,17 @@ export function usePlanQuery<TData>(
 export function useMealQuery<TData>(
   queryKey: readonly unknown[],
   serviceFunction: () => Promise<OperationResult<TData>>,
-  options?: Omit<UseQueryOptions<TData, Error, TData, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<TData, Error, TData, readonly unknown[]>,
+    'queryKey' | 'queryFn'
+  >,
 ) {
-  return useServiceQuery<TData>(DataType.MEAL, queryKey, serviceFunction, options);
+  return useServiceQuery<TData>(
+    DataType.MEAL,
+    queryKey,
+    serviceFunction,
+    options,
+  );
 }
 
 /**
@@ -97,9 +138,17 @@ export function useMealQuery<TData>(
 export function useUserQuery<TData>(
   queryKey: readonly unknown[],
   serviceFunction: () => Promise<OperationResult<TData>>,
-  options?: Omit<UseQueryOptions<TData, Error, TData, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<TData, Error, TData, readonly unknown[]>,
+    'queryKey' | 'queryFn'
+  >,
 ) {
-  return useServiceQuery<TData>(DataType.USER, queryKey, serviceFunction, options);
+  return useServiceQuery<TData>(
+    DataType.USER,
+    queryKey,
+    serviceFunction,
+    options,
+  );
 }
 
 /**
@@ -108,7 +157,15 @@ export function useUserQuery<TData>(
 export function useProgressQuery<TData>(
   queryKey: readonly unknown[],
   serviceFunction: () => Promise<OperationResult<TData>>,
-  options?: Omit<UseQueryOptions<TData, Error, TData, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<TData, Error, TData, readonly unknown[]>,
+    'queryKey' | 'queryFn'
+  >,
 ) {
-  return useServiceQuery<TData>(DataType.PROGRESS, queryKey, serviceFunction, options);
+  return useServiceQuery<TData>(
+    DataType.PROGRESS,
+    queryKey,
+    serviceFunction,
+    options,
+  );
 }

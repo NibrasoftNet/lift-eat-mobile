@@ -1,4 +1,4 @@
-  enum MealUnitEnum {
+enum MealUnitEnum {
   GRAMMES = 'GRAMMES',
   MILLILITRES = 'MILLILITRES',
   PIECES = 'PIECES',
@@ -54,12 +54,12 @@ const potatoEntries: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 536,
-    carbs: 52.90,
-    fat: 34.60,
-    protein: 7.00,
-    image: '../assets/images/seed/pomme-de-terre/Pomme_De_Terre__Chips__Salée.jpg',
+    carbs: 52.9,
+    fat: 34.6,
+    protein: 7.0,
+    image:
+      '../assets/images/seed/pomme-de-terre/Pomme_De_Terre__Chips__Salée.jpg',
   },
-
 ];
 
 export default potatoEntries;

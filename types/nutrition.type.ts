@@ -1,13 +1,16 @@
 /**
  * Types partagés pour les données nutritionnelles
  * Ces types assurent la cohérence entre l'IA et la base de données
- * 
+ *
  * STANDARD DE NORMALISATION:
- * Toutes les valeurs nutritionnelles sont stockées selon leurs valeurs brutes, mais 
+ * Toutes les valeurs nutritionnelles sont stockées selon leurs valeurs brutes, mais
  * affichées normalisées à 100g pour faciliter la comparaison entre produits/repas.
  */
 
-import { NutritionUnits, DefaultNutritionUnits } from '../utils/constants/NutritionUnits';
+import {
+  NutritionUnits,
+  DefaultNutritionUnits,
+} from '../utils/constants/NutritionUnits';
 import { NutritionDisplayMode } from '../utils/enum/nutrition.enum';
 
 /**
@@ -58,7 +61,7 @@ export interface AdjustedNutrients extends MacroNutrientsBase {
  */
 export interface NormalizedNutrients extends MacroNutrientsBase {
   referenceWeight: number; // Poids de référence (généralement 100g)
-  originalWeight: number;  // Poids original avant normalisation
+  originalWeight: number; // Poids original avant normalisation
   normalizationFactor: number; // Facteur de normalisation appliqué
   displayMode: NutritionDisplayMode; // Mode d'affichage
 }
@@ -123,9 +126,9 @@ export enum NutritionAdjustmentType {
  */
 export const CookingAdjustmentFactors = {
   RAW: 1.0,
-  BOILED: 0.9,  // Perte d'environ 10% des nutriments lors de l'ébullition
+  BOILED: 0.9, // Perte d'environ 10% des nutriments lors de l'ébullition
   STEAMED: 0.95, // Perte d'environ 5% lors de la cuisson à la vapeur
-  FRIED: 1.2,   // Gain d'environ 20% de calories (absorption d'huile)
-  BAKED: 0.85,  // Perte d'environ 15% (déshydratation)
+  FRIED: 1.2, // Gain d'environ 20% de calories (absorption d'huile)
+  BAKED: 0.85, // Perte d'environ 15% (déshydratation)
   GRILLED: 0.8, // Perte d'environ 20% (perte de graisse + déshydratation)
 };

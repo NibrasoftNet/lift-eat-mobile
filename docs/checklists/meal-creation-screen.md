@@ -28,6 +28,7 @@ interface ImageUploaderProps {
 ```
 
 **Dépendances:**
+
 - Utiliser les icônes SVG Figma de type regular-bold
 - expo-image-picker pour la sélection d'images
 - Box, Text et autres composants atoms de base
@@ -39,24 +40,25 @@ Visualisation des macronutriments sous forme de cercle segmenté avec légende.
 ```typescript
 interface CircularNutritionProgressProps {
   calories: number;
-  carbs: number;     // en grammes
-  protein: number;   // en grammes
-  fat: number;       // en grammes
-  
+  carbs: number; // en grammes
+  protein: number; // en grammes
+  fat: number; // en grammes
+
   // Apparence
-  size?: number;     // taille du cercle (par défaut 160)
+  size?: number; // taille du cercle (par défaut 160)
   showDetails?: boolean; // afficher les détails en dessous
-  showLabels?: boolean;  // afficher les étiquettes
+  showLabels?: boolean; // afficher les étiquettes
   showPercentages?: boolean; // afficher les pourcentages
-  
+
   // Couleurs
-  carbsColor?: string;   // rouge par défaut
+  carbsColor?: string; // rouge par défaut
   proteinColor?: string; // jaune par défaut
-  fatColor?: string;     // bleu par défaut
+  fatColor?: string; // bleu par défaut
 }
 ```
 
 **Dépendances:**
+
 - CircularProgressBase.tsx comme fondation
 - Box, Text, HStack, VStack
 - Système de couleurs du thème
@@ -75,6 +77,7 @@ interface MealTypeSelectorProps {
 ```
 
 **Dépendances:**
+
 - MealTypeEnum
 - Box, Text, HStack
 - Icônes SVG Figma spécifiques pour chaque type de repas
@@ -93,6 +96,7 @@ interface CuisineSelectorProps {
 ```
 
 **Dépendances:**
+
 - CuisineTypeEnum
 - Box, Text, HStack
 - Icônes SVG Figma ou drapeaux pour les différentes cuisines
@@ -105,11 +109,16 @@ Interface pour rechercher et ajouter des ingrédients.
 interface IngredientSelectorProps {
   isOpen: boolean;
   onClose: () => void;
-  onIngredientSelect: (ingredient: Ingredient, quantity: number, unit: string) => void;
+  onIngredientSelect: (
+    ingredient: Ingredient,
+    quantity: number,
+    unit: string,
+  ) => void;
 }
 ```
 
 **Dépendances:**
+
 - Services d'ingrédients
 - Box, Text, Input, Button
 - Bottom Sheet ou Modal
@@ -128,6 +137,7 @@ interface IngredientListProps {
 ```
 
 **Dépendances:**
+
 - Box, Text, HStack
 - FlashList ou FlatList
 - Icônes SVG Figma pour suppression et édition
@@ -141,6 +151,7 @@ Ensemble de champs de formulaire standardisés selon le design system.
 ```
 
 **Dépendances:**
+
 - Composants atoms de base
 - React Hook Form
 - Validation Zod
@@ -187,46 +198,46 @@ export default function CreateNewMealScreen() {
   const form = useForm<MealFormSchema>({...});
   const [imageUri, setImageUri] = useState<string | null>(null);
   const { ingredients, totalMacros } = useIngredientStore();
-  
+
   // Services MCP
   const { createMeal } = mealPagesService;
-  
+
   // Handlers
   const handleSubmit = (data: MealFormSchema) => {...};
   const handleAddIngredient = (ingredient, quantity, unit) => {...};
-  
+
   return (
     <ScrollView>
       <VStack spacing={4} padding={4}>
         {/* Titre */}
         <Heading>Création de Repas</Heading>
-        
+
         {/* Image uploader */}
         <ImageUploader
           imageUri={imageUri}
           onImageChange={setImageUri}
         />
-        
+
         {/* Champs principaux */}
         <TextInputField
           name="name"
           label="Nom du repas"
           control={form.control}
         />
-        
+
         <TextAreaField
           name="description"
           label="Préparation"
           control={form.control}
         />
-        
+
         <HStack>
           <NumberInputField
             name="quantity"
             label="Portion"
             control={form.control}
           />
-          
+
           <SelectField
             name="unit"
             label="Unité"
@@ -234,20 +245,20 @@ export default function CreateNewMealScreen() {
             control={form.control}
           />
         </HStack>
-        
+
         {/* Sélecteurs */}
         <MealTypeSelector
           selectedType={form.watch('type')}
           onChange={(type) => form.setValue('type', type)}
           label="Type de repas"
         />
-        
+
         <CuisineSelector
           selectedCuisine={form.watch('cuisine')}
           onChange={(cuisine) => form.setValue('cuisine', cuisine)}
           label="Cuisine"
         />
-        
+
         {/* Nutrition progress */}
         <CircularNutritionProgress
           calories={totalMacros.calories}
@@ -256,7 +267,7 @@ export default function CreateNewMealScreen() {
           fat={totalMacros.fat}
           showDetails
         />
-        
+
         {/* Ingredients section */}
         <HStack justifyContent="space-between">
           <Text variant="subtitle">Ingrédients</Text>
@@ -264,13 +275,13 @@ export default function CreateNewMealScreen() {
             Ajouter
           </Button>
         </HStack>
-        
+
         <IngredientList
           ingredients={ingredients}
           onRemoveIngredient={handleRemoveIngredient}
           onUpdateQuantity={handleUpdateQuantity}
         />
-        
+
         {/* Submit button */}
         <Button
           variant="primary"
@@ -280,7 +291,7 @@ export default function CreateNewMealScreen() {
           Créer repas
         </Button>
       </VStack>
-      
+
       {/* Modal/Drawer pour sélection d'ingrédients */}
       <IngredientSelector
         isOpen={isIngredientSelectorOpen}

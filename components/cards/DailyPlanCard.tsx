@@ -14,7 +14,7 @@ import MacrosDetailsBox from '@/components/boxes/MacrosDetailsBox';
 import { getDayFullName } from '@/utils/helpers/date-utils';
 
 /**
- * Props pour le composant DailyPlanCard 
+ * Props pour le composant DailyPlanCard
  */
 interface DailyPlanCardProps {
   /** Plan quotidien à afficher avec ses repas associés */
@@ -30,7 +30,7 @@ interface DailyPlanCardProps {
 /**
  * Composant qui affiche un plan quotidien dans une carte interactive
  * Affiche les informations nutritionnelles et permet la navigation vers les détails
- * 
+ *
  * @param {DailyPlanCardProps} props - Props du composant
  * @returns {JSX.Element} Composant DailyPlanCard
  */
@@ -42,7 +42,7 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
 }) => {
   const router = useRouter();
   const dayFull = getDayFullName(dailyPlan.day);
-  
+
   const handlePress = () => {
     if (onPress) {
       onPress(dailyPlan);
@@ -50,7 +50,7 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
       // Navigation par défaut vers les détails du jour de plan
       router.push({
         pathname: '/(root)/(tabs)/plans/my-plans/details/[id]',
-        params: { id: planId.toString(), dayId: dailyPlan.id.toString() }
+        params: { id: planId.toString(), dayId: dailyPlan.id.toString() },
       });
     }
   };
@@ -75,10 +75,12 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
                 </Box>
                 <VStack>
                   <Text className="font-semibold text-lg">{dayFull}</Text>
-                  <Text className="text-gray-600">Semaine {dailyPlan.week}</Text>
+                  <Text className="text-gray-600">
+                    Semaine {dailyPlan.week}
+                  </Text>
                 </VStack>
               </HStack>
-              
+
               <HStack space="sm" className="items-center">
                 <NutritionBox
                   title="Cal"
@@ -91,14 +93,14 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
                 <Icon as={ChevronRight} size="sm" className="text-gray-500" />
               </HStack>
             </HStack>
-            
+
             <MacrosDetailsBox
               carbs={dailyPlan.carbs}
               fats={dailyPlan.fat}
               protein={dailyPlan.protein}
               unit="g"
             />
-            
+
             <HStack className="w-full justify-between items-center mt-1">
               <Text className="text-gray-600">
                 {totalMeals} {totalMeals > 1 ? 'repas' : 'repas'}
@@ -113,7 +115,5 @@ const DailyPlanCard: React.FC<DailyPlanCardProps> = ({
     </Animated.View>
   );
 };
-
-
 
 export default DailyPlanCard;

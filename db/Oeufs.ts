@@ -24,18 +24,18 @@ const Oeufs: MealEntry[] = [
     carbs: 3.59,
     fat: 26.54,
     protein: 15.86,
-    image: "../assets/images/seed/Oeufs/Jaune_d'Œuf_Cru.jpg"
+    image: "../assets/images/seed/Oeufs/Jaune_d'Œuf_Cru.jpg",
   },
   {
-    name: "Œuf Frais",
+    name: 'Œuf Frais',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 147,
     carbs: 0.86,
     fat: 9.94,
     protein: 12.58,
-    image: "../assets/images/seed/Oeufs/Œuf_Frais.jpg"
-  }
+    image: '../assets/images/seed/Oeufs/Œuf_Frais.jpg',
+  },
 ];
 
 export default Oeufs;

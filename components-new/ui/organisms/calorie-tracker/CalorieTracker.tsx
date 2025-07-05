@@ -26,59 +26,59 @@ interface CalorieTrackerProps {
    * Date pour l'affichage (aujourd'hui par défaut)
    */
   date?: Date;
-  
+
   /**
    * Calories consommées
    */
   consumedCalories: number;
-  
+
   /**
    * Objectif de calories
    */
   goalCalories: number;
-  
+
   /**
    * Calories brûlées par la marche
    */
   walkingCalories: number;
-  
+
   /**
    * Calories brûlées par l'activité physique
    */
   activityCalories: number;
-  
+
   /**
    * Données des macronutriments
    */
   carbs: { current: number; goal: number };
   protein: { current: number; goal: number };
   fat: { current: number; goal: number };
-  
+
   /**
    * Liste des aliments consommés
    */
   foodItems: FoodItem[];
-  
+
   /**
    * Mode d'affichage sombre
    */
   isDarkMode?: boolean;
-  
+
   /**
    * Callback lorsque l'utilisateur appuie sur un aliment
    */
   onFoodItemPress?: (item: FoodItem) => void;
-  
+
   /**
    * Callback lorsque l'utilisateur appuie sur le bouton d'ajout d'aliment
    */
   onAddFoodPress?: () => void;
-  
+
   /**
    * Callback lorsque l'utilisateur appuie sur le bouton d'ajout d'activité
    */
   onAddActivityPress?: () => void;
-  
+
   /**
    * Callback pour la navigation entre les jours
    */
@@ -107,29 +107,29 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   onDateChange,
 }) => {
   const theme = useTheme();
-  
+
   // Calcul des calories restantes
   const remainingCalories = goalCalories - consumedCalories;
-  
+
   // Total des calories brûlées
   const totalBurnedCalories = walkingCalories + activityCalories;
-  
+
   // Calcul des calories nettes (consommées - brûlées)
   const netCalories = consumedCalories - totalBurnedCalories;
-  
+
   // Formattage de la date
   const formattedDate = date.toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   });
-  
+
   // Couleurs selon le thème
   const backgroundColor = isDarkMode ? '#1E1E1E' : '#FFFFFF';
   const textColor = isDarkMode ? '#FFFFFF' : '#212121';
   const secondaryTextColor = isDarkMode ? '#CDCDCD' : '#757575';
   const dividerColor = isDarkMode ? '#35383F' : '#EEEEEE';
-  
+
   // Navigation vers le jour précédent/suivant
   const navigateToPreviousDay = () => {
     if (onDateChange) {
@@ -138,7 +138,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       onDateChange(previousDay);
     }
   };
-  
+
   const navigateToNextDay = () => {
     if (onDateChange) {
       const nextDay = new Date(date);
@@ -146,10 +146,13 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       onDateChange(nextDay);
     }
   };
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.content}>
           {/* En-tête avec navigation de date */}
           <View style={styles.section}>
@@ -159,7 +162,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
             />
           </View>
-          
+
           {/* Section principale avec cercle de progression */}
           <View style={styles.section}>
             <MainProgressCircle
@@ -170,12 +173,12 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
             />
           </View>
-          
+
           {/* Séparateur "Eaten" */}
           <View style={styles.section}>
             <TitleDivider title="Eaten" isDarkMode={isDarkMode} />
           </View>
-          
+
           {/* Distribution des macronutriments */}
           <View style={styles.section}>
             <MacronutrientDistributionBar
@@ -185,12 +188,12 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
             />
           </View>
-          
+
           {/* Séparateur "Burned" */}
           <View style={styles.section}>
             <TitleDivider title="Burned" isDarkMode={isDarkMode} />
           </View>
-          
+
           {/* Section des calories brûlées */}
           <View style={styles.section}>
             <CaloriesBurnedSection
@@ -200,7 +203,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
             />
           </View>
-          
+
           {/* Liste des aliments */}
           <View style={styles.section}>
             <FoodList
@@ -210,10 +213,10 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
               scrollable={false}
             />
-            
+
             {/* Bouton d'ajout d'aliment */}
             {onAddFoodPress && (
-              <CircularAddButton 
+              <CircularAddButton
                 onPress={onAddFoodPress}
                 size={40}
                 color="#A1CE50"

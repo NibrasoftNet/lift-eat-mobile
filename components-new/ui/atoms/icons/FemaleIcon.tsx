@@ -7,7 +7,7 @@ interface FemaleIconProps {
    * Couleur de l'icône
    */
   color?: string;
-  
+
   /**
    * Taille de l'icône
    */
@@ -19,7 +19,7 @@ interface FemaleIconProps {
  */
 export const FemaleIcon: React.FC<FemaleIconProps> = ({
   color = '#212121',
-  size = 60
+  size = 60,
 }) => {
   return (
     <View style={{ width: size, height: size }}>

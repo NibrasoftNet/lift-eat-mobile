@@ -46,10 +46,15 @@ const SearchBarWithFilter: React.FC<SearchBarWithFilterProps> = ({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, borderColor: colors.border }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, borderColor: colors.border },
+      ]}
+    >
       {/* Icône de recherche */}
       <View style={styles.searchIconContainer}>
-        <BotDarkRegularBoldIcon  width={18} height={18} color={colors.icon} />
+        <BotDarkRegularBoldIcon width={18} height={18} color={colors.icon} />
       </View>
 
       {/* Champ de recherche */}
@@ -62,18 +67,18 @@ const SearchBarWithFilter: React.FC<SearchBarWithFilterProps> = ({
       />
 
       {/* Bouton filtre avec badge optionnel */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.filterButton}
         onPress={onFilterPress}
         activeOpacity={0.7}
       >
         <FilterRegularBoldIcon width={18} height={18} color={colors.icon} />
-        
+
         {/* Badge pour les filtres actifs */}
         {activeFiltersCount > 0 && (
           <View style={[styles.badge, { backgroundColor: colors.filterBadge }]}>
-            <Text 
-              variant="caption" 
+            <Text
+              variant="caption"
               color={colors.filterBadgeText}
               style={styles.badgeText}
             >

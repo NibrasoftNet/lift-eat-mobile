@@ -43,11 +43,11 @@ const Alert: React.FC<AlertProps> = ({
   icon,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer les couleurs selon le statut
   let backgroundColor;
   let textColor;
-  
+
   switch (status) {
     case 'success':
       backgroundColor = 'rgba(0, 168, 107, 0.08)'; // Couleur exacte du Figma
@@ -67,29 +67,21 @@ const Alert: React.FC<AlertProps> = ({
       textColor = '#A1CE50'; // Couleur exacte du Figma
       break;
   }
-  
+
   return (
     <Box
       style={{
         ...styles.container,
         backgroundColor,
-        ...(containerStyle as object || {})
+        ...((containerStyle as object) || {}),
       }}
     >
       {/* Icône (optionnelle) */}
-      {icon && (
-        <Box style={styles.iconContainer}>
-          {icon}
-        </Box>
-      )}
-      
+      {icon && <Box style={styles.iconContainer}>{icon}</Box>}
+
       {/* Message */}
       <Text
-        style={[
-          styles.message,
-          { color: textColor },
-          textStyle as TextStyle,
-        ]}
+        style={[styles.message, { color: textColor }, textStyle as TextStyle]}
       >
         {message}
       </Text>

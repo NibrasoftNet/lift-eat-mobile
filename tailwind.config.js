@@ -1,11 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'media',
-  content: ['app/**/*.{tsx,jsx,ts,js}', 'components/**/*.{tsx,jsx,ts,js}', 'components-new/**/*.{tsx,jsx,ts,js}'],
+  content: [
+    'app/**/*.{tsx,jsx,ts,js}',
+    'components/**/*.{tsx,jsx,ts,js}',
+    'components-new/**/*.{tsx,jsx,ts,js}',
+  ],
   presets: [require('nativewind/preset')],
   plugins: [
     // Plugin personnalisé pour les ombres et effets
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       const newUtilities = {
         '.shadow-lift-soft': {
           boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
@@ -79,7 +83,7 @@ module.exports = {
         liftBackgroundBrown: '#F8F3F1',
         liftBackgroundYellow: '#FFFCEB',
         liftBackgroundGrey: '#F6F6F6',
-        
+
         // Structure originale pour compatibilité
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
@@ -248,7 +252,7 @@ module.exports = {
         '4xl': '32px',
         '5xl': '40px',
       },
-      
+
       // Rayons de bordure basés sur theme/radii.ts
       borderRadius: {
         none: '0',
@@ -259,14 +263,14 @@ module.exports = {
         '2xl': '24px',
         round: '9999px',
       },
-      
+
       // Configuration des polices selon theme/typography-*.ts
       fontFamily: {
         // Nouvelles polices du thème
         urbanist: ['Urbanist', 'sans-serif'],
         playfair: ['Playfair Display', 'serif'],
         robotoFlex: ['Roboto Flex', 'sans-serif'],
-        
+
         // Pour compatibilité avec le code existant
         heading: undefined,
         body: undefined,

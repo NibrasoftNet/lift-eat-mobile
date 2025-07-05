@@ -14,7 +14,11 @@ export interface GreenSaladEmojiProps extends ImageProps {
  * Composant Emoji 🥗 (Green Salad) conforme au style des autres Fluent Emojis.
  * Utilise l’image PNG exportée depuis Figma.
  */
-export const GreenSaladEmoji: React.FC<GreenSaladEmojiProps> = ({ size = 48, style, ...props }) => {
+export const GreenSaladEmoji: React.FC<GreenSaladEmojiProps> = ({
+  size = 48,
+  style,
+  ...props
+}) => {
   return (
     <Image
       source={saladPng}

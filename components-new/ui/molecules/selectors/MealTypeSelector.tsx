@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
@@ -49,42 +55,35 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   mealTypes,
   selectedMealTypeId,
   onSelectMealType,
-  dark = false
+  dark = false,
 }) => {
   const theme = useAppTheme();
-  
+
   // Couleurs basées sur le design Figma
-  const backgroundColor = dark
-    ? '#121212'
-    : '#FFFFFF';
-  
-  const textColor = dark
-    ? '#FFFFFF'
-    : '#212121';
-    
-  const secondaryTextColor = dark
-    ? 'rgba(255, 255, 255, 0.7)'
-    : '#616161';
-    
-  const borderColor = dark
-    ? 'rgba(255, 255, 255, 0.1)'
-    : '#EEEEEE';
-    
-  const circleColor = dark
-    ? '#1E1E1E'
-    : '#FAFAFA';
-    
+  const backgroundColor = dark ? '#121212' : '#FFFFFF';
+
+  const textColor = dark ? '#FFFFFF' : '#212121';
+
+  const secondaryTextColor = dark ? 'rgba(255, 255, 255, 0.7)' : '#616161';
+
+  const borderColor = dark ? 'rgba(255, 255, 255, 0.1)' : '#EEEEEE';
+
+  const circleColor = dark ? '#1E1E1E' : '#FAFAFA';
+
   const primaryColor = theme.colors.primary;
-  
+
   // Rendu de l'icône pour un type de repas
-  const renderMealTypeIcon = (iconType: MealTypeOption['icon'], isSelected: boolean) => {
+  const renderMealTypeIcon = (
+    iconType: MealTypeOption['icon'],
+    isSelected: boolean,
+  ) => {
     const color = isSelected ? primaryColor : theme.colors.blueGrey;
     const iconProps = {
       width: 24,
       height: 24,
-      color
+      color,
     };
-    
+
     switch (iconType) {
       case 'breakfast':
         return <TimeCircleRegularBoldIcon {...iconProps} />;
@@ -98,7 +97,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         return <TimeCircleRegularBoldIcon {...iconProps} />;
     }
   };
-  
+
   // Traduction des types de repas en français
   const getMealTypeName = (mealType: MealTypeEnum): string => {
     switch (mealType) {
@@ -114,15 +113,13 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         return 'Repas';
     }
   };
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <Text style={[styles.title, { color: textColor }]}>
-        Type de repas
-      </Text>
-      
-      <ScrollView 
-        horizontal 
+      <Text style={[styles.title, { color: textColor }]}>Type de repas</Text>
+
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.mealTypesScrollContent}
       >
@@ -133,22 +130,26 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               key={mealType.id}
               style={[
                 styles.mealTypeItem,
-                { borderColor: isSelected ? primaryColor : borderColor }
+                { borderColor: isSelected ? primaryColor : borderColor },
               ]}
               onPress={() => onSelectMealType(mealType.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconCircle, { backgroundColor: circleColor }]}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: circleColor }]}
+              >
                 {renderMealTypeIcon(mealType.icon, isSelected)}
               </View>
-              
-              <Text 
+
+              <Text
                 style={[
-                  styles.mealTypeName, 
-                  { 
+                  styles.mealTypeName,
+                  {
                     color: textColor,
-                    fontFamily: isSelected ? 'Urbanist-SemiBold' : 'Urbanist-Regular'
-                  }
+                    fontFamily: isSelected
+                      ? 'Urbanist-SemiBold'
+                      : 'Urbanist-Regular',
+                  },
                 ]}
                 numberOfLines={1}
               >

@@ -5,10 +5,18 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, View, Animated, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Animated,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
-
 
 export interface TabItem {
   /**
@@ -89,17 +97,19 @@ const PagingHorizontalTab: React.FC<PagingHorizontalTabProps> = ({
   const scrollViewRef = useRef<ScrollView>(null);
   const [tabWidths, setTabWidths] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
-  
+
   // Animation pour l'indicateur
   const indicatorPosition = useRef(new Animated.Value(0)).current;
   const indicatorWidth = useRef(new Animated.Value(0)).current;
-  
+
   // Mettre à jour la position de l'indicateur lorsque l'onglet actif change
   React.useEffect(() => {
     if (tabWidths.length > 0 && activeTabIndex < tabWidths.length) {
-      const position = tabWidths.slice(0, activeTabIndex).reduce((acc, width) => acc + width, 0);
+      const position = tabWidths
+        .slice(0, activeTabIndex)
+        .reduce((acc, width) => acc + width, 0);
       const width = tabWidths[activeTabIndex];
-      
+
       Animated.parallel([
         Animated.timing(indicatorPosition, {
           toValue: position,
@@ -112,15 +122,24 @@ const PagingHorizontalTab: React.FC<PagingHorizontalTabProps> = ({
           useNativeDriver: false,
         }),
       ]).start();
-      
+
       // Faire défiler pour que l'onglet actif soit visible
       if (scrollViewRef.current) {
-        const scrollTo = position - (containerWidth / 2) + (width / 2);
-        scrollViewRef.current.scrollTo({ x: Math.max(0, scrollTo), animated: true });
+        const scrollTo = position - containerWidth / 2 + width / 2;
+        scrollViewRef.current.scrollTo({
+          x: Math.max(0, scrollTo),
+          animated: true,
+        });
       }
     }
-  }, [activeTabIndex, tabWidths, containerWidth, indicatorPosition, indicatorWidth]);
-  
+  }, [
+    activeTabIndex,
+    tabWidths,
+    containerWidth,
+    indicatorPosition,
+    indicatorWidth,
+  ]);
+
   const styles = StyleSheet.create({
     container: {
       flex: 1, // Remplace width: '100%' pour éviter les erreurs de conversion
@@ -165,22 +184,22 @@ const PagingHorizontalTab: React.FC<PagingHorizontalTabProps> = ({
       backgroundColor: color('primary'),
     },
   });
-  
+
   // Calculer la largeur de chaque onglet
   const onTabLayout = (width: number, index: number) => {
     const newTabWidths = [...tabWidths];
     newTabWidths[index] = width;
     setTabWidths(newTabWidths);
   };
-  
+
   // Calculer la largeur du conteneur
   const onContainerLayout = (width: number) => {
     setContainerWidth(width);
   };
-  
+
   return (
-    <Box 
-      style={[styles.container, containerStyle as ViewStyle || {}]}
+    <Box
+      style={[styles.container, (containerStyle as ViewStyle) || {}]}
       onLayout={(e) => onContainerLayout(e.nativeEvent.layout.width)}
     >
       <ScrollView
@@ -191,41 +210,45 @@ const PagingHorizontalTab: React.FC<PagingHorizontalTabProps> = ({
       >
         {tabs.map((tab, index) => {
           const isActive = index === activeTabIndex;
-          
+
           return (
             <TouchableOpacity
               key={tab.id}
               style={[
                 styles.tab,
-                tabStyle as ViewStyle || {},
+                (tabStyle as ViewStyle) || {},
                 isActive && styles.activeTab,
-                isActive && (activeTabStyle as ViewStyle || {}),
+                isActive && ((activeTabStyle as ViewStyle) || {}),
               ]}
               onPress={() => onTabChange(index)}
               onLayout={(e) => onTabLayout(e.nativeEvent.layout.width, index)}
               activeOpacity={0.7}
             >
               <Text
-                style={([
-                  styles.tabText,
-                  tabTextStyle as TextStyle || {},
-                  isActive ? styles.activeTabText : undefined,
-                  isActive && activeTabTextStyle ? activeTabTextStyle as TextStyle : undefined,
-                ].filter(Boolean) as TextStyle[])}
+                style={
+                  [
+                    styles.tabText,
+                    (tabTextStyle as TextStyle) || {},
+                    isActive ? styles.activeTabText : undefined,
+                    isActive && activeTabTextStyle
+                      ? (activeTabTextStyle as TextStyle)
+                      : undefined,
+                  ].filter(Boolean) as TextStyle[]
+                }
               >
                 {tab.label}
               </Text>
             </TouchableOpacity>
           );
         })}
-        
+
         {showIndicator && (
           <View style={styles.indicatorContainer}>
             <Animated.View
               style={[
                 styles.indicator,
                 { left: indicatorPosition, width: indicatorWidth },
-                indicatorStyle as ViewStyle || {},
+                (indicatorStyle as ViewStyle) || {},
               ]}
             />
           </View>

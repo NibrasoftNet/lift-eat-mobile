@@ -22,7 +22,7 @@ export const BotDarkRegularBoldIcon: React.FC<BotDarkRegularBoldIconProps> = ({
       </G>
       <Defs>
         <ClipPath id="clip0_28449_26012">
-          <Rect width="24" height="24" fill="white"/>
+          <Rect width="24" height="24" fill="white" />
         </ClipPath>
       </Defs>
     </Svg>

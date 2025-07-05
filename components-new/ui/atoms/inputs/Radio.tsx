@@ -58,19 +58,19 @@ const Radio: React.FC<RadioProps> = ({
   disabled = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Dimensions exactes du Figma
   const RADIO_SIZE = 24; // Taille exacte du Figma
   const INNER_CIRCLE_SIZE = 12; // Taille exacte du Figma
-  
+
   // Déterminer les couleurs selon le thème et l'état
   const isDark = theme === 'dark';
-  
+
   let borderColor;
   let backgroundColor = 'transparent';
   let innerCircleColor;
   let textColor;
-  
+
   if (disabled) {
     borderColor = isDark ? '#3A3A3A' : '#E0E0E0';
     innerCircleColor = isDark ? '#3A3A3A' : '#E0E0E0';
@@ -79,7 +79,7 @@ const Radio: React.FC<RadioProps> = ({
     borderColor = appTheme.color('primary');
     innerCircleColor = appTheme.color('primary');
     textColor = isDark ? 'white' : appTheme.color('primary');
-    
+
     if (type === 'check') {
       backgroundColor = appTheme.color('primary');
     }
@@ -88,14 +88,14 @@ const Radio: React.FC<RadioProps> = ({
     innerCircleColor = 'transparent';
     textColor = isDark ? 'white' : appTheme.color('primary');
   }
-  
+
   // Opacité pour l'état désactivé
   const opacity = disabled ? 0.5 : 1;
-  
+
   // Rendre le cercle intérieur selon le type
   const renderInnerCircle = () => {
     if (!selected) return null;
-    
+
     switch (type) {
       case 'check':
         // Pour le type 'check', le cercle est déjà coloré, pas besoin de cercle intérieur
@@ -135,7 +135,7 @@ const Radio: React.FC<RadioProps> = ({
         );
     }
   };
-  
+
   return (
     <TouchableOpacity
       style={[
@@ -165,7 +165,7 @@ const Radio: React.FC<RadioProps> = ({
       >
         {renderInnerCircle()}
       </View>
-      
+
       {/* Label (optionnel) */}
       {style === 'text' && label && (
         <Text

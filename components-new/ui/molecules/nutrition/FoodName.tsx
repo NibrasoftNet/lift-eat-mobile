@@ -6,7 +6,7 @@ interface FoodNameProps {
    * Nom de l'aliment
    */
   name: string;
-  
+
   /**
    * Couleur du texte (varie selon le mode sombre/clair)
    */
@@ -17,27 +17,23 @@ interface FoodNameProps {
  * Composant FoodName
  * Affiche le nom d'un aliment selon les spécifications exactes du design Figma
  */
-const FoodName: React.FC<FoodNameProps> = ({ 
-  name,
-  color
-}) => {
+const FoodName: React.FC<FoodNameProps> = ({ name, color }) => {
   // Diviser le nom "Hamburger" en deux lignes comme dans le design Figma
   // Si le nom est "Hamburger", diviser après "Hamburg"
   // Gestion stricte du retour à la ligne pour 'Hamburger' (fidèle à Figma)
-  const formattedName = name === "Hamburger" ? (
-    <View style={{ alignItems: 'center', justifyContent: 'center', height: 50 }}>
-      <Text style={[styles.text, { color, marginBottom: -8 }]}>Hamburg</Text>
-      <Text style={[styles.text, { color, marginTop: -10 }]}>er</Text>
-    </View>
-  ) : (
-    <Text style={[styles.text, { color }]}>{name}</Text>
-  );
-  
-  return (
-    <View style={styles.container}>
-      {formattedName}
-    </View>
-  );
+  const formattedName =
+    name === 'Hamburger' ? (
+      <View
+        style={{ alignItems: 'center', justifyContent: 'center', height: 50 }}
+      >
+        <Text style={[styles.text, { color, marginBottom: -8 }]}>Hamburg</Text>
+        <Text style={[styles.text, { color, marginTop: -10 }]}>er</Text>
+      </View>
+    ) : (
+      <Text style={[styles.text, { color }]}>{name}</Text>
+    );
+
+  return <View style={styles.container}>{formattedName}</View>;
 };
 
 const styles = StyleSheet.create({

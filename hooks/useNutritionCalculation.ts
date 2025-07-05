@@ -1,9 +1,9 @@
 /**
  * Hook personnalisé pour les calculs nutritionnels
- * 
+ *
  * Centralise la logique de calcul nutritionnel et les transformations
  * afin de simplifier l'utilisation du moteur nutritionnel dans les composants UI.
- * 
+ *
  * Ce hook sépare clairement la logique business (calculs nutritionnels) de la logique UI
  * (mise en forme, réactions aux interactions utilisateur).
  */
@@ -64,7 +64,10 @@ export interface NutritionCalculationResult {
   /** Change la quantité affichée */
   updateQuantity: (newQuantity: number) => void;
   /** Formate une valeur nutritionnelle pour l'affichage */
-  formatValue: (value: number, type: 'calories' | 'carbs' | 'protein' | 'fat') => string;
+  formatValue: (
+    value: number,
+    type: 'calories' | 'carbs' | 'protein' | 'fat',
+  ) => string;
 }
 
 /**
@@ -75,28 +78,28 @@ function calculateDisplayMacros(
   baseMacros: MacroNutrientsBase,
   standardQuantity: number,
   displayQuantity: number,
-  cookingMethod: CookingMethod
+  cookingMethod: CookingMethod,
 ): MacroNutrientsBase {
   // Étape 1: Calculer pour la portion souhaitée
   const portionAdjusted = nutritionEngine.calculateForPortion(
     baseMacros,
     standardQuantity,
-    displayQuantity
+    displayQuantity,
   );
-  
+
   // Étape 2: Appliquer l'ajustement pour la méthode de cuisson
   return nutritionEngine.adjustForCooking(portionAdjusted, cookingMethod);
 }
 
 /**
  * Hook pour les calculs nutritionnels, séparant clairement la logique business de la logique UI
- * 
+ *
  * @example
  * // Utilisation de base
  * const { displayMacros, updateMacros } = useNutritionCalculation({
  *   initialMacros: mealNutrition
  * });
- * 
+ *
  * @example
  * // Avec méthode de cuisson et quantité personnalisées
  * const { displayMacros, balance, updateCookingMethod } = useNutritionCalculation({
@@ -112,84 +115,101 @@ export function useNutritionCalculation({
     carbs: 0,
     protein: 0,
     fat: 0,
-    unit: 'g'
+    unit: 'g',
   },
-  quantity = STANDARD_WEIGHT,  // Utiliser notre constante standard
-  standardQuantity = STANDARD_WEIGHT,  // Utiliser notre constante standard
+  quantity = STANDARD_WEIGHT, // Utiliser notre constante standard
+  standardQuantity = STANDARD_WEIGHT, // Utiliser notre constante standard
   cookingMethod = CookingMethod.RAW,
-  onChange
+  onChange,
 }: NutritionCalculationOptions = {}): NutritionCalculationResult {
   // État des valeurs nutritionnelles normalisées (constantes quel que soit la quantité)
   const [macros, setMacros] = useState<MacroNutrientsBase>(
-    nutritionEngine.normalizeMacros(initialMacros)
+    nutritionEngine.normalizeMacros(initialMacros),
   );
 
   // Calculer le facteur d'ajustement quantité/standard pour affichage
   const adjustmentFactor = useMemo(() => {
     return quantity / standardQuantity;
   }, [quantity, standardQuantity]);
-  
+
   // Mémorisation des valeurs affichées (calculées uniquement quand nécessaire)
   const displayMacros = useMemo(() => {
-    return calculateDisplayMacros(macros, standardQuantity, quantity, cookingMethod);
+    return calculateDisplayMacros(
+      macros,
+      standardQuantity,
+      quantity,
+      cookingMethod,
+    );
   }, [macros, standardQuantity, quantity, cookingMethod]);
-  
+
   // Mémorisation de l'équilibre nutritionnel pour éviter des recalculs superflus
   const balance = useMemo(() => {
     const details = nutritionEngine.checkMacroBalance(displayMacros);
     return {
       isBalanced: details.protein && details.carbs && details.fat,
-      details
+      details,
     };
   }, [displayMacros]);
-  
+
   /**
    * Met à jour les macros avec de nouvelles valeurs
    * Séparation claire de la logique UI (setState) et business (normalisation)
    */
-  const updateMacros = useCallback((newMacros: Partial<MacroNutrientsBase>) => {
-    const normalized = nutritionEngine.normalizeMacros({
-      ...macros,
-      ...newMacros
-    });
-    
-    setMacros(normalized);
-    
-    // Appeler le callback onChange si fourni
-    if (onChange) {
-      onChange(normalized);
-    }
-  }, [macros, onChange]);
-  
+  const updateMacros = useCallback(
+    (newMacros: Partial<MacroNutrientsBase>) => {
+      const normalized = nutritionEngine.normalizeMacros({
+        ...macros,
+        ...newMacros,
+      });
+
+      setMacros(normalized);
+
+      // Appeler le callback onChange si fourni
+      if (onChange) {
+        onChange(normalized);
+      }
+    },
+    [macros, onChange],
+  );
+
   /**
    * Met à jour la méthode de cuisson (logique UI pure)
    * Ne modifie pas les données sous-jacentes, seulement la visualisation
    */
-  const updateCookingMethod = useCallback((method: CookingMethod) => {
-    // Ne rien faire si la méthode est déjà la même (optimisation)
-    if (method === cookingMethod) return;
-    
-    // La mise à jour des valeurs affichées se fera automatiquement via le useMemo
-  }, [cookingMethod]);
-  
+  const updateCookingMethod = useCallback(
+    (method: CookingMethod) => {
+      // Ne rien faire si la méthode est déjà la même (optimisation)
+      if (method === cookingMethod) return;
+
+      // La mise à jour des valeurs affichées se fera automatiquement via le useMemo
+    },
+    [cookingMethod],
+  );
+
   /**
    * Met à jour la quantité affichée (logique UI pure)
    * Ne modifie pas les données sous-jacentes, seulement la visualisation
    */
-  const updateQuantity = useCallback((newQuantity: number) => {
-    // Ne rien faire si la quantité est déjà la même (optimisation)
-    if (newQuantity === quantity) return;
-    
-    // La mise à jour des valeurs affichées se fera automatiquement via le useMemo
-  }, [quantity]);
-  
+  const updateQuantity = useCallback(
+    (newQuantity: number) => {
+      // Ne rien faire si la quantité est déjà la même (optimisation)
+      if (newQuantity === quantity) return;
+
+      // La mise à jour des valeurs affichées se fera automatiquement via le useMemo
+    },
+    [quantity],
+  );
+
   /**
    * Formater une valeur nutritionnelle pour l'affichage (logique UI pure)
    */
-  const formatValue = useCallback((value: number, type: 'calories' | 'carbs' | 'protein' | 'fat'): string => {
-    return nutritionEngine.formatForUI(value, type);
-  }, []);
-  
+  const formatValue = useCallback(
+    (value: number, type: 'calories' | 'carbs' | 'protein' | 'fat'): string => {
+      return nutritionEngine.formatForUI(value, type);
+    },
+    [],
+  );
+
   return {
     // Données
     macros,
@@ -201,6 +221,6 @@ export function useNutritionCalculation({
     updateCookingMethod,
     updateQuantity,
     // UI
-    formatValue
+    formatValue,
   };
 }

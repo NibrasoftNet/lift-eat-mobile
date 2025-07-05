@@ -29,7 +29,7 @@ export interface CalculateNormalizedNutritionParams {
  * Structure de base pour les macronutriments
  * @removed - Cette interface a été supprimée le 13 mai 2025.
  * Utiliser directement MacroNutrientsBase importé depuis @/types/nutrition.type
- * 
+ *
  * Interface de référence:
  * export interface MacroNutrientsBase {
  *   calories: number;  // Calories en kcal

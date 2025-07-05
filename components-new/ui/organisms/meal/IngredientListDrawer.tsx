@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
 import {
   View,
   Text,
@@ -10,7 +16,6 @@ import {
   Image,
   Pressable,
   Modal,
-  
   BackHandler,
 } from 'react-native';
 import { useIngredientStore } from '@/utils/store/ingredientStore';
@@ -36,7 +41,10 @@ interface IngredientListDrawerProps {
   onClose: () => void;
 }
 
-const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, onClose }) => {
+const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({
+  visible,
+  onClose,
+}) => {
   const theme = useTheme();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,7 +52,8 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, on
 
   // État pour la ligne d’ingrédient développée
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [editingIngredient, setEditingIngredient] = useState<IngredientWithUniqueId | null>(null);
+  const [editingIngredient, setEditingIngredient] =
+    useState<IngredientWithUniqueId | null>(null);
   const [editingQty, setEditingQty] = useState('');
 
   const {
@@ -75,7 +84,9 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, on
   });
 
   const ingredients: IngredientWithUniqueId[] = useMemo(() => {
-    const all = (data?.pages || []).flatMap((page) => page.data) as IngredientWithUniqueId[];
+    const all = (data?.pages || []).flatMap(
+      (page) => page.data,
+    ) as IngredientWithUniqueId[];
     // Remove duplicates based on ingredient id to avoid repeating same items
     const uniqueMap = new Map<number, IngredientWithUniqueId>();
     all.forEach((ing) => {
@@ -88,8 +99,15 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, on
     if (!selectedId) return ingredients as any;
     const index = ingredients.findIndex((ing) => ing.id === selectedId);
     if (index === -1) return ingredients as any;
-    const detailObj = { type: 'detail', ingredient: ingredients[index] } as const;
-    return [...ingredients.slice(0, index + 1), detailObj, ...ingredients.slice(index + 1)] as any;
+    const detailObj = {
+      type: 'detail',
+      ingredient: ingredients[index],
+    } as const;
+    return [
+      ...ingredients.slice(0, index + 1),
+      detailObj,
+      ...ingredients.slice(index + 1),
+    ] as any;
   }, [ingredients, selectedId]);
 
   const loading = queryLoading && ingredients.length === 0;
@@ -300,7 +318,11 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, on
       fallbackText: { color: '#FFF', fontWeight: '700' },
       textContainer: { flexShrink: 1 },
       rightSection: { justifyContent: 'center', alignItems: 'flex-end' },
-      quantityText: { fontSize: 16, fontWeight: '600', color: theme.color('success') },
+      quantityText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: theme.color('success'),
+      },
       qtyModal: {
         width: '80%',
         backgroundColor: theme.color('background'),
@@ -334,25 +356,41 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({ visible, on
   }, [theme]);
 
   // Réinitialiser le détail ouvert à la fermeture du drawer
-useEffect(() => {
-  if (!visible) setSelectedId(null);
-}, [visible]);
+  useEffect(() => {
+    if (!visible) setSelectedId(null);
+  }, [visible]);
 
-return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <View style={styles.modalContainer}>
         <View style={styles.drawer}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Select an ingredient</Text>
-            <TouchableOpacity onPress={onClose} style={{ padding: theme.space('sm') }}>
-              <CloseSquareRegularBoldIcon width={24} height={24} color={theme.color('primary')} />
+            <TouchableOpacity
+              onPress={onClose}
+              style={{ padding: theme.space('sm') }}
+            >
+              <CloseSquareRegularBoldIcon
+                width={24}
+                height={24}
+                color={theme.color('primary')}
+              />
             </TouchableOpacity>
           </View>
 
           {/* Search */}
           <View style={styles.searchContainer}>
-            <SearchRegularBoldIcon width={20} height={20} color={theme.color('blueGrey')} />
+            <SearchRegularBoldIcon
+              width={20}
+              height={20}
+              color={theme.color('blueGrey')}
+            />
             <TextInput
               style={styles.searchInput}
               placeholder="Search an ingredient..."
@@ -372,22 +410,28 @@ return (
             <FlatList
               scrollEnabled={true}
               data={listWithDetail}
-              keyExtractor={(item: any) => ('type' in item ? `detail_${item.ingredient.id}` : item.uniqueId ?? `ing_${item.id}`)}
-              
+              keyExtractor={(item: any) =>
+                'type' in item
+                  ? `detail_${item.ingredient.id}`
+                  : item.uniqueId ?? `ing_${item.id}`
+              }
               renderItem={({ item }) => {
                 if ((item as any).type === 'detail') {
                   const ing = (item as any).ingredient;
                   // Quantité courante depuis le store si sélectionné, sinon map locale
-                  const storeQty = selectedIngredients.find((i) => i.ingredientStandardId === ing.id)?.quantity;
-                  const currentQty = storeQty ?? quantities.get(ing.id) ?? DEFAULT_QTY;
+                  const storeQty = selectedIngredients.find(
+                    (i) => i.ingredientStandardId === ing.id,
+                  )?.quantity;
+                  const currentQty =
+                    storeQty ?? quantities.get(ing.id) ?? DEFAULT_QTY;
                   return (
                     <IngredientDetailsRow
                       ingredient={ing}
                       onClose={() => setSelectedId(null)}
                       quantity={currentQty}
                       onQuantityChange={(qty: number) => {
-  handleQuantityChange(ing.id, qty);
-}}
+                        handleQuantityChange(ing.id, qty);
+                      }}
                     />
                   );
                 }
@@ -397,7 +441,9 @@ return (
                 const storeQty = selectedIngredients.find(
                   (ing) => ing.ingredientStandardId === item.id,
                 )?.quantity;
-                const currentQty = selected ? storeQty ?? DEFAULT_QTY : quantities.get(item.id) ?? DEFAULT_QTY;
+                const currentQty = selected
+                  ? storeQty ?? DEFAULT_QTY
+                  : quantities.get(item.id) ?? DEFAULT_QTY;
 
                 return (
                   <Pressable
@@ -408,7 +454,10 @@ return (
                       if (selected) openEditModal(item, currentQty);
                     }}
                     delayLongPress={300}
-                    style={[styles.ingredientItem, selected && styles.selectedItem]}
+                    style={[
+                      styles.ingredientItem,
+                      selected && styles.selectedItem,
+                    ]}
                     disabled={!!editingIngredient}
                   >
                     {/* Left section: image + texts */}
@@ -416,23 +465,63 @@ return (
                       <View style={styles.imageContainer}>
                         {item.image ? (
                           <Image
-                            source={{ uri: typeof item.image === 'string' ? item.image : `data:image/png;base64,${item.image}` }}
+                            source={{
+                              uri:
+                                typeof item.image === 'string'
+                                  ? item.image
+                                  : `data:image/png;base64,${item.image}`,
+                            }}
                             style={styles.ingredientImage}
                           />
                         ) : (
                           <View style={styles.fallbackContainer}>
-                            <Text style={styles.fallbackText}>{item.name.slice(0, 2).toUpperCase()}</Text>
+                            <Text style={styles.fallbackText}>
+                              {item.name.slice(0, 2).toUpperCase()}
+                            </Text>
                           </View>
                         )}
                       </View>
                       <View style={styles.textContainer}>
                         <Text style={styles.ingredientName}>{item.name}</Text>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
-  <Text style={[styles.macroKcal]}>{item.calories} kcal</Text>
-  <Text style={{ color: '#FF981F', fontWeight: '700', marginLeft: 10 }}>P:{item.protein}g</Text>
-  <Text style={{ color: '#F54336', fontWeight: '700', marginLeft: 10 }}>C:{item.carbs}g</Text>
-  <Text style={{ color: '#1A96F0', fontWeight: '700', marginLeft: 10 }}>L:{item.fat}g</Text>
-</View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            marginTop: 2,
+                          }}
+                        >
+                          <Text style={[styles.macroKcal]}>
+                            {item.calories} kcal
+                          </Text>
+                          <Text
+                            style={{
+                              color: '#FF981F',
+                              fontWeight: '700',
+                              marginLeft: 10,
+                            }}
+                          >
+                            P:{item.protein}g
+                          </Text>
+                          <Text
+                            style={{
+                              color: '#F54336',
+                              fontWeight: '700',
+                              marginLeft: 10,
+                            }}
+                          >
+                            C:{item.carbs}g
+                          </Text>
+                          <Text
+                            style={{
+                              color: '#1A96F0',
+                              fontWeight: '700',
+                              marginLeft: 10,
+                            }}
+                          >
+                            L:{item.fat}g
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
@@ -441,8 +530,15 @@ return (
                       {selected ? (
                         <Text style={styles.quantityText}>{currentQty} g</Text>
                       ) : (
-                        <TouchableOpacity onPress={() => handleToggleIngredient(item)} disabled={!!editingIngredient}>
-                          <PlusRegularBoldIcon width={20} height={20} color={theme.color('success')} />
+                        <TouchableOpacity
+                          onPress={() => handleToggleIngredient(item)}
+                          disabled={!!editingIngredient}
+                        >
+                          <PlusRegularBoldIcon
+                            width={20}
+                            height={20}
+                            color={theme.color('success')}
+                          />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -454,12 +550,14 @@ return (
               contentContainerStyle={styles.listContent}
               ListFooterComponent={
                 isFetchingNextPage ? (
-                  <ActivityIndicator size="large" color={theme.color('primary')} />
+                  <ActivityIndicator
+                    size="large"
+                    color={theme.color('primary')}
+                  />
                 ) : null
               }
             />
           )}
-          
         </View>
       </View>
     </Modal>

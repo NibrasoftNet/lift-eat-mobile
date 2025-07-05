@@ -8,22 +8,22 @@ interface FoodItem {
    * Identifiant unique de l'aliment
    */
   id: string;
-  
+
   /**
    * Nom de l'aliment
    */
   name: string;
-  
+
   /**
    * Quantité (avec unité)
    */
   quantity: string;
-  
+
   /**
    * Calories
    */
   calories: number;
-  
+
   /**
    * Emoji ou icône associée à l'aliment
    */
@@ -35,27 +35,27 @@ interface FoodListProps {
    * Liste des aliments
    */
   foodItems: FoodItem[];
-  
+
   /**
    * Fonction appelée lors du clic sur un aliment
    */
   onFoodItemPress?: (item: FoodItem) => void;
-  
+
   /**
    * Titre de la section
    */
   title?: string;
-  
+
   /**
    * Mode d'affichage sombre
    */
   isDarkMode?: boolean;
-  
+
   /**
    * Indique si la liste peut scroller
    */
   scrollable?: boolean;
-  
+
   /**
    * Hauteur maximale si scrollable est true
    */
@@ -76,29 +76,27 @@ const FoodList: React.FC<FoodListProps> = ({
   maxHeight = 300,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs selon le thème
   const backgroundColor = isDarkMode ? '#1F222A' : '#FFFFFF';
   const textColor = isDarkMode ? '#FFFFFF' : '#212121';
   const secondaryTextColor = isDarkMode ? '#CDCDCD' : '#757575';
   const dividerColor = isDarkMode ? '#35383F' : '#EEEEEE';
-  
+
   // Conteneur pour les éléments
   const ListContainer = scrollable ? ScrollView : View;
-  
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* Titre */}
-      <Text style={[styles.title, { color: textColor }]}>
-        {title}
-      </Text>
-      
+      <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+
       {/* Liste des aliments */}
-      <ListContainer 
+      <ListContainer
         style={[
-          styles.foodItemList, 
-          scrollable && { maxHeight }, 
-          scrollable && styles.scrollableFoodList
+          styles.foodItemList,
+          scrollable && { maxHeight },
+          scrollable && styles.scrollableFoodList,
         ]}
       >
         {foodItems.map((item, index) => (
@@ -110,35 +108,35 @@ const FoodList: React.FC<FoodListProps> = ({
               activeOpacity={0.7}
             >
               {/* Emoji ou icône */}
-              {item.emoji && (
-                <Text style={styles.foodEmoji}>
-                  {item.emoji}
-                </Text>
-              )}
-              
+              {item.emoji && <Text style={styles.foodEmoji}>{item.emoji}</Text>}
+
               {/* Informations sur l'aliment */}
               <View style={styles.foodInfo}>
                 <Text style={[styles.foodName, { color: textColor }]}>
                   {item.name}
                 </Text>
-                <Text style={[styles.foodQuantity, { color: secondaryTextColor }]}>
+                <Text
+                  style={[styles.foodQuantity, { color: secondaryTextColor }]}
+                >
                   {item.quantity}
                 </Text>
               </View>
-              
+
               {/* Calories */}
               <Text style={[styles.foodCalories, { color: textColor }]}>
                 {item.calories} kcal
               </Text>
             </TouchableOpacity>
-            
+
             {/* Séparateur (sauf pour le dernier élément) */}
             {index < foodItems.length - 1 && (
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
+              <View
+                style={[styles.divider, { backgroundColor: dividerColor }]}
+              />
             )}
           </React.Fragment>
         ))}
-        
+
         {/* Message si aucun aliment */}
         {foodItems.length === 0 && (
           <View style={styles.emptyContainer}>

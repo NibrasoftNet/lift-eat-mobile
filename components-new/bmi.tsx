@@ -1,6 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Path,
+  Defs,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface BMIGaugeProps {
   bmiValue?: number;
@@ -14,30 +20,42 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
   const radius = size * 0.45;
   const strokeWidth = 25;
   const innerRadius = radius - strokeWidth / 2;
-  
+
   // Couleurs pour chaque segment BMI
   const segments = [
-    { color: '#1A96F0', start: -180, end: -135 },      // Underweight
-    { color: '#00A9F1', start: -135, end: -90 },     
-    { color: '#00BCD3', start: -90, end: -45 },     
-    { color: '#4AAF57', start: -45, end: 0 },     // Normal
-    { color: '#FFC02D', start: 0, end: 45 },    
-    { color: '#FF981F', start: 45, end: 90 },   
-    { color: '#FF5726', start: 90, end: 135 },   // Overweight
-    { color: '#F54336', start: 135, end: 180 },   // Obese
+    { color: '#1A96F0', start: -180, end: -135 }, // Underweight
+    { color: '#00A9F1', start: -135, end: -90 },
+    { color: '#00BCD3', start: -90, end: -45 },
+    { color: '#4AAF57', start: -45, end: 0 }, // Normal
+    { color: '#FFC02D', start: 0, end: 45 },
+    { color: '#FF981F', start: 45, end: 90 },
+    { color: '#FF5726', start: 90, end: 135 }, // Overweight
+    { color: '#F54336', start: 135, end: 180 }, // Obese
   ];
- 
-  
 
   // Fonction pour créer un arc SVG
-  const createArc = (startAngle: number, endAngle: number, radius: number, color: string): JSX.Element => {
+  const createArc = (
+    startAngle: number,
+    endAngle: number,
+    radius: number,
+    color: string,
+  ): JSX.Element => {
     const start = polarToCartesian(centerX, centerY, radius, endAngle);
     const end = polarToCartesian(centerX, centerY, radius, startAngle);
     const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-    
+
     const d = [
-      'M', start.x, start.y, 
-      'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y
+      'M',
+      start.x,
+      start.y,
+      'A',
+      radius,
+      radius,
+      0,
+      largeArcFlag,
+      0,
+      end.x,
+      end.y,
     ].join(' ');
 
     return (
@@ -53,11 +71,16 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
   };
 
   // Conversion coordonnées polaires vers cartésiennes
-  const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number): { x: number, y: number } => {
-    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  const polarToCartesian = (
+    centerX: number,
+    centerY: number,
+    radius: number,
+    angleInDegrees: number,
+  ): { x: number; y: number } => {
+    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
     return {
-      x: centerX + (radius * Math.cos(angleInRadians)),
-      y: centerY + (radius * Math.sin(angleInRadians))
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians),
     };
   };
 
@@ -73,30 +96,45 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
 
   // Création du pointeur
   const pointerAngle = calculatePointerAngle(bmiValue);
-  const pointerEnd = polarToCartesian(centerX, centerY, radius - 30, pointerAngle);
-  
+  const pointerEnd = polarToCartesian(
+    centerX,
+    centerY,
+    radius - 30,
+    pointerAngle,
+  );
+
   const pointerPath = [
-    'M', centerX, centerY,
-    'L', pointerEnd.x, pointerEnd.y
+    'M',
+    centerX,
+    centerY,
+    'L',
+    pointerEnd.x,
+    pointerEnd.y,
   ].join(' ');
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size} style={styles.svg}>
         <Defs>
-          <LinearGradient id="pointerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <LinearGradient
+            id="pointerGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
             <Stop offset="0%" stopColor="#4AAF57" stopOpacity="1" />
             <Stop offset="74.74%" stopColor="#4AAF57" stopOpacity="0.04" />
             <Stop offset="87.24%" stopColor="#4AAF57" stopOpacity="0.02" />
             <Stop offset="100%" stopColor="#4AAF57" stopOpacity="0" />
           </LinearGradient>
         </Defs>
-        
+
         {/* Segments colorés de la jauge */}
-        {segments.map((segment, index) => 
-          createArc(segment.start, segment.end, innerRadius, segment.color)
+        {segments.map((segment, index) =>
+          createArc(segment.start, segment.end, innerRadius, segment.color),
         )}
-        
+
         {/* Ligne pointillée de fond */}
         <Circle
           cx={centerX}
@@ -107,7 +145,7 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
           strokeDasharray="2,32"
           fill="none"
         />
-        
+
         {/* Pointeur */}
         <Path
           d={pointerPath}
@@ -115,7 +153,7 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
           strokeWidth={4}
           strokeLinecap="round"
         />
-        
+
         {/* Point central blanc */}
         <Circle
           cx={centerX}
@@ -126,7 +164,7 @@ const BMIGauge = ({ bmiValue = 22.9, size = 300 }: BMIGaugeProps) => {
           strokeWidth={6}
         />
       </Svg>
-      
+
       {/* Texte BMI au centre */}
       <View style={styles.textContainer}>
         <Text style={styles.bmiValue}>{bmiValue}</Text>

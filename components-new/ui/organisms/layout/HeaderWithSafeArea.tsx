@@ -15,15 +15,15 @@ interface HeaderWithSafeAreaProps {
 
 /**
  * HeaderWithSafeArea component
- * 
+ *
  * Composant qui encapsule HeaderBar avec une gestion automatique de la SafeArea.
  * Assure la compatibilité avec tous les dispositifs, y compris ceux avec encoche.
- * 
+ *
  * Reproduction fidèle du design Figma sans modification personnelle.
  */
 const HeaderWithSafeArea: React.FC<HeaderWithSafeAreaProps> = (props) => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <HeaderBar {...props} />

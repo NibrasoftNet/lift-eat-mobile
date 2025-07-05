@@ -43,7 +43,11 @@ const DurationFormInput: React.FC<DurationFormInputProps> = ({
                 onChange(parsedValue);
               }}
               // Utiliser le service pour formater la valeur pour l'affichage
-              value={value !== undefined ? durationFormService.formatDurationValue(value).split(' ')[0] : ''}
+              value={
+                value !== undefined
+                  ? durationFormService.formatDurationValue(value).split(' ')[0]
+                  : ''
+              }
               className="bg-gray-50"
             />
           </Input>

@@ -35,7 +35,7 @@ const resetPasswordSchema = z
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Passwords don't match",
-    path: ["confirmNewPassword"],
+    path: ['confirmNewPassword'],
   });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
@@ -99,13 +99,18 @@ export default function ResetPasswordNew() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
         {/* Bouton retour */}
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <ArrowLeftRegularBoldIcon
             width={24}
             height={24}
@@ -140,9 +145,13 @@ export default function ResetPasswordNew() {
                   px={20}
                   py={10}
                   rounded={10}
-                  leftIcon={<LockRegularTwotoneIcon size={20} color="#81A540" />}
+                  leftIcon={
+                    <LockRegularTwotoneIcon size={20} color="#81A540" />
+                  }
                   rightIcon={
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
                       {showPassword ? (
                         <HideRegularBoldIcon size={20} color="#3F51B2" />
                       ) : (
@@ -177,9 +186,13 @@ export default function ResetPasswordNew() {
                   px={20}
                   py={10}
                   rounded={10}
-                  leftIcon={<LockRegularTwotoneIcon size={20} color="#81A540" />}
+                  leftIcon={
+                    <LockRegularTwotoneIcon size={20} color="#81A540" />
+                  }
                   rightIcon={
-                    <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                    <TouchableOpacity
+                      onPress={() => setShowConfirm(!showConfirm)}
+                    >
                       {showConfirm ? (
                         <HideRegularBoldIcon size={20} color="#3F51B2" />
                       ) : (
@@ -191,14 +204,19 @@ export default function ResetPasswordNew() {
               )}
             />
             {errors.confirmNewPassword && (
-              <Text style={styles.errorText}>{errors.confirmNewPassword.message}</Text>
+              <Text style={styles.errorText}>
+                {errors.confirmNewPassword.message}
+              </Text>
             )}
           </View>
         </View>
 
         {/* Bouton mise à jour */}
         <TouchableOpacity
-          style={[styles.updateButton, isPending && styles.updateButtonDisabled]}
+          style={[
+            styles.updateButton,
+            isPending && styles.updateButtonDisabled,
+          ]}
           onPress={handleSubmit(onSubmit)}
           disabled={isPending}
         >
@@ -210,8 +228,13 @@ export default function ResetPasswordNew() {
           <Text variant="caption" color={theme.color('blueGrey')}>
             Back to
           </Text>
-          <TouchableOpacity onPress={() => router.replace('/loginNew')}> 
-            <Text variant="caption" semibold color={theme.color('successLighter')} style={{ marginLeft: 4 }}>
+          <TouchableOpacity onPress={() => router.replace('/loginNew')}>
+            <Text
+              variant="caption"
+              semibold
+              color={theme.color('successLighter')}
+              style={{ marginLeft: 4 }}
+            >
               Login
             </Text>
           </TouchableOpacity>
@@ -283,5 +306,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
 });

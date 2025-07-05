@@ -15,17 +15,17 @@ interface MealNutritionalValuesProps {
    * Nom du repas/aliment
    */
   mealName: string;
-  
+
   /**
    * Liste des valeurs nutritionnelles (ex: calories, protéines, etc.)
    */
   nutritionalValues: NutritionalValue[];
-  
+
   /**
    * Mode d'affichage sombre
    */
   isDarkMode?: boolean;
-  
+
   /**
    * Événement lorsqu'on clique sur une valeur nutritionnelle
    */
@@ -44,36 +44,43 @@ const MealNutritionalValues: React.FC<MealNutritionalValuesProps> = ({
   onValuePress,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs selon le thème
   const backgroundColor = isDarkMode ? '#1F222A' : '#FFFFFF';
   const textColor = isDarkMode ? '#FFFFFF' : '#212121';
   const secondaryTextColor = isDarkMode ? '#CDCDCD' : '#424242';
   const dividerColor = isDarkMode ? '#35383F' : '#EEEEEE';
-  const iconColor = isDarkMode ? theme.colors.successLighter : secondaryTextColor;
-  
+  const iconColor = isDarkMode
+    ? theme.colors.successLighter
+    : secondaryTextColor;
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* Nom du repas */}
-      <Text style={[styles.mealName, { color: textColor }]}>
-        {mealName}
-      </Text>
-      
+      <Text style={[styles.mealName, { color: textColor }]}>{mealName}</Text>
+
       {/* Séparateur */}
       <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-      
+
       {/* Valeurs nutritionnelles */}
       <View style={styles.nutritionalValuesContainer}>
         {nutritionalValues.map((item, index) => (
-          <View key={`${item.label}-${index}`} style={styles.nutritionalValueRow}>
+          <View
+            key={`${item.label}-${index}`}
+            style={styles.nutritionalValueRow}
+          >
             <Text style={[styles.label, { color: secondaryTextColor }]}>
               {item.label}
             </Text>
             <View style={styles.valueContainer}>
-              <Text style={[
-                item.label.toLowerCase() === 'calorie' ? styles.calorieValue : styles.value, 
-                { color: textColor }
-              ]}>
+              <Text
+                style={[
+                  item.label.toLowerCase() === 'calorie'
+                    ? styles.calorieValue
+                    : styles.value,
+                  { color: textColor },
+                ]}
+              >
                 {item.value}
               </Text>
               {item.unit && (

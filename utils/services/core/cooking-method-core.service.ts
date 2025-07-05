@@ -3,15 +3,18 @@
  * Contient la logique métier liée aux calculs d'ajustement nutritionnel selon les méthodes de cuisson
  */
 
-import { MacroNutrientsBase } from "@/types/nutrition.type";
-import { CookingMethod } from "@/utils/constants/CookingConstants";
-import { COOKING_METHODS_INFO, CookingMethodInfo } from "@/utils/constants/cooking-method-info.constants";
-import { STANDARD_WEIGHT } from "@/utils/constants/NutritionConstants";
-import { NutritionDisplayMode } from "@/utils/enum/nutrition.enum";
-import { LogCategory } from "@/utils/enum/logging.enum";
-import { nutritionEngine } from "@/utils/engines/nutrition-engine";
-import { calculateCookedWeight } from "@/utils/helpers/cookingAdjustment.helper";
-import { logger } from "@/utils/services/common/logging.service";
+import { MacroNutrientsBase } from '@/types/nutrition.type';
+import { CookingMethod } from '@/utils/constants/CookingConstants';
+import {
+  COOKING_METHODS_INFO,
+  CookingMethodInfo,
+} from '@/utils/constants/cooking-method-info.constants';
+import { STANDARD_WEIGHT } from '@/utils/constants/NutritionConstants';
+import { NutritionDisplayMode } from '@/utils/enum/nutrition.enum';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { nutritionEngine } from '@/utils/engines/nutrition-engine';
+import { calculateCookedWeight } from '@/utils/helpers/cookingAdjustment.helper';
+import { logger } from '@/utils/services/common/logging.service';
 
 /**
  * Interface pour les pourcentages d'ajustement
@@ -63,41 +66,44 @@ class CookingMethodCoreService {
    * @returns Résultat des calculs d'ajustement
    */
   calculateCookingMethodAdjustments(
-    initialMacros: MacroNutrientsBase, 
+    initialMacros: MacroNutrientsBase,
     initialWeight: number = STANDARD_WEIGHT,
     cookingMethod: CookingMethod = CookingMethod.RAW,
-    displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G
+    displayMode: NutritionDisplayMode = NutritionDisplayMode.PER_100G,
   ): CookingMethodAdjustmentResult {
     try {
       // Calculer le poids cuit
-      const adjustedWeight = calculateCookedWeight(initialWeight, cookingMethod);
+      const adjustedWeight = calculateCookedWeight(
+        initialWeight,
+        cookingMethod,
+      );
 
       // Ajuster les macros en fonction de la méthode de cuisson
       const adjustedMacros = nutritionEngine.adjustForCooking(
         initialMacros,
-        cookingMethod
+        cookingMethod,
       );
 
       // Normaliser pour l'affichage standard
       const normalizedMacros = nutritionEngine.adjustForFinalMealWeight(
         adjustedMacros,
         adjustedWeight,
-        STANDARD_WEIGHT
+        STANDARD_WEIGHT,
       );
-      
+
       // Calculer les pourcentages d'ajustement
       const adjustmentPercentages = this.calculateAdjustmentPercentages(
         initialMacros,
         adjustedMacros,
         initialWeight,
-        adjustedWeight
+        adjustedWeight,
       );
-      
+
       // Log pour le débogage
       logger.debug(
         LogCategory.NUTRITION,
         `Ajustement de cuisson: ${cookingMethod}`,
-        { original: initialMacros, adjusted: adjustedMacros }
+        { original: initialMacros, adjusted: adjustedMacros },
       );
 
       return {
@@ -107,13 +113,18 @@ class CookingMethodCoreService {
         normalizedMacros,
         adjustmentPercentages,
         methodInfo: COOKING_METHODS_INFO[cookingMethod],
-        allMethods: COOKING_METHODS_INFO
+        allMethods: COOKING_METHODS_INFO,
       };
     } catch (error) {
       logger.error(
         LogCategory.NUTRITION,
         "Erreur lors de l'ajustement de cuisson",
-        { error, method: cookingMethod, macros: initialMacros, weight: initialWeight }
+        {
+          error,
+          method: cookingMethod,
+          macros: initialMacros,
+          weight: initialWeight,
+        },
       );
 
       // Valeurs par défaut en cas d'erreur
@@ -127,10 +138,10 @@ class CookingMethodCoreService {
           carbs: 0,
           protein: 0,
           fat: 0,
-          weight: 0
+          weight: 0,
         },
         methodInfo: COOKING_METHODS_INFO[cookingMethod],
-        allMethods: COOKING_METHODS_INFO
+        allMethods: COOKING_METHODS_INFO,
       };
     }
   }
@@ -147,14 +158,20 @@ class CookingMethodCoreService {
     originalMacros: MacroNutrientsBase,
     adjustedMacros: MacroNutrientsBase,
     originalWeight: number,
-    adjustedWeight: number
+    adjustedWeight: number,
   ): AdjustmentPercentages {
     return {
-      calories: this.getPercentage(originalMacros.calories, adjustedMacros.calories),
+      calories: this.getPercentage(
+        originalMacros.calories,
+        adjustedMacros.calories,
+      ),
       carbs: this.getPercentage(originalMacros.carbs, adjustedMacros.carbs),
-      protein: this.getPercentage(originalMacros.protein, adjustedMacros.protein),
+      protein: this.getPercentage(
+        originalMacros.protein,
+        adjustedMacros.protein,
+      ),
       fat: this.getPercentage(originalMacros.fat, adjustedMacros.fat),
-      weight: this.getPercentage(originalWeight, adjustedWeight)
+      weight: this.getPercentage(originalWeight, adjustedWeight),
     };
   }
 

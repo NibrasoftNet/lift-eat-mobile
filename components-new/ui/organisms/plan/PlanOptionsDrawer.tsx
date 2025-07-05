@@ -10,12 +10,7 @@ import type { ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
 import Icon from '@/components-new/ui/atoms/display/Icon';
-import {
-  CircleX,
-  Eye,
-  Pencil,
-  Trash2,
-} from 'lucide-react-native';
+import { CircleX, Eye, Pencil, Trash2 } from 'lucide-react-native';
 
 export interface PlanOptionsDrawerProps {
   /** Controls the visibility of the drawer */
@@ -71,7 +66,10 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
           <View style={styles.handle as ViewStyle} />
 
           {/* Close button */}
-          <TouchableOpacity style={styles.closeBtn as ViewStyle} onPress={onClose}>
+          <TouchableOpacity
+            style={styles.closeBtn as ViewStyle}
+            onPress={onClose}
+          >
             <Icon as={CircleX} size="xl" color={theme.color('primary')} />
           </TouchableOpacity>
 
@@ -90,11 +88,18 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
               <View style={styles.iconWrapper as ViewStyle}>
                 <Icon as={Eye} size="md" color="#1A96F0" />
               </View>
-              <Text style={[styles.optionLabel as TextStyle, { color: '#1A96F0' }]}>Details</Text>
+              <Text
+                style={[styles.optionLabel as TextStyle, { color: '#1A96F0' }]}
+              >
+                Details
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.optionRow as ViewStyle, disableEdit && (styles.disabled as ViewStyle)]}
+              style={[
+                styles.optionRow as ViewStyle,
+                disableEdit && (styles.disabled as ViewStyle),
+              ]}
               onPress={!disableEdit ? handlePress(onEdit) : undefined}
               disabled={disableEdit}
             >
@@ -105,11 +110,18 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
                   color={disableEdit ? theme.color('blueGrey') : '#FF981F'}
                 />
               </View>
-              <Text style={[styles.optionLabel as TextStyle, { color: '#FF981F' }]}>Edit</Text>
+              <Text
+                style={[styles.optionLabel as TextStyle, { color: '#FF981F' }]}
+              >
+                Edit
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.optionRow as ViewStyle, disableDelete && (styles.disabled as ViewStyle)]}
+              style={[
+                styles.optionRow as ViewStyle,
+                disableDelete && (styles.disabled as ViewStyle),
+              ]}
               onPress={!disableDelete ? handlePress(onDelete) : undefined}
               disabled={disableDelete}
             >
@@ -120,7 +132,11 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
                   color={disableDelete ? theme.color('blueGrey') : '#F54336'}
                 />
               </View>
-              <Text style={[styles.optionLabel as TextStyle, { color: '#F54336' }]}>Delete</Text>
+              <Text
+                style={[styles.optionLabel as TextStyle, { color: '#F54336' }]}
+              >
+                Delete
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

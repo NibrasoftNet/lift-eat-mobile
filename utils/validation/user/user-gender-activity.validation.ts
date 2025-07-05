@@ -20,26 +20,28 @@ export const userGenderActivitySchema = z.object({
   ]),
   // Nouvelles fonctionnalités
   // Restrictions alimentaires
-  dietaryRestrictions: z.array(
-    z.enum(Object.values(DietaryRestrictionEnum) as [string, ...string[]])
-  ).default([]),
+  dietaryRestrictions: z
+    .array(
+      z.enum(Object.values(DietaryRestrictionEnum) as [string, ...string[]]),
+    )
+    .default([]),
   // Allergies
-  allergies: z.array(
-    z.enum(Object.values(AllergyEnum) as [string, ...string[]])
-  ).default([]),
+  allergies: z
+    .array(z.enum(Object.values(AllergyEnum) as [string, ...string[]]))
+    .default([]),
   // Objectifs nutritionnels détaillés
-  nutritionGoals: z.object({
-    goal: z.enum([
-      GoalEnum.WEIGHT_LOSS,
-      GoalEnum.MAINTAIN,
-      GoalEnum.GAIN_MUSCLE,
-    ]).default(GoalEnum.MAINTAIN),
-    targetWeight: z.number().optional(),
-    dailyCalories: z.number().optional(),
-    proteinPercentage: z.number().min(0).max(100).optional(),
-    carbsPercentage: z.number().min(0).max(100).optional(),
-    fatPercentage: z.number().min(0).max(100).optional(),
-  }).optional(),
+  nutritionGoals: z
+    .object({
+      goal: z
+        .enum([GoalEnum.WEIGHT_LOSS, GoalEnum.MAINTAIN, GoalEnum.GAIN_MUSCLE])
+        .default(GoalEnum.MAINTAIN),
+      targetWeight: z.number().optional(),
+      dailyCalories: z.number().optional(),
+      proteinPercentage: z.number().min(0).max(100).optional(),
+      carbsPercentage: z.number().min(0).max(100).optional(),
+      fatPercentage: z.number().min(0).max(100).optional(),
+    })
+    .optional(),
 });
 
 export type UserGenderActivityFormData = z.infer<

@@ -51,7 +51,11 @@ const WeightFormInput: React.FC<WeightFormInputProps> = ({
                 onChange(parsedValue);
               }}
               // Utiliser le service pour formater la valeur pour l'affichage
-              value={value !== undefined ? weightInputUIService.formatWeightValue(value) : ''}
+              value={
+                value !== undefined
+                  ? weightInputUIService.formatWeightValue(value)
+                  : ''
+              }
               className="bg-gray-50"
             />
           </Input>

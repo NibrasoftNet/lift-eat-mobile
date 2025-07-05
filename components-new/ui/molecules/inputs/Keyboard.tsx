@@ -70,14 +70,14 @@ const Keyboard: React.FC<KeyboardProps> = ({
 }) => {
   const appTheme = useAppTheme();
   const screenWidth = Dimensions.get('window').width;
-  
+
   // Couleurs selon le thème
   const backgroundColor = dark ? '#1F222A' : '#FAFAFA'; // Couleurs exactes du Figma
   const keyBackgroundColor = dark ? '#35383F' : '#FFFFFF'; // Couleurs exactes du Figma
   const textColor = dark ? '#FFFFFF' : '#212121'; // Couleurs exactes du Figma
   const specialKeyColor = dark ? '#35383F' : '#EEEEEE'; // Couleurs exactes du Figma
   const borderColor = dark ? '#35383F' : '#E0E0E0'; // Couleurs exactes du Figma
-  
+
   // Gérer l'appui sur une touche
   const handleKeyPress = (key: string) => {
     if (key === 'delete') {
@@ -93,12 +93,12 @@ const Keyboard: React.FC<KeyboardProps> = ({
       onKeyPress && onKeyPress(key);
     }
   };
-  
+
   // Rendre une touche du clavier numérique
   const renderNumericKey = (key: string, index: number, rowIndex: number) => {
     const isSpecialKey = key === 'delete';
     const keyWidth = (screenWidth - 48) / 3; // 3 touches par ligne, avec marges
-    
+
     return (
       <TouchableOpacity
         key={`${rowIndex}-${index}`}
@@ -106,7 +106,9 @@ const Keyboard: React.FC<KeyboardProps> = ({
           styles.numericKey,
           {
             width: keyWidth,
-            backgroundColor: isSpecialKey ? specialKeyColor : keyBackgroundColor,
+            backgroundColor: isSpecialKey
+              ? specialKeyColor
+              : keyBackgroundColor,
             borderColor,
           },
           keyStyle,
@@ -115,10 +117,7 @@ const Keyboard: React.FC<KeyboardProps> = ({
         activeOpacity={0.7}
       >
         {isSpecialKey ? (
-          <ArrowLeftRegularBoldIcon
-            size={24}
-            color={textColor}
-          />
+          <ArrowLeftRegularBoldIcon size={24} color={textColor} />
         ) : (
           <Text
             style={[
@@ -136,15 +135,21 @@ const Keyboard: React.FC<KeyboardProps> = ({
       </TouchableOpacity>
     );
   };
-  
+
   // Rendre une touche du clavier alphabétique
-  const renderAlphabeticKey = (key: string, index: number, rowIndex: number) => {
-    const isSpecialKey = ['delete', 'shift', '123', 'space', 'return'].includes(key);
+  const renderAlphabeticKey = (
+    key: string,
+    index: number,
+    rowIndex: number,
+  ) => {
+    const isSpecialKey = ['delete', 'shift', '123', 'space', 'return'].includes(
+      key,
+    );
     const isSpaceKey = key === 'space';
     const isReturnKey = key === 'return';
-    
+
     let keyWidth;
-    
+
     if (rowIndex === 0) {
       // Première ligne: 10 touches égales
       keyWidth = (screenWidth - 20) / 10;
@@ -154,19 +159,19 @@ const Keyboard: React.FC<KeyboardProps> = ({
     } else if (rowIndex === 2) {
       // Troisième ligne: touches spéciales aux extrémités
       if (key === 'shift' || key === 'delete') {
-        keyWidth = (screenWidth - 16) / 8 * 1.5; // 1.5x plus large
+        keyWidth = ((screenWidth - 16) / 8) * 1.5; // 1.5x plus large
       } else {
         keyWidth = (screenWidth - 16) / 8;
       }
     } else {
       // Quatrième ligne: touches spéciales
       if (key === 'space') {
-        keyWidth = (screenWidth - 12) / 3 * 1.5; // Barre d'espace plus large
+        keyWidth = ((screenWidth - 12) / 3) * 1.5; // Barre d'espace plus large
       } else {
-        keyWidth = (screenWidth - 12) / 3 * 0.75;
+        keyWidth = ((screenWidth - 12) / 3) * 0.75;
       }
     }
-    
+
     return (
       <TouchableOpacity
         key={`${rowIndex}-${index}`}
@@ -174,7 +179,9 @@ const Keyboard: React.FC<KeyboardProps> = ({
           styles.alphabeticKey,
           {
             width: keyWidth,
-            backgroundColor: isSpecialKey ? specialKeyColor : keyBackgroundColor,
+            backgroundColor: isSpecialKey
+              ? specialKeyColor
+              : keyBackgroundColor,
             borderColor,
             height: isSpaceKey || isReturnKey ? 50 : 40, // Hauteur exacte du Figma
           },
@@ -184,10 +191,7 @@ const Keyboard: React.FC<KeyboardProps> = ({
         activeOpacity={0.7}
       >
         {key === 'delete' ? (
-          <ArrowLeftRegularBoldIcon
-            size={20}
-            color={textColor}
-          />
+          <ArrowLeftRegularBoldIcon size={20} color={textColor} />
         ) : (
           <Text
             style={[
@@ -200,45 +204,50 @@ const Keyboard: React.FC<KeyboardProps> = ({
               keyTextStyle as TextStyle,
             ]}
           >
-            {key === 'shift' ? '⇧' : 
-             key === '123' ? '123' : 
-             key === 'space' ? '' : 
-             key === 'return' ? 'return' : key}
+            {key === 'shift'
+              ? '⇧'
+              : key === '123'
+              ? '123'
+              : key === 'space'
+              ? ''
+              : key === 'return'
+              ? 'return'
+              : key}
           </Text>
         )}
       </TouchableOpacity>
     );
   };
-  
+
   // Rendre les rangées de touches
   const renderKeyRows = () => {
     const keys = type === 'numeric' ? numericKeys : alphabeticKeys;
-    
+
     return keys.map((row, rowIndex) => (
       <View key={`row-${rowIndex}`} style={styles.keyRow}>
-        {row.map((key, index) => (
-          type === 'numeric' 
+        {row.map((key, index) =>
+          type === 'numeric'
             ? renderNumericKey(key, index, rowIndex)
-            : renderAlphabeticKey(key, index, rowIndex)
-        ))}
+            : renderAlphabeticKey(key, index, rowIndex),
+        )}
       </View>
     ));
   };
-  
+
   // Rendre l'indicateur Home (barre en bas de l'écran sur iOS)
   const renderHomeIndicator = () => {
     return (
       <View style={styles.homeIndicatorContainer}>
-        <View 
+        <View
           style={[
             styles.homeIndicator,
-            { backgroundColor: dark ? '#FFFFFF' : '#000000' }
-          ]} 
+            { backgroundColor: dark ? '#FFFFFF' : '#000000' },
+          ]}
         />
       </View>
     );
   };
-  
+
   return (
     <Box
       style={[

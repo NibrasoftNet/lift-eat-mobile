@@ -5,15 +5,18 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 ## 1. Analyse des Composants Actuels
 
 ### Architecture MCP
+
 - ✅ **sqliteMCPServer** : Singleton bien conçu pour l'accès à la base de données
 - ✅ **handlers MCP** : Organisation modulaire par domaine fonctionnel
 - ⚠️ **Intégration avec nutritionEngine** : Non existante, opportunity d'amélioration
 
 ### Moteur Central (Core)
+
 - ✅ **nutritionEngine** : Bien conçu comme façade pour les calculs nutritionnels
 - ✅ **nutritionCoreService** : Fournit des fonctions de base solides
 
 ### Helpers
+
 - ⚠️ **macroCalculations.helper.ts** : Déprécié mais encore utilisé
 - ⚠️ **nutrition-calculation.helper.ts** : Duplication partielle avec le moteur
 - ✅ **nutritionConverter.helper.ts** : Utilitaires de conversion bien structurés
@@ -21,12 +24,14 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 - ✅ **macroBalance.helper.ts** : Évaluation de l'équilibre nutritionnel
 
 ### Hooks React
+
 - ⚠️ **useNormalizedNutrition** : Fonctionnel mais utilisé inconsistamment
 - ⚠️ **useNutritionCalculation** : Mélange des préoccupations UI/business
 - ⚠️ **useCookingMethodAdjustment** : Logique complexe avec recalculs fréquents
 - ❌ **useMealNutrition** : Manquant, devrait intégrer MCP et nutritionEngine
 
 ### Composants UI
+
 - ❌ **MealCard** : Contient de la logique métier directement dans le rendu
 - ❌ **MacrosInfoCard** : Inconsistance dans l'affichage des valeurs normalisées
 - ❌ **NutritionAdjuster** : Trop de responsabilités (calcul et UI)
@@ -34,23 +39,28 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 ## 2. Problèmes Identifiés
 
 1. **Mélange des responsabilités** :
+
    - Logique métier intégrée directement dans les composants UI
    - Manque d'abstraction entre la couche données et la couche présentation
 
 2. **Non-conformité avec le pattern MCP** :
+
    - Système nutritionnel pas complètement aligné avec l'architecture MCP du projet
    - Absence d'un handler MCP dédié aux calculs nutritionnels standardisés
 
 3. **Inconsistance dans les calculs** :
+
    - Différentes approches pour calculer le poids total (estimation vs. réel)
    - Multiples implémentations pour des calculs similaires
 
 4. **Utilisation irrégulière des hooks** :
+
    - Les hooks ne sont pas utilisés systématiquement dans tous les composants
    - Paramètres inconsistants entre différentes parties du code
    - Manque d'un hook qui servirait de façade entre le MCP et les composants UI
 
 5. **Duplication de code** :
+
    - Fonctions de calcul similaires dans différents helpers
    - Logique de normalisation répétée dans les composants
 
@@ -70,6 +80,7 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 ### 🚨 P0 – Fondations MCP et Normalisation
 
 - [x] **Créer un handler MCP pour les calculs nutritionnels**
+
   - [x] Générer `nutrition-handlers.ts` dans `/utils/mcp/handlers`
     - ✅ Implémenté le 04/05/2025 avec fonctions pour normalisation des macros
   - [x] Ajouter `calculateNormalizedNutrition`, `getMealWeight`, `getMacroBreakdown`
@@ -79,6 +90,7 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
   - [ ] ✅ **Sous-tests :** écrire des tests unitaires pour chaque fonction
 
 - [x] **Développer le hook `useMealNutrition`**
+
   - [x] Consommer les méthodes du handler MCP
     - ✅ Intégration avec `calculateNormalizedNutritionViaMCP` et `getMacroBreakdownViaMCP`
   - [x] Retourner un objet complet avec toutes les données nutritionnelles
@@ -101,10 +113,12 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 ### 🟠 P1 – Nettoyage des Helpers & Centralisation
 
 - [x] **Retirer les helpers dépréciés**
+
   - [x] Remplacer `macroCalculations.helper.ts` par les appels MCP
   - [x] Fusionner/supprimer `nutrition-calculation.helper.ts`
 
 - [x] **Centraliser les constantes & unités**
+
   - [x] Analyser les fichiers existants dans `/utils/constants` (nutrition-constants.ts, NutritionLimits.ts, NutritionUnits.ts)
     - ✅ Constatation de l'existence d'un fichier centralisé avec point d'entrée unique nutrition-constants.ts
   - [x] Standardiser les noms de fichiers en PascalCase pour cohérence
@@ -137,10 +151,12 @@ Ce document présente un plan détaillé pour améliorer l'architecture du syst�
 ### 🟢 P2 – Tests, Documentation & UX
 
 - [ ] **Étendre la couverture de tests**
+
   - [ ] Scénarios limites (poids nul, négatif, extrêmes)
   - [ ] Tests d’intégration du flux (création → MCP → UI)
 
 - [ ] **Documentation**
+
   - [ ] Diagramme de flux MCP pour la nutrition
   - [ ] Guide développeur : ajouter un nouveau calcul nutritionnel
   - [ ] Guide produit : comment sont calculées les valeurs affichées

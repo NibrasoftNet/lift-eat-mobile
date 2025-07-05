@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({
   containerStyle,
 }) => {
   const { colors, color } = useAppTheme();
-  
+
   // Limiter à 3 icônes maximum à droite
   const limitedRightIcons = rightIcons.slice(0, 3);
   const isTransparent = variant === 'transparent';
@@ -107,13 +107,11 @@ const Navbar: React.FC<NavbarProps> = ({
     logoContainer: {
       width: 32,
       height: 32,
-    }
+    },
   });
 
   return (
-    <Box 
-      style={[styles.container, containerStyle]}
-    >
+    <Box style={[styles.container, containerStyle]}>
       {/* Section gauche: Bouton retour ou Logo */}
       <Box style={styles.leftSection}>
         {showBackButton ? (
@@ -123,31 +121,25 @@ const Navbar: React.FC<NavbarProps> = ({
           </TouchableOpacity>
         ) : showLogo ? (
           <Box style={styles.logoContainer}>
-            <AppLogo 
-              type="default" 
-              size={32} 
-            />
+            <AppLogo type="default" size={32} />
           </Box>
         ) : null}
       </Box>
-      
+
       {/* Section centrale: Titre */}
       <Box style={styles.centerSection}>
         {title && (
-          <Text 
-            urbanist="body"
-            bold
-          >
+          <Text urbanist="body" bold>
             {title}
           </Text>
         )}
       </Box>
-      
+
       {/* Section droite: Icônes d'action */}
       <Box style={styles.rightSection}>
         {limitedRightIcons.map((item, index) => (
-          <TouchableOpacity 
-            key={`right-icon-${index}`} 
+          <TouchableOpacity
+            key={`right-icon-${index}`}
             style={styles.iconButton}
             onPress={item.onPress}
           >

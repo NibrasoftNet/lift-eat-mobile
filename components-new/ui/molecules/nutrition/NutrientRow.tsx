@@ -7,27 +7,27 @@ interface NutrientRowProps {
    * Nom du macronutriment (Carbs, Protein, Fat)
    */
   name: string;
-  
+
   /**
    * Valeur du macronutriment en grammes
    */
   value: number;
-  
+
   /**
    * Pourcentage du macronutriment sur le total des calories (format: "(xx.x%)")
    */
   percentage: string;
-  
+
   /**
    * Couleur du point indicateur
    */
   dotColor: string;
-  
+
   /**
    * Couleur du texte principal (varie selon le mode sombre/clair)
    */
   textColor: string;
-  
+
   /**
    * Couleur du texte secondaire pour le pourcentage
    */
@@ -39,13 +39,13 @@ interface NutrientRowProps {
  * Affiche une ligne de macronutriment avec son nom, sa valeur et son pourcentage
  * Reproduction exacte du design Figma (node-id=48485:28653)
  */
-const NutrientRow: React.FC<NutrientRowProps> = ({ 
+const NutrientRow: React.FC<NutrientRowProps> = ({
   name,
   value,
   percentage,
   dotColor,
   textColor,
-  secondaryTextColor
+  secondaryTextColor,
 }) => {
   return (
     <View style={styles.container}>
@@ -55,7 +55,9 @@ const NutrientRow: React.FC<NutrientRowProps> = ({
       </View>
       <View style={styles.valueContainer}>
         <Text style={[styles.value, { color: textColor }]}>{value}</Text>
-        <Text style={[styles.percentage, { color: secondaryTextColor }]}>{percentage.trim()}</Text>
+        <Text style={[styles.percentage, { color: secondaryTextColor }]}>
+          {percentage.trim()}
+        </Text>
       </View>
     </View>
   );

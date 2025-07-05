@@ -22,9 +22,7 @@ export const mealSchema = z.object({
     .min(3, { message: 'meal.form.validation.description.min' }),
   cuisine: z.enum(CuisineTypeArray),
   unit: z.enum(MealUnitArray),
-  quantity: z
-    .number()
-    .min(1, { message: 'meal.form.validation.quantity.min' }),
+  quantity: z.number().min(1, { message: 'meal.form.validation.quantity.min' }),
   calories: z.number(),
   carbs: z.number(),
   fat: z.number(),

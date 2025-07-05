@@ -3,7 +3,7 @@
  * Gère le formatage et les aspects visuels des méthodes de cuisson
  */
 
-import { formattingUIService } from "@/utils/services/ui/formatting-ui.service";
+import { formattingUIService } from '@/utils/services/ui/formatting-ui.service';
 
 /**
  * Service pour les aspects UI des méthodes de cuisson
@@ -17,7 +17,7 @@ class CookingMethodUIService {
   formatPercentage(value: number): string {
     return formattingUIService.formatPercentage(value);
   }
-  
+
   /**
    * Obtenir une classe CSS basée sur le pourcentage
    * @param percentage Valeur en pourcentage

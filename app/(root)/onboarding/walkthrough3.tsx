@@ -4,7 +4,14 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Dimensions, StatusBar } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  StatusBar,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../../themeNew';
@@ -51,7 +58,7 @@ export default function Walkthrough3() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       {/* Fond avec ellipse gradient */}
       <View style={styles.backgroundContainer}>
         <View style={styles.ellipseGradient} />
@@ -72,7 +79,8 @@ export default function Walkthrough3() {
             Set Your Daily Goals
           </Text>
           <Text variant="body" color="#616161" style={styles.description}>
-            Set your daily goals for calories, water intake, and other nutrition needs
+            Set your daily goals for calories, water intake, and other nutrition
+            needs
           </Text>
         </View>
 
@@ -84,8 +92,8 @@ export default function Walkthrough3() {
         </View>
 
         {/* Bouton Get Started */}
-        <TouchableOpacity 
-          onPress={handleGetStarted} 
+        <TouchableOpacity
+          onPress={handleGetStarted}
           style={styles.getStartedButton}
         >
           <Text variant="button" color="#FFFFFF" style={styles.getStartedText}>
@@ -115,7 +123,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: width * 1.5,
     height: width * 1.5,
-    borderRadius: width * 1.5 / 2,
+    borderRadius: (width * 1.5) / 2,
     backgroundColor: 'transparent',
     top: -width * 0.5,
     // Simule le gradient radial en utilisant des shadows

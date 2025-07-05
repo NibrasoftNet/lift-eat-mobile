@@ -85,7 +85,6 @@ import { nutritionEngine } from '@/utils/engines/nutrition-engine';
 // Constante pour l'affichage standardisé des valeurs nutritionnelles
 const DEFAULT_DISPLAY_WEIGHT = 100;
 
-
 export default function MealForm({
   defaultValues,
   operation,
@@ -99,14 +98,23 @@ export default function MealForm({
   const userId = useMemo(() => getCurrentUserIdSync(), []);
   // Valider l'accès de l'utilisateur
   useEffect(() => {
-    const isValid = mealFormService.validateUserAccess(userId?.toString() || null, toast);
+    const isValid = mealFormService.validateUserAccess(
+      userId?.toString() || null,
+      toast,
+    );
     if (!isValid) {
       router.back();
     }
   }, [userId, toast, router]);
-  
-  const { selectedIngredients, totalMacros, totalWeight, mealWeight, setMealWeight } = useIngredientStore();
-  
+
+  const {
+    selectedIngredients,
+    totalMacros,
+    totalWeight,
+    mealWeight,
+    setMealWeight,
+  } = useIngredientStore();
+
   // Utiliser le service de pages pour normaliser les valeurs nutritionnelles
   const { normalizedMacros, displayText } = useMemo(() => {
     const rawMacros = {
@@ -114,21 +122,21 @@ export default function MealForm({
       carbs: totalMacros.totalCarbs,
       fat: totalMacros.totalFats,
       protein: totalMacros.totalProtein,
-      unit: defaultValues.unit
+      unit: defaultValues.unit,
     };
-    
+
     // Utiliser directement nutritionEngine pour la normalisation conformément à l'architecture MCP
     const result = nutritionEngine.normalizeForDisplay(
       rawMacros,
       totalWeight,
-      NutritionDisplayMode.PER_100G
+      NutritionDisplayMode.PER_100G,
     );
-    
+
     // Adapter le format de retour pour maintenir la compatibilité
     return {
       normalizedMacros: result.normalizedMacros || rawMacros,
       displayText: result.displayText || 'Valeurs nutritionnelles',
-      adjustmentFactor: result.normalizationFactor || 1
+      adjustmentFactor: result.normalizationFactor || 1,
     };
   }, [totalMacros, totalWeight, defaultValues.unit]);
 
@@ -136,7 +144,11 @@ export default function MealForm({
   const processedDefaultValues = useMemo(() => {
     // Si c'est une mise à jour, utiliser les valeurs existantes, sinon obtenir les valeurs par défaut
     if (operation === 'update' && defaultValues) {
-      logger.info(LogCategory.FORM, 'Using existing meal data for form update', { mealId: defaultValues.id });
+      logger.info(
+        LogCategory.FORM,
+        'Using existing meal data for form update',
+        { mealId: defaultValues.id },
+      );
       return defaultValues;
     } else {
       logger.info(LogCategory.FORM, 'Using default values for new meal form');
@@ -145,11 +157,13 @@ export default function MealForm({
   }, [operation, defaultValues]);
 
   // Initialiser l'image avec celle du repas existant si disponible
-  const [image, setImage] = useState<Buffer<ArrayBufferLike> | string | undefined>(
-    defaultValues.image || processedDefaultValues.image
-  );
-  const [isImageActionSheetOpen, setIsImageActionSheetOpen] = useState<boolean>(false);
-  const [showIngredientsDrawer, setShowIngredientsDrawer] = useState<boolean>(false);
+  const [image, setImage] = useState<
+    Buffer<ArrayBufferLike> | string | undefined
+  >(defaultValues.image || processedDefaultValues.image);
+  const [isImageActionSheetOpen, setIsImageActionSheetOpen] =
+    useState<boolean>(false);
+  const [showIngredientsDrawer, setShowIngredientsDrawer] =
+    useState<boolean>(false);
   // Init Tanstack Query client
   const queryClient = useQueryClient();
 
@@ -162,10 +176,13 @@ export default function MealForm({
     resolver: zodResolver(mealSchema),
     defaultValues: processedDefaultValues,
   });
-  
+
   // Synchronize the meal weight with the total ingredients weight for the actual meal
   useEffect(() => {
-    if (operation === 'create' || (operation === 'update' && totalWeight > 0 && mealWeight === 0)) {
+    if (
+      operation === 'create' ||
+      (operation === 'update' && totalWeight > 0 && mealWeight === 0)
+    ) {
       // Only auto-update if we're creating a new meal or if updating a meal with no previously set mealWeight
       setValue('quantity', totalWeight);
       setMealWeight(totalWeight);
@@ -181,14 +198,19 @@ export default function MealForm({
   const handleImageSelection = async (source: 'camera' | 'gallery') => {
     setIsImageActionSheetOpen(false); // Close the action sheet
     // Utiliser le service pour la sélection d'image avec la source appropriée
-    const imageSelectionHandler = mealFormService.handleImageSelection((field, value) => {
-      if (field === 'image') {
-        // Enregistrer l'image dans le formulaire et dans l'état local
-        setValue('image', value);
-        setImage(value);
-        logger.info(LogCategory.FORM, `Image set successfully in form: ${value}`);
-      }
-    });
+    const imageSelectionHandler = mealFormService.handleImageSelection(
+      (field, value) => {
+        if (field === 'image') {
+          // Enregistrer l'image dans le formulaire et dans l'état local
+          setValue('image', value);
+          setImage(value);
+          logger.info(
+            LogCategory.FORM,
+            `Image set successfully in form: ${value}`,
+          );
+        }
+      },
+    );
     // Passer la source (camera ou gallery) à la fonction
     await imageSelectionHandler(source);
   };
@@ -197,32 +219,34 @@ export default function MealForm({
     mutationFn: async (data: MealFormData) => {
       // Utiliser le service pour soumettre le formulaire
       const formResult = await mealFormService.submitMealForm(
-        data, 
+        data,
         userId?.toString() || null,
         operation === 'update' ? defaultValues.id || null : null,
         {
           totalCalories: totalMacros.totalCalories,
           totalCarbs: totalMacros.totalCarbs,
           totalFats: totalMacros.totalFats,
-          totalProtein: totalMacros.totalProtein
+          totalProtein: totalMacros.totalProtein,
         },
-        selectedIngredients // Passer les ingrédients sélectionnés
+        selectedIngredients, // Passer les ingrédients sélectionnés
       );
-      
+
       if (!formResult.success) {
         throw new Error(formResult.message || 'Failed to process meal data');
       }
-      
+
       // Invalider le cache approprié selon l'opération
       if (operation === 'create') {
-        invalidateCache(queryClient, DataType.MEALS_LIST, { invalidateRelated: true });
+        invalidateCache(queryClient, DataType.MEALS_LIST, {
+          invalidateRelated: true,
+        });
       } else if (formResult.data?.id) {
-        invalidateCache(queryClient, DataType.MEAL, { 
+        invalidateCache(queryClient, DataType.MEAL, {
           id: formResult.data.id,
-          invalidateRelated: true
+          invalidateRelated: true,
         });
       }
-      
+
       return formResult.data;
     },
     onSuccess: async (result) => {
@@ -244,27 +268,31 @@ export default function MealForm({
       // En cas de création ou de mise à jour, result contient l'ID du repas dans result.id
       // Extraire l'ID du repas créé ou mis à jour, en s'assurant qu'il est du bon type
       let mealId: string | number | undefined = undefined;
-      
+
       if (result && typeof result === 'object' && 'id' in result) {
         const resultId = result.id;
         if (typeof resultId === 'string' || typeof resultId === 'number') {
           mealId = resultId;
         }
       }
-      
-      logger.info(LogCategory.CACHE, `Invalidating cache after ${operation} meal`, {
-        mealId,
-        operation
-      });
-      
+
+      logger.info(
+        LogCategory.CACHE,
+        `Invalidating cache after ${operation} meal`,
+        {
+          mealId,
+          operation,
+        },
+      );
+
       // Invalider le cache du repas spécifique seulement si nous avons un ID valide
       if (mealId !== undefined) {
-        await invalidateCache(queryClient, DataType.MEAL, { 
+        await invalidateCache(queryClient, DataType.MEAL, {
           id: mealId,
-          invalidateRelated: true 
+          invalidateRelated: true,
         });
       }
-      
+
       // Invalider également directement la liste des repas pour s'assurer que les nouveaux repas sont affichés
       await invalidateCache(queryClient, DataType.MEALS_LIST);
       router.push('/meals/my-meals');
@@ -280,7 +308,11 @@ export default function MealForm({
               id={toastId}
               color={ToastTypeEnum.ERROR}
               title={`Failure ${operation} Meal`}
-              description={error && typeof error.toString === 'function' ? error.toString() : 'Une erreur inconnue est survenue'}
+              description={
+                error && typeof error.toString === 'function'
+                  ? error.toString()
+                  : 'Une erreur inconnue est survenue'
+              }
             />
           );
         },
@@ -307,12 +339,17 @@ export default function MealForm({
       });
       return;
     }
-    
+
     try {
       await mutateAsync(data);
     } catch (error) {
       // Les erreurs seront gérées dans onError de useMutation
-      logger.error(LogCategory.FORM, `Error submitting meal form: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error submitting meal form: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     }
   };
 
@@ -357,7 +394,7 @@ export default function MealForm({
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            gap: 10
+            gap: 10,
           }}
         >
           <Card className="w-full gap-4">
@@ -634,9 +671,14 @@ export default function MealForm({
               renderItem={({ item, index }) => (
                 <IngredientCard item={item} index={index} />
               )}
-              keyExtractor={(item, index) => `ingredient-${item.ingredientStandardId}-${index}`}
+              keyExtractor={(item, index) =>
+                `ingredient-${item.ingredientStandardId}-${index}`
+              }
               estimatedItemSize={100}
-              contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
+              contentContainerStyle={{
+                paddingHorizontal: 8,
+                paddingVertical: 8,
+              }}
             />
           ) : (
             <Card className="rounded-lg flex flex-col gap-2">

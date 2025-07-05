@@ -58,13 +58,13 @@ const Divider: React.FC<DividerProps> = ({
   labelPosition = 'center',
 }) => {
   const theme = useAppTheme();
-  
+
   // Définir les styles selon l'orientation
   const isHorizontal = orientation === 'horizontal';
-  
+
   // Couleur par défaut
   const dividerColor = color || theme.color('successLighter') + '30';
-  
+
   // Style de la ligne selon la variante
   let borderStyle: 'solid' | 'dashed' | 'dotted' = 'solid';
   switch (variant) {
@@ -77,14 +77,14 @@ const Divider: React.FC<DividerProps> = ({
     default:
       borderStyle = 'solid';
   }
-  
+
   // Si on a un label, on va créer une divider avec du contenu
   if (label && isHorizontal) {
     // Calcul des styles pour la position du label
     let containerStyles = {};
     let leftLineStyles = {};
     let rightLineStyles = {};
-    
+
     switch (labelPosition) {
       case 'start':
         leftLineStyles = { flex: 0.1 };
@@ -99,13 +99,14 @@ const Divider: React.FC<DividerProps> = ({
         leftLineStyles = { flex: 1 };
         rightLineStyles = { flex: 1 };
     }
-    
+
     return (
       <Box
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          width: width, flex: width ? undefined : 1 // Remplace width: '100%' par flex
+          width: width,
+          flex: width ? undefined : 1, // Remplace width: '100%' par flex
         }}
         m={m}
         mt={mt}
@@ -147,25 +148,17 @@ const Divider: React.FC<DividerProps> = ({
       </Box>
     );
   }
-  
+
   // Sinon, on crée une simple divider (horizontale ou verticale)
   return (
-    <Box
-      m={m}
-      mt={mt}
-      mr={mr}
-      mb={mb}
-      ml={ml}
-      mx={mx}
-      my={my}
-    >
+    <Box m={m} mt={mt} mr={mr} mb={mb} ml={ml} mx={mx} my={my}>
       <View
         style={[
           styles.divider,
           {
-            width: isHorizontal ? (width || undefined) : thickness,
+            width: isHorizontal ? width || undefined : thickness,
             flex: isHorizontal && !width ? 1 : undefined,
-            height: isHorizontal ? thickness : (height || undefined),
+            height: isHorizontal ? thickness : height || undefined,
             position: !isHorizontal && !height ? 'absolute' : undefined,
             top: !isHorizontal && !height ? 0 : undefined,
             bottom: !isHorizontal && !height ? 0 : undefined,

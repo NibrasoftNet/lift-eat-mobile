@@ -28,14 +28,12 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
   valueClassName = '',
 }: NutritionBoxProps) => {
   // Utiliser directement le nutritionEngine pour le formatage (suivant l'architecture MCP)
-  const formattedValue = nutrientType 
-    ? nutritionEngine.formatForUI(value, nutrientType) 
+  const formattedValue = nutrientType
+    ? nutritionEngine.formatForUI(value, nutrientType)
     : Math.round(value).toString();
 
   return (
-    <Box
-      className={`flex rounded-md items-center drop-shadow-xl ${className}`}
-    >
+    <Box className={`flex rounded-md items-center drop-shadow-xl ${className}`}>
       {/* Top Section (Title) */}
       <HStack
         className={`w-full justify-center rounded-t-xl ${titleClassName}`}
@@ -48,7 +46,9 @@ const NutritionBox: React.FC<NutritionBoxProps> = ({
         className={`w-full rounded-b-xl ${valueClassName} p-1 justify-center gap-2 items-center`}
       >
         <Box
-          accessibilityLabel={`${formattedValue} ${unit}${showTooltip && tooltipContent ? `. ${tooltipContent}` : ''}`}
+          accessibilityLabel={`${formattedValue} ${unit}${
+            showTooltip && tooltipContent ? `. ${tooltipContent}` : ''
+          }`}
         >
           <Text className={`text-gray-600 font-semibold text-center`}>
             {formattedValue} {unit}

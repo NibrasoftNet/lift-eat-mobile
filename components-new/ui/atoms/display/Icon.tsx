@@ -43,10 +43,10 @@ const Icon: React.FC<IconProps> = ({
   ...rest
 }) => {
   const theme = useAppTheme();
-  
+
   // Déterminer la taille en fonction de la prop
   let iconSize: number;
-  
+
   if (typeof size === 'number') {
     iconSize = size;
   } else {
@@ -73,17 +73,12 @@ const Icon: React.FC<IconProps> = ({
         iconSize = 24;
     }
   }
-  
+
   // Utilisez la couleur fournie ou la couleur primaire du thème
   const iconColor = color || theme.color('primary');
-  
+
   return (
-    <Box
-      mx={mx}
-      my={my}
-      m={m}
-      style={[styles.container, style || {}]}
-    >
+    <Box mx={mx} my={my} m={m} style={[styles.container, style || {}]}>
       <IconComponent
         width={iconSize}
         height={iconSize}

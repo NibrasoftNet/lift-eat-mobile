@@ -22,7 +22,6 @@ export interface ScanResultCardProps {
   macros: MacroInfo;
   onAdd?: () => void;
 
-
   brands?: string;
   categories?: string;
   nutriscoreGrade?: string;
@@ -91,8 +90,16 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
           return (
             <MultiPurposeToast
               id={toastId}
-              color={op.data?.alreadyExists ? ToastTypeEnum.INFOS : ToastTypeEnum.SUCCESS}
-              title={t(op.data?.alreadyExists ? 'meal.scanResultCard.toastTitle.alreadyExists' : 'meal.scanResultCard.toastTitle.added')}
+              color={
+                op.data?.alreadyExists
+                  ? ToastTypeEnum.INFOS
+                  : ToastTypeEnum.SUCCESS
+              }
+              title={t(
+                op.data?.alreadyExists
+                  ? 'meal.scanResultCard.toastTitle.alreadyExists'
+                  : 'meal.scanResultCard.toastTitle.added',
+              )}
               description={op.message || ''}
             />
           );
@@ -108,7 +115,11 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
             id={`toast-${id}`}
             color={ToastTypeEnum.ERROR}
             title={t('meal.scanResultCard.toastTitle.error')}
-            description={e instanceof Error ? e.message : t('meal.scanResultCard.toastDescription.defaultError')}
+            description={
+              e instanceof Error
+                ? e.message
+                : t('meal.scanResultCard.toastDescription.defaultError')
+            }
           />
         ),
       });
@@ -132,24 +143,55 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
         <View style={styles.detailsContainer}>
           {nutriscoreGrade && (
             <Text style={styles.detailText}>
-            <Text style={styles.detailLabel}>{t('meal.scanner.productDetails.nutriScore')}: </Text>
-            <Text style={{ color: gradeColor, fontWeight: '700', fontSize:20 }}>{nutriscoreGrade.toUpperCase()}</Text>
-          </Text>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.nutriScore')}:{' '}
+              </Text>
+              <Text
+                style={{ color: gradeColor, fontWeight: '700', fontSize: 20 }}
+              >
+                {nutriscoreGrade.toUpperCase()}
+              </Text>
+            </Text>
           )}
           {brands && (
-            <Text style={styles.detailText}><Text style={styles.detailLabel}>{t('meal.scanner.productDetails.brands')}: </Text>{brands}</Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.brands')}:{' '}
+              </Text>
+              {brands}
+            </Text>
           )}
           {categories && (
-            <Text style={styles.detailText}><Text style={styles.detailLabel}>{t('meal.scanner.productDetails.categories')}: </Text>{categories}</Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.categories')}:{' '}
+              </Text>
+              {categories}
+            </Text>
           )}
           {sugars !== undefined && (
-            <Text style={styles.detailText}><Text style={styles.detailLabel}>{t('meal.scanner.productDetails.sugars')}: </Text>{sugars} g</Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.sugars')}:{' '}
+              </Text>
+              {sugars} g
+            </Text>
           )}
           {allergens && (
-            <Text style={styles.detailText}><Text style={styles.detailLabel}>{t('meal.scanner.productDetails.allergens')}: </Text>{allergens}</Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.allergens')}:{' '}
+              </Text>
+              {allergens}
+            </Text>
           )}
           {barcode && (
-            <Text style={styles.detailText}><Text style={styles.detailLabel}>{t('meal.scanner.productDetails.barcode')}: </Text>{barcode}</Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.detailLabel}>
+                {t('meal.scanner.productDetails.barcode')}:{' '}
+              </Text>
+              {barcode}
+            </Text>
           )}
         </View>
       )}
@@ -164,8 +206,6 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
           showDetails={true}
         />
       </View>
-
-
 
       {/* Add button */}
       <TouchableOpacity style={styles.addBtn} onPress={handleAdd}>
@@ -205,7 +245,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       alignSelf: 'center',
       marginBottom: 16,
       overflow: 'hidden',
-      marginTop:20,
+      marginTop: 20,
     },
     favoriteBtn: {
       position: 'absolute',

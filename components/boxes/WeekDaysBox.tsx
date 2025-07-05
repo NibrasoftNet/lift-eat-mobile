@@ -23,7 +23,9 @@ const WeekDaysBox: React.FC<WeekDaysBoxProps> = ({
         <Button
           key={index}
           onPress={() => handleDayClick(day)}
-          className={`rounded-full h-20 flex flex-col items-center justify-center p-2 ${day === selectedDay ? 'bg-primary-500' : 'bg-primary-100'}`}
+          className={`rounded-full h-20 flex flex-col items-center justify-center p-2 ${
+            day === selectedDay ? 'bg-primary-500' : 'bg-primary-100'
+          }`}
         >
           <ButtonText className="text-sm text-center text-white">
             {day.substring(0, 3)}

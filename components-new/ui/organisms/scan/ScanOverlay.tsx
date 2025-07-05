@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Dimensions, Easing, Text, View, TouchableOpacity } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  Dimensions,
+  Easing,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import { useTheme } from '@/themeNew';
 import { useTranslation } from 'react-i18next';
 import Box from '@/components-new/ui/atoms/base/Box';
@@ -22,7 +30,11 @@ const FRAME_BORDER_RADIUS = 15;
 const LINE_HEIGHT = 2;
 const BORDER_WIDTH = 3;
 
-const ScanOverlay: React.FC<ScanOverlayProps> = ({ onScan, scanning, detected = false }) => {
+const ScanOverlay: React.FC<ScanOverlayProps> = ({
+  onScan,
+  scanning,
+  detected = false,
+}) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
@@ -55,68 +67,75 @@ const ScanOverlay: React.FC<ScanOverlayProps> = ({ onScan, scanning, detected = 
   return (
     <Box style={styles.container}>
       <Animated.View style={[styles.scanFrame, { borderColor: '#A4C73B' }]}>
-        <Animated.View style={[styles.scanLine, { transform: [{ translateY: scanAnim }] }]} />
-        <Animated.View style={[styles.scanLine, { backgroundColor: '#A4C73B' }]} />
-        <Animated.View style={[styles.scanLine, { backgroundColor: '#A4C73B' }]} />
-        <Animated.View style={[styles.scanLine, { backgroundColor: '#A4C73B' }]} />
-        <Animated.View style={[styles.scanLine, { backgroundColor: '#A4C73B' }]} />
+        <Animated.View
+          style={[styles.scanLine, { transform: [{ translateY: scanAnim }] }]}
+        />
+        <Animated.View
+          style={[styles.scanLine, { backgroundColor: '#A4C73B' }]}
+        />
+        <Animated.View
+          style={[styles.scanLine, { backgroundColor: '#A4C73B' }]}
+        />
+        <Animated.View
+          style={[styles.scanLine, { backgroundColor: '#A4C73B' }]}
+        />
+        <Animated.View
+          style={[styles.scanLine, { backgroundColor: '#A4C73B' }]}
+        />
       </Animated.View>
-      
-
 
       <Box style={styles.scanTextContainer}>
         <Box style={styles.scanText}>
-          <Text style={styles.scanTextContent}>{t('scanner.overlayInstruction')}</Text>
+          <Text style={styles.scanTextContent}>
+            {t('scanner.overlayInstruction')}
+          </Text>
         </Box>
       </Box>
-
-
     </Box>
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  scanFrame: {
-    width: FRAME_WIDTH,
-    height: FRAME_HEIGHT,
-    borderWidth: BORDER_WIDTH,
-    borderRadius: FRAME_BORDER_RADIUS,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanLine: {
-    height: LINE_HEIGHT,
-    position: 'absolute',
-    width: FRAME_WIDTH - BORDER_WIDTH * 3,
-    backgroundColor: '#A4C73B',
-    opacity: 0.8,
-    left: BORDER_WIDTH,
-
-  },
-  scanTextContainer: {
-    position: 'absolute',
-    bottom: FRAME_HEIGHT * 0.1,
-    width: '100%',
-  },
-  scanText: {
-    backgroundColor: '#A4C73B',
-    padding: 12,
-    borderRadius: 8,
-    opacity: 0.6,
-  },
-  scanTextContent: {
-    color: theme.colors.textInverse,
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    },
+    scanFrame: {
+      width: FRAME_WIDTH,
+      height: FRAME_HEIGHT,
+      borderWidth: BORDER_WIDTH,
+      borderRadius: FRAME_BORDER_RADIUS,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    scanLine: {
+      height: LINE_HEIGHT,
+      position: 'absolute',
+      width: FRAME_WIDTH - BORDER_WIDTH * 3,
+      backgroundColor: '#A4C73B',
+      opacity: 0.8,
+      left: BORDER_WIDTH,
+    },
+    scanTextContainer: {
+      position: 'absolute',
+      bottom: FRAME_HEIGHT * 0.1,
+      width: '100%',
+    },
+    scanText: {
+      backgroundColor: '#A4C73B',
+      padding: 12,
+      borderRadius: 8,
+      opacity: 0.6,
+    },
+    scanTextContent: {
+      color: theme.colors.textInverse,
+      textAlign: 'center',
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
 
 export default ScanOverlay;

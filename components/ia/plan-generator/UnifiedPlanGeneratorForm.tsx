@@ -26,29 +26,39 @@ interface UnifiedPlanGeneratorFormProps {
  * Composant unifié pour le générateur de plan nutritionnel
  * Utilise PlanConfigurationForm comme formulaire standardisé
  */
-const UnifiedPlanGeneratorForm: React.FC<UnifiedPlanGeneratorFormProps> = ({ onPlanGenerated }) => {
+const UnifiedPlanGeneratorForm: React.FC<UnifiedPlanGeneratorFormProps> = ({
+  onPlanGenerated,
+}) => {
   // État pour les restrictions alimentaires disponibles
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<DietaryRestrictionFormType[]>([]);
-  
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<
+    DietaryRestrictionFormType[]
+  >([]);
+
   // Initialisation des hooks
   const toast = useToast();
   const [uiState, uiActions] = useUiState();
-  const [formMethods, formActions] = usePlanGeneratorForm(uiActions, onPlanGenerated);
-  
+  const [formMethods, formActions] = usePlanGeneratorForm(
+    uiActions,
+    onPlanGenerated,
+  );
+
   // Couleurs du thème
   const primaryColor = useThemeColor({}, 'tint');
   const disabledColor = useThemeColor({}, 'tabIconDefault');
   const textColor = useThemeColor({}, 'text');
-  const whiteColor = useThemeColor({ light: 'white', dark: 'white' }, 'background');
-  
+  const whiteColor = useThemeColor(
+    { light: 'white', dark: 'white' },
+    'background',
+  );
+
   // Extraire les propriétés et méthodes nécessaires de react-hook-form
   const { handleSubmit, control, formState } = formMethods;
   const { errors } = formState;
-  
+
   // États pour le plan généré et les états de loading/error
   const [generatedPlan, setGeneratedPlan] = useState<IaPlanType | null>(null);
   const [error, setError] = useState<IaError | null>(null);
-  
+
   // Charger les restrictions alimentaires disponibles
   useEffect(() => {
     const loadDietaryRestrictions = async () => {
@@ -81,22 +91,23 @@ const UnifiedPlanGeneratorForm: React.FC<UnifiedPlanGeneratorFormProps> = ({ onP
 
       // Générer le plan via l'action du formulaire
       const plan = await formActions.generatePlan();
-      
+
       if (plan) {
         setGeneratedPlan(plan);
-        
+
         // Notifier le composant parent si nécessaire
         if (onPlanGenerated) {
           onPlanGenerated(plan);
         }
       }
     } catch (error) {
-      let errorMessage = 'Une erreur est survenue lors de la génération du plan.';
-      
+      let errorMessage =
+        'Une erreur est survenue lors de la génération du plan.';
+
       if (error instanceof IaError) {
         errorMessage = error.message;
       }
-      
+
       toast.show({
         render: ({ id }) => (
           <MultiPurposeToast
@@ -115,9 +126,9 @@ const UnifiedPlanGeneratorForm: React.FC<UnifiedPlanGeneratorFormProps> = ({ onP
   // Si un plan a été généré, afficher les résultats
   if (generatedPlan) {
     return (
-      <PlanGenerationResult 
+      <PlanGenerationResult
         plan={generatedPlan}
-        loading={uiState.loading} 
+        loading={uiState.loading}
         error={error}
       />
     );

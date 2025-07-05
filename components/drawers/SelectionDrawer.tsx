@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useState, useMemo, useEffect, useCallback } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { RefreshControl, ActivityIndicator } from 'react-native';
 import { logger } from '@/utils/services/common/logging.service';
@@ -45,7 +52,13 @@ interface SelectionDrawerProps<T extends SelectionItem> {
   fetchNextPage: () => Promise<any>;
   hasNextPage: boolean | undefined;
   setSearchTerm: (term: string | undefined) => void;
-  renderItem: ({ item, index }: { item: T; index: number }) => React.ReactElement;
+  renderItem: ({
+    item,
+    index,
+  }: {
+    item: T;
+    index: number;
+  }) => React.ReactElement;
   getItemType?: (item: T) => string; // Aide à l'optimisation en identifiant les types d'items différents
   searchPlaceholder?: string;
   onEndReachedThreshold?: number;
@@ -71,21 +84,26 @@ function SelectionDrawer<T extends SelectionItem>({
   hasNextPage,
   setSearchTerm,
   renderItem,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   onEndReachedThreshold = 0.5,
   estimatedItemSize = 300,
   additionalActions,
-  footerComponent
+  footerComponent,
 }: SelectionDrawerProps<T>) {
   // États locaux
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string | undefined>(undefined);
-  
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<
+    string | undefined
+  >(undefined);
+
   // Vérifier l'authentification de l'utilisateur
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   useEffect(() => {
     if (!userId) {
-      logger.warn(LogCategory.AUTH, 'User not authenticated when accessing SelectionDrawer');
+      logger.warn(
+        LogCategory.AUTH,
+        'User not authenticated when accessing SelectionDrawer',
+      );
       setShowDrawer(false);
     }
   }, [userId, setShowDrawer]);
@@ -94,14 +112,18 @@ function SelectionDrawer<T extends SelectionItem>({
   useEffect(() => {
     // Ne rien faire si le terme de recherche est undefined
     if (typeof debouncedSearchTerm === 'undefined') return;
-    
+
     // Fonction de rappel qui appelle setSearchTerm
     const updateSearchTerm = (term: string) => {
       setSearchTerm(term);
     };
-    
+
     // Utiliser le service pour débouncer le terme de recherche
-    drawerUIService.debounceSearchTerm(debouncedSearchTerm, updateSearchTerm, 300);
+    drawerUIService.debounceSearchTerm(
+      debouncedSearchTerm,
+      updateSearchTerm,
+      300,
+    );
   }, [debouncedSearchTerm, setSearchTerm]);
 
   // Gestionnaire de recherche optimisé
@@ -137,7 +159,7 @@ function SelectionDrawer<T extends SelectionItem>({
           </Button>
         </DrawerHeader>
         <DrawerBody className="pb-16">
-        {/* pb-16 pour faire de la place pour le footer fixe */}
+          {/* pb-16 pour faire de la place pour le footer fixe */}
           <VStack className="gap-2 flex-1">
             <Input
               variant="outline"
@@ -150,9 +172,9 @@ function SelectionDrawer<T extends SelectionItem>({
                 onChangeText={handleSearch}
               />
             </Input>
-            
+
             {additionalActions}
-            
+
             <QueryStateHandler
               data={data}
               isLoading={isLoading}
@@ -165,13 +187,21 @@ function SelectionDrawer<T extends SelectionItem>({
                 renderItem={renderItem}
                 keyExtractor={(item) => item.uniqueId || `${item.id}`}
                 // Paramètres spécifiques fournis ou valeurs par défaut optimisées
-                estimatedItemSize={estimatedItemSize || drawerUIService.getFlashListConfig().estimatedItemSize}
+                estimatedItemSize={
+                  estimatedItemSize ||
+                  drawerUIService.getFlashListConfig().estimatedItemSize
+                }
                 // Ajouter un padding suffisant en bas pour éviter que le footer ne cache des éléments
                 contentContainerStyle={{ padding: 8, paddingBottom: 120 }}
                 onEndReached={handleEndReached}
-                onEndReachedThreshold={onEndReachedThreshold || drawerUIService.getFlashListConfig().onEndReachedThreshold}
+                onEndReachedThreshold={
+                  onEndReachedThreshold ||
+                  drawerUIService.getFlashListConfig().onEndReachedThreshold
+                }
                 // Optimisations pour FlashList compatibles avec les types existants
-                estimatedListSize={drawerUIService.getFlashListConfig().estimatedListSize}
+                estimatedListSize={
+                  drawerUIService.getFlashListConfig().estimatedListSize
+                }
                 ListFooterComponent={() =>
                   isFetchingNextPage ? (
                     <ActivityIndicator size="large" color="#000" />
@@ -181,8 +211,8 @@ function SelectionDrawer<T extends SelectionItem>({
                   )
                 }
                 refreshControl={
-                  <RefreshControl 
-                    refreshing={isRefetching && !isFetchingNextPage} 
+                  <RefreshControl
+                    refreshing={isRefetching && !isFetchingNextPage}
                     onRefresh={refetch}
                     colors={['#4F46E5']} // Couleur de chargement assortie au thème
                   />
@@ -195,10 +225,7 @@ function SelectionDrawer<T extends SelectionItem>({
           {footerComponent ? (
             footerComponent
           ) : (
-            <Button
-              onPress={() => setShowDrawer(false)}
-              className="w-full"
-            >
+            <Button onPress={() => setShowDrawer(false)} className="w-full">
               <ButtonText>Close</ButtonText>
             </Button>
           )}

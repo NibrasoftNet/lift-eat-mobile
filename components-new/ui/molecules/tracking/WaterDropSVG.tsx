@@ -6,7 +6,13 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Path,
+  Defs,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
 interface WaterDropSVGProps {
   /** Pourcentage de remplissage (0-100) */
@@ -34,32 +40,26 @@ const WaterDropSVG: React.FC<WaterDropSVGProps> = ({
 }) => {
   // Couleurs selon le thème
   const dropOuterColor = dark ? '#1E1E1E' : '#F5F5F5';
-  
+
   // Pour simplifier, nous utilisons une approche différente pour le pourcentage
   const waterHeight = (fillPercentage / 100) * 100; // hauteur maximale de 100
-  
+
   return (
     <View style={[styles.container, style]}>
       <Svg width={width} height={height} viewBox="0 0 160 190">
         <Defs>
-          <LinearGradient 
-            id="waterGradient" 
-            x1="80" 
-            y1="50" 
-            x2="80" 
-            y2="180"
-          >
+          <LinearGradient id="waterGradient" x1="80" y1="50" x2="80" y2="180">
             <Stop offset="0" stopColor="#369FFF" />
             <Stop offset="1" stopColor="#0064FF" />
           </LinearGradient>
         </Defs>
-        
+
         {/* Contour extérieur de la goutte */}
         <Path
           d="M80 10C80 10 140 70 140 130C140 162.033 113.137 188 80 188C46.863 188 20 162.033 20 130C20 70 80 10 80 10Z"
           fill={dropOuterColor}
         />
-        
+
         {/* Remplissage de la goutte - plus simple mais efficace */}
         {fillPercentage > 0 && (
           <Path
@@ -68,11 +68,13 @@ const WaterDropSVG: React.FC<WaterDropSVGProps> = ({
             transform={`translate(0, ${100 - waterHeight})`}
           />
         )}
-        
+
         {/* Ligne d'ondulation simplifiée */}
         {fillPercentage > 0 && (
-          <Path 
-            d={`M30 ${140 - waterHeight + 2} Q55 ${135 - waterHeight} 80 ${140 - waterHeight} Q105 ${145 - waterHeight} 130 ${140 - waterHeight}`}
+          <Path
+            d={`M30 ${140 - waterHeight + 2} Q55 ${135 - waterHeight} 80 ${
+              140 - waterHeight
+            } Q105 ${145 - waterHeight} 130 ${140 - waterHeight}`}
             stroke="url(#waterGradient)"
             strokeWidth="2"
             fill="none"
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
 });
 
 export default WaterDropSVG;

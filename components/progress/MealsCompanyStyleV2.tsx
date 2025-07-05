@@ -14,15 +14,17 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { DailyProgressOrmProps } from '@/db/schema';
-import useProgressStore, { MealWithProgress } from '@/utils/store/progressStore';
+import useProgressStore, {
+  MealWithProgress,
+} from '@/utils/store/progressStore';
 import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
-import { 
-  mealsCompanyStyleService, 
-  MealItem, 
-  MealType, 
-  MealList, 
-  MealListsState 
+import {
+  mealsCompanyStyleService,
+  MealItem,
+  MealType,
+  MealList,
+  MealListsState,
 } from '@/utils/services/common/meals-company-style.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { logger } from '@/utils/services/common/logging.service';
@@ -119,12 +121,12 @@ const DraggableItem = ({
                     droppedOnMealType = 'snacks';
                   }
 
-                  console.log("Dropped at:", {
+                  console.log('Dropped at:', {
                     x: nativeEvent.absoluteX,
                     y: nativeEvent.absoluteY,
                     relativeY,
                     droppedOnRight,
-                    droppedOnMealType
+                    droppedOnMealType,
                   });
 
                   translateX.value = withSpring(0);
@@ -175,19 +177,25 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
       lunch: [],
       dinner: [],
       snacks: [],
-    }
+    },
   };
 
-  const [mealListsState, setMealListsState] = useState<MealListsState>(initialState);
+  const [mealListsState, setMealListsState] =
+    useState<MealListsState>(initialState);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
 
   // Initialiser les listes de repas lors du chargement du composant
   useEffect(() => {
-    logger.info(LogCategory.PERFORMANCE, 'MealsCompanyStyleV2 - Initialisation', { count: mealsWithProgress.length });
-    
+    logger.info(
+      LogCategory.PERFORMANCE,
+      'MealsCompanyStyleV2 - Initialisation',
+      { count: mealsWithProgress.length },
+    );
+
     // Utiliser le service pour initialiser les listes
-    const newState = mealsCompanyStyleService.initializeMealLists(mealsWithProgress);
+    const newState =
+      mealsCompanyStyleService.initializeMealLists(mealsWithProgress);
     setMealListsState(newState);
     setMealsWithProgress(mealsWithProgress);
   }, [mealsWithProgress, setMealsWithProgress]);
@@ -206,16 +214,21 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
     droppedOnRight: boolean,
     droppedOnMealType: MealType,
   ) => {
-    logger.debug(LogCategory.UI, 'Fin du drag and drop', { id, droppedOnRight, mealType: droppedOnMealType });
+    logger.debug(LogCategory.UI, 'Fin du drag and drop', {
+      id,
+      droppedOnRight,
+      mealType: droppedOnMealType,
+    });
     setActiveId(null);
 
     // Utiliser le service pour mettre à jour les listes
-    const { updatedState, movedItems } = mealsCompanyStyleService.updateMealLists(
-      mealListsState,
-      selectedItems,
-      droppedOnRight,
-      droppedOnMealType
-    );
+    const { updatedState, movedItems } =
+      mealsCompanyStyleService.updateMealLists(
+        mealListsState,
+        selectedItems,
+        droppedOnRight,
+        droppedOnMealType,
+      );
 
     if (movedItems.length > 0) {
       // Mettre à jour l'état local immédiatement
@@ -232,18 +245,18 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
           queryClient,
           dailyProgress.id,
           movedItems,
-          droppedOnRight
+          droppedOnRight,
         );
 
         // Afficher la notification de succès
         if (result.success) {
           toast.show({
-            placement: "top",
+            placement: 'top',
             render: () => (
               <Box className="bg-green-600 px-4 py-3 rounded-sm mb-5">
                 <Text style={styles.toastText}>{result.message}</Text>
               </Box>
-            )
+            ),
           });
 
           // Notifier le composant parent pour rafraîchir les données
@@ -253,14 +266,14 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
         }
       } catch (error: any) {
         toast.show({
-          placement: "top",
+          placement: 'top',
           render: () => (
             <Box className="bg-red-600 px-4 py-3 rounded-sm mb-5">
               <Text style={styles.toastText}>
                 Erreur: {error.message || 'Une erreur est survenue'}
               </Text>
             </Box>
-          )
+          ),
         });
       }
 
@@ -271,7 +284,10 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
 
   const toggleItemSelection = (id: number) => {
     // Utiliser le service pour basculer la sélection d'un élément
-    const newSelection = mealsCompanyStyleService.toggleItemSelection(selectedItems, id);
+    const newSelection = mealsCompanyStyleService.toggleItemSelection(
+      selectedItems,
+      id,
+    );
     setSelectedItems(newSelection);
   };
 
@@ -309,7 +325,9 @@ const MealsCompanyStyleV2: React.FC<MealsCompanyStyleV2Props> = ({
   if (mealsWithProgress.length === 0) {
     return (
       <View style={styles.noMealsContainer}>
-        <Text style={styles.noMealsText}>Aucun repas disponible pour cette date.</Text>
+        <Text style={styles.noMealsText}>
+          Aucun repas disponible pour cette date.
+        </Text>
       </View>
     );
   }
@@ -425,7 +443,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
 });
 
 export default MealsCompanyStyleV2;

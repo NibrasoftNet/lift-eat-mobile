@@ -17,135 +17,141 @@ interface MealEntry {
 
 const SucreEtProduitsSucres: MealEntry[] = [
   {
-    name: "Bonbons",
+    name: 'Bonbons',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 379,
-    carbs: 95.00,
-    fat: 0.00,
-    protein: 0.00,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Bonbons.jpg'
+    carbs: 95.0,
+    fat: 0.0,
+    protein: 0.0,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Bonbons.jpg',
   },
   {
-    name: "Chamia",
+    name: 'Chamia',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 517,
     carbs: 42.73,
-    fat: 33.30,
-    protein: 11.60,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chamia.jpg'
+    fat: 33.3,
+    protein: 11.6,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chamia.jpg',
   },
   {
-    name: "Chocolat à Tartiner avec Noisette",
+    name: 'Chocolat à Tartiner avec Noisette',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 541,
     carbs: 62.16,
     fat: 29.73,
     protein: 5.41,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_à_Tartiner_avec_Noisette.jpg'
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_à_Tartiner_avec_Noisette.jpg',
   },
   {
-    name: "Chocolat au Lait",
+    name: 'Chocolat au Lait',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 535,
-    carbs: 59.40,
+    carbs: 59.4,
     fat: 29.66,
     protein: 7.65,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_au_Lait.jpg'
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_au_Lait.jpg',
   },
   {
-    name: "Chocolat Instantané Sucré, en Poudre",
+    name: 'Chocolat Instantané Sucré, en Poudre',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 349,
     carbs: 76.98,
-    fat: 3.10,
-    protein: 3.30,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_Instantané_Sucré__en_Poudre.jpg'
+    fat: 3.1,
+    protein: 3.3,
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_Instantané_Sucré__en_Poudre.jpg',
   },
   {
-    name: "Confiture, Tout Type",
+    name: 'Confiture, Tout Type',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 278,
     carbs: 68.86,
     fat: 0.07,
     protein: 0.37,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Confiture__Tout_Type.jpg'
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Confiture__Tout_Type.jpg',
   },
   {
-    name: "Glace",
+    name: 'Glace',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 181,
     carbs: 25.57,
-    fat: 6.90,
-    protein: 4.60,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Glace.jpg'
+    fat: 6.9,
+    protein: 4.6,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Glace.jpg',
   },
   {
-    name: "Miel",
+    name: 'Miel',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 304,
-    carbs: 75.70,
-    fat: 0.00,
-    protein: 0.30,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Miel.jpg'
+    carbs: 75.7,
+    fat: 0.0,
+    protein: 0.3,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Miel.jpg',
   },
   {
-    name: "Pâte de Fruits",
+    name: 'Pâte de Fruits',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 214,
-    carbs: 56.00,
-    fat: 0.00,
-    protein: 1.00,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Pâte_de_Fruits.jpg'
+    carbs: 56.0,
+    fat: 0.0,
+    protein: 1.0,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Pâte_de_Fruits.jpg',
   },
   {
-    name: "Sirop, Grenadine",
+    name: 'Sirop, Grenadine',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 266,
-    carbs: 66.60,
-    fat: 0.00,
-    protein: 0.00,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Sirop__Grenadine.jpg'
+    carbs: 66.6,
+    fat: 0.0,
+    protein: 0.0,
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Sirop__Grenadine.jpg',
   },
   {
-    name: "Soda",
+    name: 'Soda',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 39,
     carbs: 10.85,
-    fat: 0.00,
-    protein: 0.00,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Soda.jpg'
+    fat: 0.0,
+    protein: 0.0,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/Soda.jpg',
   },
   {
-    name: "Sorbet au Citron",
+    name: 'Sorbet au Citron',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 92,
-    carbs: 23.10,
-    fat: 0.00,
-    protein: 0.50,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Sorbet_au_Citron.jpg'
+    carbs: 23.1,
+    fat: 0.0,
+    protein: 0.5,
+    image:
+      '../assets/images/seed/Sucre-et-produits-sucrés/Sorbet_au_Citron.jpg',
   },
   {
-    name: "Sucre",
+    name: 'Sucre',
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 387,
     carbs: 99.98,
-    fat: 0.00,
-    protein: 0.00,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/sucre.jpg'
-  }
+    fat: 0.0,
+    protein: 0.0,
+    image: '../assets/images/seed/Sucre-et-produits-sucrés/sucre.jpg',
+  },
 ];
 
 export default SucreEtProduitsSucres;

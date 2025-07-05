@@ -21,9 +21,9 @@ const legumesSecs: MealEntry[] = [
     unit: MealUnitEnum.GRAMMES,
     quantity: 100,
     calories: 380,
-    carbs: 56.00,
-    fat: 5.30,
-    protein: 26.20,
+    carbs: 56.0,
+    fat: 5.3,
+    protein: 26.2,
     image: '../assets/images/seed/Légumes-secs/Fenugrec__Graines_Entières.jpg',
   },
 
@@ -56,7 +56,7 @@ const legumesSecs: MealEntry[] = [
     calories: 338,
     carbs: 57.09,
     fat: 0.96,
-    protein: 28.00,
+    protein: 28.0,
     image: '../assets/images/seed/Légumes-secs/Lentille__Sèche.jpg',
   },
 
@@ -67,7 +67,7 @@ const legumesSecs: MealEntry[] = [
     calories: 364,
     carbs: 60.65,
     fat: 6.04,
-    protein: 19.30,
+    protein: 19.3,
     image: '../assets/images/seed/Légumes-secs/Pois_Chiche_Sec.jpg',
   },
 ];

@@ -25,31 +25,37 @@ Base de données (SQLite)
 ### 1.1 Responsabilités par Couche
 
 #### UI (React/React Native)
+
 - Composants d'interface utilisateur
 - Interactions utilisateur basiques
 - Utilisation des hooks pour obtenir les données
 
 #### Services UI (`utils/services/ui`)
+
 - Formatage des données pour l'affichage
 - Gestion des classes CSS dynamiques
 - Utilitaires spécifiques à l'UI
 
 #### Services Forms (`utils/services/forms`)
+
 - Validation des entrées utilisateur
 - Préparation des données de formulaire
 - Gestion des états de formulaire
 
 #### Services Pages (`utils/services/pages`) - Presenter
+
 - Orchestration des opérations pour l'UI
 - Délégation aux services core
 - Gestion des erreurs orientée UI
 
 #### Services Core (`utils/services/core`) - Controller
+
 - Logique métier pure
 - Calculs et transformations de données
 - Orchestration des handlers MCP
 
 #### Handlers MCP (`utils/mcp`) - Model
+
 - Accès direct à la base de données
 - Validation des données au niveau DB
 - Gestion des transactions
@@ -58,29 +64,29 @@ Base de données (SQLite)
 
 ### 2.1 Problèmes de Nommage et Organisation
 
-| Problème | Fichiers concernés | Impact | Statut |
-|----------|-------------------|--------|--------|
-| Incohérence dans le nommage des services | ~~`cooking-method.service.ts`~~ → `cooking-method-pages.service.ts` | Difficulté à identifier les services pages vs core | ✅ Corrigé |
-| Constants mélangées dans les services | ~~`cooking-method.service.ts` (COOKING_METHODS_INFO)~~ → `cooking-method-info.constants.ts` | Duplication potentielle, difficile à réutiliser | ✅ Corrigé |
-| Interfaces définies dans les services | Plusieurs services pages | Fragmentation de la définition des types | 🔄 En cours |
+| Problème                                 | Fichiers concernés                                                                          | Impact                                             | Statut      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------- |
+| Incohérence dans le nommage des services | ~~`cooking-method.service.ts`~~ → `cooking-method-pages.service.ts`                         | Difficulté à identifier les services pages vs core | ✅ Corrigé  |
+| Constants mélangées dans les services    | ~~`cooking-method.service.ts` (COOKING_METHODS_INFO)~~ → `cooking-method-info.constants.ts` | Duplication potentielle, difficile à réutiliser    | ✅ Corrigé  |
+| Interfaces définies dans les services    | Plusieurs services pages                                                                    | Fragmentation de la définition des types           | 🔄 En cours |
 
 ### 2.2 Problèmes de Responsabilité
 
-| Problème | Fichiers concernés | Impact | Statut |
-|----------|-------------------|--------|--------|
+| Problème                               | Fichiers concernés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Impact                                 | Statut                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------- |
 | Logique métier dans les services pages | ~~`cooking-method.service.ts` (calculateAdjustmentPercentages, formatPercentage)~~ → déplacé vers `cooking-method-core.service.ts`<br>~~`assistant-pages.service.ts` (validation d'ingrédients, génération de recommandations)~~ → déplacé vers `assistant-core.service.ts`<br>~~`ingredient-pages.service.ts` (formatIngredientForDisplay, optimizeIngredientData)~~ → déplacé vers services UI et core appropriés<br>~~`plan-pages.service.ts` (filtrage, pagination, validation)~~ → déplacé vers `plan.service.ts`<br>~~`progress-pages.service.ts` (limitation à 31 jours, boucle de récupération de données)~~ → déplacé vers `progress.service.ts` | Violation du principe MCP, duplication | ✅ Majoritairement corrigé |
-| Accès direct aux données | ~~`cooking-method.service.ts`~~ → corrigé<br>~~`assistant-pages.service.ts` (appels directs à sqliteMCPServer)~~ → corrigé<br>~~`ingredient-pages.service.ts` (appel direct à sqliteMCPServer.getIngredientsListViaMCP)~~ → corrigé<br>~~`plan-pages.service.ts` (appel direct à sqliteMCPServer.getPlansListViaMCP)~~ → corrigé<br>~~`progress-pages.service.ts` (multiple appels directs à sqliteMCPServer)~~ → corrigé | Contournement de la couche Controller | ✅ Corrigé |
-| Appels directs entre services non-core | ~~`assistant-pages.service.ts` (appel direct à iaService)~~ → corrigé<br>~~`plan-pages.service.ts` (appel direct à nutritionPagesService)~~ → corrigé | Violation de la hiérarchie MCP | ✅ Corrigé |
-| Méthodes d'UI dans les services pages | ~~`cooking-method.service.ts` (getDifferenceClass)~~ → déplacé vers `cooking-method-ui.service.ts`<br>~~`ingredient-pages.service.ts` (formatIngredientForDisplay)~~ → déplacé vers `ingredient-ui.service.ts` | Mélange des responsabilités P et UI | ✅ Partiellement corrigé |
+| Accès direct aux données               | ~~`cooking-method.service.ts`~~ → corrigé<br>~~`assistant-pages.service.ts` (appels directs à sqliteMCPServer)~~ → corrigé<br>~~`ingredient-pages.service.ts` (appel direct à sqliteMCPServer.getIngredientsListViaMCP)~~ → corrigé<br>~~`plan-pages.service.ts` (appel direct à sqliteMCPServer.getPlansListViaMCP)~~ → corrigé<br>~~`progress-pages.service.ts` (multiple appels directs à sqliteMCPServer)~~ → corrigé                                                                                                                                                                                                                                 | Contournement de la couche Controller  | ✅ Corrigé                 |
+| Appels directs entre services non-core | ~~`assistant-pages.service.ts` (appel direct à iaService)~~ → corrigé<br>~~`plan-pages.service.ts` (appel direct à nutritionPagesService)~~ → corrigé                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Violation de la hiérarchie MCP         | ✅ Corrigé                 |
+| Méthodes d'UI dans les services pages  | ~~`cooking-method.service.ts` (getDifferenceClass)~~ → déplacé vers `cooking-method-ui.service.ts`<br>~~`ingredient-pages.service.ts` (formatIngredientForDisplay)~~ → déplacé vers `ingredient-ui.service.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                            | Mélange des responsabilités P et UI    | ✅ Partiellement corrigé   |
 
 ### 2.3 Problèmes de Duplication
 
-| Problème | Fichiers concernés | Impact | Statut |
-|----------|-------------------|--------|--------|
-| Fichiers dupliqués | ~~`assistant-pages.service.new.ts` et `assistant-pages.service.ts`~~ → supprimé | Confusion dans la maintenance | ✅ Corrigé |
-| Méthodes utilitaires dupliquées | formatPercentage, getPercentage | Risque d'incohérence, maintenance difficile | ✅ Corrigé |
-| Centralisation des fonctions UI | Fonctions de formatage UI | Améliore la maintenabilité, cohérence | ✅ Implémenté |
-| Logique de conversion nutritionnelle | Entre nutrition-pages.service et cooking-method.service | Duplication partielle des calculs | ✅ Corrigé |
+| Problème                             | Fichiers concernés                                                              | Impact                                      | Statut        |
+| ------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------- | ------------- |
+| Fichiers dupliqués                   | ~~`assistant-pages.service.new.ts` et `assistant-pages.service.ts`~~ → supprimé | Confusion dans la maintenance               | ✅ Corrigé    |
+| Méthodes utilitaires dupliquées      | formatPercentage, getPercentage                                                 | Risque d'incohérence, maintenance difficile | ✅ Corrigé    |
+| Centralisation des fonctions UI      | Fonctions de formatage UI                                                       | Améliore la maintenabilité, cohérence       | ✅ Implémenté |
+| Logique de conversion nutritionnelle | Entre nutrition-pages.service et cooking-method.service                         | Duplication partielle des calculs           | ✅ Corrigé    |
 
 ## 3. Plan de Refactorisation
 
@@ -162,6 +168,7 @@ Base de données (SQLite)
 ### Étape 2: Externalisation des Constants et Interfaces
 
 - [x] Constantes: déplacer vers le dossier approprié
+
   - [x] Déplacer `COOKING_METHODS_INFO` vers `utils/constants/cooking-method-info.constants.ts`
   - [x] Externaliser les constantes UI dans `utils/constants/ui-constants.ts`
     - [x] Déplacer `UI_PREFERENCES_KEY` depuis `ui-preferences.service.ts`
@@ -181,11 +188,12 @@ Base de données (SQLite)
 - [x] Éliminer les duplications dans les services
   - [x] Supprimer `assistant-pages.service.new.ts` (copie de `assistant-pages.service.ts`)
   - [x] ~~Déprécier~~ → **Supprimer** `nutrition-database.service.ts` (remplacé par sqliteMCPServer)
-  - [x] ~~Déprécier~~ → **Supprimer** `cooking-method.service.ts` (remplacé par cooking-method-*.service.ts)
+  - [x] ~~Déprécier~~ → **Supprimer** `cooking-method.service.ts` (remplacé par cooking-method-\*.service.ts)
 
 #### 3.1 Séparation UI / Services UI
 
 - [ ] Identifier les méthodes UI dans les services pages
+
   - [x] Déplacer `getDifferenceClass` de `cooking-method.service.ts` vers `cooking-method-ui.service.ts`
   - [x] Déplacer les méthodes de formatage d'affichage de cuisson vers `cooking-method-ui.service.ts`
   - [x] Déplacer `formatIngredientForDisplay` de `ingredient-pages.service.ts` vers un service UI
@@ -199,6 +207,7 @@ Base de données (SQLite)
 #### 3.2 Séparation Services Forms / Services Pages
 
 - [ ] Identifier la logique de formulaire dans les services pages
+
   - [ ] Vérifier tous les validateurs de formulaires dans les services pages
   - [ ] Identifier les transformations de données spécifiques aux formulaires
 
@@ -271,6 +280,7 @@ Base de données (SQLite)
 ### Étape 4: Création d'Utilitaires Communs
 
 - [ ] Utilitaires UI
+
   - [x] Centralisation des calculs nutritionnels dans `nutrition-core.service.ts`
   - [x] Façade unifiée via `nutritionEngine` pour les calculs nutritionnels
   - [x] Créer `nutrition-ui.service.ts` pour standardiser l'affichage des valeurs à 100g
@@ -279,6 +289,7 @@ Base de données (SQLite)
   - [ ] Créer un service pour les classes CSS dynamiques
 
 - [ ] Utilitaires Forms
+
   - [ ] Créer un service pour la validation commune des formulaires
   - [ ] Standardiser les transformations de données
 
@@ -294,31 +305,33 @@ Base de données (SQLite)
   - [ ] `utils/helpers/percentage.helper.ts` pour les calculs de pourcentage
 - [ ] Refactoriser tous les services pour utiliser ces utilitaires
 
-
-
 ## 5. Synthèse des Services MCP Analysés
 
 ### 5.1 Modèles à Suivre par Couche
 
 #### Services UI
+
 - Modèle: `meals-company-style.service.ts`
   - Contient uniquement du formatage UI
   - Pas d'accès aux données
   - Fonctions pures de transformation pour l'affichage
 
 #### Services Forms
+
 - Modèle: `form-user-profile.service.ts`
   - Validation claire des entrées
   - Transformation des données brutes
   - Délégation aux services pages pour la soumission
 
 #### Services Pages (Presenter)
+
 - Modèle: `user-pages.service.ts`
   - Délégation pure au service core
   - Gestion d'erreurs orientée UI
   - Aucune logique métier
 
 #### Services Core (Controller)
+
 - Modèle: `nutrition-core.service.ts`
   - Centralisation de la logique métier
   - Bonne encapsulation des calculs
@@ -327,7 +340,9 @@ Base de données (SQLite)
 ### 5.2 Services Nécessitant des Améliorations
 
 #### Priorité Haute
+
 - `progress-pages.service.ts`
+
   - Problème: Accès direct aux données, pas de service core adéquat
   - Impact: Risque élevé de bugs, duplication, violation de l'architecture
 
@@ -336,7 +351,9 @@ Base de données (SQLite)
   - Impact: Confusion dans la structure, difficulté de maintenance
 
 #### Priorité Moyenne
+
 - `assistant-pages.service.ts`
+
   - Problème: Appels entre services non-core, logique métier mélangée
   - Impact: Violation de la hiérarchie, couplage fort
 
@@ -347,9 +364,11 @@ Base de données (SQLite)
 ### 5.3 Principes de Communication Entre Couches
 
 1. **Flux de données descendant**:
+
    - UI → Services UI → Services Forms → Services Pages → Services Core → Handlers MCP → DB
 
 2. **Flux de données ascendant**:
+
    - DB → Handlers MCP → Services Core → Services Pages → Services Forms → Services UI → UI
 
 3. **Règles strictes de communication**:
@@ -362,11 +381,13 @@ Base de données (SQLite)
 ### 6.1 Documentation et Formation
 
 - [ ] Documentation complète de l'architecture
+
   - [ ] Mettre à jour les schémas pour inclure toutes les couches
   - [ ] Documenter les responsabilités précises de chaque couche
   - [ ] Créer des exemples pour chaque type de service
 
 - [ ] Guide de développement
+
   - [ ] Créer un guide de contribution avec exemples modèles pour chaque couche
   - [ ] Documenter les patterns d'interaction entre couches
   - [ ] Établir des conventions de nommage strictes
@@ -379,6 +400,7 @@ Base de données (SQLite)
 ### 6.2 Validation et Tests
 
 - [ ] Tests unitaires par couche
+
   - [ ] Tests pour services UI (pure fonctions)
   - [ ] Tests pour services Forms (validation)
   - [ ] Tests pour services Core (logique métier)
@@ -395,6 +417,7 @@ Base de données (SQLite)
 #### Semaine 1: Corrections Critiques
 
 - [x] Refactoriser `progress-pages.service.ts`
+
   - [x] Utiliser le `progress.service.ts` déjà existant
   - [x] Éliminer les appels directs à sqliteMCPServer
   - [x] Ajouter la méthode `getProgressHistory` au service core
@@ -405,6 +428,7 @@ Base de données (SQLite)
   - [x] Améliorer la gestion des erreurs
 
 - [x] Corriger `cooking-method.service.ts`
+
   - [x] Renommer en cooking-method-pages.service.ts
   - [x] Créer cooking-method-core.service.ts
   - [x] Créer cooking-method-ui.service.ts pour les aspects UI
@@ -420,6 +444,7 @@ Base de données (SQLite)
 #### Semaine 2: Séparation UI et Forms
 
 - [ ] Créer les services UI manquants
+
   - [x] Identifier les méthodes de formatage nutritionnel (normalizeMacrosForDisplay, formatForUI)
   - [x] Créer `nutrition-ui.service.ts` avec les méthodes:
     - [x] `formatNutritionFor100g` - Standardiser l'affichage "Pour 100g"
@@ -437,6 +462,7 @@ Base de données (SQLite)
 #### Semaine 3: Refactorisation des autres services
 
 - [x] Corriger `assistant-pages.service.ts` ✅
+
   - [x] Créer assistant-core.service.ts
   - [x] Déplacer la logique métier dans le core
 
@@ -454,6 +480,7 @@ L'application Lift présente une architecture MCP à 6 niveaux qui est partielle
 3. Faciliter l'évolution future de l'application
 
 Chaque couche a un rôle distinct et bien défini:
+
 - UI: Interaction utilisateur
 - Services UI: Formatage pour l'affichage
 - Services Forms: Validation et transformation de formulaires
@@ -462,6 +489,7 @@ Chaque couche a un rôle distinct et bien défini:
 - Handlers MCP: Accès aux données
 
 L'application comprend désormais une architecture de calcul nutritionnel standardisée:
+
 - Calculs nutritionnels centralisés dans `nutrition-core.service.ts`
 - Valeurs normalisées à 100g pour faciliter la comparaison entre repas
 - Séparation claire entre logique métier et formatage d'affichage

@@ -58,27 +58,30 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
   const theme = useTheme();
   const { t } = useTranslation();
   const isDark = theme.isDark;
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
-  
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
+
   // Couleurs exactes du design Figma
   const defaultCarbsColor = '#F54336'; // Rouge
   const defaultProteinColor = '#FF981F'; // Orange
   const defaultFatColor = '#1A96F0'; // Bleu
-  
+
   // Utilisation des couleurs fournies ou des couleurs par défaut
   const carbsColorFinal = carbsColor || defaultCarbsColor;
   const proteinColorFinal = proteinColor || defaultProteinColor;
   const fatColorFinal = fatColor || defaultFatColor;
-  
+
   // Calcul des totaux
   const totalGrams = carbs + protein + fat;
   if (totalGrams === 0) return null; // Eviter la division par zéro
-  
+
   // Calcul des pourcentages
   const carbsPercentage = Math.round((carbs / totalGrams) * 100);
   const proteinPercentage = Math.round((protein / totalGrams) * 100);
   const fatPercentage = Math.round((fat / totalGrams) * 100);
-  
+
   // Préparation des données pour les segments
   const macroNutrients: MacroNutrient[] = [
     {
@@ -98,15 +101,15 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
       value: fat,
       percentage: fatPercentage,
       color: fatColorFinal,
-    }
+    },
   ];
-  
+
   // Constantes pour les calculs de segments
   const strokeWidth = 12;
   const segmentGap = 2; // espace entre les segments
   const totalSegmentDegrees = 360;
   const startAngle = -90; // commence en haut
-  
+
   return (
     <View style={styles.container}>
       {/* Layout horizontal pour le cercle et les nutriments */}
@@ -114,7 +117,9 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
         {/* Cercle de progression à gauche */}
         <View style={styles.circleContainer}>
           {/* Cercles concentriques pour chaque macronutriment */}
-          <View style={[styles.progressContainer, { width: size, height: size }]}>
+          <View
+            style={[styles.progressContainer, { width: size, height: size }]}
+          >
             {/* Fond blanc pour les segments */}
             <CircularProgressBase
               size={size}
@@ -124,27 +129,25 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
               baseColor={theme.colors.orange}
               gapDegrees={0}
             />
-            
+
             {/* Segments des macronutriments proportionnels aux pourcentages réels */}
             {(() => {
               // On calcule la position de départ de chaque segment
               let currentAngle = startAngle;
-              
+
               return macroNutrients.map((macro, index) => {
                 // Calcul des angles pour chaque segment basé sur le pourcentage réel
                 const segmentStartAngle = currentAngle;
-                const segmentSize = (totalSegmentDegrees * (macro.percentage / 100)) - segmentGap;
-                
+                const segmentSize =
+                  totalSegmentDegrees * (macro.percentage / 100) - segmentGap;
+
                 // On met à jour l'angle pour le prochain segment
                 currentAngle += segmentSize + segmentGap;
-                
+
                 return (
                   <View
                     key={macro.name}
-                    style={[
-                      StyleSheet.absoluteFill,
-                      styles.segmentContainer
-                    ]}
+                    style={[StyleSheet.absoluteFill, styles.segmentContainer]}
                   >
                     <CircularProgressBase
                       size={size}
@@ -159,7 +162,7 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
                 );
               });
             })()}
-            
+
             {/* Affichage des calories au centre */}
             <View style={styles.caloriesContainer}>
               <Text style={styles.caloriesText}>{calories}</Text>
@@ -167,13 +170,15 @@ const CircularNutritionProgress: React.FC<CircularNutritionProgressProps> = ({
             </View>
           </View>
         </View>
-        
+
         {/* Légende des macronutriments à droite */}
         {showDetails && (
           <View style={styles.legendContainerRight}>
             {macroNutrients.map((macro) => (
               <View key={macro.name} style={styles.legendItem}>
-                <View style={[styles.legendColor, { backgroundColor: macro.color }]} />
+                <View
+                  style={[styles.legendColor, { backgroundColor: macro.color }]}
+                />
                 <Text style={styles.legendLabel}>{macro.name}</Text>
                 <Text style={styles.legendValue}>
                   {macro.value}g {showPercentages && `(${macro.percentage}%)`}

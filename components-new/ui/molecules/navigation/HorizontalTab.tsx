@@ -17,7 +17,6 @@ import {
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
 
-
 // Types pour les variantes du composant HorizontalTab
 type TabVariant = 'default' | 'filled' | 'underline';
 type TabSize = 'small' | 'medium' | 'large';
@@ -67,13 +66,13 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
   scrollable = false,
 }) => {
   const appTheme = useAppTheme();
-  
+
   // Déterminer les dimensions selon la taille
   let paddingHorizontal;
   let paddingVertical;
   let fontSize;
   let indicatorHeight;
-  
+
   switch (size) {
     case 'small':
       paddingHorizontal = 12;
@@ -95,17 +94,18 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
       indicatorHeight = 2;
       break;
   }
-  
+
   // Déterminer les couleurs et styles selon la variante
   const activeColor = appTheme.color('primary');
   const inactiveColor = '#757575'; // Couleur exacte du Figma
-  const activeBackgroundColor = variant === 'filled' ? activeColor : 'transparent';
+  const activeBackgroundColor =
+    variant === 'filled' ? activeColor : 'transparent';
   const activeTextColor = variant === 'filled' ? '#FFFFFF' : activeColor;
-  
+
   // Rendre un onglet
   const renderTab = (tab: TabItem) => {
     const isActive = tab.isActive || false;
-    
+
     return (
       <TouchableOpacity
         key={tab.id}
@@ -114,7 +114,10 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
           {
             paddingHorizontal,
             paddingVertical,
-            backgroundColor: isActive && variant === 'filled' ? activeBackgroundColor : 'transparent',
+            backgroundColor:
+              isActive && variant === 'filled'
+                ? activeBackgroundColor
+                : 'transparent',
             borderRadius: variant === 'filled' ? 8 : 0,
           },
           tabStyle,
@@ -124,27 +127,27 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
         activeOpacity={0.7}
       >
         {/* Icône (optionnelle) */}
-        {tab.icon && (
-          <View style={styles.iconContainer}>
-            {tab.icon}
-          </View>
-        )}
-        
+        {tab.icon && <View style={styles.iconContainer}>{tab.icon}</View>}
+
         {/* Texte */}
         <Text
           style={[
             styles.tabText,
             {
-              color: isActive ? appTheme.color('primary') : appTheme.color('blueGrey'),
+              color: isActive
+                ? appTheme.color('primary')
+                : appTheme.color('blueGrey'),
               fontFamily: isActive ? 'Urbanist-Bold' : 'Urbanist-Regular',
             },
-            tabTextStyle as TextStyle || {},
-            isActive && activeTabTextStyle ? (activeTabTextStyle as TextStyle) : {},
+            (tabTextStyle as TextStyle) || {},
+            isActive && activeTabTextStyle
+              ? (activeTabTextStyle as TextStyle)
+              : {},
           ]}
         >
           {tab.label}
         </Text>
-        
+
         {/* Indicateur pour la variante 'underline' */}
         {isActive && variant === 'underline' && (
           <View
@@ -160,7 +163,7 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
       </TouchableOpacity>
     );
   };
-  
+
   // Conteneur pour les onglets (scrollable ou fixe)
   const TabContainer = scrollable ? ScrollView : View;
   const scrollProps = scrollable
@@ -170,18 +173,10 @@ const HorizontalTab: React.FC<HorizontalTabProps> = ({
         contentContainerStyle: styles.scrollContent,
       }
     : {};
-  
+
   return (
-    <Box
-      style={[
-        styles.container,
-        containerStyle as ViewStyle,
-      ]}
-    >
-      <TabContainer
-        {...scrollProps}
-        style={styles.tabsContainer}
-      >
+    <Box style={[styles.container, containerStyle as ViewStyle]}>
+      <TabContainer {...scrollProps} style={styles.tabsContainer}>
         {tabs.map(renderTab)}
       </TabContainer>
     </Box>

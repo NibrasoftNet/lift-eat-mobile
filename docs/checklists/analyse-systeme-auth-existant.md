@@ -6,13 +6,15 @@
 
 Le système d'authentification actuel suit l'architecture MCP (Model-Controller-Presenter) avec:
 
-- **Model (M)**: 
+- **Model (M)**:
+
   - Schéma `users` dans `db/schema.ts`
   - Définition des interfaces dans `utils/mcp/interfaces/user-interfaces.ts`
   - Absence de modèle pour les sessions ou tokens d'authentification
 
 - **Controller (C)**:
-  - Service core dans `utils/services/core/auth-core.service.ts` 
+
+  - Service core dans `utils/services/core/auth-core.service.ts`
   - Handlers d'accès à la base de données dans `utils/mcp/handlers/user-handlers.ts`
   - Point d'accès via `sqliteMCPServer` pour les opérations utilisateur
 
@@ -24,6 +26,7 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
 ### 1.2 Flux d'authentification
 
 1. **Inscription/Connexion**:
+
    - Saisie d'email (et théoriquement mot de passe) dans les formulaires
    - Utilisation de `findOrCreateUser()` qui:
      - Vérifie si l'utilisateur existe
@@ -32,6 +35,7 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
    - Génère un "simulated-token" (non fonctionnel)
 
 2. **Session utilisateur**:
+
    - Géré uniquement via state React (non persistant)
    - Aucun mécanisme de refresh token ou session
    - Stockage en mémoire uniquement, perdu au rechargement de la page
@@ -43,6 +47,7 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
 ### 1.3 Technologies intégrées (mais désactivées)
 
 - **Clerk**: Configuration présente mais commentée:
+
   - `ClerkProvider` et composants associés commentés dans `_layout.tsx`
   - Domaine configuré: `https://amazing-werewolf-65.clerk.accounts.dev/`
   - Dépendances présentes dans le package.json
@@ -56,12 +61,14 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
 
 ### 2.1 Authentification et sécurité
 
-- **Absence de vérification des mots de passe**: 
+- **Absence de vérification des mots de passe**:
+
   - Les mots de passe sont collectés mais jamais vérifiés
   - Absence de hachage et de stockage sécurisé
   - Auto-création d'utilisateurs posant des risques de sécurité
 
 - **Gestion des sessions inexistante**:
+
   - Pas de tokens JWT ou similaires
   - Aucune persistance des sessions
   - Absence de mécanisme d'expiration ou de révocation
@@ -81,6 +88,7 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
 ### 2.3 Gestion des utilisateurs
 
 - **Synchronisation partielle des données**:
+
   - Webhook pour `user.created` configuré mais non actif
   - Absence de gestion des modifications ou suppressions
   - Pas de stratégie de migration des utilisateurs existants
@@ -97,6 +105,7 @@ Le système d'authentification actuel suit l'architecture MCP (Model-Controller-
 Le système d'authentification présente plusieurs cycles de dépendances:
 
 1. **Premier cycle**:
+
    ```
    sqlite-server.ts → user-handlers.ts → auth-core.service.ts → sqlite-server.ts
    ```

@@ -4,11 +4,23 @@
  */
 
 import React, { ReactNode } from 'react';
-import { Text as RNText, TextProps as RNTextProps, StyleSheet, TextStyle } from 'react-native';
+import {
+  Text as RNText,
+  TextProps as RNTextProps,
+  StyleSheet,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 
 // Types pour les différentes familles de police - doivent correspondre exactement aux clés dans les fichiers de thème
-type UrbanistVariants = 'h1' | 'h2' | 'h3' | 'subtitle' | 'body' | 'button' | 'caption';
+type UrbanistVariants =
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'subtitle'
+  | 'body'
+  | 'button'
+  | 'caption';
 type PlayfairVariants = 'h1' | 'h2' | 'h3' | 'subtitle';
 type RobotoVariants = 'h1' | 'h2' | 'h3' | 'body' | 'caption';
 
@@ -69,12 +81,12 @@ const Text: React.FC<TextProps> = ({
   ...rest
 }) => {
   const theme = useAppTheme();
-  
+
   // Déterminer la famille de police et le variant à utiliser
   // Priorité: props spécifiques (urbanist, playfair, roboto) > variant générique > défaut (urbanist.body)
   let fontStyle: TextStyle = {};
   let fontStyleObj: any = {};
-  
+
   if (urbanist) {
     fontStyleObj = theme.textStyle.urbanist(urbanist);
   } else if (playfair) {
@@ -88,12 +100,12 @@ const Text: React.FC<TextProps> = ({
     // Si rien n'est spécifié, on utilise Urbanist body
     fontStyleObj = theme.textStyle.urbanist('body');
   }
-  
+
   // Convertir les valeurs numériques de fontWeight en chaînes pour compatibilité
   const fontWeight = fontStyleObj.fontWeight?.toString();
   fontStyle = {
     ...fontStyleObj,
-    fontWeight: fontWeight as TextStyle['fontWeight']
+    fontWeight: fontWeight as TextStyle['fontWeight'],
   };
 
   // Appliquer les styles additionnels
@@ -103,8 +115,18 @@ const Text: React.FC<TextProps> = ({
       color: color || theme.color('primary'),
       textAlign: align,
       fontStyle: italic ? 'italic' : 'normal',
-      fontWeight: bold ? 'bold' : semibold ? '600' : medium ? '500' : fontStyle.fontWeight,
-      textDecorationLine: underline ? 'underline' : lineThrough ? 'line-through' : 'none',
+      fontWeight: bold
+        ? 'bold'
+        : semibold
+        ? '600'
+        : medium
+        ? '500'
+        : fontStyle.fontWeight,
+      textDecorationLine: underline
+        ? 'underline'
+        : lineThrough
+        ? 'line-through'
+        : 'none',
       marginBottom: mb,
       marginTop: mt,
       marginHorizontal: mx,

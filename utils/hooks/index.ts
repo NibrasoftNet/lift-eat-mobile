@@ -3,10 +3,10 @@
  * Facilite l'importation et évite les imports circulaires
  */
 
-export { 
+export {
   useServiceQuery,
   usePlanQuery,
-  useMealQuery, 
+  useMealQuery,
   useUserQuery,
-  useProgressQuery
+  useProgressQuery,
 } from './useServiceQuery';

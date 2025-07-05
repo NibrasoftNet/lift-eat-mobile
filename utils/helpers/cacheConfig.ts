@@ -1,4 +1,4 @@
-import { DataType } from "./queryInvalidation";
+import { DataType } from './queryInvalidation';
 
 /**
  * Configuration de cache pour différents types de données
@@ -37,92 +37,92 @@ export const CACHE_DURATIONS = {
  */
 export const DEFAULT_CACHE_CONFIGS: Record<DataType, CacheConfig> = {
   [DataType.USER]: {
-    staleTime: CACHE_DURATIONS.MEDIUM,  // Les données utilisateur changent occasionnellement
-    gcTime: CACHE_DURATIONS.VERY_LONG,  // Mais on garde les données en cache longtemps
+    staleTime: CACHE_DURATIONS.MEDIUM, // Les données utilisateur changent occasionnellement
+    gcTime: CACHE_DURATIONS.VERY_LONG, // Mais on garde les données en cache longtemps
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.USER_PREFERENCES]: {
-    staleTime: CACHE_DURATIONS.MEDIUM,  // Les préférences utilisateur changent occasionnellement
-    gcTime: CACHE_DURATIONS.LONG,       // Cache de durée moyenne
+    staleTime: CACHE_DURATIONS.MEDIUM, // Les préférences utilisateur changent occasionnellement
+    gcTime: CACHE_DURATIONS.LONG, // Cache de durée moyenne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.MEAL]: {
-    staleTime: CACHE_DURATIONS.MEDIUM,  // Les repas peuvent être modifiés régulièrement
-    gcTime: CACHE_DURATIONS.VERY_LONG,  // Garde en cache pour le mode hors ligne
+    staleTime: CACHE_DURATIONS.MEDIUM, // Les repas peuvent être modifiés régulièrement
+    gcTime: CACHE_DURATIONS.VERY_LONG, // Garde en cache pour le mode hors ligne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.MEALS_LIST]: {
-    staleTime: CACHE_DURATIONS.SHORT,   // Les listes de repas sont mises à jour plus fréquemment
-    gcTime: CACHE_DURATIONS.LONG,       // Cache de durée moyenne
+    staleTime: CACHE_DURATIONS.SHORT, // Les listes de repas sont mises à jour plus fréquemment
+    gcTime: CACHE_DURATIONS.LONG, // Cache de durée moyenne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.PLAN]: {
-    staleTime: CACHE_DURATIONS.MEDIUM,  // Les plans nutritionnels changent occasionnellement
-    gcTime: CACHE_DURATIONS.VERY_LONG,  // Longue durée de cache pour mode hors ligne
+    staleTime: CACHE_DURATIONS.MEDIUM, // Les plans nutritionnels changent occasionnellement
+    gcTime: CACHE_DURATIONS.VERY_LONG, // Longue durée de cache pour mode hors ligne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.PLANS_LIST]: {
-    staleTime: CACHE_DURATIONS.SHORT,   // Les listes de plans sont mises à jour plus fréquemment
-    gcTime: CACHE_DURATIONS.LONG,       // Cache de durée moyenne
+    staleTime: CACHE_DURATIONS.SHORT, // Les listes de plans sont mises à jour plus fréquemment
+    gcTime: CACHE_DURATIONS.LONG, // Cache de durée moyenne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.DAILY_PLAN]: {
-    staleTime: CACHE_DURATIONS.SHORT,   // Mis à jour plus fréquemment que les plans généraux
-    gcTime: CACHE_DURATIONS.LONG,       // Durée de cache moyenne
+    staleTime: CACHE_DURATIONS.SHORT, // Mis à jour plus fréquemment que les plans généraux
+    gcTime: CACHE_DURATIONS.LONG, // Durée de cache moyenne
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.PROGRESS]: {
-    staleTime: CACHE_DURATIONS.BRIEF,   // Les données de progression sont mises à jour fréquemment
-    gcTime: CACHE_DURATIONS.MEDIUM,     // Durée de cache courte
+    staleTime: CACHE_DURATIONS.BRIEF, // Les données de progression sont mises à jour fréquemment
+    gcTime: CACHE_DURATIONS.MEDIUM, // Durée de cache courte
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.PROGRESS_LIST]: {
-    staleTime: CACHE_DURATIONS.BRIEF,   // Les listes de progression sont très dynamiques
-    gcTime: CACHE_DURATIONS.MEDIUM,     // Durée de cache courte
+    staleTime: CACHE_DURATIONS.BRIEF, // Les listes de progression sont très dynamiques
+    gcTime: CACHE_DURATIONS.MEDIUM, // Durée de cache courte
     retry: 2,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
   },
   [DataType.INGREDIENT]: {
-    staleTime: CACHE_DURATIONS.LONG,    // Les ingrédients changent rarement
+    staleTime: CACHE_DURATIONS.LONG, // Les ingrédients changent rarement
     gcTime: CACHE_DURATIONS.PERSISTENT, // Très longue durée de cache
     retry: 2,
-    refetchOnWindowFocus: false,        // Pas besoin de rafraîchir au focus
+    refetchOnWindowFocus: false, // Pas besoin de rafraîchir au focus
     refetchOnReconnect: true,
-    refetchOnMount: false,              // Pas besoin de rafraîchir au montage
+    refetchOnMount: false, // Pas besoin de rafraîchir au montage
   },
   [DataType.INGREDIENTS_LIST]: {
-    staleTime: CACHE_DURATIONS.LONG,    // Les listes d'ingrédients changent rarement
+    staleTime: CACHE_DURATIONS.LONG, // Les listes d'ingrédients changent rarement
     gcTime: CACHE_DURATIONS.PERSISTENT, // Très longue durée de cache
     retry: 2,
-    refetchOnWindowFocus: false,        // Pas besoin de rafraîchir au focus
+    refetchOnWindowFocus: false, // Pas besoin de rafraîchir au focus
     refetchOnReconnect: true,
-    refetchOnMount: false,              // Pas besoin de rafraîchir au montage
+    refetchOnMount: false, // Pas besoin de rafraîchir au montage
   },
 };
 
@@ -132,7 +132,10 @@ export const DEFAULT_CACHE_CONFIGS: Record<DataType, CacheConfig> = {
  * @param type Type de données pour lequel récupérer la configuration
  * @param overrides Surcharges optionnelles pour la configuration par défaut
  */
-export function getCacheConfig(type: DataType, overrides?: Partial<CacheConfig>): CacheConfig {
+export function getCacheConfig(
+  type: DataType,
+  overrides?: Partial<CacheConfig>,
+): CacheConfig {
   const defaultConfig = DEFAULT_CACHE_CONFIGS[type];
   return {
     ...defaultConfig,
@@ -142,7 +145,7 @@ export function getCacheConfig(type: DataType, overrides?: Partial<CacheConfig>)
 
 /**
  * Exemple d'utilisation:
- * 
+ *
  * ```typescript
  * const { data: user } = useQuery({
  *   queryKey: [DataType.USER, userId],

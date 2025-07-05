@@ -19,15 +19,15 @@ interface PlanStore {
   activeDayIndex: number;
   selectedWeek: number;
   isEditing: boolean;
-  
+
   setCurrentPlan: (plan: PlanWithDays | null) => void;
   setActiveDayIndex: (index: number) => void;
   setSelectedWeek: (week: number) => void;
   setIsEditing: (isEditing: boolean) => void;
-  
+
   addMealToDailyPlan: (dayPlanId: number, meal: MealOrmProps) => void;
   removeMealFromDailyPlan: (dayPlanId: number, mealId: number) => void;
-  
+
   getActiveDayPlan: () => DayPlanWithMeals | null;
   getDayPlanByDay: (day: DayEnum, week: number) => DayPlanWithMeals | null;
   calculateDailyMacros: (dayPlanId: number) => {
@@ -45,16 +45,16 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
   activeDayIndex: 0,
   selectedWeek: 1,
   isEditing: false,
-  
+
   setCurrentPlan: (plan) => set({ currentPlan: plan }),
   setActiveDayIndex: (index) => set({ activeDayIndex: index }),
   setSelectedWeek: (week) => set({ selectedWeek: week }),
   setIsEditing: (isEditing) => set({ isEditing }),
-  
+
   addMealToDailyPlan: (dayPlanId, meal) => {
     const { currentPlan } = get();
     if (!currentPlan) return;
-    
+
     try {
       set({
         currentPlan: {
@@ -63,10 +63,10 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
             if (dayPlan.id === dayPlanId) {
               const existingMeal = dayPlan.meals.find((m) => m.id === meal.id);
               if (existingMeal) return dayPlan;
-              
+
               const updatedMeals = [...dayPlan.meals, meal];
               const macros = calculateTotalMacros(updatedMeals);
-              
+
               return {
                 ...dayPlan,
                 meals: updatedMeals,
@@ -81,14 +81,14 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
         },
       });
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du repas:', error);
+      console.error("Erreur lors de l'ajout du repas:", error);
     }
   },
-  
+
   removeMealFromDailyPlan: (dayPlanId, mealId) => {
     const { currentPlan } = get();
     if (!currentPlan) return;
-    
+
     try {
       set({
         currentPlan: {
@@ -97,7 +97,7 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
             if (dayPlan.id === dayPlanId) {
               const updatedMeals = dayPlan.meals.filter((m) => m.id !== mealId);
               const macros = calculateTotalMacros(updatedMeals);
-              
+
               return {
                 ...dayPlan,
                 meals: updatedMeals,
@@ -115,36 +115,35 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
       console.error('Erreur lors de la suppression du repas:', error);
     }
   },
-  
+
   getActiveDayPlan: () => {
     const { currentPlan, activeDayIndex, selectedWeek } = get();
     if (!currentPlan) return null;
-    
+
     const weekDayPlans = currentPlan.dailyPlans.filter(
-      (dp) => dp.week === selectedWeek
+      (dp) => dp.week === selectedWeek,
     );
-    
+
     return weekDayPlans[activeDayIndex] || null;
   },
-  
+
   getDayPlanByDay: (day, week) => {
     const { currentPlan } = get();
     if (!currentPlan) return null;
-    
+
     return (
-      currentPlan.dailyPlans.find(
-        (dp) => dp.day === day && dp.week === week
-      ) || null
+      currentPlan.dailyPlans.find((dp) => dp.day === day && dp.week === week) ||
+      null
     );
   },
-  
+
   calculateDailyMacros: (dayPlanId) => {
     const { currentPlan } = get();
     if (!currentPlan) return { calories: 0, carbs: 0, fat: 0, protein: 0 };
-    
+
     const dayPlan = currentPlan.dailyPlans.find((dp) => dp.id === dayPlanId);
     if (!dayPlan) return { calories: 0, carbs: 0, fat: 0, protein: 0 };
-    
+
     try {
       return calculateTotalMacros(dayPlan.meals);
     } catch (error) {
@@ -152,7 +151,7 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
       return { calories: 0, carbs: 0, fat: 0, protein: 0 };
     }
   },
-  
+
   resetPlanStore: () => {
     set({
       currentPlan: null,

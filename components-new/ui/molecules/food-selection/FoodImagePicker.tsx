@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, Platform, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Modal,
+  Platform,
+  Alert,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { Text } from '../../atoms/base';
@@ -17,8 +26,6 @@ export type ImageSource = {
   component?: React.FC<{ size?: number }>; // Composant SVG optionnel avec size optionnel
 };
 
-
-
 interface FoodImagePickerProps {
   onImageSelected: (imageSource: ImageSource) => void;
   initialImage?: ImageSource;
@@ -27,7 +34,7 @@ interface FoodImagePickerProps {
 
 /**
  * Composant FoodImagePicker
- * 
+ *
  * Permet à l'utilisateur de sélectionner une image pour un repas à partir de 2 sources :
  * 1. Appareil photo du téléphone
  * 2. Galerie de photos
@@ -40,14 +47,15 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageSource | undefined>(
-    initialImage || { type: 'none', value: '' }
+    initialImage || { type: 'none', value: '' },
   );
-  
+
   const theme = useAppTheme();
-  
+
   // Couleurs exactes du design Figma
   // Utilisation du thème global pour la couleur de fond
-  const backgroundColor = theme?.colors?.background || (isDarkMode ? '#212121' : '#FFFFFF');
+  const backgroundColor =
+    theme?.colors?.background || (isDarkMode ? '#212121' : '#FFFFFF');
   const textPrimaryColor = isDarkMode ? '#FFFFFF' : '#212121';
   const textSecondaryColor = isDarkMode ? '#9E9E9E' : '#616161';
   const accentColor = '#A1CE50'; // Couleur verte utilisée dans l'app
@@ -58,19 +66,20 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
   // Fonction pour prendre une photo
   const takePhoto = async () => {
     try {
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
       if (permissionResult.granted === false) {
         Alert.alert(t('meal.form.permission.cameraRequired'));
         return;
       }
-      
+
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-      
+
       if (!result.canceled) {
         const newImageSource: ImageSource = {
           type: 'image',
@@ -81,27 +90,28 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
         setModalVisible(false);
       }
     } catch (error) {
-      console.error("Erreur lors de la prise de photo:", error);
+      console.error('Erreur lors de la prise de photo:', error);
     }
   };
 
   // Fonction pour sélectionner une image depuis la galerie
   const pickImage = async () => {
     try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (permissionResult.granted === false) {
         Alert.alert(t('meal.form.permission.galleryRequired'));
         return;
       }
-      
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-      
+
       if (!result.canceled) {
         const newImageSource: ImageSource = {
           type: 'image',
@@ -116,37 +126,49 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
     }
   };
 
-
-
   // Rendu de l'image sélectionnée
   const renderSelectedImage = () => {
     if (!selectedImage || selectedImage.type === 'none') {
       return (
-        <View style={[styles.placeholder, { backgroundColor: cardBackgroundColor, borderColor }]}>
-          <Text style={{ color: textSecondaryColor }}>{t('meal.form.image.selectTitle')}</Text>
+        <View
+          style={[
+            styles.placeholder,
+            { backgroundColor: cardBackgroundColor, borderColor },
+          ]}
+        >
+          <Text style={{ color: textSecondaryColor }}>
+            {t('meal.form.image.selectTitle')}
+          </Text>
         </View>
       );
     }
 
     if (selectedImage.type === 'image') {
       return (
-        <Image 
-          source={{ uri: selectedImage.value }} 
-          style={styles.selectedImage} 
+        <Image
+          source={{ uri: selectedImage.value }}
+          style={styles.selectedImage}
         />
       );
     }
 
     return (
-      <View style={[styles.placeholder, { backgroundColor: cardBackgroundColor, borderColor }]}>
-        <Text style={{ color: textSecondaryColor }}>{t('meal.form.image.unsupported')}</Text>
+      <View
+        style={[
+          styles.placeholder,
+          { backgroundColor: cardBackgroundColor, borderColor },
+        ]}
+      >
+        <Text style={{ color: textSecondaryColor }}>
+          {t('meal.form.image.unsupported')}
+        </Text>
       </View>
     );
   };
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.imageContainer}
         onPress={() => setModalVisible(true)}
         activeOpacity={0.8}
@@ -161,34 +183,57 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={[styles.modalContainer, { backgroundColor }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: borderColor, backgroundColor }]}>
-            <TouchableOpacity 
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomColor: borderColor, backgroundColor },
+            ]}
+          >
+            <TouchableOpacity
               onPress={() => setModalVisible(false)}
               style={styles.backButton}
             >
-              <ArrowLeft3CurvedBoldIcon width={24} height={24} color={textPrimaryColor} />
+              <ArrowLeft3CurvedBoldIcon
+                width={24}
+                height={24}
+                color={textPrimaryColor}
+              />
             </TouchableOpacity>
             <Text style={[styles.modalTitle, { color: textPrimaryColor }]}>
               {t('meal.form.image.selectTitle')}
             </Text>
           </View>
-          
+
           <View style={styles.optionsContainer}>
-            <TouchableOpacity 
-              style={[styles.optionButton, { backgroundColor: cardBackgroundColor }]} 
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                { backgroundColor: cardBackgroundColor },
+              ]}
               onPress={takePhoto}
             >
-              <CameraCurvedBoldIcon width={150} height={150} color={accentColor} />
+              <CameraCurvedBoldIcon
+                width={150}
+                height={150}
+                color={accentColor}
+              />
               <Text style={[styles.optionText, { color: textPrimaryColor }]}>
                 {t('meal.form.image.camera')}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.optionButton, { backgroundColor: cardBackgroundColor }]} 
+
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                { backgroundColor: cardBackgroundColor },
+              ]}
               onPress={pickImage}
             >
-              <ImageCurvedBoldIcon width={150} height={150} color={accentColor} />
+              <ImageCurvedBoldIcon
+                width={150}
+                height={150}
+                color={accentColor}
+              />
               <Text style={[styles.optionText, { color: textPrimaryColor }]}>
                 {t('meal.form.image.gallery')}
               </Text>
@@ -207,7 +252,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: 198,
-    height: 158 ,
+    height: 158,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 12,
@@ -305,7 +350,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-
 });
 
 export default FoodImagePicker;

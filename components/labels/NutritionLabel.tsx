@@ -1,6 +1,6 @@
 /**
  * Composant NutritionLabel - Affichage standardisu00e9 des valeurs nutritionnelles
- * 
+ *
  * Fournit un format cohu00e9rent pour l'affichage des informations nutritionnelles
  * avec support pour mise en u00e9vidence des macros, indicateur d'u00e9quilibre
  * et support d'accessibilitu00e9.
@@ -45,24 +45,33 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
   className = '',
 }) => {
   // Calculer l'u00e9quilibre des macros si nu00e9cessaire
-  const macroBalance = showBalanceIndicator 
+  const macroBalance = showBalanceIndicator
     ? nutritionEngine.checkMacroBalance(macros)
     : { protein: false, carbs: false, fat: false };
-  
+
   // Formatter les valeurs pour l'affichage
-  const formattedCalories = nutritionEngine.formatForUI(macros.calories, 'calories');
+  const formattedCalories = nutritionEngine.formatForUI(
+    macros.calories,
+    'calories',
+  );
   const formattedCarbs = nutritionEngine.formatForUI(macros.carbs, 'carbs');
-  const formattedProtein = nutritionEngine.formatForUI(macros.protein, 'protein');
+  const formattedProtein = nutritionEngine.formatForUI(
+    macros.protein,
+    'protein',
+  );
   const formattedFat = nutritionEngine.formatForUI(macros.fat, 'fat');
-  
+
   // Calculer les pourcentages pour les barres de progression
   const totalMacrosWeight = macros.carbs + macros.protein + macros.fat;
-  const carbsPercent = totalMacrosWeight > 0 ? (macros.carbs / totalMacrosWeight) * 100 : 0;
-  const proteinPercent = totalMacrosWeight > 0 ? (macros.protein / totalMacrosWeight) * 100 : 0;
-  const fatPercent = totalMacrosWeight > 0 ? (macros.fat / totalMacrosWeight) * 100 : 0;
-  
+  const carbsPercent =
+    totalMacrosWeight > 0 ? (macros.carbs / totalMacrosWeight) * 100 : 0;
+  const proteinPercent =
+    totalMacrosWeight > 0 ? (macros.protein / totalMacrosWeight) * 100 : 0;
+  const fatPercent =
+    totalMacrosWeight > 0 ? (macros.fat / totalMacrosWeight) * 100 : 0;
+
   return (
-    <Box 
+    <Box
       className={`p-3 rounded-lg bg-white shadow-sm ${className}`}
       aria-label="Information nutritionnelle"
     >
@@ -75,9 +84,9 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
           </Text>
         )}
       </HStack>
-      
+
       <Divider />
-      
+
       {/* Calories */}
       <HStack className="justify-between py-2">
         <Text className="font-semibold">Calories</Text>
@@ -85,14 +94,14 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
           {formattedCalories}
         </Text>
       </HStack>
-      
+
       <Divider />
-      
+
       {/* Macronutriments avec code couleur et barres */}
       <VStack className="space-y-2 pt-2">
         {/* Glucides */}
         <HStack className="justify-between items-center">
-          <Text 
+          <Text
             className={`${macroBalance.carbs ? 'text-green-600' : ''}`}
             aria-label={`Glucides ${formattedCarbs} grammes`}
           >
@@ -102,22 +111,22 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
             {formattedCarbs} g
           </Text>
         </HStack>
-        
+
         {showProgressBars && (
-          <Box 
+          <Box
             className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden"
             aria-hidden={true}
           >
-            <Box 
+            <Box
               className="h-full bg-amber-400"
               style={{ width: `${carbsPercent}%` }}
             />
           </Box>
         )}
-        
+
         {/* Protu00e9ines */}
         <HStack className="justify-between items-center">
-          <Text 
+          <Text
             className={`${macroBalance.protein ? 'text-green-600' : ''}`}
             aria-label={`Protu00e9ines ${formattedProtein} grammes`}
           >
@@ -127,22 +136,22 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
             {formattedProtein} g
           </Text>
         </HStack>
-        
+
         {showProgressBars && (
-          <Box 
+          <Box
             className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden"
             aria-hidden={true}
           >
-            <Box 
+            <Box
               className="h-full bg-blue-500"
               style={{ width: `${proteinPercent}%` }}
             />
           </Box>
         )}
-        
+
         {/* Lipides */}
         <HStack className="justify-between items-center">
-          <Text 
+          <Text
             className={`${macroBalance.fat ? 'text-green-600' : ''}`}
             aria-label={`Lipides ${formattedFat} grammes`}
           >
@@ -152,26 +161,26 @@ export const NutritionLabel: React.FC<NutritionLabelProps> = ({
             {formattedFat} g
           </Text>
         </HStack>
-        
+
         {showProgressBars && (
-          <Box 
+          <Box
             className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden"
             aria-hidden={true}
           >
-            <Box 
+            <Box
               className="h-full bg-yellow-500"
               style={{ width: `${fatPercent}%` }}
             />
           </Box>
         )}
       </VStack>
-      
+
       {/* Indicateur d'u00e9quilibre global si demandu00e9 */}
       {showBalanceIndicator && (
         <Box className="mt-3 pt-2 border-t border-gray-200">
           <HStack className="justify-between">
             <Text className="text-sm">Équilibre nutritionnel</Text>
-            <Box 
+            <Box
               className={`px-2 py-0.5 rounded text-xs ${
                 macroBalance.protein && macroBalance.carbs && macroBalance.fat
                   ? 'bg-green-100 text-green-800'

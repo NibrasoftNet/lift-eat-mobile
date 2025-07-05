@@ -4,8 +4,21 @@ import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
-import { FormControl, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control';
-import { Select, SelectTrigger, SelectInput, SelectPortal, SelectItem, SelectContent, SelectDragIndicator, SelectDragIndicatorWrapper } from '@/components/ui/select';
+import {
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
+} from '@/components/ui/form-control';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectPortal,
+  SelectItem,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+} from '@/components/ui/select';
 import { DietaryRestrictionEnum } from '@/utils/enum/user-details.enum';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
@@ -17,14 +30,15 @@ interface DietaryRestrictionsInputProps {
 
 export default function DietaryRestrictionsInput({
   defaultRestrictions = [],
-  setValue
+  setValue,
 }: DietaryRestrictionsInputProps) {
   // État local pour gérer les restrictions sélectionnées
-  const [selectedRestrictions, setSelectedRestrictions] = React.useState<DietaryRestrictionEnum[]>(defaultRestrictions);
-  
+  const [selectedRestrictions, setSelectedRestrictions] =
+    React.useState<DietaryRestrictionEnum[]>(defaultRestrictions);
+
   logger.debug(
     LogCategory.FORM,
-    'Rendering DietaryRestrictionsInput component'
+    'Rendering DietaryRestrictionsInput component',
   );
 
   const restrictionOptions = [
@@ -42,26 +56,29 @@ export default function DietaryRestrictionsInput({
 
   const formatRestrictionName = (restriction: string): string => {
     if (restriction === DietaryRestrictionEnum.NONE) {
-      return "Aucune restriction";
+      return 'Aucune restriction';
     }
     // Remplacer tous les underscores par des espaces et mettre en forme
-    return restriction.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return restriction
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   // Gère le changement de restriction alimentaire
   const handleRestrictionChange = (value: string) => {
-    logger.debug(
-      LogCategory.FORM,
-      `Changing dietary restriction: ${value}`
-    );
-    
+    logger.debug(LogCategory.FORM, `Changing dietary restriction: ${value}`);
+
     const newRestrictions = [value as DietaryRestrictionEnum];
     setSelectedRestrictions(newRestrictions);
     setValue('dietaryRestrictions', newRestrictions);
   };
 
   // Déterminer la valeur actuellement sélectionnée
-  const currentValue = selectedRestrictions.length > 0 ? selectedRestrictions[0] : DietaryRestrictionEnum.NONE;
+  const currentValue =
+    selectedRestrictions.length > 0
+      ? selectedRestrictions[0]
+      : DietaryRestrictionEnum.NONE;
 
   return (
     <Card className="p-4">
@@ -71,17 +88,19 @@ export default function DietaryRestrictionsInput({
             Restrictions alimentaires
           </FormControlLabelText>
         </FormControlLabel>
-        
+
         <Box className="mt-2">
-          <Text className="mb-1 font-medium">Sélectionnez votre régime alimentaire</Text>
+          <Text className="mb-1 font-medium">
+            Sélectionnez votre régime alimentaire
+          </Text>
           <Select
             selectedValue={currentValue}
             onValueChange={handleRestrictionChange}
           >
             <SelectTrigger size="lg" className="h-12">
-              <SelectInput 
-                placeholder="Choisir une restriction" 
-                style={{fontSize: 16}}
+              <SelectInput
+                placeholder="Choisir une restriction"
+                style={{ fontSize: 16 }}
               />
             </SelectTrigger>
             <SelectPortal>
@@ -90,10 +109,10 @@ export default function DietaryRestrictionsInput({
                   <SelectDragIndicator />
                 </SelectDragIndicatorWrapper>
                 {restrictionOptions.map((restriction) => (
-                  <SelectItem 
-                    key={restriction} 
-                    label={formatRestrictionName(restriction)} 
-                    value={restriction} 
+                  <SelectItem
+                    key={restriction}
+                    label={formatRestrictionName(restriction)}
+                    value={restriction}
                   />
                 ))}
               </SelectContent>

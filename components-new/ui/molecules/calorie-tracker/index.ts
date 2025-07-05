@@ -1,4 +1,3 @@
-
 // Exporte également les versions originales pour la rétrocompatibilité
 export { default as CaloriesBurnedSection } from './CaloriesBurnedSection';
 export { default as DateNavigationHeader } from './DateNavigationHeader';

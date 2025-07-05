@@ -7,7 +7,9 @@ Ce dossier contient l'ensemble des services qui composent l'architecture MCP (Mo
 L'organisation des services est structurée comme suit:
 
 ### `/core`
+
 Services métier principaux qui implémentent la logique business centrale de l'application.
+
 - `auth.service.ts` - Authentification et gestion des sessions
 - `user.service.ts` - Gestion des utilisateurs (profils, préférences)
 - `nutrition.service.ts` - Calculs nutritionnels et gestion des objectifs
@@ -16,20 +18,28 @@ Services métier principaux qui implémentent la logique business centrale de l'
 - `progress.service.ts` - Suivi des progrès et statistiques
 
 ### `/pages`
+
 Services d'orchestration qui font l'interface entre l'UI et les services métier.
+
 - `*-pages.service.ts` - Orchestrent les appels entre UI et services business
 
 ### `/forms`
+
 Services de validation et préparation des données de formulaires.
+
 - `form-*.service.ts` - Validation et préparation des données avant persistance
 
 ### `/ui`
+
 Services liés aux composants d'interface utilisateur.
+
 - `ui-drawer.service.ts` - Gestion des tiroirs (drawers)
 - `ui-deletion-modal.service.ts` - Gestion des modales de confirmation
 
 ### `/common`
+
 Services utilitaires et partagés.
+
 - `logging.service.ts` - Journalisation centralisée
 - Autres utilitaires communs
 
@@ -43,6 +53,7 @@ L'architecture MCP (Model-Controller-Persistence) centralise l'accès aux donné
 4. **MCP Server** - Point d'accès unique à la base de données via des handlers
 
 ### Flux des Données
+
 ```
 Composant UI → Service Pages → Service Core → MCP Server → Base de données
 ```
@@ -57,11 +68,13 @@ Composant UI → Service Pages → Service Core → MCP Server → Base de donn�
 ## Bonnes Pratiques:
 
 1. **Séparation des Responsabilités**:
+
    - Les composants UI ne doivent JAMAIS accéder directement à la base de données
    - Toute logique métier doit être dans les services `/core`
    - Les services de pages ne font qu'orchestrer
 
 2. **Gestion des Erreurs**:
+
    - Tous les services retournent un type `OperationResult<T>`
    - La journalisation est centralisée via `logging.service.ts`
 

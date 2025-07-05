@@ -1,5 +1,11 @@
 import React, { useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+} from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Text } from '../../atoms/base';
@@ -23,26 +29,22 @@ interface MealCardProps {
  * Composant MealCard
  * Carte d'affichage d'un repas, conformément au design Figma
  */
-const MealCard: React.FC<MealCardProps> = ({
-  meal,
-  onPress,
-  onDelete,
-}) => {
+const MealCard: React.FC<MealCardProps> = ({ meal, onPress, onDelete }) => {
   const theme = useAppTheme();
   const swipeableRef = useRef<Swipeable>(null);
 
   // Extraction des données du repas
   const { id, name, description, calories, image, quantity, unit } = meal;
-  
+
   // Approche simple pour l'image du repas, comme dans l'ancien composant
   let imageSource = DEFAULT_MEAL_IMAGE;
-  
+
   // Si l'image existe, l'utiliser directement comme URI
   if (image) {
     try {
       imageSource = { uri: `${image}` };
     } catch (error) {
-      console.error('Erreur lors du traitement de l\'image:', error);
+      console.error("Erreur lors du traitement de l'image:", error);
       imageSource = DEFAULT_MEAL_IMAGE;
     }
   }
@@ -69,15 +71,18 @@ const MealCard: React.FC<MealCardProps> = ({
   const caloriesText = calories ? `${calories} kcal` : 'N/A';
 
   // Rendu du bouton de suppression (visible lors du swipe)
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
     if (!onDelete) return null;
-    
+
     const trans = dragX.interpolate({
       inputRange: [-80, 0],
       outputRange: [0, 80],
       extrapolate: 'clamp',
     });
-    
+
     return (
       <Animated.View
         style={[
@@ -103,33 +108,28 @@ const MealCard: React.FC<MealCardProps> = ({
       friction={2}
       rightThreshold={40}
     >
-      <TouchableOpacity 
-        style={[styles.container, { backgroundColor: theme.color('background') }]}
+      <TouchableOpacity
+        style={[
+          styles.container,
+          { backgroundColor: theme.color('background') },
+        ]}
         onPress={handlePress}
         activeOpacity={0.7}
       >
         {/* Image du repas */}
         <View style={styles.imageContainer}>
-          <Image 
-            source={imageSource} 
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <Image source={imageSource} style={styles.image} resizeMode="cover" />
         </View>
-        
+
         {/* Contenu textuel */}
         <View style={styles.content}>
-          <Text 
-            variant="subtitle" 
-            color={theme.color('primary')}
-            bold
-          >
+          <Text variant="subtitle" color={theme.color('primary')} bold>
             {name || 'Sans nom'}
           </Text>
-          
+
           {description && (
-            <Text 
-              variant="caption" 
+            <Text
+              variant="caption"
               color={theme.color('blueGrey')}
               style={styles.description}
               numberOfLines={1}
@@ -137,35 +137,31 @@ const MealCard: React.FC<MealCardProps> = ({
               {description}
             </Text>
           )}
-          
+
           {/* Informations nutritionnelles */}
           <View style={styles.infoContainer}>
-            <Text 
-              variant="caption" 
+            <Text
+              variant="caption"
               color={theme.color('blueGrey')}
               style={styles.portionText}
             >
               {portion.toUpperCase()}
             </Text>
-            
+
             <View style={styles.caloriesContainer}>
-              <Text 
-                variant="caption" 
-                color={theme.color('orange')}
-                bold
-              >
+              <Text variant="caption" color={theme.color('orange')} bold>
                 {caloriesText}
               </Text>
             </View>
           </View>
         </View>
-        
+
         {/* Icône de navigation */}
         <View style={styles.arrowContainer}>
-          <ArrowRightRegularBoldIcon 
-            width={16} 
-            height={16} 
-            color={theme.color('blueGrey')} 
+          <ArrowRightRegularBoldIcon
+            width={16}
+            height={16}
+            color={theme.color('blueGrey')}
           />
         </View>
       </TouchableOpacity>

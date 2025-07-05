@@ -12,10 +12,10 @@ interface FooterWithNavigationProps {
 
 /**
  * FooterWithNavigation component
- * 
- * Composant qui encapsule BottomNavigation avec une gestion automatique 
+ *
+ * Composant qui encapsule BottomNavigation avec une gestion automatique
  * de la SafeArea et des insets de l'appareil.
- * 
+ *
  * Reproduction fidèle du design Figma (node-id=3404-17376) sans modification personnelle.
  */
 const FooterWithNavigation: React.FC<FooterWithNavigationProps> = ({
@@ -24,15 +24,12 @@ const FooterWithNavigation: React.FC<FooterWithNavigationProps> = ({
   darkMode = true,
 }) => {
   const insets = useSafeAreaInsets();
-  
+
   return (
-    <View 
-      style={[
-        styles.container,
-        { paddingBottom: Math.max(insets.bottom, 8) }
-      ]}
+    <View
+      style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}
     >
-      <BottomNavigation 
+      <BottomNavigation
         activeTab={activeTab}
         onTabChange={onTabChange}
         darkMode={darkMode}

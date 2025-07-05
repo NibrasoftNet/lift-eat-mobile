@@ -52,7 +52,7 @@ const Textarea = React.forwardRef<
   ITextareaProps
 >(function Textarea(
   { className, variant = 'default', size = 'md', ...props },
-  ref
+  ref,
 ) {
   return (
     <UITextarea

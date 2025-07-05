@@ -14,7 +14,11 @@ export interface FireEmojiProps extends ImageProps {
 /**
  * Composant Emoji 🔥 (Flame) conforme au style Fluent Emojis.
  */
-export const FireEmoji: React.FC<FireEmojiProps> = ({ size = 48, style, ...props }) => {
+export const FireEmoji: React.FC<FireEmojiProps> = ({
+  size = 48,
+  style,
+  ...props
+}) => {
   return (
     <Image
       source={firePng}

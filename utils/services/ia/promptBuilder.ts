@@ -22,38 +22,43 @@ export enum PromptTypeEnum {
 export async function buildEnrichedPrompt(
   userId: number,
   userPrompt: string,
-  promptType: PromptTypeEnum
+  promptType: PromptTypeEnum,
 ): Promise<string> {
   try {
     // Récupérer le contexte utilisateur complet avec la méthode MCP
-    const userContextResult = await sqliteMCPServer.getUserContextViaMCP(userId);
-    
+    const userContextResult = await sqliteMCPServer.getUserContextViaMCP(
+      userId,
+    );
+
     // Vérifier si la récupération a réussi
     if (!userContextResult.success) {
-      console.error('Erreur lors de la récupération du contexte utilisateur:', userContextResult.error);
+      console.error(
+        'Erreur lors de la récupération du contexte utilisateur:',
+        userContextResult.error,
+      );
       return `USER QUESTION: ${userPrompt}\n\nINSTRUCTIONS: Répondez de manière simple et concise à cette question.`;
     }
-    
+
     // Récupérer le contexte utilisateur complet avec restrictions alimentaires et allergies
     const userContext = userContextResult.context || '';
-    
+
     // Construire le prompt en fonction du type
     switch (promptType) {
       case PromptTypeEnum.ADD_MEAL_PLAN_INGREDIENT:
         return buildAddEntityPrompt(userContext, userPrompt);
-      
+
       case PromptTypeEnum.NUTRITION_PLAN_GENERATION:
         return buildNutritionPlanPrompt(userContext, userPrompt);
-      
+
       case PromptTypeEnum.MEAL_RECOMMENDATION:
         return buildMealRecommendationPrompt(userContext, userPrompt);
-        
+
       case PromptTypeEnum.PROGRESS_ANALYSIS:
         return buildProgressAnalysisPrompt(userContext, userPrompt);
-        
+
       case PromptTypeEnum.NUTRITION_ADVICE:
         return buildNutritionAdvicePrompt(userContext, userPrompt);
-      
+
       case PromptTypeEnum.GENERAL_QUESTION:
       default:
         return buildGeneralPrompt(userContext, userPrompt);
@@ -146,7 +151,10 @@ If the request is not about adding an item, just respond normally without any sp
 /**
  * Construit un prompt pour la génération de plan nutritionnel
  */
-function buildNutritionPlanPrompt(userContext: string, userPrompt: string): string {
+function buildNutritionPlanPrompt(
+  userContext: string,
+  userPrompt: string,
+): string {
   return `
 ${userContext}
 
@@ -195,7 +203,10 @@ Si vous décidez de créer un plan, incluez également le format JSON suivant à
 /**
  * Construit un prompt pour la recommandation de repas
  */
-function buildMealRecommendationPrompt(userContext: string, userPrompt: string): string {
+function buildMealRecommendationPrompt(
+  userContext: string,
+  userPrompt: string,
+): string {
   return `
 ${userContext}
 
@@ -253,7 +264,10 @@ Si vous suggérez un repas spécifique, incluez également le format JSON suivan
 /**
  * Construit un prompt pour l'analyse de progrès
  */
-function buildProgressAnalysisPrompt(userContext: string, userPrompt: string): string {
+function buildProgressAnalysisPrompt(
+  userContext: string,
+  userPrompt: string,
+): string {
   return `
 ${userContext}
 
@@ -281,7 +295,10 @@ Répondez de manière claire, concise et bienveillante.
 /**
  * Construit un prompt pour les conseils nutritionnels
  */
-function buildNutritionAdvicePrompt(userContext: string, userPrompt: string): string {
+function buildNutritionAdvicePrompt(
+  userContext: string,
+  userPrompt: string,
+): string {
   return `
 ${userContext}
 
@@ -329,35 +346,79 @@ Répondez de manière claire, concise et informative.
  */
 // Mots-clés communs pour les actions
 const ACTION_KEYWORDS = {
-  ADD: ['ajouter', 'créer', 'nouveau', 'ajoute', 'crée', 'add', 'create', 'new'],
+  ADD: [
+    'ajouter',
+    'créer',
+    'nouveau',
+    'ajoute',
+    'crée',
+    'add',
+    'create',
+    'new',
+  ],
 };
 
 // Termes spécifiques aux entités
 const ENTITY_TERMS = {
   MEAL: ['repas', 'plat', 'meal', 'dish', 'food'],
   PLAN: ['plan', 'planning', 'programme', 'régime', 'diet', 'nutrition'],
-  INGREDIENT: ['ingredient', 'ingrédient', 'aliment', 'food item', 'food']
+  INGREDIENT: ['ingredient', 'ingrédient', 'aliment', 'food item', 'food'],
 };
 
 // Mots-clés pour les types de prompts spécifiques
 const nutritionPlanKeywords = [
-  'plan', 'nutrition', 'diète', 'régime', 'programme', 'alimentation', 
-  'planning', 'planification', 'génère', 'créer un plan', 'recommande-moi un plan'
+  'plan',
+  'nutrition',
+  'diète',
+  'régime',
+  'programme',
+  'alimentation',
+  'planning',
+  'planification',
+  'génère',
+  'créer un plan',
+  'recommande-moi un plan',
 ];
 
 const mealRecommendationKeywords = [
-  'recommande', 'suggère', 'propose', 'idée', 'repas', 'que manger',
-  'recette', 'plat', 'menu', 'recommandation'
+  'recommande',
+  'suggère',
+  'propose',
+  'idée',
+  'repas',
+  'que manger',
+  'recette',
+  'plat',
+  'menu',
+  'recommandation',
 ];
 
 const progressAnalysisKeywords = [
-  'progrès', 'progression', 'analyser', 'analyse', 'évolution', 'suivi',
-  'résultats', 'progression', 'amélioration', 'tendance', 'statistiques'
+  'progrès',
+  'progression',
+  'analyser',
+  'analyse',
+  'évolution',
+  'suivi',
+  'résultats',
+  'progression',
+  'amélioration',
+  'tendance',
+  'statistiques',
 ];
 
 const nutritionAdviceKeywords = [
-  'conseil', 'avis', 'recommandation', 'nutriments', 'vitamines', 'minéraux',
-  'macros', 'équilibre', 'nutrition', 'diététique', 'santé'
+  'conseil',
+  'avis',
+  'recommandation',
+  'nutriments',
+  'vitamines',
+  'minéraux',
+  'macros',
+  'équilibre',
+  'nutrition',
+  'diététique',
+  'santé',
 ];
 
 /**
@@ -365,21 +426,23 @@ const nutritionAdviceKeywords = [
  */
 export function isAddMealRequest(prompt: string): boolean {
   const lowerPrompt = prompt.toLowerCase();
-  
+
   // Combinaisons spécifiques (ex: "ajouter un repas")
-  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap(action => 
-    ENTITY_TERMS.MEAL.map(entity => `${action} ${entity}`)
+  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap((action) =>
+    ENTITY_TERMS.MEAL.map((entity) => `${action} ${entity}`),
   );
-  
+
   // Vérifier si l'une des combinaisons spécifiques est présente
-  if (specificCombinations.some(combo => lowerPrompt.includes(combo))) {
+  if (specificCombinations.some((combo) => lowerPrompt.includes(combo))) {
     return true;
   }
-  
+
   // Vérifier si contient des termes de repas mais pas de termes de plan ou ingrédient
-  return ENTITY_TERMS.MEAL.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.PLAN.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.INGREDIENT.some(term => lowerPrompt.includes(term));
+  return (
+    ENTITY_TERMS.MEAL.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.PLAN.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.INGREDIENT.some((term) => lowerPrompt.includes(term))
+  );
 }
 
 /**
@@ -387,21 +450,23 @@ export function isAddMealRequest(prompt: string): boolean {
  */
 export function isAddPlanRequest(prompt: string): boolean {
   const lowerPrompt = prompt.toLowerCase();
-  
+
   // Combinaisons spécifiques (ex: "ajouter un plan")
-  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap(action => 
-    ENTITY_TERMS.PLAN.map(entity => `${action} ${entity}`)
+  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap((action) =>
+    ENTITY_TERMS.PLAN.map((entity) => `${action} ${entity}`),
   );
-  
+
   // Vérifier si l'une des combinaisons spécifiques est présente
-  if (specificCombinations.some(combo => lowerPrompt.includes(combo))) {
+  if (specificCombinations.some((combo) => lowerPrompt.includes(combo))) {
     return true;
   }
-  
+
   // Vérifier si contient des termes de plan mais pas de termes de repas ou ingrédient
-  return ENTITY_TERMS.PLAN.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.MEAL.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.INGREDIENT.some(term => lowerPrompt.includes(term));
+  return (
+    ENTITY_TERMS.PLAN.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.MEAL.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.INGREDIENT.some((term) => lowerPrompt.includes(term))
+  );
 }
 
 /**
@@ -409,21 +474,23 @@ export function isAddPlanRequest(prompt: string): boolean {
  */
 export function isAddIngredientRequest(prompt: string): boolean {
   const lowerPrompt = prompt.toLowerCase();
-  
+
   // Combinaisons spécifiques (ex: "ajouter un ingrédient")
-  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap(action => 
-    ENTITY_TERMS.INGREDIENT.map(entity => `${action} ${entity}`)
+  const specificCombinations = ACTION_KEYWORDS.ADD.flatMap((action) =>
+    ENTITY_TERMS.INGREDIENT.map((entity) => `${action} ${entity}`),
   );
-  
+
   // Vérifier si l'une des combinaisons spécifiques est présente
-  if (specificCombinations.some(combo => lowerPrompt.includes(combo))) {
+  if (specificCombinations.some((combo) => lowerPrompt.includes(combo))) {
     return true;
   }
-  
+
   // Vérifier si contient des termes d'ingrédient mais pas de termes de repas ou plan
-  return ENTITY_TERMS.INGREDIENT.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.MEAL.some(term => lowerPrompt.includes(term)) &&
-    !ENTITY_TERMS.PLAN.some(term => lowerPrompt.includes(term));
+  return (
+    ENTITY_TERMS.INGREDIENT.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.MEAL.some((term) => lowerPrompt.includes(term)) &&
+    !ENTITY_TERMS.PLAN.some((term) => lowerPrompt.includes(term))
+  );
 }
 
 /**
@@ -433,8 +500,8 @@ export function isAddIngredientRequest(prompt: string): boolean {
  */
 function isProgressAnalysisRequest(prompt: string): boolean {
   const promptLower = prompt.toLowerCase();
-  return progressAnalysisKeywords.some(keyword => 
-    promptLower.includes(keyword.toLowerCase())
+  return progressAnalysisKeywords.some((keyword) =>
+    promptLower.includes(keyword.toLowerCase()),
   );
 }
 
@@ -445,8 +512,8 @@ function isProgressAnalysisRequest(prompt: string): boolean {
  */
 function isMealRecommendationRequest(prompt: string): boolean {
   const promptLower = prompt.toLowerCase();
-  return mealRecommendationKeywords.some(keyword => 
-    promptLower.includes(keyword.toLowerCase())
+  return mealRecommendationKeywords.some((keyword) =>
+    promptLower.includes(keyword.toLowerCase()),
   );
 }
 
@@ -457,8 +524,8 @@ function isMealRecommendationRequest(prompt: string): boolean {
  */
 function isNutritionPlanGenerationRequest(prompt: string): boolean {
   const promptLower = prompt.toLowerCase();
-  return nutritionPlanKeywords.some(keyword => 
-    promptLower.includes(keyword.toLowerCase())
+  return nutritionPlanKeywords.some((keyword) =>
+    promptLower.includes(keyword.toLowerCase()),
   );
 }
 
@@ -469,8 +536,8 @@ function isNutritionPlanGenerationRequest(prompt: string): boolean {
  */
 function isNutritionAdviceRequest(prompt: string): boolean {
   const promptLower = prompt.toLowerCase();
-  return nutritionAdviceKeywords.some(keyword => 
-    promptLower.includes(keyword.toLowerCase())
+  return nutritionAdviceKeywords.some((keyword) =>
+    promptLower.includes(keyword.toLowerCase()),
   );
 }
 
@@ -481,30 +548,34 @@ function isNutritionAdviceRequest(prompt: string): boolean {
  */
 export function determinePromptType(prompt: string): PromptTypeEnum {
   // Vérifier s'il s'agit d'une demande d'ajout d'ingrédient, de repas ou de plan
-  if (isAddMealRequest(prompt) || isAddPlanRequest(prompt) || isAddIngredientRequest(prompt)) {
+  if (
+    isAddMealRequest(prompt) ||
+    isAddPlanRequest(prompt) ||
+    isAddIngredientRequest(prompt)
+  ) {
     return PromptTypeEnum.ADD_MEAL_PLAN_INGREDIENT;
   }
-  
+
   // Vérifier s'il s'agit d'une demande de génération de plan nutritionnel
   if (isNutritionPlanGenerationRequest(prompt)) {
     return PromptTypeEnum.NUTRITION_PLAN_GENERATION;
   }
-  
+
   // Vérifier s'il s'agit d'une demande de recommandation de repas
   if (isMealRecommendationRequest(prompt)) {
     return PromptTypeEnum.MEAL_RECOMMENDATION;
   }
-  
+
   // Vérifier s'il s'agit d'une demande d'analyse de progrès
   if (isProgressAnalysisRequest(prompt)) {
     return PromptTypeEnum.PROGRESS_ANALYSIS;
   }
-  
+
   // Vérifier s'il s'agit d'une demande de conseils nutritionnels
   if (isNutritionAdviceRequest(prompt)) {
     return PromptTypeEnum.NUTRITION_ADVICE;
   }
-  
+
   // Par défaut, c'est une question générale
   return PromptTypeEnum.GENERAL_QUESTION;
 }

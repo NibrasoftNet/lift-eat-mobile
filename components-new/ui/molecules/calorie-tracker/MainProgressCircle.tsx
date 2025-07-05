@@ -3,7 +3,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import Svg, { Circle, G } from 'react-native-svg';
 import CircularAddButton from '../../atoms/inputs/CircularAddButton';
-import { GreenSaladEmoji, FireEmoji } from '../../../../assets/icons/fluent-emojis';
+import {
+  GreenSaladEmoji,
+  FireEmoji,
+} from '../../../../assets/icons/fluent-emojis';
 
 interface MainProgressCircleProps {
   consumedCalories: number;
@@ -24,16 +27,19 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
   onAddPress,
 }) => {
   const theme = useTheme();
-  
+
   // Couleurs issues du Design System Figma
   const primaryColor = theme.colors.successLighter ?? '#A1CE50'; // Couleur verte du progrès
   const backgroundColor = theme.colors.backgroundGrey ?? '#EEEEEE'; // Couleur grise du fond
   const textDarkColor = theme.colors.primary ?? '#212121'; // Couleur principale (texte)
   const textGrayColor = theme.colors.blueGrey ?? '#616161'; // Couleur grise des labels
-  
+
   // Calculer le pourcentage pour le cercle de progression
-  const percentage = Math.min(Math.round((consumedCalories / goalCalories) * 100), 100);
-  
+  const percentage = Math.min(
+    Math.round((consumedCalories / goalCalories) * 100),
+    100,
+  );
+
   // Paramètres du cercle
   const size = 140;
   const strokeWidth = 10;
@@ -47,16 +53,16 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
       <View style={styles.sideContainer}>
         <View style={styles.labelRow}>
           <GreenSaladEmoji size={12} />
-          <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>Eaten</Text>
+          <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>
+            Eaten
+          </Text>
         </View>
         <Text style={[styles.amountText, { color: textDarkColor }]}>
           {consumedCalories}
         </Text>
-        <Text style={[styles.unitText, { color: textGrayColor }]}>
-          kcal
-        </Text>
+        <Text style={[styles.unitText, { color: textGrayColor }]}>kcal</Text>
       </View>
-      
+
       {/* Section centrale - Cercle de progression */}
       <View style={styles.circleContainer}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -69,7 +75,7 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
             stroke={backgroundColor}
             strokeWidth={strokeWidth}
           />
-          
+
           {/* Cercle de progression */}
           <G rotation={-90} origin={`${size / 2}, ${size / 2}`}>
             <Circle
@@ -84,7 +90,7 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
               strokeLinecap="round"
             />
           </G>
-        </Svg>      
+        </Svg>
         {/* Pourcentage au centre */}
         <View style={styles.percentageContainer}>
           <Text style={[styles.percentageText, { color: textDarkColor }]}>
@@ -95,19 +101,19 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
           </Text>
         </View>
       </View>
-      
+
       {/* Section droite - Calories restantes */}
       <View style={styles.sideContainer}>
         <View style={styles.labelRow}>
           <FireEmoji size={12} />
-          <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>Burned</Text>
+          <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>
+            Burned
+          </Text>
         </View>
         <Text style={[styles.amountText, { color: textDarkColor }]}>
           {burnedCalories}
         </Text>
-        <Text style={[styles.unitText, { color: textGrayColor }]}>
-          kcal
-        </Text>
+        <Text style={[styles.unitText, { color: textGrayColor }]}>kcal</Text>
       </View>
     </View>
   );

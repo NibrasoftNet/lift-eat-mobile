@@ -32,9 +32,15 @@ export interface ThemeInterface {
     roboto: typeof typographyRoboto;
   };
   textStyle: {
-    urbanist: (key: TypographyUrbanistKeys) => typeof typographyUrbanist[TypographyUrbanistKeys];
-    playfair: (key: TypographyPlayfairKeys) => typeof typographyPlayfair[TypographyPlayfairKeys];
-    roboto: (key: TypographyRobotoKeys) => typeof typographyRoboto[TypographyRobotoKeys];
+    urbanist: (
+      key: TypographyUrbanistKeys,
+    ) => (typeof typographyUrbanist)[TypographyUrbanistKeys];
+    playfair: (
+      key: TypographyPlayfairKeys,
+    ) => (typeof typographyPlayfair)[TypographyPlayfairKeys];
+    roboto: (
+      key: TypographyRobotoKeys,
+    ) => (typeof typographyRoboto)[TypographyRobotoKeys];
   };
 
   // Espacement
@@ -58,7 +64,7 @@ export interface ThemeInterface {
 /**
  * Hook personnalisé pour accéder au Design System Figma
  * Regroupe tous les tokens design (couleurs, typo, espacements, etc.)
- * 
+ *
  * @example
  * const theme = useTheme();
  * const styles = StyleSheet.create({
@@ -119,7 +125,10 @@ export const useTheme = (): ThemeInterface => {
 export const { colors: themeColors } = { colors };
 export const { spacing: themeSpacing } = { spacing };
 export const { radii: themeRadii } = { radii };
-export const { shadows: themeShadows, opacities: themeOpacities } = { shadows, opacities };
+export const { shadows: themeShadows, opacities: themeOpacities } = {
+  shadows,
+  opacities,
+};
 export const {
   typographyUrbanist: themeTypographyUrbanist,
   typographyPlayfair: themeTypographyPlayfair,

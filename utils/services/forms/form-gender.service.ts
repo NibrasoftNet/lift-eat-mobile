@@ -3,11 +3,11 @@
  * Fournit des fonctionnalités pour l'animation et les styles du composant GenderFormInput
  */
 
-import { GenderEnum } from "@/utils/enum/user-gender-activity.enum";
-import { SharedValue } from "react-native-reanimated";
-import { GenderFormServiceInterface } from "@/utils/interfaces/form-input.interface";
-import { logger } from "@/utils/services/common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
+import { GenderEnum } from '@/utils/enum/user-gender-activity.enum';
+import { SharedValue } from 'react-native-reanimated';
+import { GenderFormServiceInterface } from '@/utils/interfaces/form-input.interface';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Implémentation du service de gestion du formulaire de genre
@@ -22,14 +22,17 @@ class GenderFormService implements GenderFormServiceInterface {
   initializeGenderAnimations(
     defaultGender: GenderEnum,
     maleBarWidth: SharedValue<number>,
-    femaleBarWidth: SharedValue<number>
+    femaleBarWidth: SharedValue<number>,
   ): void {
     try {
       // Définir les valeurs initiales en fonction du genre par défaut
       maleBarWidth.value = defaultGender === GenderEnum.MALE ? 100 : 0;
       femaleBarWidth.value = defaultGender === GenderEnum.FEMALE ? 100 : 0;
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error initializing gender animations: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error initializing gender animations: ${error}`,
+      );
     }
   }
 
@@ -44,7 +47,7 @@ class GenderFormService implements GenderFormServiceInterface {
     selectedGender: GenderEnum,
     maleBarWidth: SharedValue<number>,
     femaleBarWidth: SharedValue<number>,
-    duration: number = 300
+    duration: number = 300,
   ): void {
     try {
       // Animer les barres en fonction du genre sélectionné avec la durée spécifiée
@@ -61,35 +64,41 @@ class GenderFormService implements GenderFormServiceInterface {
    * @param targetGender - Le genre cible pour les styles
    * @returns Les classes CSS pour le bouton
    */
-  getGenderButtonStyles(currentGender: GenderEnum, targetGender: GenderEnum): {
+  getGenderButtonStyles(
+    currentGender: GenderEnum,
+    targetGender: GenderEnum,
+  ): {
     buttonClass: string;
     textClass: string;
   } {
     try {
       // Bouton sélectionné ou non
       const isSelected = currentGender === targetGender;
-      
+
       // Classes de base pour tous les boutons
-      const baseButtonClass = "w-full h-full";
-      const baseTextClass = "text-gray-500";
-      
+      const baseButtonClass = 'w-full h-full';
+      const baseTextClass = 'text-gray-500';
+
       // Ajouter des classes pour le bouton sélectionné
       const buttonClass = isSelected
         ? `${baseButtonClass} bg-transparent`
         : `${baseButtonClass} bg-transparent`;
-        
+
       // Ajouter des classes pour le texte du bouton sélectionné
       const textClass = isSelected
         ? `${baseTextClass} font-bold`
         : baseTextClass;
-      
+
       return { buttonClass, textClass };
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error getting gender button styles: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error getting gender button styles: ${error}`,
+      );
       // Retourner des styles par défaut en cas d'erreur
       return {
-        buttonClass: "w-full h-full bg-transparent",
-        textClass: "text-gray-500"
+        buttonClass: 'w-full h-full bg-transparent',
+        textClass: 'text-gray-500',
       };
     }
   }
@@ -101,8 +110,8 @@ class GenderFormService implements GenderFormServiceInterface {
    */
   getGenderBarStyles(gender: GenderEnum) {
     return {
-      barColor: gender === GenderEnum.MALE ? "blue" : "orange",
-      position: gender === GenderEnum.MALE ? "left" : "right"
+      barColor: gender === GenderEnum.MALE ? 'blue' : 'orange',
+      position: gender === GenderEnum.MALE ? 'left' : 'right',
     };
   }
 }

@@ -6,7 +6,7 @@ import {
   FormControlHelper,
   FormControlHelperText,
   FormControlLabel,
-  FormControlLabelText
+  FormControlLabelText,
 } from '@/components/ui/form-control';
 import { VStack } from '@/components/ui/vstack';
 import React, { useState, useMemo, useEffect } from 'react';
@@ -15,7 +15,7 @@ import { Grid, GridItem } from '@/components/ui/grid';
 import {
   useSharedValue,
   useAnimatedStyle,
-  withSpring
+  withSpring,
 } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
 import { Card } from '@/components/ui/card';
@@ -25,7 +25,7 @@ import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 import {
   UserDetailsFormData,
   UserDetailsDefaultValuesProps,
-  userDetailsSchema
+  userDetailsSchema,
 } from '@/utils/validation/user/user-details.validation';
 import RulerPicker from '@/components/ui/ruler-picker/RulerPicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -52,23 +52,27 @@ export default function UserDetailsForm({
 }) {
   const toast = useToast();
   const router = useRouter();
-  
+
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   // Préparer les valeurs par défaut normalisées via le service
-  const normalizedDefaultValues = useMemo(() => 
-    userDetailsFormService.prepareDefaultValues(defaultValues), 
-  [defaultValues]);
-  
+  const normalizedDefaultValues = useMemo(
+    () => userDetailsFormService.prepareDefaultValues(defaultValues),
+    [defaultValues],
+  );
+
   // Vérifier l'accès de l'utilisateur via le service
   useEffect(() => {
-    if (userId && !userDetailsFormService.validateUserAccess(
-      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
-      String(userId), 
-      normalizedDefaultValues?.id?.toString() || '', 
-      toast
-    )) {
+    if (
+      userId &&
+      !userDetailsFormService.validateUserAccess(
+        // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+        String(userId),
+        normalizedDefaultValues?.id?.toString() || '',
+        toast,
+      )
+    ) {
       router.back();
     }
   }, [userId, normalizedDefaultValues?.id, toast, router]);
@@ -117,10 +121,10 @@ export default function UserDetailsForm({
 
   const handleWidthUnitChange = (unit: WeightUnitEnum, index: number) => {
     setWeightUnit(unit);
-    
+
     // Déléguer au service la gestion du changement d'unité
     userDetailsFormService.handleWeightUnitChange(unit, setValue, index);
-    
+
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
     slidePosition.value = withSpring(position, { duration: 300 }); // Each button is 100px wide
@@ -128,10 +132,10 @@ export default function UserDetailsForm({
 
   const handleHeightUnitChange = (unit: HeightUnitEnum, index: number) => {
     setHeightUnit(unit);
-    
+
     // Déléguer au service la gestion du changement d'unité
     userDetailsFormService.handleHeightUnitChange(unit, setValue, index);
-    
+
     const position = index * (buttonWidth + 7);
     // Animate the blue square to the selected button's position
     slideHeightPosition.value = withSpring(position, { duration: 300 }); // Each button is 100px wide
@@ -143,35 +147,43 @@ export default function UserDetailsForm({
       if (!userId) {
         throw new Error('User not authenticated');
       }
-      
+
       // Déléguer entièrement au service la soumission du formulaire
       // S'assurer que userId est toujours une chaîne pour respecter l'interface du service
       const userIdString = userId ? String(userId) : '';
-      
+
       // Nous récupérons d'abord le résultat du service de formulaire pour la validation et la préparation des données
-      const formResult = await userDetailsFormService.submitForm(data, userIdString, operation);
-      
+      const formResult = await userDetailsFormService.submitForm(
+        data,
+        userIdString,
+        operation,
+      );
+
       if (!formResult.success) {
-        throw new Error(formResult.error || 'Failed to prepare user details data');
+        throw new Error(
+          formResult.error || 'Failed to prepare user details data',
+        );
       }
-      
+
       // Puis nous utilisons le service de page qui gérera l'accès au service métier
       // C'est une architecture MCP en couches : UI -> PageService -> BusinessService -> MCPServer
       const serviceResult = await userPagesService.updateUserPreferences(
-        Number(userId), 
-        formResult.data
+        Number(userId),
+        formResult.data,
       );
-      
+
       if (!serviceResult.success) {
         throw new Error(serviceResult.error || 'Failed to update user details');
       }
-      
+
       return serviceResult;
     },
     onSuccess: async () => {
       // Utiliser l'utilitaire standardisé d'invalidation du cache
-      await invalidateCache(queryClient, DataType.USER, { invalidateRelated: true });
-      
+      await invalidateCache(queryClient, DataType.USER, {
+        invalidateRelated: true,
+      });
+
       // Afficher le toast de succès
       toast.show({
         placement: 'top',
@@ -187,10 +199,13 @@ export default function UserDetailsForm({
           );
         },
       });
-      
+
       // Ajouter un délai court pour permettre au toast d'être visible
       // puis rediriger automatiquement l'utilisateur vers la page précédente
-      logger.info(LogCategory.NAVIGATION, 'Redirection automatique après modification des détails');
+      logger.info(
+        LogCategory.NAVIGATION,
+        'Redirection automatique après modification des détails',
+      );
       setTimeout(() => {
         router.back();
       }, 1500); // Attendre 1.5 secondes pour que le toast soit visible
@@ -217,11 +232,17 @@ export default function UserDetailsForm({
   // Simplifier la fonction onSubmit en déléguant le logging au service
   const onSubmit = async (data: UserDetailsFormData) => {
     try {
-      logger.debug(LogCategory.FORM, 'Component initiating user details form submission');
+      logger.debug(
+        LogCategory.FORM,
+        'Component initiating user details form submission',
+      );
       await mutateAsync(data);
     } catch (error) {
       // Géré par onError du useMutation
-      logger.error(LogCategory.FORM, `Unhandled error in user details form submission: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Unhandled error in user details form submission: ${error}`,
+      );
     }
   };
 

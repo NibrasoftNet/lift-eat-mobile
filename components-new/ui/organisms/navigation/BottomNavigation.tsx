@@ -11,7 +11,7 @@ interface BottomNavigationProps {
 
 /**
  * BottomNavigation component
- * 
+ *
  * Implémente la navigation principale de l'application avec un MenuBar
  * dans un conteneur sécurisé pour les dispositifs avec encoches.
  * Design conforme à Figma node-id=3404-17376
@@ -22,16 +22,13 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
   darkMode = true,
 }) => {
   const insets = useSafeAreaInsets();
-  
+
   return (
-    <View 
+    <View
       className="absolute bottom-0 left-0 right-0"
-      style={[
-        styles.container,
-        { paddingBottom: Math.max(insets.bottom, 8) }
-      ]}
+      style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}
     >
-      <MenuBar 
+      <MenuBar
         activeTab={activeTab}
         onTabChange={onTabChange}
         darkMode={darkMode}

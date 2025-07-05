@@ -16,7 +16,6 @@ const MealTypeBox: React.FC<MealTypeBoxProps> = ({
   selectedMealType,
   handleMealTypeSelect,
 }) => {
-
   // Render regular meal type box
   return (
     <Box className="w-full h-18 p-2 justify-center">

@@ -24,18 +24,18 @@ export const HotDogEmoji: React.FC<HotDogEmojiProps> = ({ size = 64 }) => {
         fill="#E83F0F"
       />
       {/* Saucisse - effet brillant */}
-      <Path 
+      <Path
         d="M78.8 43.2c-6.6 5.9-20.3 10-36.3 10-8.1 0-15.7-1.3-22-3.6 6.3 5.8 20 9.9 35.9 9.9 16.3 0 30.1-4.3 36.2-10.3-3.2-2.4-7.8-4.5-13.8-6z"
         fill="#C82D05"
         opacity="0.7"
       />
       {/* Pain - effets d'ombre et de relief */}
-      <Path 
+      <Path
         d="M13.7 39.4c0 9.8 16.3 17.7 36.4 17.7s36.4-7.9 36.4-17.7"
         fill="#E7B07E"
         opacity="0.3"
       />
-      <Path 
+      <Path
         d="M86.5 39.4c0 9.8-16.3 17.7-36.4 17.7S13.7 49.2 13.7 39.4"
         fill="#DC945A"
         opacity="0.2"

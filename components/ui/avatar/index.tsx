@@ -24,11 +24,11 @@ const avatarStyle = tva({
   base: 'rounded-full justify-center items-center relative bg-primary-600 group-[.avatar-group]/avatar-group:-ml-2.5',
   variants: {
     size: {
-      'xs': 'w-6 h-6',
-      'sm': 'w-8 h-8',
-      'md': 'w-12 h-12',
-      'lg': 'w-16 h-16',
-      'xl': 'w-24 h-24',
+      xs: 'w-6 h-6',
+      sm: 'w-8 h-8',
+      md: 'w-12 h-12',
+      lg: 'w-16 h-16',
+      xl: 'w-24 h-24',
       '2xl': 'w-32 h-32',
     },
   },
@@ -39,11 +39,11 @@ const avatarFallbackTextStyle = tva({
 
   parentVariants: {
     size: {
-      'xs': 'text-2xs',
-      'sm': 'text-xs',
-      'md': 'text-base',
-      'lg': 'text-xl',
-      'xl': 'text-3xl',
+      xs: 'text-2xs',
+      sm: 'text-xs',
+      md: 'text-base',
+      lg: 'text-xl',
+      xl: 'text-3xl',
       '2xl': 'text-5xl',
     },
   },
@@ -57,11 +57,11 @@ const avatarBadgeStyle = tva({
   base: 'w-5 h-5 bg-success-500 rounded-full absolute right-0 bottom-0 border-background-0 border-2',
   parentVariants: {
     size: {
-      'xs': 'w-2 h-2',
-      'sm': 'w-2 h-2',
-      'md': 'w-3 h-3',
-      'lg': 'w-4 h-4',
-      'xl': 'w-6 h-6',
+      xs: 'w-2 h-2',
+      sm: 'w-2 h-2',
+      md: 'w-3 h-3',
+      lg: 'w-4 h-4',
+      xl: 'w-6 h-6',
       '2xl': 'w-8 h-8',
     },
   },
@@ -146,11 +146,26 @@ type IAvatarImageProps = React.ComponentPropsWithoutRef<typeof UIAvatar.Image> &
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof UIAvatar.Image>,
   IAvatarImageProps
->(({ className, ...props }, ref) => {
+>(({ className, source, ...props }, ref) => {
+  // Map stored uri to bundled asset id if available
+  let finalSource: any = source;
+  if (finalSource && !Array.isArray(finalSource) && (finalSource as any).uri) {
+    const uri = (finalSource as any).uri as string;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ingredientImages } = require('../../../db/ingredientImages');
+      if (ingredientImages && ingredientImages[uri]) {
+        finalSource = ingredientImages[uri];
+      }
+    } catch {
+      // mapping file may not be bundled in some contexts
+    }
+  }
   return (
     <UIAvatar.Image
-      ref={ref}
       {...props}
+      ref={ref}
+      source={finalSource}
       className={avatarImageStyle({
         class: className,
       })}

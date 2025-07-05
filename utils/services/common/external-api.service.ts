@@ -16,9 +16,9 @@ class ExternalApiService {
   private constructor() {
     this.geminiAdapter = GeminiApiAdapter.getInstance();
     this.openFoodFactsAdapter = OpenFoodFactsApiAdapter.getInstance();
-    
+
     logger.info(LogCategory.INTEGRATION, 'External API Service initialized');
-    
+
     // Vérifier les versions des API au démarrage
     this.checkApiVersions();
   }
@@ -42,17 +42,25 @@ class ExternalApiService {
       // Vérification asynchrone des versions d'API
       Promise.all([
         this.geminiAdapter.checkApiVersion(),
-        this.openFoodFactsAdapter.checkApiVersion()
-      ]).then(([geminiVersion, openFoodFactsVersion]) => {
-        logger.info(
-          LogCategory.INTEGRATION, 
-          `API versions - Gemini: ${geminiVersion.toString()}, OpenFoodFacts: ${openFoodFactsVersion.toString()}`
-        );
-      }).catch(error => {
-        logger.error(LogCategory.INTEGRATION, 'Failed to check API versions', { error });
-      });
+        this.openFoodFactsAdapter.checkApiVersion(),
+      ])
+        .then(([geminiVersion, openFoodFactsVersion]) => {
+          logger.info(
+            LogCategory.INTEGRATION,
+            `API versions - Gemini: ${geminiVersion.toString()}, OpenFoodFacts: ${openFoodFactsVersion.toString()}`,
+          );
+        })
+        .catch((error) => {
+          logger.error(
+            LogCategory.INTEGRATION,
+            'Failed to check API versions',
+            { error },
+          );
+        });
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, 'Error in API version check', { error });
+      logger.error(LogCategory.INTEGRATION, 'Error in API version check', {
+        error,
+      });
     }
   }
 
@@ -67,7 +75,9 @@ class ExternalApiService {
       // Enregistrer la clé pour les futures demandes
       logger.info(LogCategory.INTEGRATION, 'Gemini API configured');
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, 'Failed to configure Gemini API', { error });
+      logger.error(LogCategory.INTEGRATION, 'Failed to configure Gemini API', {
+        error,
+      });
       throw new Error('Failed to configure Gemini API');
     }
   }
@@ -78,24 +88,31 @@ class ExternalApiService {
    * @param temperature - Température pour la génération (creativité)
    * @returns La réponse générée par l'API Gemini
    */
-  public async generateWithGemini(prompt: string, temperature: number = 0.7): Promise<string> {
+  public async generateWithGemini(
+    prompt: string,
+    temperature: number = 0.7,
+  ): Promise<string> {
     try {
       const startTime = Date.now();
       // Gemini adapter attend un objet avec prompt et temperature
       const response = await this.geminiAdapter.generateText({
         prompt,
-        temperature
+        temperature,
       });
       const duration = Date.now() - startTime;
-      
+
       logger.info(
-        LogCategory.INTEGRATION, 
-        `Gemini API response received in ${duration}ms`
+        LogCategory.INTEGRATION,
+        `Gemini API response received in ${duration}ms`,
       );
-      
+
       return response;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, 'Failed to generate text with Gemini API', { error, prompt });
+      logger.error(
+        LogCategory.INTEGRATION,
+        'Failed to generate text with Gemini API',
+        { error, prompt },
+      );
       throw new Error('Failed to generate text with Gemini API');
     }
   }
@@ -108,17 +125,23 @@ class ExternalApiService {
   public async getProductByBarcode(barcode: string): Promise<any> {
     try {
       const startTime = Date.now();
-      const product = await this.openFoodFactsAdapter.getProductByBarcode(barcode);
-      const duration = Date.now() - startTime;
-      
-      logger.info(
-        LogCategory.INTEGRATION, 
-        `OpenFoodFacts API response received in ${duration}ms for barcode ${barcode}`
+      const product = await this.openFoodFactsAdapter.getProductByBarcode(
+        barcode,
       );
-      
+      const duration = Date.now() - startTime;
+
+      logger.info(
+        LogCategory.INTEGRATION,
+        `OpenFoodFacts API response received in ${duration}ms for barcode ${barcode}`,
+      );
+
       return product;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, 'Failed to get product from OpenFoodFacts API', { error, barcode });
+      logger.error(
+        LogCategory.INTEGRATION,
+        'Failed to get product from OpenFoodFacts API',
+        { error, barcode },
+      );
       throw new Error('Failed to get product from OpenFoodFacts API');
     }
   }
@@ -129,24 +152,31 @@ class ExternalApiService {
    * @param limit - Nombre maximum de résultats (défaut: 10)
    * @returns Liste des produits correspondant à la recherche
    */
-  public async searchProductsByName(name: string, limit: number = 10): Promise<any[]> {
+  public async searchProductsByName(
+    name: string,
+    limit: number = 10,
+  ): Promise<any[]> {
     try {
       const startTime = Date.now();
       // Corriger l'appel pour passer un objet de recherche conforme à SearchProductParams
       const products = await this.openFoodFactsAdapter.searchProducts({
         searchTerm: name,
-        pageSize: limit
+        pageSize: limit,
       });
       const duration = Date.now() - startTime;
-      
+
       logger.info(
-        LogCategory.INTEGRATION, 
-        `OpenFoodFacts search response received in ${duration}ms for query "${name}"`
+        LogCategory.INTEGRATION,
+        `OpenFoodFacts search response received in ${duration}ms for query "${name}"`,
       );
-      
+
       return products;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, 'Failed to search products from OpenFoodFacts API', { error, name });
+      logger.error(
+        LogCategory.INTEGRATION,
+        'Failed to search products from OpenFoodFacts API',
+        { error, name },
+      );
       throw new Error('Failed to search products from OpenFoodFacts API');
     }
   }

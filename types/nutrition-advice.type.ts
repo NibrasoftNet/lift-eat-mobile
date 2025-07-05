@@ -8,12 +8,12 @@ import { MealOrmProps, PlanOrmProps } from '../db/schema';
  * Type de conseil nutritionnel
  */
 export enum NutritionAdviceType {
-  GENERAL = 'GENERAL',         // Conseil général (non spécifique)
-  MEAL_SPECIFIC = 'MEAL',      // Conseil spécifique à un repas
-  PLAN_SPECIFIC = 'PLAN',      // Conseil spécifique à un plan
-  ALLERGEN = 'ALLERGEN',       // Alerte sur les allergènes
-  MACRONUTRIENT = 'MACRO',     // Conseil sur l'équilibre des macronutriments
-  MICRONUTRIENT = 'MICRO'      // Conseil sur les micronutriments
+  GENERAL = 'GENERAL', // Conseil général (non spécifique)
+  MEAL_SPECIFIC = 'MEAL', // Conseil spécifique à un repas
+  PLAN_SPECIFIC = 'PLAN', // Conseil spécifique à un plan
+  ALLERGEN = 'ALLERGEN', // Alerte sur les allergènes
+  MACRONUTRIENT = 'MACRO', // Conseil sur l'équilibre des macronutriments
+  MICRONUTRIENT = 'MICRO', // Conseil sur les micronutriments
 }
 
 /**
@@ -37,7 +37,8 @@ export interface NutritionAdviceProps {
 /**
  * Interface pour les conseils nutritionnels avec relations
  */
-export interface NutritionAdviceWithRelationsProps extends NutritionAdviceProps {
+export interface NutritionAdviceWithRelationsProps
+  extends NutritionAdviceProps {
   meal?: MealOrmProps;
   plan?: PlanOrmProps;
 }

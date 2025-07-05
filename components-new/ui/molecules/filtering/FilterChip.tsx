@@ -18,7 +18,11 @@ interface FilterChipProps {
  * Composant de puce de filtre
  * Utilisé pour afficher une option sélectionnable dans un groupe de filtres
  */
-const FilterChip: React.FC<FilterChipProps> = ({ label, isSelected, onPress }) => {
+const FilterChip: React.FC<FilterChipProps> = ({
+  label,
+  isSelected,
+  onPress,
+}) => {
   return (
     <TouchableOpacity
       style={[styles.filterChip, isSelected && styles.selectedFilterChip]}

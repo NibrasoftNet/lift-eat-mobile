@@ -42,7 +42,7 @@ const CircularProgressBase: React.FC<CircularProgressBaseProps> = ({
   baseColor,
   showDashedCircle = false,
   dashedStrokeColor,
-  dashedStrokePattern = "2 32",
+  dashedStrokePattern = '2 32',
   dashedStrokeWidth,
   startAngle = -90,
   gapDegrees = 60,
@@ -51,36 +51,36 @@ const CircularProgressBase: React.FC<CircularProgressBaseProps> = ({
   // Constantes de l'anneau - calcul basé sur le JSON Figma
   const center = size / 2;
   const radius = center - strokeWidth / 2;
-  
+
   // Valeurs optimales d'après analyse JSON
   // Figma JSON : startingAngle=5.76 rad (~330°), endingAngle=0.52 rad (~30°)
   // Conversion des angles de départ et fin en radians
-  const startRad = (startAngle) * Math.PI / 180;
-  const endRad = startRad + ((360 - gapDegrees) * Math.PI / 180);
-  
+  const startRad = (startAngle * Math.PI) / 180;
+  const endRad = startRad + ((360 - gapDegrees) * Math.PI) / 180;
+
   // Calcul du pourcentage réel en tenant compte du gap
   const arcAngle = (360 - gapDegrees) * (progressPercentage / 100);
-  const progressEndRad = startRad + (arcAngle * Math.PI / 180);
-  
+  const progressEndRad = startRad + (arcAngle * Math.PI) / 180;
+
   // Conversion en coordonnées SVG
   const baseStartX = center + radius * Math.cos(startRad);
   const baseStartY = center + radius * Math.sin(startRad);
   const baseEndX = center + radius * Math.cos(endRad);
   const baseEndY = center + radius * Math.sin(endRad);
-  
+
   const progressEndX = center + radius * Math.cos(progressEndRad);
   const progressEndY = center + radius * Math.sin(progressEndRad);
-  
+
   // Calcul pour les flags d'arc SVG
-  const baseArcFlag = (endRad - startRad) > Math.PI ? 1 : 0;
-  const progressArcFlag = (progressEndRad - startRad) > Math.PI ? 1 : 0;
+  const baseArcFlag = endRad - startRad > Math.PI ? 1 : 0;
+  const progressArcFlag = progressEndRad - startRad > Math.PI ? 1 : 0;
 
   // Construction des chemins SVG
   const basePathD = `
     M ${baseStartX} ${baseStartY}
     A ${radius} ${radius} 0 ${baseArcFlag} 1 ${baseEndX} ${baseEndY}
   `;
-  
+
   const progressPathD = `
     M ${baseStartX} ${baseStartY}
     A ${radius} ${radius} 0 ${progressArcFlag} 1 ${progressEndX} ${progressEndY}
@@ -97,20 +97,20 @@ const CircularProgressBase: React.FC<CircularProgressBaseProps> = ({
           strokeLinecap="round"
           fill="none"
         />
-        
+
         {/* Cercle en pointillés (si activé) */}
         {showDashedCircle && dashedStrokeColor && (
           <Circle
             cx={center}
             cy={center}
-            r={radius - strokeWidth/2 + (dashedStrokeWidth || 2)/2}
+            r={radius - strokeWidth / 2 + (dashedStrokeWidth || 2) / 2}
             stroke={dashedStrokeColor}
             strokeWidth={dashedStrokeWidth || 2}
             strokeDasharray={dashedStrokePattern}
             fill="none"
           />
         )}
-        
+
         {/* Arc de progression (orange) */}
         <Path
           d={progressPathD}

@@ -11,18 +11,20 @@ interface TestLayoutProps {
 
 export const TestLayout: React.FC<TestLayoutProps> = ({ children }) => {
   const theme = useAppTheme();
-  
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.color('background') }]}>
-      <ScrollView 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.color('background') }]}
+    >
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <Box
           bg={theme.color('background')}
           style={styles.content}
-          rounded='md'
-          shadow='md'
+          rounded="md"
+          shadow="md"
         >
           {children}
         </Box>

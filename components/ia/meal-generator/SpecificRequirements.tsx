@@ -10,18 +10,22 @@ interface SpecificRequirementsProps {
   control: Control<MealGeneratorFormType>;
 }
 
-const SpecificRequirements: React.FC<SpecificRequirementsProps> = ({ control }) => {
+const SpecificRequirements: React.FC<SpecificRequirementsProps> = ({
+  control,
+}) => {
   return (
     <Box style={{ marginBottom: 16 }}>
       <VStack space="sm">
-        <Text style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          marginBottom: 12,
-        }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 12,
+          }}
+        >
           Exigences spécifiques
         </Text>
-        
+
         <Controller
           control={control}
           name="specificRequirements"
@@ -30,7 +34,7 @@ const SpecificRequirements: React.FC<SpecificRequirementsProps> = ({ control }) 
               <Input
                 style={{
                   borderColor: fieldState.error ? 'red' : undefined,
-                  marginTop: 4
+                  marginTop: 4,
                 }}
               >
                 <InputField
@@ -44,11 +48,13 @@ const SpecificRequirements: React.FC<SpecificRequirementsProps> = ({ control }) 
                 />
               </Input>
               {fieldState.error && (
-                <Text style={{
-                  color: 'red',
-                  fontSize: 12,
-                  marginTop: 4,
-                }}>
+                <Text
+                  style={{
+                    color: 'red',
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                >
                   {fieldState.error.message}
                 </Text>
               )}

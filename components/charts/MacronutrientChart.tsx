@@ -36,12 +36,12 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
   const validCarbs = Math.max(0, carbs);
   const validFat = Math.max(0, fat);
   const total = validProtein + validCarbs + validFat;
-  
+
   // Calcul des proportions et pourcentages
   const proteinPercentage = total > 0 ? (validProtein / total) * 100 : 0;
   const carbsPercentage = total > 0 ? (validCarbs / total) * 100 : 0;
   const fatPercentage = total > 0 ? (validFat / total) * 100 : 0;
-  
+
   // Définition des constantes pour le graphique
   const center = size / 2;
   const radius = (size / 2) * 0.7;
@@ -91,16 +91,16 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
     // Convertir les angles en radians
     const startRad = ((startAngle - 90) * Math.PI) / 180;
     const endRad = ((endAngle - 90) * Math.PI) / 180;
-    
+
     // Calculer les coordonnées de début et de fin
     const startX = center + radius * Math.cos(startRad);
     const startY = center + radius * Math.sin(startRad);
     const endX = center + radius * Math.cos(endRad);
     const endY = center + radius * Math.sin(endRad);
-    
+
     // Déterminer si l'arc est plus grand qu'un demi-cercle
     const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
-    
+
     // Créer le chemin SVG
     return `M ${center} ${center} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
   };
@@ -108,7 +108,10 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
   // Calculer les chemins pour chaque secteur
   const proteinPath = createSectorPath(0, proteinAngle);
   const carbsPath = createSectorPath(proteinAngle, proteinAngle + carbsAngle);
-  const fatPath = createSectorPath(proteinAngle + carbsAngle, proteinAngle + carbsAngle + fatAngle);
+  const fatPath = createSectorPath(
+    proteinAngle + carbsAngle,
+    proteinAngle + carbsAngle + fatAngle,
+  );
 
   // Calculer les positions pour les étiquettes au milieu de chaque secteur
   const getLabelPosition = (startAngle: number, sectorAngle: number) => {
@@ -136,7 +139,7 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
             stroke="white"
             strokeWidth={1}
           />
-          
+
           {/* Secteur pour les glucides */}
           <Path
             d={carbsPath}
@@ -144,7 +147,7 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
             stroke="white"
             strokeWidth={1}
           />
-          
+
           {/* Secteur pour les lipides */}
           <Path
             d={fatPath}
@@ -152,7 +155,7 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
             stroke="white"
             strokeWidth={1}
           />
-          
+
           {/* Étiquettes de valeur si activées */}
           {showLabels && proteinPercentage > 5 && (
             <SvgText
@@ -167,7 +170,7 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
               {Math.round(proteinPercentage)}%
             </SvgText>
           )}
-          
+
           {showLabels && carbsPercentage > 5 && (
             <SvgText
               x={carbsLabelPos.x}
@@ -181,7 +184,7 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
               {Math.round(carbsPercentage)}%
             </SvgText>
           )}
-          
+
           {showLabels && fatPercentage > 5 && (
             <SvgText
               x={fatLabelPos.x}
@@ -197,34 +200,44 @@ export const MacronutrientChart: React.FC<MacronutrientChartProps> = ({
           )}
         </G>
       </Svg>
-      
+
       {/* Légende si activée */}
       {showLegend && (
         <VStack className="mt-4 w-full">
           <HStack className="justify-between w-full">
             <HStack className="items-center">
               <Box className="w-4 h-4 rounded bg-blue-500 mr-2" />
-              <Text>Protéines: {Math.round(proteinPercentage)}% ({validProtein}g)</Text>
+              <Text>
+                Protéines: {Math.round(proteinPercentage)}% ({validProtein}g)
+              </Text>
             </HStack>
-            <Text className="font-semibold">{Math.round(proteinPercentage)}%</Text>
+            <Text className="font-semibold">
+              {Math.round(proteinPercentage)}%
+            </Text>
           </HStack>
-          
+
           <HStack className="justify-between w-full mt-1">
             <HStack className="items-center">
               <Box className="w-4 h-4 rounded bg-amber-400 mr-2" />
-              <Text>Glucides: {Math.round(carbsPercentage)}% ({validCarbs}g)</Text>
+              <Text>
+                Glucides: {Math.round(carbsPercentage)}% ({validCarbs}g)
+              </Text>
             </HStack>
-            <Text className="font-semibold">{Math.round(carbsPercentage)}%</Text>
+            <Text className="font-semibold">
+              {Math.round(carbsPercentage)}%
+            </Text>
           </HStack>
-          
+
           <HStack className="justify-between w-full mt-1">
             <HStack className="items-center">
               <Box className="w-4 h-4 rounded bg-green-400 mr-2" />
-              <Text>Lipides: {Math.round(fatPercentage)}% ({validFat}g)</Text>
+              <Text>
+                Lipides: {Math.round(fatPercentage)}% ({validFat}g)
+              </Text>
             </HStack>
             <Text className="font-semibold">{Math.round(fatPercentage)}%</Text>
           </HStack>
-          
+
           <HStack className="justify-between w-full mt-2 pt-2 border-t border-gray-200">
             <Text className="font-semibold">Total</Text>
             <Text className="font-semibold">{total}g</Text>

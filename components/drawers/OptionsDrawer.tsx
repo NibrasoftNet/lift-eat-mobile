@@ -28,7 +28,7 @@ function OptionsDrawer({
   onEdit,
   onDelete,
   itemId = 0,
-  itemType = 'generic'
+  itemType = 'generic',
 }: {
   showOptionDrawer: boolean;
   setShowOptionsDrawer: Dispatch<SetStateAction<boolean>>;
@@ -45,20 +45,23 @@ function OptionsDrawer({
     optionsDrawerUIService.handleDetailAction(itemId, onDetail);
     setShowOptionsDrawer(false);
   }, [itemId, onDetail, setShowOptionsDrawer]);
-  
+
   const handleEditClick = useCallback(() => {
     optionsDrawerUIService.handleEditAction(itemId, onEdit);
     setShowOptionsDrawer(false);
   }, [itemId, onEdit, setShowOptionsDrawer]);
-  
+
   const handleDeleteClick = useCallback(() => {
     optionsDrawerUIService.handleDeleteAction(itemId, onDelete);
     setShowOptionsDrawer(false);
   }, [itemId, onDelete, setShowOptionsDrawer]);
-  
+
   // Vérifier la disponibilité des actions si non spécifiée en props
-  const isEditDisabled = disableEdit || !optionsDrawerUIService.isEditAvailable(itemType, itemId);
-  const isDeleteDisabled = disableDelete || !optionsDrawerUIService.isDeleteAvailable(itemType, itemId);
+  const isEditDisabled =
+    disableEdit || !optionsDrawerUIService.isEditAvailable(itemType, itemId);
+  const isDeleteDisabled =
+    disableDelete ||
+    !optionsDrawerUIService.isDeleteAvailable(itemType, itemId);
   return (
     <Drawer
       isOpen={showOptionDrawer}

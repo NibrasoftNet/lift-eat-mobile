@@ -19,9 +19,9 @@ export const ingredientSuggestionCoreService = {
    * @returns Résultat de l'opération avec l'ID de la suggestion
    */
   async saveSuggestion(
-    suggestion: IaIngredientType, 
+    suggestion: IaIngredientType,
     status: 'pending' | 'accepted' | 'rejected' = 'pending',
-    source: string = 'ia'
+    source: string = 'ia',
   ): Promise<{ success: boolean; suggestionId?: number; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
@@ -29,30 +29,40 @@ export const ingredientSuggestionCoreService = {
         throw new Error('User not authenticated');
       }
 
-      logger.info(LogCategory.APP, `Saving ingredient suggestion for "${suggestion.name}"`);
-      
+      logger.info(
+        LogCategory.APP,
+        `Saving ingredient suggestion for "${suggestion.name}"`,
+      );
+
       // Utiliser SQLiteMCPServer pour enregistrer la suggestion dans la base de données
       const result = await sqliteMCPServer.saveIngredientSuggestionViaMCP({
         suggestion,
         userId,
         status,
-        source
+        source,
       });
 
       if (result.success) {
-        logger.info(LogCategory.APP, `Successfully saved suggestion for "${suggestion.name}" with ID ${result.suggestionId}`);
+        logger.info(
+          LogCategory.APP,
+          `Successfully saved suggestion for "${suggestion.name}" with ID ${result.suggestionId}`,
+        );
       } else {
         throw new Error(result.error);
       }
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.APP, `Error saving ingredient suggestion: ${errorMessage}`);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.APP,
+        `Error saving ingredient suggestion: ${errorMessage}`,
+      );
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   },
@@ -65,7 +75,7 @@ export const ingredientSuggestionCoreService = {
    */
   async getSuggestions(
     status?: 'pending' | 'accepted' | 'rejected',
-    limit: number = 50
+    limit: number = 50,
   ): Promise<{ success: boolean; suggestions?: any[]; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
@@ -73,29 +83,39 @@ export const ingredientSuggestionCoreService = {
         throw new Error('User not authenticated');
       }
 
-      logger.info(LogCategory.APP, `Getting ingredient suggestions for user ${userId}`);
-      
+      logger.info(
+        LogCategory.APP,
+        `Getting ingredient suggestions for user ${userId}`,
+      );
+
       // Utiliser SQLiteMCPServer pour récupérer les suggestions de la base de données
       const result = await sqliteMCPServer.getIngredientSuggestionsViaMCP({
         userId,
         status,
-        limit
+        limit,
       });
 
       if (result.success) {
-        logger.info(LogCategory.APP, `Retrieved ${result.suggestions?.length || 0} ingredient suggestions`);
+        logger.info(
+          LogCategory.APP,
+          `Retrieved ${result.suggestions?.length || 0} ingredient suggestions`,
+        );
       } else {
         throw new Error(result.error);
       }
-      
+
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.APP, `Error getting ingredient suggestions: ${errorMessage}`);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.APP,
+        `Error getting ingredient suggestions: ${errorMessage}`,
+      );
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   },
@@ -110,7 +130,7 @@ export const ingredientSuggestionCoreService = {
   async updateSuggestion(
     suggestionId: number,
     status: 'pending' | 'accepted' | 'rejected',
-    data?: Partial<IaIngredientType>
+    data?: Partial<IaIngredientType>,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
@@ -118,30 +138,40 @@ export const ingredientSuggestionCoreService = {
         throw new Error('User not authenticated');
       }
 
-      logger.info(LogCategory.APP, `Updating ingredient suggestion ${suggestionId} to status ${status}`);
-      
+      logger.info(
+        LogCategory.APP,
+        `Updating ingredient suggestion ${suggestionId} to status ${status}`,
+      );
+
       // Utiliser SQLiteMCPServer pour mettre à jour la suggestion dans la base de données
       const result = await sqliteMCPServer.updateIngredientSuggestionViaMCP({
         suggestionId,
         userId,
         status,
-        data
+        data,
       });
 
       if (result.success) {
-        logger.info(LogCategory.APP, `Successfully updated suggestion ${suggestionId} to status ${status}`);
+        logger.info(
+          LogCategory.APP,
+          `Successfully updated suggestion ${suggestionId} to status ${status}`,
+        );
       } else {
         throw new Error(result.error);
       }
-      
+
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.APP, `Error updating ingredient suggestion: ${errorMessage}`);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.APP,
+        `Error updating ingredient suggestion: ${errorMessage}`,
+      );
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   },
@@ -152,7 +182,7 @@ export const ingredientSuggestionCoreService = {
    * @returns Résultat de l'opération
    */
   async deleteSuggestion(
-    suggestionId: number
+    suggestionId: number,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
@@ -160,28 +190,38 @@ export const ingredientSuggestionCoreService = {
         throw new Error('User not authenticated');
       }
 
-      logger.info(LogCategory.APP, `Deleting ingredient suggestion ${suggestionId}`);
-      
+      logger.info(
+        LogCategory.APP,
+        `Deleting ingredient suggestion ${suggestionId}`,
+      );
+
       // Utiliser SQLiteMCPServer pour supprimer la suggestion de la base de données
       const result = await sqliteMCPServer.deleteIngredientSuggestionViaMCP({
         suggestionId,
-        userId
+        userId,
       });
 
       if (result.success) {
-        logger.info(LogCategory.APP, `Successfully deleted suggestion ${suggestionId}`);
+        logger.info(
+          LogCategory.APP,
+          `Successfully deleted suggestion ${suggestionId}`,
+        );
       } else {
         throw new Error(result.error);
       }
-      
+
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.APP, `Error deleting ingredient suggestion: ${errorMessage}`);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.APP,
+        `Error deleting ingredient suggestion: ${errorMessage}`,
+      );
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   },
@@ -192,7 +232,7 @@ export const ingredientSuggestionCoreService = {
    * @returns Résultat de l'opération avec l'ID de l'ingrédient créé
    */
   async acceptSuggestionAndCreateIngredient(
-    suggestionId: number
+    suggestionId: number,
   ): Promise<{ success: boolean; ingredientId?: number; error?: string }> {
     try {
       const userId = getCurrentUserIdSync();
@@ -200,20 +240,25 @@ export const ingredientSuggestionCoreService = {
         throw new Error('User not authenticated');
       }
 
-      logger.info(LogCategory.APP, `Accepting suggestion ${suggestionId} and creating ingredient`);
-      
+      logger.info(
+        LogCategory.APP,
+        `Accepting suggestion ${suggestionId} and creating ingredient`,
+      );
+
       // 1. Récupérer les suggestions pour trouver celle qui correspond à l'ID
       const suggestionsResult = await this.getSuggestions();
-      
+
       if (!suggestionsResult.success || !suggestionsResult.suggestions) {
         throw new Error('Failed to get ingredient suggestions');
       }
-      
-      const suggestion = suggestionsResult.suggestions.find(s => s.id === suggestionId);
+
+      const suggestion = suggestionsResult.suggestions.find(
+        (s) => s.id === suggestionId,
+      );
       if (!suggestion) {
         throw new Error(`Suggestion with ID ${suggestionId} not found`);
       }
-      
+
       // 2. Convertir la suggestion en format IaIngredientType
       const ingredientData: IaIngredientType = {
         name: suggestion.name,
@@ -222,33 +267,42 @@ export const ingredientSuggestionCoreService = {
         calories: suggestion.suggested_calories || 0,
         carbs: suggestion.suggested_carbs || 0,
         protein: suggestion.suggested_protein || 0,
-        fat: suggestion.suggested_fat || 0
+        fat: suggestion.suggested_fat || 0,
       };
-      
+
       // 3. Utiliser le service d'ingrédients pour créer l'ingrédient
-      const result = await ingredientCoreService.createIngredient(ingredientData);
-      
+      const result = await ingredientCoreService.createIngredient(
+        ingredientData,
+      );
+
       if (!result || !result.id) {
         throw new Error('Failed to create ingredient from suggestion');
       }
-      
+
       // 4. Mettre à jour le statut de la suggestion
       await this.updateSuggestion(suggestionId, 'accepted');
-      
-      logger.info(LogCategory.APP, `Successfully accepted suggestion ${suggestionId} and created ingredient ${result.id}`);
-      
+
+      logger.info(
+        LogCategory.APP,
+        `Successfully accepted suggestion ${suggestionId} and created ingredient ${result.id}`,
+      );
+
       return {
         success: true,
-        ingredientId: result.id
+        ingredientId: result.id,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LogCategory.APP, `Error accepting suggestion and creating ingredient: ${errorMessage}`);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.APP,
+        `Error accepting suggestion and creating ingredient: ${errorMessage}`,
+      );
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
-  }
+  },
 };

@@ -7,7 +7,7 @@ interface FoodEmojiProps {
    * Composant emoji ou icône à afficher
    */
   emoji?: React.ReactNode;
-  
+
   /**
    * Taille de l'emoji
    */
@@ -19,14 +19,15 @@ interface FoodEmojiProps {
  * Affiche l'emoji d'un aliment selon les spécifications exactes du design Figma
  * node-id=48485:28635
  */
-const FoodEmoji: React.FC<FoodEmojiProps> = ({ 
-  emoji,
-  size = 48
-}) => {
+const FoodEmoji: React.FC<FoodEmojiProps> = ({ emoji, size = 48 }) => {
   return (
     <View style={styles.container}>
       {/* Toujours utiliser la taille exacte Figma et le bon composant */}
-      {emoji ? React.cloneElement(emoji as React.ReactElement, { size }) : <HamburgerEmoji size={size} />}
+      {emoji ? (
+        React.cloneElement(emoji as React.ReactElement, { size })
+      ) : (
+        <HamburgerEmoji size={size} />
+      )}
     </View>
   );
 };

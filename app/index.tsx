@@ -16,7 +16,10 @@ export default function Index() {
         const value = await AsyncStorage.getItem('hasSeenOnboarding');
         setHasSeenOnboarding(value === 'true');
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut onboarding:', error);
+        console.error(
+          'Erreur lors de la vérification du statut onboarding:',
+          error,
+        );
         // En cas d'erreur, on considère que l'utilisateur n'a pas vu l'onboarding
         setHasSeenOnboarding(false);
       } finally {
@@ -29,7 +32,14 @@ export default function Index() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={theme.color('successLighter')} />
       </View>
     );

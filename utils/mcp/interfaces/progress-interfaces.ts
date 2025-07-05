@@ -1,4 +1,8 @@
-import { DailyProgressOrmProps, DailyMealProgressOrmProps, MealOrmProps } from '@/db/schema';
+import {
+  DailyProgressOrmProps,
+  DailyMealProgressOrmProps,
+  MealOrmProps,
+} from '@/db/schema';
 
 // Interface pour getDailyProgressByDateViaMCP
 export interface GetDailyProgressByDateParams {
@@ -45,7 +49,10 @@ export interface GetMealProgressByDateParams {
 export interface GetMealProgressByDateResult {
   success: boolean;
   progress?: DailyProgressOrmProps;
-  meals?: (MealOrmProps & { progress: DailyMealProgressOrmProps | null; dailyPlanMealId: number | null })[];
+  meals?: (MealOrmProps & {
+    progress: DailyMealProgressOrmProps | null;
+    dailyPlanMealId: number | null;
+  })[];
   error?: string;
 }
 

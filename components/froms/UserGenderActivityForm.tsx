@@ -51,24 +51,28 @@ export default function UserGenderActivityForm({
   const toast = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
-  
+
   // Obtenir l'ID de l'utilisateur actuel de façon standardisée
   const userId = useMemo(() => getCurrentUserIdSync(), []);
-  
+
   // Préparer les valeurs par défaut normalisées via le service
-  const normalizedDefaultValues = useMemo(() => 
-    userGenderActivityFormService.prepareDefaultValues(defaultValues), 
-  [defaultValues]);
-  
+  const normalizedDefaultValues = useMemo(
+    () => userGenderActivityFormService.prepareDefaultValues(defaultValues),
+    [defaultValues],
+  );
+
   // Vérifier l'accès de l'utilisateur via le service
   useEffect(() => {
-    if (userId && !userGenderActivityFormService.validateUserAccess(
-      // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
-      String(userId), 
-      // Convertir l'ID numérique en chaîne pour respecter l'interface du service
-      String(defaultValues.id), 
-      toast
-    )) {
+    if (
+      userId &&
+      !userGenderActivityFormService.validateUserAccess(
+        // Convertir l'ID de l'utilisateur en chaîne pour respecter l'interface du service
+        String(userId),
+        // Convertir l'ID numérique en chaîne pour respecter l'interface du service
+        String(defaultValues.id),
+        toast,
+      )
+    ) {
       router.back();
     }
   }, [userId, defaultValues.id, toast, router]);
@@ -89,12 +93,16 @@ export default function UserGenderActivityForm({
       // Déléguer entièrement au service la soumission du formulaire
       // S'assurer que userId est toujours une chaîne pour respecter l'interface du service
       const userIdString = userId ? String(userId) : '';
-      return userGenderActivityFormService.submitForm(data, userIdString, operation);
+      return userGenderActivityFormService.submitForm(
+        data,
+        userIdString,
+        operation,
+      );
     },
     onSuccess: async (result) => {
       // Invalidation du cache pour que les données soient rafraîchies
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
-      
+
       // Affichage d'un toast succès
       toast.show({
         placement: 'top',
@@ -110,18 +118,24 @@ export default function UserGenderActivityForm({
           );
         },
       });
-      
+
       // Ajouter un délai court pour permettre au toast d'être visible
       // puis rediriger automatiquement l'utilisateur vers la page précédente
-      logger.info(LogCategory.NAVIGATION, 'Redirection automatique après modification des données utilisateur');
+      logger.info(
+        LogCategory.NAVIGATION,
+        'Redirection automatique après modification des données utilisateur',
+      );
       setTimeout(() => {
         router.back();
       }, 1500); // Attendre 1.5 secondes pour que le toast soit visible
     },
     onError: (error: any) => {
       // Journalisation de l'erreur
-      logger.error(LogCategory.FORM, `Error submitting gender/activity form: ${error}`);
-      
+      logger.error(
+        LogCategory.FORM,
+        `Error submitting gender/activity form: ${error}`,
+      );
+
       // Affichage d'un toast d'erreur
       toast.show({
         placement: 'top',
@@ -147,7 +161,10 @@ export default function UserGenderActivityForm({
       await mutateAsync(data);
     } catch (error) {
       // Géré par onError du useMutation
-      logger.error(LogCategory.FORM, `Unhandled error in form submission: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Unhandled error in form submission: ${error}`,
+      );
     }
   };
 
@@ -182,7 +199,7 @@ export default function UserGenderActivityForm({
             </VStack>
           </ImageBackground>
         </Animated.View>
-        
+
         {/* Section Informations de base */}
         <Card>
           {/* Age Input */}
@@ -199,7 +216,9 @@ export default function UserGenderActivityForm({
                     keyboardType="numeric"
                     placeholder="Age"
                     onBlur={onBlur}
-                    onChangeText={(val) => onChange(val ? parseInt(val, 10) : 0)}
+                    onChangeText={(val) =>
+                      onChange(val ? parseInt(val, 10) : 0)
+                    }
                     value={value.toString()}
                   />
                 </Input>
@@ -208,27 +227,31 @@ export default function UserGenderActivityForm({
             {errors.age && (
               <FormControlError>
                 <FormControlErrorIcon as={AlertCircleIcon} />
-                <FormControlErrorText>{errors.age.message}</FormControlErrorText>
+                <FormControlErrorText>
+                  {errors.age.message}
+                </FormControlErrorText>
               </FormControlError>
             )}
           </FormControl>
         </Card>
-        
+
         {/* Gender Selection */}
         <GenderFormInput
           defaultGender={defaultValues.gender}
           setValue={setValue}
         />
-        
+
         {/* Physical activity Selection */}
         <PhysicalActivityFormInput
           defaultPhysicalActivity={defaultValues.physicalActivity}
           setValue={setValue}
         />
-        
+
         {/* Nouvelles sections */}
-        <Text className="text-lg font-bold mt-4 mb-2">Préférences alimentaires</Text>
-        
+        <Text className="text-lg font-bold mt-4 mb-2">
+          Préférences alimentaires
+        </Text>
+
         {/* Restrictions alimentaires */}
         <DietaryRestrictionsInput
           defaultRestrictions={defaultValues.dietaryRestrictions}
@@ -239,7 +262,7 @@ export default function UserGenderActivityForm({
             }
           }}
         />
-        
+
         {/* Allergies */}
         <AllergiesInput
           defaultAllergies={defaultValues.allergies}
@@ -250,7 +273,7 @@ export default function UserGenderActivityForm({
             }
           }}
         />
-        
+
         {/* Objectifs nutritionnels */}
         <NutritionGoalsInput
           defaultNutritionGoals={defaultValues.nutritionGoals}
@@ -261,7 +284,7 @@ export default function UserGenderActivityForm({
             }
           }}
         />
-        
+
         {/* Boutons de navigation */}
         <HStack className="w-full justify-between items-center mt-6 gap-2">
           {/* Submit Button */}
@@ -270,7 +293,9 @@ export default function UserGenderActivityForm({
             size="sm"
             onPress={handleCancel}
           >
-            <ButtonText>{operation === 'create' ? 'Skip' : 'Cancel'}</ButtonText>
+            <ButtonText>
+              {operation === 'create' ? 'Skip' : 'Cancel'}
+            </ButtonText>
           </Button>
           {/* Submit Button */}
           <Button className="w-2/5" size="sm" onPress={handleSubmit(onSubmit)}>

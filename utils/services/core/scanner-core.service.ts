@@ -1,7 +1,11 @@
 import scannerService from '@/utils/services/common/scanner.service';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { ScanResult, SearchParams, ProductResult } from '@/utils/api/OpenFoodFactsService';
+import {
+  ScanResult,
+  SearchParams,
+  ProductResult,
+} from '@/utils/api/OpenFoodFactsService';
 import { ScanResultWithCode } from '@/types/scanner.types';
 
 /**
@@ -15,19 +19,27 @@ class ScannerCoreService {
    */
   async scanBarcode(barcode: string): Promise<ScanResult> {
     try {
-      logger.info(LogCategory.INTEGRATION, '[SCANNER] scanBarcode (core)', { barcode });
+      logger.info(LogCategory.INTEGRATION, '[SCANNER] scanBarcode (core)', {
+        barcode,
+      });
       const result = await scannerService.scanBarcode(barcode);
       if (result.isValid && result.productResult) {
         // Ajouter le code-barres au résultat
-        const productResult = result.productResult as ProductResult & { code: string };
+        const productResult = result.productResult as ProductResult & {
+          code: string;
+        };
         productResult.code = barcode;
       }
       return result as ScanResultWithCode;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, '[SCANNER] Failed scanBarcode (core)', {
-        error: error instanceof Error ? error.message : String(error),
-        barcode,
-      });
+      logger.error(
+        LogCategory.INTEGRATION,
+        '[SCANNER] Failed scanBarcode (core)',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          barcode,
+        },
+      );
       return {
         isValid: false,
         message: 'Erreur lors du scan',
@@ -41,14 +53,20 @@ class ScannerCoreService {
    */
   async searchProducts(params: SearchParams): Promise<ProductResult[]> {
     try {
-      logger.info(LogCategory.INTEGRATION, '[SCANNER] searchProducts (core)', { params });
+      logger.info(LogCategory.INTEGRATION, '[SCANNER] searchProducts (core)', {
+        params,
+      });
       const results = await scannerService.searchProducts(params);
       return results;
     } catch (error) {
-      logger.error(LogCategory.INTEGRATION, '[SCANNER] Failed searchProducts (core)', {
-        error: error instanceof Error ? error.message : String(error),
-        params,
-      });
+      logger.error(
+        LogCategory.INTEGRATION,
+        '[SCANNER] Failed searchProducts (core)',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          params,
+        },
+      );
       return [];
     }
   }

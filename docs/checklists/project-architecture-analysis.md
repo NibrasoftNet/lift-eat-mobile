@@ -2,7 +2,7 @@
 
 Ce document présente une analyse complète de l'architecture actuelle du projet Lift, identifiant les forces, les faiblesses et proposant des recommandations d'amélioration.
 
-*Dernière mise à jour: 13 mai 2025 - Analyse basée sur l'examen détaillé de la codebase*
+_Dernière mise à jour: 13 mai 2025 - Analyse basée sur l'examen détaillé de la codebase_
 
 ## 1. Structure Générale du Projet
 
@@ -51,6 +51,7 @@ Ce document présente une analyse complète de l'architecture actuelle du projet
 ### Schéma de Base de Données
 
 - **Entités principales** :
+
   - `users` - Informations utilisateur et préférences
   - `ingredientsStandard` - Informations nutritionnelles des ingrédients
   - `mealIngredients` - Relation entre repas et ingrédients
@@ -155,6 +156,7 @@ Une standardisation de l'affichage des valeurs nutritionnelles à 100g a été i
 - Indication claire avec le texte "Pour 100g" et l'affichage du facteur d'ajustement
 
 L'analyse du code montre que cette standardisation suit l'architecture MCP :
+
 - Les composants comme `MealCard.tsx` utilisent `nutritionPagesService.getMealNutritionForDisplay()`
 - Ce service présentateur délègue au `nutritionEngine.getMealNutrition()`
 - Le moteur centralise les calculs et la normalisation des valeurs nutritionnelles
@@ -222,7 +224,7 @@ Le flux typique des données suit le schéma :
 
 L'analyse du code source confirme la présence de cycles de dépendances entre plusieurs modules clés :
 
-1. **Premier cycle** : 
+1. **Premier cycle** :
    `sqlite-server.ts → meal-handlers.ts → nutrition-core.service.ts → sqlite-server.ts`
 
 2. **Second cycle** :
@@ -242,11 +244,13 @@ Ces cycles génèrent des avertissements au démarrage et représentent un risqu
 L'analyse détaillée du code source révèle plusieurs problèmes d'architecture :
 
 1. **Couplage fort entre les couches** :
+
    - Les services "core" comme `nutrition-core.service.ts` dépendent directement de `userContext.ts`
    - Les services "pages" comme `meal-pages.service.ts` dépendent de `sqliteMCPServer`
    - Le façade `nutritionEngine` dépend à la fois des services "core" et du système de logging
 
 2. **Mélange des responsabilités dans les services** :
+
    - Le service `userContext.ts` mélange la gestion de l'état (via useSessionStore) et les accès à la base de données (via sqliteMCPServer)
    - Les services "core" dépendent de l'UI via le contexte utilisateur (`getCurrentUserIdSync`)
 
@@ -259,17 +263,20 @@ L'analyse détaillée du code source révèle plusieurs problèmes d'architectur
 ### 9.1 Architecture Globale
 
 1. **Adopter une architecture en couches plus stricte** :
+
    - Couche de présentation (UI)
    - Couche de logique métier (services, hooks)
    - Couche d'accès aux données (MCP)
    - Couche de domaine (modèles, entités)
 
 2. **Renforcer le pattern MCP** :
+
    - Étendre l'utilisation du MCP pour toutes les opérations de données
    - Standardiser les interfaces des handlers MCP
    - Améliorer la documentation du pattern MCP pour faciliter son utilisation
 
 3. **Résoudre les cycles de dépendances** :
+
    - Utiliser des patterns d'architecture (Repository, Façade)
    - Implémenter l'injection de dépendances
    - Renforcer le nutritionEngine comme point d'accès centralisé
@@ -282,6 +289,7 @@ L'analyse détaillée du code source révèle plusieurs problèmes d'architectur
 ### Architecture des Données
 
 1. **Optimiser le schéma de base de données** :
+
    - Réviser les relations pour éliminer les redondances
    - Standardiser les colonnes communes (createdAt, updatedAt)
 
@@ -292,11 +300,13 @@ L'analyse détaillée du code source révèle plusieurs problèmes d'architectur
 ### 9.3 Architecture de la Logique Métier
 
 1. **Séparer strictement la logique métier de l'UI** :
+
    - Créer des services pour chaque domaine de l'application
    - Utiliser des hooks comme façade entre les services et les composants
    - Centraliser tous les calculs nutritionnels dans nutrition-core.service.ts
 
 2. **Standardiser les patterns** :
+
    - Utiliser un pattern cohérent pour tous les calculs (comme le nutritionEngine)
    - Implémenter des validateurs pour garantir l'intégrité des données
    - Standardiser les schémas de données IA avec le schéma de la DB
@@ -311,12 +321,14 @@ L'analyse détaillée du code source révèle plusieurs problèmes d'architectur
 ### 10.1 Progrès Réalisés
 
 1. **Phase 3 de la refactorisation UI** : Complétée
+
    - Remplacement des composants basiques par des composants UI standards
    - Remplacement des modaux par ActionSheet
    - Utilisation de VStack et HStack à la place des Flexbox directs
    - Composants refactorisés : PlanConfigurationForm, PlanGeneratorForm, PlanGenerationResult, MissingIngredientsModal, PlanPreview, IngredientsSelector
 
 2. **Standardisation nutritionnelle** : Implémentée
+
    - Affichage cohérent des valeurs nutritionnelles à 100g
    - Utilisation du hook useNormalizedNutrition
 

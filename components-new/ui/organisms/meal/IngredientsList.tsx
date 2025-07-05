@@ -41,7 +41,7 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
   onIngredientPress,
   onIngredientDelete,
   showDeleteButtons = true,
-  title = "Ingrédients",
+  title = 'Ingrédients',
 }) => {
   const theme = useTheme();
   const isDark = isDarkMode || theme.isDark;
@@ -52,7 +52,10 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
   const borderColor = isDark ? '#35383F' : '#EEEEEE';
   const iconColor = isDark ? '#FFFFFF' : '#212121';
   // Styles dépendants du thème
-  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
+  const styles = React.useMemo(
+    () => createStyles(theme, isDark),
+    [theme, isDark],
+  );
 
   // Gestionnaire de clic sur un ingrédient
   const handleIngredientPress = (id: string) => {
@@ -67,18 +70,18 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
       // Confirmation avant suppression
       Alert.alert(
         "Supprimer l'ingrédient",
-        "Voulez-vous vraiment supprimer cet ingrédient ?",
+        'Voulez-vous vraiment supprimer cet ingrédient ?',
         [
           {
-            text: "Annuler",
-            style: "cancel"
+            text: 'Annuler',
+            style: 'cancel',
           },
-          { 
-            text: "Supprimer", 
+          {
+            text: 'Supprimer',
             onPress: () => onIngredientDelete(id),
-            style: "destructive"
-          }
-        ]
+            style: 'destructive',
+          },
+        ],
       );
     }
   };
@@ -103,11 +106,9 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
       {/* En-tête de la section */}
       <View style={styles.header}>
         <InfoCircleRegularBoldIcon width={20} height={20} color={iconColor} />
-        <Text style={[styles.title, { color: textColor }]}>
-          {title}
-        </Text>
+        <Text style={[styles.title, { color: textColor }]}>{title}</Text>
       </View>
-      
+
       {/* Liste des ingrédients */}
       {ingredients.length > 0 && (
         <FlatList

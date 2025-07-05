@@ -61,7 +61,7 @@ const Search = forwardRef<TextInput, SearchProps>(
       darkMode = false,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const theme = useAppTheme();
     const [isFocused, setIsFocused] = useState(false);
@@ -100,7 +100,7 @@ const Search = forwardRef<TextInput, SearchProps>(
       } else if (!text && internalState !== 'disabled') {
         setInternalState(isFocused ? 'active' : 'default');
       }
-      
+
       if (onChangeText) {
         onChangeText(text);
       }
@@ -122,7 +122,7 @@ const Search = forwardRef<TextInput, SearchProps>(
     let borderColor = darkMode ? '#181A20' : '#FFFFFF'; // Valeurs exactes du Figma
     let iconColor = darkMode ? '#757575' : '#BDBDBD'; // Valeurs exactes du Figma
     let textColor = darkMode ? 'white' : theme.color('primary');
-    
+
     switch (internalState) {
       case 'active':
         borderColor = theme.color('primary');
@@ -132,13 +132,16 @@ const Search = forwardRef<TextInput, SearchProps>(
         iconColor = darkMode ? '#757575' : theme.color('primary');
         break;
       case 'disabled':
-        backgroundColor = darkMode ? 'rgba(31, 34, 42, 0.5)' : 'rgba(250, 250, 250, 0.5)';
+        backgroundColor = darkMode
+          ? 'rgba(31, 34, 42, 0.5)'
+          : 'rgba(250, 250, 250, 0.5)';
         iconColor = 'rgba(117, 117, 117, 0.5)';
         break;
     }
 
     // Déterminer si on doit afficher le bouton d'effacement
-    const showClearButton = !!value && !!onClear && internalState !== 'disabled';
+    const showClearButton =
+      !!value && !!onClear && internalState !== 'disabled';
 
     return (
       <Box style={containerStyle as ViewStyle}>
@@ -163,15 +166,12 @@ const Search = forwardRef<TextInput, SearchProps>(
               borderColor,
               borderRadius: 10, // Valeur exacte du Figma
               opacity: internalState === 'disabled' ? 0.7 : 1,
-            }
+            },
           ]}
         >
           {/* Icône de recherche */}
           <View style={styles.iconContainer}>
-            <SearchRegularBoldIcon
-              size={20}
-              color={iconColor}
-            />
+            <SearchRegularBoldIcon size={20} color={iconColor} />
           </View>
 
           {/* Champ de saisie */}
@@ -190,7 +190,7 @@ const Search = forwardRef<TextInput, SearchProps>(
                 color: textColor,
                 fontFamily: 'Urbanist', // Police exacte du Figma
                 fontSize: 18, // Taille exacte du Figma
-              }
+              },
             ]}
             {...rest}
           />
@@ -198,16 +198,13 @@ const Search = forwardRef<TextInput, SearchProps>(
           {/* Bouton d'effacement */}
           {showClearButton && (
             <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
-              <CloseSquareRegularBoldIcon
-                size={20}
-                color={iconColor}
-              />
+              <CloseSquareRegularBoldIcon size={20} color={iconColor} />
             </TouchableOpacity>
           )}
         </View>
       </Box>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

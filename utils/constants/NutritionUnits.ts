@@ -12,7 +12,7 @@ export const NutritionUnits = {
     OUNCE: 'oz',
     POUND: 'lb',
   },
-  
+
   VOLUME: {
     MILLILITER: 'ml',
     LITER: 'l',
@@ -20,13 +20,13 @@ export const NutritionUnits = {
     TABLESPOON: 'tbsp',
     CUP: 'cup',
   },
-  
+
   // Unités pour les macronutriments
   ENERGY: {
-    KILOCALORIE: 'kcal',  // Unité standard pour l'énergie
+    KILOCALORIE: 'kcal', // Unité standard pour l'énergie
     KILOJOULE: 'kJ',
   },
-  
+
   // Unités pour les pourcentages
   PERCENTAGE: '%',
 };
@@ -42,7 +42,7 @@ export const UnitConversionFactors = {
     [NutritionUnits.WEIGHT.GRAM]: 1000,
     [NutritionUnits.WEIGHT.POUND]: 2.20462,
   },
-  
+
   // Énergie
   [NutritionUnits.ENERGY.KILOCALORIE]: {
     [NutritionUnits.ENERGY.KILOJOULE]: 4.184,
@@ -63,9 +63,9 @@ export const DefaultNutritionUnits = {
 
 // Facteurs caloriques des macronutriments (calories par gramme)
 export const MacroCalorieFactors = {
-  CARBS: 4,   // 4 kcal par gramme de glucides
+  CARBS: 4, // 4 kcal par gramme de glucides
   PROTEIN: 4, // 4 kcal par gramme de protéines
-  FAT: 9,     // 9 kcal par gramme de lipides
+  FAT: 9, // 9 kcal par gramme de lipides
   ALCOHOL: 7, // 7 kcal par gramme d'alcool (pour référence future)
-  FIBER: 2,   // 2 kcal par gramme de fibres (certains systèmes l'utilisent)
+  FIBER: 2, // 2 kcal par gramme de fibres (certains systèmes l'utilisent)
 };

@@ -24,7 +24,9 @@ const ToastContext = createContext<ToastContextValue>({
   show: noop,
 });
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const show = ({ render }: ToastShowParams) => {
     // Generate a simple id for the toast instance
     const id = Math.random().toString(36).slice(2);
@@ -40,7 +42,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     console.log('[Toast]', node);
   };
 
-  return <ToastContext.Provider value={{ show }}>{children}</ToastContext.Provider>;
+  return (
+    <ToastContext.Provider value={{ show }}>{children}</ToastContext.Provider>
+  );
 };
 
 export const useToast = () => useContext(ToastContext);

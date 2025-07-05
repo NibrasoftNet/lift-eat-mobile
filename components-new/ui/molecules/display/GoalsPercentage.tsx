@@ -4,7 +4,6 @@ import Svg, { Circle } from 'react-native-svg';
 import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Box, Text } from '../../atoms/base';
 
-
 interface GoalsPercentageProps {
   percentage: number; // 0 à 100
   size?: number; // taille du cercle
@@ -34,7 +33,8 @@ const GoalsPercentage: React.FC<GoalsPercentageProps> = ({
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
   const circumference = 2 * Math.PI * radius;
-  const progressOffset = circumference - (clampedPercentage / 100) * circumference;
+  const progressOffset =
+    circumference - (clampedPercentage / 100) * circumference;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -48,7 +48,7 @@ const GoalsPercentage: React.FC<GoalsPercentageProps> = ({
           strokeWidth={strokeWidth}
           fill="transparent"
         />
-        
+
         {/* Cercle de progression */}
         <Circle
           cx={center}
@@ -64,7 +64,7 @@ const GoalsPercentage: React.FC<GoalsPercentageProps> = ({
           transform={`rotate(-90, ${center}, ${center})`}
         />
       </Svg>
-      
+
       {/* Texte du pourcentage */}
       <View style={styles.textContainer}>
         <Text

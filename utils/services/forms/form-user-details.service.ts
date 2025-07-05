@@ -3,15 +3,21 @@
  * Fournit des fonctionnalités pour la validation, la soumission et la gestion des erreurs
  */
 
-import { FormOperationResult, UserDetailsFormServiceInterface } from "../../interfaces/forms.interface";
-import { UserDetailsDefaultValuesProps, UserDetailsFormData } from "../../validation/user/user-details.validation";
-import { logger } from "../common/logging.service";
-import { LogCategory } from "@/utils/enum/logging.enum";
-import { useToast } from "@/components/ui/toast";
-import { ToastTypeEnum } from "@/utils/enum/general.enum";
-import { HeightUnitEnum, WeightUnitEnum } from "@/utils/enum/user-details.enum";
+import {
+  FormOperationResult,
+  UserDetailsFormServiceInterface,
+} from '../../interfaces/forms.interface';
+import {
+  UserDetailsDefaultValuesProps,
+  UserDetailsFormData,
+} from '../../validation/user/user-details.validation';
+import { logger } from '../common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { useToast } from '@/components/ui/toast';
+import { ToastTypeEnum } from '@/utils/enum/general.enum';
+import { HeightUnitEnum, WeightUnitEnum } from '@/utils/enum/user-details.enum';
 import { ReactNode } from 'react';
-import { userCoreService } from "../core/user-core.service";
+import { userCoreService } from '../core/user-core.service';
 
 // Type pour le service de toast
 type ToastServiceType = ReturnType<typeof useToast>;
@@ -40,12 +46,19 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
    * @param toast - Service toast pour afficher les messages
    * @returns Un booléen indiquant si l'utilisateur est autorisé
    */
-  validateUserAccess(userId: string | null, formUserId: string, toast: ToastServiceType): boolean {
+  validateUserAccess(
+    userId: string | null,
+    formUserId: string,
+    toast: ToastServiceType,
+  ): boolean {
     try {
       // Vérifier si l'utilisateur est connecté
       if (!userId) {
-        logger.error(LogCategory.AUTH, 'User not authenticated when accessing the user details form');
-        
+        logger.error(
+          LogCategory.AUTH,
+          'User not authenticated when accessing the user details form',
+        );
+
         // Afficher un message d'erreur
         toast.show({
           placement: 'top',
@@ -55,19 +68,22 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
               variant: 'solid',
               action: 'error',
               title: 'Authentication Required',
-              description: 'You must be logged in to access this form'
+              description: 'You must be logged in to access this form',
             };
             return toastRender as unknown as ReactNode;
-          }
+          },
         });
-        
+
         return false;
       }
-      
+
       // Vérifier si l'utilisateur essaie d'accéder à ses propres données
       if (formUserId && formUserId !== userId) {
-        logger.error(LogCategory.AUTH, `User ${userId} tried to access details for user ${formUserId}`);
-        
+        logger.error(
+          LogCategory.AUTH,
+          `User ${userId} tried to access details for user ${formUserId}`,
+        );
+
         // Afficher un message d'erreur
         toast.show({
           placement: 'top',
@@ -77,22 +93,22 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
               variant: 'solid',
               action: 'error',
               title: 'Access Denied',
-              description: 'You can only modify your own profile data'
+              description: 'You can only modify your own profile data',
             };
             return toastRender as unknown as ReactNode;
-          }
+          },
         });
-        
+
         return false;
       }
-      
+
       return true;
     } catch (error) {
       logger.error(LogCategory.AUTH, `Error validating user access: ${error}`);
       return false;
     }
   }
-  
+
   /**
    * Soumet les données du formulaire pour création ou mise à jour
    * @param data - Les données du formulaire
@@ -100,50 +116,65 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
    * @param operation - L'opération (create ou update)
    * @returns Le résultat de l'opération avec les données préparées pour la persistance
    */
-  async submitForm(data: UserDetailsFormData, userId: string, operation: 'create' | 'update'): Promise<FormOperationResult> {
+  async submitForm(
+    data: UserDetailsFormData,
+    userId: string,
+    operation: 'create' | 'update',
+  ): Promise<FormOperationResult> {
     try {
-      logger.info(LogCategory.FORM, `Submitting user details form for ${operation}`, { userId });
-      
+      logger.info(
+        LogCategory.FORM,
+        `Submitting user details form for ${operation}`,
+        { userId },
+      );
+
       // Validation supplémentaire
       if (!userId) {
         throw new Error('User ID is required');
       }
-      
+
       // Construire l'objet de détails utilisateur à partir des données du formulaire
       const userDetails = {
         height: this.ensureNumber(data.height, 170),
         weight: this.ensureNumber(data.weight, 70),
         heightUnit: data.heightUnit,
-        weightUnit: data.weightUnit
+        weightUnit: data.weightUnit,
       };
-      
+
       // Préparer les données pour la mise à jour (conversion des énumérations en chaînes)
       const preprocessedData = {
         height: userDetails.height,
         weight: userDetails.weight,
         heightUnit: userDetails.heightUnit.toString(),
-        weightUnit: userDetails.weightUnit.toString()
+        weightUnit: userDetails.weightUnit.toString(),
       };
 
       // Dans l'architecture MCP, la responsabilité de ce service s'arrête à la préparation des données
       // La persistance est déléguée aux services supérieurs (userPagesService -> userCoreService -> MCP)
-      logger.info(LogCategory.FORM, `User details form data prepared for ${operation}`, { userId });
-      
+      logger.info(
+        LogCategory.FORM,
+        `User details form data prepared for ${operation}`,
+        { userId },
+      );
+
       return {
         success: true,
         message: `User details form data prepared for ${operation}`,
-        data: preprocessedData
+        data: preprocessedData,
       };
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error preparing user details form data: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error preparing user details form data: ${error}`,
+      );
       return {
         success: false,
         message: 'An error occurred while preparing your data',
-        error
+        error,
       };
     }
   }
-  
+
   /**
    * Gère l'action d'annulation du formulaire
    * @param operation - L'opération en cours (create ou update)
@@ -151,8 +182,11 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
    */
   handleCancel(operation: 'create' | 'update', router: any): void {
     try {
-      logger.info(LogCategory.FORM, `User cancelling ${operation} user details form`);
-      
+      logger.info(
+        LogCategory.FORM,
+        `User cancelling ${operation} user details form`,
+      );
+
       // Déterminer l'action en fonction de l'opération
       if (operation === 'update') {
         // Si l'opération est une mise à jour, on revient à la page précédente
@@ -161,13 +195,16 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
       } else {
         // Si l'opération est une création, on peut aller à la page de préférences
         router.replace('/(root)/(user)/preference');
-        logger.debug(LogCategory.UI, 'Navigating to preference after form create cancel');
+        logger.debug(
+          LogCategory.UI,
+          'Navigating to preference after form create cancel',
+        );
       }
     } catch (error) {
       logger.error(LogCategory.FORM, `Error handling form cancel: ${error}`);
     }
   }
-  
+
   /**
    * Prépare les valeurs par défaut pour le formulaire
    * @param defaultValues - Les valeurs par défaut fournies
@@ -183,11 +220,14 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
       // Déléguer la validation au service core
       return userCoreService.validateWeightUnit(unit);
     } catch (error) {
-      logger.warn(LogCategory.FORM, `Error validating weight unit: ${error}, using default`);
+      logger.warn(
+        LogCategory.FORM,
+        `Error validating weight unit: ${error}, using default`,
+      );
       return WeightUnitEnum.KG;
     }
   }
-  
+
   /**
    * Valide une unité de hauteur
    * @param unit - L'unité de hauteur à valider
@@ -198,15 +238,23 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
       // Déléguer la validation au service core
       return userCoreService.validateHeightUnit(unit);
     } catch (error) {
-      logger.warn(LogCategory.FORM, `Error validating height unit: ${error}, using default`);
+      logger.warn(
+        LogCategory.FORM,
+        `Error validating height unit: ${error}, using default`,
+      );
       return HeightUnitEnum.CM;
     }
   }
 
-  prepareDefaultValues(defaultValues: UserDetailsDefaultValuesProps): UserDetailsDefaultValuesProps {
+  prepareDefaultValues(
+    defaultValues: UserDetailsDefaultValuesProps,
+  ): UserDetailsDefaultValuesProps {
     try {
-      logger.debug(LogCategory.FORM, 'Preparing default values for user details form');
-      
+      logger.debug(
+        LogCategory.FORM,
+        'Preparing default values for user details form',
+      );
+
       // Valeurs par défaut si aucune n'est fournie
       const normalizedValues: UserDetailsDefaultValuesProps = {
         id: this.ensureNumber(defaultValues?.id, 0),
@@ -215,22 +263,28 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
         weightUnit: this.validateWeightUnit(defaultValues?.weightUnit),
         height: this.ensureNumber(defaultValues?.height, 170),
         // Utiliser la fonction de validation pour sécuriser les unités
-        heightUnit: this.validateHeightUnit(defaultValues?.heightUnit)
+        heightUnit: this.validateHeightUnit(defaultValues?.heightUnit),
       };
-      
-      logger.debug(LogCategory.FORM, `Prepared default values: ${JSON.stringify(normalizedValues)}`);
-      
+
+      logger.debug(
+        LogCategory.FORM,
+        `Prepared default values: ${JSON.stringify(normalizedValues)}`,
+      );
+
       return normalizedValues;
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error preparing default values: ${error}`);
-      
+      logger.error(
+        LogCategory.FORM,
+        `Error preparing default values: ${error}`,
+      );
+
       // En cas d'erreur, retourner des valeurs par défaut sûres
       return {
         id: 0,
         weight: 70,
         weightUnit: WeightUnitEnum.KG,
         height: 170,
-        heightUnit: HeightUnitEnum.CM
+        heightUnit: HeightUnitEnum.CM,
       };
     }
   }
@@ -252,7 +306,11 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
    * @param setValue - Fonction pour mettre à jour la valeur du champ
    * @param index - Index pour l'animation
    */
-  handleWeightUnitChange(unit: string, setValue: Function, index: number): void {
+  handleWeightUnitChange(
+    unit: string,
+    setValue: Function,
+    index: number,
+  ): void {
     try {
       // Vérifier que l'unité est valide
       if (Object.values(WeightUnitEnum).includes(unit as WeightUnitEnum)) {
@@ -262,7 +320,10 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
         logger.warn(LogCategory.FORM, `Invalid weight unit: ${unit}`);
       }
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error handling weight unit change: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error handling weight unit change: ${error}`,
+      );
     }
   }
 
@@ -272,7 +333,11 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
    * @param setValue - Fonction pour mettre à jour la valeur du champ
    * @param index - Index pour l'animation
    */
-  handleHeightUnitChange(unit: string, setValue: Function, index: number): void {
+  handleHeightUnitChange(
+    unit: string,
+    setValue: Function,
+    index: number,
+  ): void {
     try {
       // Vérifier que l'unité est valide
       if (Object.values(HeightUnitEnum).includes(unit as HeightUnitEnum)) {
@@ -282,7 +347,10 @@ class UserDetailsFormService implements UserDetailsFormServiceInterface {
         logger.warn(LogCategory.FORM, `Invalid height unit: ${unit}`);
       }
     } catch (error) {
-      logger.error(LogCategory.FORM, `Error handling height unit change: ${error}`);
+      logger.error(
+        LogCategory.FORM,
+        `Error handling height unit change: ${error}`,
+      );
     }
   }
 }
