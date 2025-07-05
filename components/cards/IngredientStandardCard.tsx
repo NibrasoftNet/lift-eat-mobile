@@ -1,4 +1,5 @@
-import React, { useEffect, useState, memo, useMemo } from 'react';
+import React, { useEffect, memo, useMemo } from 'react';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
@@ -30,6 +31,9 @@ import { createStableId, ItemType } from '@/utils/helpers/uniqueId';
 interface IngredientWithStableId extends IngredientStandardOrmProps {
   uniqueId?: string;
 }
+
+// Image par défaut
+const DEFAULT_INGREDIENT_IMAGE = require('@/assets/images/logo_no_bg.png');
 
 // Solution optimisée, pas de lecture/écriture de valeurs Reanimated pendant le rendu
 const IngredientStandardCard = memo(
@@ -98,7 +102,7 @@ const IngredientStandardCard = memo(
                   {item.image ? (
                     <AvatarImage
                       className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
-                      source={{ uri: `${item.image}` }}
+                      source={resolveStaticImage(item.image as unknown as string, DEFAULT_INGREDIENT_IMAGE)}
                     />
                   ) : (
                     <Icon as={HandPlatter} size="lg" className="stroke-white" />

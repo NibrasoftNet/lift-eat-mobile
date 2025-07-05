@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/themeNew';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +32,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
+        <Image source={resolveStaticImage(imageUrl, require('@/assets/images/logo_no_bg.png'))} style={styles.image} />
         <Text style={styles.name}>{name}</Text>
         {brands && <Text style={styles.brands}>{brands}</Text>}
       </View>

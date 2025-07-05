@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { useTheme } from '@/themeNew';
 import CircularNutritionProgress from '@/components-new/ui/molecules/tracking/CircularNutritionProgress';
 
@@ -130,7 +131,7 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
+        <Image source={resolveStaticImage(imageUrl, require('@/assets/images/logo_no_bg.png'))} style={styles.image} />
       </View>
 
       {/* Name */}

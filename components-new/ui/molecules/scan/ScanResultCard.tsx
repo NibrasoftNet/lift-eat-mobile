@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
 import { useTheme } from '@/themeNew';
 import { HeartRegularBoldIcon } from '@/assets/icons/figma/regular-bold';
@@ -36,7 +37,7 @@ const ScanResultCard: React.FC<ScanResultCardProps> = ({
     <Box style={styles.container}>
       {/* Image du produit */}
       <Image
-        source={{ uri: product.image }}
+        source={resolveStaticImage(product.image, require('@/assets/images/logo_no_bg.png'))}
         style={styles.productImage}
         borderRadius={12}
       />
