@@ -4,9 +4,9 @@
     "slug": "fitness",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.jpg",
+    "icon": "./assets/images/logo.png",
     "splash": {
-      "image": "./assets/images/auth/login_background.jpg",
+      "image": "./assets/images/auth/login_background.png",
       "resizeMode": "cover",
       "backgroundColor": "#21273F"
     },
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.jpg"
+        "foregroundImage": "./assets/images/logo.png"
       },
       "package": "com.nibrasoftnet.liftandeat"
     },
@@ -31,7 +31,8 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-asset"
+      "expo-asset",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
