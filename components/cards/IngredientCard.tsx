@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
 import { HStack } from '../ui/hstack';
@@ -25,6 +26,8 @@ import { LogCategory } from '@/utils/enum/logging.enum';
  * Composant qui affiche un ingrédient dans une carte interactive
  * Permet de modérer la quantité de l'ingrédient
  */
+const DEFAULT_INGREDIENT_IMAGE = require('@/assets/images/logo_no_bg.png');
+
 const IngredientCard: React.FC<{
   item: IngredientWithStandardProps;
   index: number;
@@ -88,7 +91,7 @@ const IngredientCard: React.FC<{
                 {item.ingredientsStandard?.image ? (
                   <AvatarImage
                     className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
-                    source={{ uri: `${item.ingredientsStandard.image}` }}
+                    source={resolveStaticImage(item.ingredientsStandard.image as unknown as string, DEFAULT_INGREDIENT_IMAGE)}
                   />
                 ) : (
                   <Icon as={HandPlatter} size="lg" className="stroke-white" />

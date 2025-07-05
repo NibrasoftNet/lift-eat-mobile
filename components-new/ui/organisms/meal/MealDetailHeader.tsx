@@ -4,7 +4,6 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
-  Image as RNImage,
   ActivityIndicator,
 } from 'react-native';
 import { Text } from '../../atoms/base';
@@ -14,6 +13,8 @@ import { EditRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold
 import { DeleteRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/DeleteRegularBoldIcon';
 import { HeartRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/HeartRegularBoldIcon';
 import { useRouter } from 'expo-router';
+import { Image as RNImage } from 'react-native';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 
 interface MealDetailHeaderProps {
   /** ID du repas */
@@ -130,7 +131,7 @@ const MealDetailHeader: React.FC<MealDetailHeaderProps> = ({
       {/* Image centrée */}
       <View style={styles.imageContainer}>
         <RNImage
-          source={{ uri: imageUrl }}
+          source={resolveStaticImage(imageUrl, require('@/assets/images/logo_no_bg.png'))}
           style={styles.centeredImage}
           resizeMode="contain"
         />
