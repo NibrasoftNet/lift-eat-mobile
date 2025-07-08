@@ -12,6 +12,7 @@ import { Text } from '../../atoms/base';
 import { IngredientWithStandardOrmProps } from '@/db/schema';
 import { DeleteRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/DeleteRegularBoldIcon';
 import { HandPlatter } from 'lucide-react-native';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 
 interface IngredientCardProps {
   /** Données de l'ingrédient à afficher */
@@ -103,7 +104,15 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           <View style={styles.imageContainer}>
             {ingredientsStandard?.image ? (
               <Image
-                source={{ uri: `${ingredientsStandard.image}` }}
+                source={
+                  Buffer.isBuffer(ingredientsStandard.image)
+                    ? {
+                        uri: `data:image/jpeg;base64,${Buffer.from(
+                          ingredientsStandard.image
+                        ).toString('base64')}`,
+                      }
+                    : resolveStaticImage(ingredientsStandard.image as string)
+                }
                 style={styles.ingredientImage}
                 resizeMode="cover"
               />
