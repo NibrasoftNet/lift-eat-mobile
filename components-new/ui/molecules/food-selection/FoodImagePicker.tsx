@@ -16,6 +16,7 @@ import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { CameraCurvedBoldIcon } from '../../../../assets/icons/figma/curved-bold/CameraCurvedBoldIcon';
 import { ImageCurvedBoldIcon } from '../../../../assets/icons/figma/curved-bold/ImageCurvedBoldIcon';
 import { ArrowLeft3CurvedBoldIcon } from '../../../../assets/icons/figma/curved-bold/ArrowLeft3CurvedBoldIcon';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 
 // Emoji icon support removed
 
@@ -146,7 +147,7 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
     if (selectedImage.type === 'image') {
       return (
         <Image
-          source={{ uri: selectedImage.value }}
+          source={resolveStaticImage(selectedImage.value)}
           style={styles.selectedImage}
         />
       );
