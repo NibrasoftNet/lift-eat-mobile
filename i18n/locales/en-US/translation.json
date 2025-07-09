@@ -30,19 +30,39 @@
     "moderate": "Moderate",
     "high": "High"
   },
+  "goal": {
+    "weight_loss": "Weight Loss",
+    "maintain": "Maintain",
+    "gain_muscle": "Gain Muscle"
+  },
   "actions": {
-    "continue": "Continue"
+    "continue": "Continue",
+    "save": "Save",
+    "saving": "Saving..."
   },
   "toast": {
     "savedTitle": "Data Saved",
     "calorieSavedMsg": "Your calorie intake data has been saved successfully!",
     "errorTitle": "Error",
-    "genericError": "An error occurred"
+    "genericError": "An error occurred",
+    "nutritionGoalSavedMsg": "Your nutrition plan has been saved successfully!"
   },
   "forms": {
     "calorieIntake": {
       "heroTitle": "Nutrition Data",
       "heroSubtitle": "Calculate your daily needs"
+    },
+    "nutritionGoal": {
+      "heroTitle": "Set Your Goals",
+      "heroSubtitle": "Define your nutrition targets",
+      "planDetails": "Plan Details",
+      "planName": "Plan Name (optional)",
+      "planNamePlaceholder": "Enter a custom plan name",
+      "weightGoals": "Weight Goals",
+      "initialWeight": "Initial Weight (kg)",
+      "targetWeight": "Target Weight (kg)",
+      "goalType": "Goal Type",
+      "duration": "Duration (weeks)"
     }
   },
   "home": {

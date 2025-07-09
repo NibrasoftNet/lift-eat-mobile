@@ -30,20 +30,41 @@
     "moderate": "Modérée",
     "high": "Élevée"
   },
+  "goal": {
+    "weight_loss": "Perte de poids",
+    "maintain": "Maintenir",
+    "gain_muscle": "Prendre du muscle"
+  },
   "actions": {
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "save": "Enregistrer",
+    "saving": "Enregistrement..."
   },
   "toast": {
     "savedTitle": "Données enregistrées",
     "calorieSavedMsg": "Vos données d'apport calorique ont été enregistrées avec succès !",
     "errorTitle": "Erreur",
-    "genericError": "Une erreur est survenue"
+    "genericError": "Une erreur est survenue",
+    "nutritionGoalSavedMsg": "Votre plan nutritionnel a été enregistré avec succès !"
   },
   "forms": {
     "calorieIntake": {
       "heroTitle": "Données nutritionnelles",
       "heroSubtitle": "Calculez vos besoins quotidiens"
+    },
+    "nutritionGoal": {
+      "heroTitle": "Définissez vos objectifs",
+      "heroSubtitle": "Définissez vos cibles nutritionnelles",
+      "planDetails": "Détails du plan",
+      "planName": "Nom du plan (optionnel)",
+      "planNamePlaceholder": "Entrez un nom de plan personnalisé",
+      "weightGoals": "Objectifs de poids",
+      "initialWeight": "Poids initial (kg)",
+      "targetWeight": "Poids cible (kg)",
+      "goalType": "Type d'objectif",
+      "duration": "Durée (semaines)"
     }
+    
   },
   "home": {
     "title": "Accueil",
@@ -292,16 +313,15 @@
       "toastDescription": {
         "defaultError": "Une erreur est survenue"
       }
-    }
-  },
-  "tab": {
+    },
+    "tab": {
     "assistant": "Assistant",
     "plans": "Plans",
     "meals": "Repas",
     "progress": "Progrès",
     "analytics": "Analyse"
-  },
-  "profile": {
+    },
+    "profile": {
     "toast": {
       "updatedTitle": "Profil mis à jour",
       "updatedDescription": "Votre profil a été mis à jour avec succès",
@@ -311,4 +331,4 @@
       "imageErrorDescription": "Impossible de sélectionner l'image. Veuillez réessayer."
     }
   }
-}
+}}

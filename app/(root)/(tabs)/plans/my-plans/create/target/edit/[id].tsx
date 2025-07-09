@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
-import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
+import NutritionGoalForm from '@/components-new/ui/forms/NutritionGoalForm';
 import { getCurrentUserId } from '@/utils/helpers/userContext';
 
 export default function EditNutritionTarget() {
@@ -29,7 +29,6 @@ export default function EditNutritionTarget() {
     <NutritionGoalForm
       defaultValues={nutritionGoalDefaultValueProps}
       operation="update"
-      userId={userId ?? 0}
     />
   );
 }
