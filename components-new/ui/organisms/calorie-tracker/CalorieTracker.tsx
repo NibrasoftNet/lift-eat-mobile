@@ -203,28 +203,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
               isDarkMode={isDarkMode}
             />
           </View>
-
-          {/* Liste des aliments */}
-          <View style={styles.section}>
-            <FoodList
-              foodItems={foodItems}
-              onFoodItemPress={onFoodItemPress}
-              title="Today's Food"
-              isDarkMode={isDarkMode}
-              scrollable={false}
-            />
-
-            {/* Bouton d'ajout d'aliment */}
-            {onAddFoodPress && (
-              <CircularAddButton
-                onPress={onAddFoodPress}
-                size={40}
-                color="#A1CE50"
-                iconColor="#212121"
-                style={styles.addButton}
-              />
-            )}
-          </View>
         </View>
       </ScrollView>
     </View>
