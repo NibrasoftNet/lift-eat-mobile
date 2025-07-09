@@ -35,6 +35,7 @@ import { PlusRegularBoldIcon } from '@/assets/icons/figma/regular-bold/PlusRegul
 import { CloseSquareRegularBoldIcon } from '@/assets/icons/figma/regular-bold/CloseSquareRegularBoldIcon';
 import { TickSquareRegularBoldIcon } from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import IngredientDetailsRow from './IngredientDetailsRow';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 
 interface IngredientListDrawerProps {
   visible: boolean;
@@ -465,12 +466,11 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({
                       <View style={styles.imageContainer}>
                         {item.image ? (
                           <Image
-                            source={{
-                              uri:
-                                typeof item.image === 'string'
-                                  ? item.image
-                                  : `data:image/png;base64,${item.image}`,
-                            }}
+                            source={
+                              typeof item.image === 'string'
+                                ? resolveStaticImage(item.image)
+                                : { uri: `data:image/png;base64,${item.image}` }
+                            }
                             style={styles.ingredientImage}
                           />
                         ) : (

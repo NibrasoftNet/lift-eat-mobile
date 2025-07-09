@@ -126,15 +126,33 @@ export async function handleCreatePlan(
       };
 
       const multiplier = activityMultiplier[physicalActivity] || 1.55;
-      calculatedCalories = Math.round(bmr * multiplier);
+      let maintenanceCalories = Math.round(bmr * multiplier);
+
+      // Récupérer l'objectif pour ajuster les calories
+      const goal = anyData.goal || data.goalUnit || GoalEnum.MAINTAIN;
+
+      // Appliquer le déficit/surplus en fonction de l'objectif
+      if (goal === GoalEnum.WEIGHT_LOSS) {
+        // Appliquer un déficit de 15% pour la perte de poids
+        calculatedCalories = Math.round(maintenanceCalories * 0.85);
+      } else if (goal === GoalEnum.GAIN_MUSCLE) {
+        // Appliquer un surplus de 15% pour la prise de muscle
+        calculatedCalories = Math.round(maintenanceCalories * 1.15);
+      } else {
+        // Pour le maintien, utiliser les calories de maintenance
+        calculatedCalories = maintenanceCalories;
+      }
 
       // Limiter à la valeur maximale pour éviter des valeurs excessives
       calculatedCalories = Math.min(calculatedCalories, 3000);
 
       logger.info(
         LogCategory.NUTRITION,
-        `Calculated ${calculatedCalories} daily calories for user ${userId}`,
+        `Calculated ${calculatedCalories} daily calories for user ${userId} with goal ${goal}`,
         {
+          goal,
+          maintenanceCalories,
+          finalCalories: calculatedCalories,
           weight,
           height,
           age,

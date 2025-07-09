@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PhysicalActivityEnum } from '@/utils/enum/user-gender-activity.enum';
 import { CalculateCaloriesIntakeDefaultValueProps } from '@/utils/validation/plan/calculate-calories-intake.validation';
-import CalculateCaloriesIntakeForm from '@/components/froms/CalculateCaloriesIntakeForm';
+import CalculateCaloriesIntakeFormNew from '@/components-new/ui/forms/CalculateCaloriesIntakeForm';
 import useSessionStore from '@/utils/store/sessionStore';
 import { useQuery } from '@tanstack/react-query';
 import { UserOrmPros } from '@/db/schema';
@@ -87,7 +87,7 @@ export default function CreateCaloriesCount() {
       isPending={isPending}
       isRefetching={isRefetching}
     >
-      <CalculateCaloriesIntakeForm
+      <CalculateCaloriesIntakeFormNew
         defaultValues={defaultCalculateCaloriesIntakeValues}
       />
     </QueryStateHandler>

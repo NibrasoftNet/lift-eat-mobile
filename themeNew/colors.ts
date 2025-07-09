@@ -43,6 +43,7 @@ export const colors = {
   backgroundBrown: '#F8F3F1',
   backgroundYellow: '#FFFCEB',
   backgroundGrey: '#F6F6F6',
+  setCurrentPlan: '#d2dbc3',
   overlayLime: 'rgba(161, 206, 80, 0.08)',
   overlayBlue: 'rgba(35, 93, 255, 0.08)',
   overlayPurple: 'rgba(126, 109, 252, 0.08)',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { NutritionGoalDefaultValueProps } from '@/utils/validation/plan/nutrition-goal.validation';
-import NutritionGoalForm from '@/components/froms/NutritionGoalForm';
+import NutritionGoalForm from '@/components-new/ui/forms/NutritionGoalForm';
 import { UserOrmPros } from '@/db/schema';
 import { DataType } from '@/utils/helpers/queryInvalidation';
 import { withQueryState } from '@/utils/hoc';
@@ -75,7 +75,6 @@ export default function CreateNutritionTargetScreen() {
     <NutritionGoalForm
       defaultValues={nutritionGoalDefaultValueProps}
       operation="create"
-      userId={userQuery.data?.details?.id || 0}
     />
   );
 }

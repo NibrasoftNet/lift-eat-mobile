@@ -4,7 +4,8 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 
-import { useTheme } from '@/themeNew';
+import { useAppTheme } from '@/utils/providers/ThemeProvider';
+import type { ThemeInterface } from '@/themeNew';
 import SearchPlanNew from '@/components-new/ui/organisms/plan/SearchPlanNew';
 import PlanCardNew from '@/components-new/ui/organisms/plan/PlanCardNew';
 import CreatePlanButton from '@/components-new/ui/organisms/plan/CreatePlanButton';
@@ -13,9 +14,11 @@ import Text from '@/components-new/ui/atoms/base/Text';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
+
 export default function MyPlansScreenNew() {
   const router = useRouter();
-  const theme = useTheme();
+  const theme = useAppTheme();
+  const styles = getStyles(theme);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -61,7 +64,7 @@ export default function MyPlansScreenNew() {
 
   return (
     <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: theme.color('background') }]}
+      style={styles.safeArea}
     >
       {/* Header */}
       <View style={styles.headerContainer}>
@@ -130,13 +133,7 @@ export default function MyPlansScreenNew() {
 
       {/* CTA */}
       <View
-        style={[
-          styles.ctaContainer,
-          {
-            paddingHorizontal: theme.space('xl'),
-            paddingBottom: theme.space('2xl'),
-          },
-        ]}
+        style={styles.ctaContainer}
       >
         <CreatePlanButton
           onPress={() => router.push('/plans/my-plans/create')}
@@ -146,30 +143,42 @@ export default function MyPlansScreenNew() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  headerTitle: {
-    fontWeight: '700',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    marginTop: 32,
-  },
-  emptyText: {
-    opacity: 0.6,
-  },
-  ctaContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-  },
-});
+const getStyles = (theme: ThemeInterface) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    headerContainer: {
+      alignItems: 'center',
+      marginTop: 40,
+      marginBottom: 40,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: theme.colors.primary,
+      marginLeft: 30,
+      padding: 10,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      marginTop: 32,
+      
+    },
+    emptyText: {
+      opacity: 0.6,
+    },
+    ctaContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: 'transparent',
+      paddingHorizontal: theme.space('xl'),
+      paddingBottom: theme.space('2xl'),
+      
+    },
+  });
+
+

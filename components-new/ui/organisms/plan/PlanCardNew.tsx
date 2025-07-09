@@ -1,269 +1,222 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
-import { useTheme } from '../../../../themeNew';
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Text } from '../../atoms/base';
 import CircularNutritionProgress from '../../molecules/tracking/CircularNutritionProgress';
-import Icon from '@/components-new/ui/atoms/display/Icon';
-import { Svg, Circle, SvgProps } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { useToast } from '@/components-new/ui/toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MultiPurposeToast from '@/components-new/MultiPurposeToast';
 import { ToastTypeEnum } from '@/utils/enum/general.enum';
-import PlanOptionsDrawer from './PlanOptionsDrawer';
-import DeleteConfirmationDrawer from '@/components-new/ui/organisms/DeleteDrawer/DeleteConfirmationDrawer';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import MenuItemPlan from './MenuItemPlan';
-
-// Inline simple 3-dots icon (horizontal)
-const ThreeDotsIcon: React.FC<SvgProps> = (props) => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
-    <Circle cx="4" cy="12" r="2" fill={props.color || '#000'} />
-    <Circle cx="12" cy="12" r="2" fill={props.color || '#000'} />
-    <Circle cx="20" cy="12" r="2" fill={props.color || '#000'} />
-  </Svg>
-);
-
+import PlanOptionsDrawer from './PlanOptionsDrawer';
 import { PlanOrmProps } from '@/db/schema';
+import { DeleteRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/DeleteRegularBoldIcon';
 
-export interface PlanCardNewProps {
+interface PlanCardNewProps {
   plan: PlanOrmProps;
-  onPress?: (plan: PlanOrmProps) => void;
-  onMenuPress?: (plan: PlanOrmProps) => void;
 }
 
 /**
- * PlanCardNew – nouvelle carte nutrition plan (Figma node 55523-1121)
- * 1. Image header arrondie
- * 2. Menu 3 points en overlay
- * 3. Infos + cercle macros + chips
+ * PlanCardNew – carte d'un plan nutritionnel avec :
+ *  • Tap court  : navigation vers détails du plan.
+ *  • Appui long : ouvre le PlanOptionsDrawer (detail / edit / delete).
+ *  • Swipe-to-delete : glisser vers la gauche pour afficher le bouton « Supprimer ».
  */
-const PlanCardNew: React.FC<PlanCardNewProps> = ({
-  plan,
-  onPress,
-  onMenuPress,
-}) => {
-  const theme = useTheme();
-  const styles = React.useMemo(() => createStyles(theme), [theme]);
-
+const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan }) => {
+  /* -------------------------------------------------- */
+  /* Hooks & helpers                                     */
+  /* -------------------------------------------------- */
+  const theme = useAppTheme();
+  // Dynamic background: highlight current plan
+  const containerBg = plan.current ? theme.color('setCurrentPlan') : theme.color('background');
   const router = useRouter();
   const toast = useToast();
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [showOptionDrawer, setShowOptionsDrawer] = useState<boolean>(false);
-  const [showActionMenu, setShowActionMenu] = useState<boolean>(false);
+  const swipeableRef = useRef<Swipeable>(null);
   const queryClient = useQueryClient();
+  const [showOptionDrawer, setShowOptionsDrawer] = useState(false);
 
-  // Mutation for deleting a plan
+  /* -------------------------------------------------- */
+  /* Mutations                                           */
+  /* -------------------------------------------------- */
   const { mutateAsync: deleteAsync, isPending: isDeletePending } = useMutation({
     mutationFn: () => planPagesService.deletePlan(plan.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Plan deleted`}
-              description={`The plan has been successfully deleted`}
-            />
-          );
-        },
+        render: ({ id }) => (
+          <MultiPurposeToast
+            id={'toast-' + id}
+            color={ToastTypeEnum.SUCCESS}
+            title="Plan deleted"
+            description="The plan has been successfully deleted"
+          />
+        ),
       });
+      // Remove queries for this plan to avoid stale refetch errors
+      queryClient.removeQueries({ queryKey: [`plan-${plan.id}`] });
+      queryClient.removeQueries({ queryKey: ['plan-details', plan.id] });
       planPagesService.invalidatePlanCache(queryClient, plan.id);
-      setShowOptionsDrawer(false);
+      await queryClient.invalidateQueries({ queryKey: ['plans'] });
+      await queryClient.invalidateQueries({ queryKey: ['plans-list-new'] });
     },
     onError: (error: any) => {
       toast.show({
         placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Cannot Delete Plan`}
-              description={
-                error instanceof Error
-                  ? error.message
-                  : 'An unexpected error occurred'
-              }
-            />
-          );
-        },
+        render: ({ id }) => (
+          <MultiPurposeToast
+            id={'toast-' + id}
+            color={ToastTypeEnum.ERROR}
+            title="Cannot Delete Plan"
+            description={error instanceof Error ? error.message : 'Unexpected error'}
+          />
+        ),
       });
     },
   });
 
-  // Mutation to set current plan
-  const { mutateAsync: setCurrentAsync } = useMutation({
+  /* -------------------------------------------------- */
+  /* Mutation: set current                               */
+  /* -------------------------------------------------- */
+  const { mutateAsync: setCurrentAsync, isPending: isSetCurrentPending } = useMutation({
     mutationFn: () => planPagesService.setCurrentPlan(plan.id),
     onSuccess: async () => {
       toast.show({
         placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.SUCCESS}
-              title={`Plan set as current`}
-              description={`"${plan.name}" is now your current plan`}
-            />
-          );
-        },
+        render: ({ id }) => (
+          <MultiPurposeToast
+            id={'toast-' + id}
+            color={ToastTypeEnum.SUCCESS}
+            title="Plan set as current"
+            description={`"${plan.name}" is now your current plan`}
+          />
+        ),
       });
+      // Remove queries for this plan to avoid stale refetch errors
+      queryClient.removeQueries({ queryKey: [`plan-${plan.id}`] });
+      queryClient.removeQueries({ queryKey: ['plan-details', plan.id] });
       planPagesService.invalidatePlanCache(queryClient, plan.id);
       await queryClient.invalidateQueries({ queryKey: ['plans'] });
+      await queryClient.invalidateQueries({ queryKey: ['plans-list-new'] });
       await queryClient.invalidateQueries({ queryKey: ['progress', plan.id] });
     },
     onError: (error: any) => {
       toast.show({
         placement: 'top',
-        render: ({ id }: { id: string }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title={`Failed to set plan as current`}
-              description={error.toString()}
-            />
-          );
-        },
+        render: ({ id }) => (
+          <MultiPurposeToast
+            id={'toast-' + id}
+            color={ToastTypeEnum.ERROR}
+            title="Failed to set current plan"
+            description={error instanceof Error ? error.message : String(error)}
+          />
+        ),
       });
     },
   });
 
-  const handlePlanDelete = () => {
+  /* -------------------------------------------------- */
+  /* Handlers                                            */
+  /* -------------------------------------------------- */
+  const handlePress = () => {
+    router.push(`/plans/my-plans/details/${plan.id}`);
+  };
+
+  const handleDelete = () => {
     deleteAsync()
-      .then(() => setShowModal(false))
+      .then(() => swipeableRef.current?.close())
       .catch((error) => {
-        logger.error(
-          LogCategory.DATABASE,
-          `Error deleting plan: ${error.message}`,
-        );
-        toast.show({
-          placement: 'top',
-          render: ({ id }) => {
-            const toastId = 'toast-' + id;
-            return (
-              <MultiPurposeToast
-                id={toastId}
-                color={ToastTypeEnum.ERROR}
-                title="Erreur de suppression"
-                description={(error as Error).message}
-              />
-            );
-          },
-        });
+        logger.error(LogCategory.DATABASE, `Error deleting plan: ${error.message}`);
       });
   };
 
-  const handleSetCurrentPlan = () => {
+  const handleSetCurrent = () => {
     setCurrentAsync().catch((error) => {
-      logger.error(
-        LogCategory.DATABASE,
-        `Error setting current plan: ${error.message}`,
-      );
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => {
-          const toastId = 'toast-' + id;
-          return (
-            <MultiPurposeToast
-              id={toastId}
-              color={ToastTypeEnum.ERROR}
-              title="Erreur de configuration"
-              description={(error as Error).message}
-            />
-          );
-        },
-      });
+      logger.error(LogCategory.DATABASE, `Error setting current plan: ${error.message}`);
     });
   };
 
-  const handlePress = () => onPress?.(plan);
+  /* -------------------------------------------------- */
+  /* Swipeable actions                                   */
+  /* -------------------------------------------------- */
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const trans = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [0, 80],
+      extrapolate: 'clamp',
+    });
 
+    return (
+      <Animated.View
+        style={[styles.deleteButtonContainer, { transform: [{ translateX: trans }] }]}
+      >
+        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton} disabled={isDeletePending}>
+          <DeleteRegularBoldIcon width={24} height={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  /* -------------------------------------------------- */
+  /* JSX                                                */
+  /* -------------------------------------------------- */
   return (
     <>
-      <TouchableOpacity
-        style={styles.container}
-        activeOpacity={0.8}
-        onPress={handlePress}
-        onLongPress={() => setShowOptionsDrawer(true)}
+      <Swipeable
+        ref={swipeableRef}
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        friction={2}
+        rightThreshold={40}
       >
-        {/* Menu icon */}
         <TouchableOpacity
-          style={styles.menuBtn}
-          onPress={() => setShowActionMenu((prev) => !prev)}
-          hitSlop={8}
+          style={[styles.container, { backgroundColor: containerBg } ]}
+          activeOpacity={0.8}
+          onPress={handlePress}
+          onLongPress={() => setShowOptionsDrawer(true)}
         >
-          <Icon as={ThreeDotsIcon} size="sm" color={theme.color('primary')} />
-        </TouchableOpacity>
-
-        {/* Header */}
-        <View style={styles.headerSection}>
-          <Text variant="h3" style={styles.title} numberOfLines={2}>
-            {plan.name}
-          </Text>
-          <View style={styles.statsRow}>
-            <Text variant="caption" style={styles.subLine}>
-              {plan.initialWeight} {plan.unit} → {plan.targetWeight} {plan.unit}
+          {/* Header */}
+          <View style={styles.headerSection}>
+            <Text variant="h3" style={styles.title} numberOfLines={2}>
+              {plan.name}
             </Text>
-            <Text
-              variant="caption"
-              style={[styles.subLine, styles.durationText]}
-            >
-              {plan.durationWeeks} Semaines
-            </Text>
+            <View style={styles.statsRow}>
+              <Text variant="caption" style={styles.subLine}>
+                {plan.initialWeight} {plan.unit} → {plan.targetWeight} {plan.unit}
+              </Text>
+              <Text variant="caption" style={[styles.subLine, styles.durationText]}>
+                {plan.durationWeeks} Semaines
+              </Text>
+            </View>
           </View>
-        </View>
 
-        {/* Body */}
-        <View style={styles.contentRow}>
-          {/* Progress */}
-          <CircularNutritionProgress
-            calories={plan.calories}
-            carbs={plan.carbs}
-            protein={plan.protein}
-            fat={plan.fat}
-            size={90}
-            showDetails={true}
-            showPercentages={true}
-          />
-        </View>
-        {/* Hide bottom line from inner component */}
-        <View style={styles.borderCover} pointerEvents="none" />
-      </TouchableOpacity>
+          {/* Progress circle */}
+          <View style={styles.contentRow}>
+            <CircularNutritionProgress
+              calories={plan.calories}
+              carbs={plan.carbs}
+              protein={plan.protein}
+              fat={plan.fat}
+              size={90}
+              showDetails
+              showPercentages
+            />
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
 
-      {showActionMenu && (
-        <MenuItemPlan
-          disabledSelect={plan.current}
-          onSelectCurrent={() => {
-            handleSetCurrentPlan();
-            setShowActionMenu(false);
-          }}
-          onEdit={() => {
-            router.push(`/plans/my-plans/edit/${plan.id}`);
-            setShowActionMenu(false);
-          }}
-          onDelete={() => {
-            setShowModal(true);
-            setShowActionMenu(false);
-          }}
-          style={{
-            position: 'absolute',
-            right: theme.space('sm'),
-            top: theme.space('sm') + 32,
-            zIndex: 1000,
-          }}
-        />
-      )}
-
+      {/* Bottom-sheet options drawer */}
       <PlanOptionsDrawer
         visible={showOptionDrawer}
         onClose={() => setShowOptionsDrawer(false)}
@@ -271,109 +224,61 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({
         disableDelete={false}
         onDetail={() => router.push(`/plans/my-plans/details/${plan.id}`)}
         onEdit={() => router.push(`/plans/my-plans/edit/${plan.id}`)}
-        onDelete={() => setShowModal(true)}
-      />
-
-      <DeleteConfirmationDrawer
-        open={showModal}
-        onConfirm={handlePlanDelete}
-        onCancel={() => setShowModal(false)}
-        title="Delete plan"
-        description="Are you sure you want to delete this plan? This action cannot be undone."
-        isLoading={isDeletePending}
+        onDelete={handleDelete}
+        disableSetCurrent={plan.current}
+        onSetCurrent={handleSetCurrent}
       />
     </>
   );
 };
 
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: theme.color('background'),
-      borderRadius: theme.radius('xl'),
-      overflow: 'visible',
-      position: 'relative',
-      shadowColor: '#000000',
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 2,
-    },
-    /* headerImage removed */
-    headerImage: {
-      width: '100%',
-      height: 110,
-      justifyContent: 'flex-start',
-      alignItems: 'flex-end',
-      padding: theme.space('sm'),
-    },
-    headerImageBorder: {
-      borderTopLeftRadius: theme.radius('xl'),
-      borderTopRightRadius: theme.radius('xl'),
-    },
-    menuBtn: {
-      position: 'absolute',
-      top: theme.space('sm'),
-      right: theme.space('sm'),
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: 'rgba(255,255,255,0.8)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    contentRow: {
-      flexDirection: 'row',
-      padding: theme.space('lg'),
-      alignItems: 'center',
-      gap: theme.space('md'),
-    },
-    infoCol: {
-      flex: 1,
-    },
-    title: {
-      fontWeight: '700',
-      marginBottom: theme.space('xs'),
-    },
-    subLine: {
-      color: theme.color('blueGrey'),
-      marginBottom: theme.space('xs') / 2,
-    },
-    chipsRow: {
-      flexDirection: 'row',
-      gap: 6,
-      marginTop: 6,
-    },
-    carbsChip: { backgroundColor: theme.color('overlayOrange') },
-    proteinChip: { backgroundColor: theme.color('overlayGreen') },
-    fatChip: { backgroundColor: theme.color('overlayBlue') },
-
-    // overlay to hide inner border
-    borderCover: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 2,
-      backgroundColor: theme.color('background'),
-    },
-
-    // New header styles
-    headerSection: {
-      alignItems: 'center',
-      paddingHorizontal: theme.space('lg'),
-      paddingTop: theme.space('lg'),
-    },
-    statsRow: {
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      gap: theme.space('md'),
-      marginTop: 4,
-    },
-    durationText: {
-      marginLeft: theme.space('lg'),
-    },
-  });
+/* -------------------------------------------------- */
+/* Styles                                              */
+/* -------------------------------------------------- */
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  headerSection: {
+    alignItems: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  durationText: {
+    marginLeft: 12,
+  },
+  title: {
+    fontWeight: '700',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  subLine: {
+    opacity: 0.7,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  /* Swipe-to-delete styles */
+  deleteButtonContainer: {
+    width: 80,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FF5252',
+  },
+  deleteButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+  },
+});
 
 export default PlanCardNew;
