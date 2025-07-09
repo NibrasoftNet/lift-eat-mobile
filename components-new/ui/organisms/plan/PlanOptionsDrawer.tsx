@@ -10,7 +10,7 @@ import type { ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
 import Icon from '@/components-new/ui/atoms/display/Icon';
-import { CircleX, Eye, Pencil, Trash2 } from 'lucide-react-native';
+import { CircleX, Eye, Pencil, Trash2, Star } from 'lucide-react-native';
 
 export interface PlanOptionsDrawerProps {
   /** Controls the visibility of the drawer */
@@ -25,8 +25,12 @@ export interface PlanOptionsDrawerProps {
   onDetail?: () => void;
   /** Callback when user selects \"Edit\" */
   onEdit?: () => void;
-  /** Callback when user selects \"Delete\" */
+  /** Callback when user selects "Delete" */
   onDelete?: () => void;
+  /** Disable the set current option */
+  disableSetCurrent?: boolean;
+  /** Callback when user selects "Set Current" */
+  onSetCurrent?: () => void;
 }
 
 const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
@@ -34,6 +38,8 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
   disableEdit = false,
   disableDelete = false,
   onClose,
+  disableSetCurrent = false,
+  onSetCurrent,
   onDetail,
   onEdit,
   onDelete,
@@ -114,6 +120,29 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
                 style={[styles.optionLabel as TextStyle, { color: '#FF981F' }]}
               >
                 Edit
+              </Text>
+            </TouchableOpacity>
+
+            {/* Set current */}
+            <TouchableOpacity
+              style={[
+                styles.optionRow as ViewStyle,
+                disableSetCurrent && (styles.disabled as ViewStyle),
+              ]}
+              onPress={!disableSetCurrent ? handlePress(onSetCurrent) : undefined}
+              disabled={disableSetCurrent}
+            >
+              <View style={styles.iconWrapper as ViewStyle}>
+                <Icon
+                  as={Star}
+                  size="md"
+                  color={disableSetCurrent ? theme.color('blueGrey') : theme.color('green')}
+                />
+              </View>
+              <Text
+                style={[styles.optionLabel as TextStyle, { color: theme.color('green') }]}
+              >
+                Set current
               </Text>
             </TouchableOpacity>
 

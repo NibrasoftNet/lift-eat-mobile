@@ -56,12 +56,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.color('background'),
-      borderRadius: theme.radius('2xl'),
-      borderWidth: 1,
-      borderColor: theme.color('overlayGrey'),
-      paddingHorizontal: theme.space('md'),
       height: 48,
+      borderRadius: 12,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      marginBottom: 16,
+      backgroundColor: theme.colors.background,
+      borderColor: '#EEEEEE',
     },
     icon: {
       marginRight: theme.space('sm'),

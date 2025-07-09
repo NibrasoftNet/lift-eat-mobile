@@ -14,7 +14,36 @@
     "protein": "Protein",
     "search": "Search",
     "all": "All",
-    "notSpecified": "Not specified"
+    "notSpecified": "Not specified",
+    "age": "Age",
+    "height": "Height",
+    "gender": "Gender",
+    "physicalActivity": "Physical Activity"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "physicalActivity": {
+    "low": "Low",
+    "sedentary": "Sedentary",
+    "moderate": "Moderate",
+    "high": "High"
+  },
+  "actions": {
+    "continue": "Continue"
+  },
+  "toast": {
+    "savedTitle": "Data Saved",
+    "calorieSavedMsg": "Your calorie intake data has been saved successfully!",
+    "errorTitle": "Error",
+    "genericError": "An error occurred"
+  },
+  "forms": {
+    "calorieIntake": {
+      "heroTitle": "Nutrition Data",
+      "heroSubtitle": "Calculate your daily needs"
+    }
   },
   "home": {
     "title": "Home",
@@ -57,6 +86,10 @@
     },
     "details": {
       "notSpecified": "Not specified",
+    "age": "Age",
+    "height": "Height",
+    "gender": "Gender",
+    "physicalActivity": "Physical Activity",
       "instructionsTitle": "Preparation Instructions",
       "noName": "Meal without name"
     },
@@ -310,7 +343,11 @@
   },
   "details": {
     "noName": "Meal without name",
-    "notSpecified": "Not specified"
+    "notSpecified": "Not specified",
+    "age": "Age",
+    "height": "Height",
+    "gender": "Gender",
+    "physicalActivity": "Physical Activity"
   },
   "search": {
     "title": "Search for Food",

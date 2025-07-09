@@ -13,7 +13,11 @@ Services Forms (Gestion des formulaires)
     ↓ ↑
 Services Pages (Presenter)
     ↓ ↑
-Services Core (Controller)
+Services Core (Logique métier)
+    ↓ ↑
+Services d'IA (Logique IA)
+    ↓ ↑
+Services API (Communication externe)
     ↓ ↑
 Handlers MCP (Model)
     ↓ ↑
@@ -89,7 +93,28 @@ Base de données (SQLite)
   - Accès aux données uniquement via handlers MCP
   - Nommage avec `.service.ts` ou `-core.service.ts`
 
-### 2.6 Handlers MCP (Model)
+### 2.6 Services d'IA (utils/services/ia)
+
+- **Rôle**: Encapsulation de la logique liée à l'intelligence artificielle.
+- **Emplacement**: `utils/services/ia/*.service.ts`
+- **Responsabilités**:
+  - Interaction avec des modèles d'IA (ex: Gemini).
+  - Préparation des données pour les modèles.
+  - Traitement des réponses des modèles.
+- **Bonnes pratiques**:
+  - Isoler les appels aux SDK d'IA.
+  - Gérer les erreurs spécifiques aux API d'IA.
+
+### 2.7 Services API (utils/services/api)
+
+- **Rôle**: Communication avec des API externes.
+- **Emplacement**: `utils/services/api/*.service.ts`
+- **Responsabilités**:
+  - Exécution des requêtes HTTP vers des services tiers.
+  - Gestion de l'authentification (clés API, etc.).
+  - Transformation des données de l'API.
+
+### 2.8 Handlers MCP (Model)
 
 - **Rôle**: Accès direct à la base de données
 - **Emplacement**: `utils/mcp/handlers/*.handler.ts` et `utils/mcp/sqlite-server.ts`
@@ -312,6 +337,8 @@ Pour assurer la conformité avec cette architecture:
 - Services forms: `form-*.service.ts`
 - Services UI: `*-ui.service.ts`
 - Services core: `*.service.ts` ou `*-core.service.ts`
+- Services IA: `*-ia.service.ts` ou `*-ai.service.ts`
+- Services API: `*-api.service.ts`
 
 ## 5. Modèles à Suivre
 

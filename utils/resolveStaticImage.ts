@@ -1,4 +1,5 @@
 import { ImageSourcePropType } from 'react-native';
+import { ingredientImages } from '../db/ingredientImages';
 
 /**
  * Convertit un chemin (string) stocké en base locale ou distant en source compatible React Native.
@@ -17,15 +18,8 @@ export function resolveStaticImage(
     return { uri } as ImageSourcePropType;
   }
 
-  try {
-    // Chargement à la volée pour éviter les problèmes de cycles sous web
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ingredientImages } = require('../db/ingredientImages');
-    if (ingredientImages && ingredientImages[uri]) {
-      return ingredientImages[uri] as ImageSourcePropType;
-    }
-  } catch {
-    // ignore
+  if (ingredientImages && ingredientImages[uri as keyof typeof ingredientImages]) {
+    return ingredientImages[uri as keyof typeof ingredientImages] as ImageSourcePropType;
   }
 
   // Aucun mapping trouvé – on renvoie soit l'URI brute (peut provenir du FileSystem),
