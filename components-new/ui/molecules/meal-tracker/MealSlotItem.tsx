@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, Image, StyleSheet, Pressable } from 'react-native';
-import { HStack } from '@/components/ui/hstack';
-import { Text } from '@/components/ui/text';
-import { Icon } from '@/components/ui/icon';
-import { Plus, ChevronRight, CheckCircle } from 'lucide-react-native';
+import { View, Image, Pressable, StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import Text from '@/components-new/ui/atoms/base/Text';
+import CircularAddButton from '@/components-new/ui/atoms/inputs/CircularAddButton';
+import ArrowRight2RegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
+import TickSquareIcon from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import { useTheme, ThemeInterface } from '@/themeNew';
+
 
 interface MealSlotItemProps {
   /** Nom du créneau (Breakfast, Lunch, …) */
@@ -23,7 +24,11 @@ interface MealSlotItemProps {
   iconSource?: any;
 }
 
+const ICON_SIZE = 48;
 const BAR_HEIGHT = 4;
+const BADGE_SIZE = 20;
+const ADD_SIZE = 28;
+
 
 const MealSlotItem: React.FC<MealSlotItemProps> = ({
   title,
@@ -34,52 +39,124 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
   onAddPress,
   iconSource,
 }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const progress = goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
-  const remaining = goalCalories - consumedCalories;
 
-  const content = (
-    <HStack className="items-center py-2 gap-3">
-      {/* Icon */}
-      {iconSource ? (
-        <Image source={iconSource} className="w-12 h-12" />
-      ) : (
-        // Fallback emoji
-        <Text className="text-4xl">🥗</Text>
-      )}
+  const Left = iconSource ? (
+    <Image source={iconSource} style={styles.icon} />
+  ) : (
+    <Text style={styles.emoji}>🥗</Text>
+  );
 
-      {/* Middle section */}
-      <View style={{ flex: 1 }}>
-        <HStack className="items-center gap-2 mb-1">
-          <Text className="font-semibold text-lg flex-1">{title}</Text>
-          {hasMeals && consumedCalories >= goalCalories ? (
-            <Icon as={CheckCircle} className="text-primary-500 w-7 h-7" />
-          ) : null}
-        </HStack>
-        {/* Progress bar */}
-        <View className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-          <View style={{ width: `${progress * 100}%` }} className="h-full bg-primary-500 rounded-full" />
+  const Right = hasMeals ? (
+    <ArrowRight2RegularLightBorderIcon width={24} height={24} color="#212121" />
+  ) : (
+    <CircularAddButton
+      size={40}
+      color={theme.color('successLighter')}
+      iconColor="#ffffff"
+      onPress={onAddPress}
+      style={styles.addButton}
+    />
+  );
+
+  const Content = (
+    <View style={styles.container}>
+      {Left}
+      <View style={styles.middle}>
+        {/* Title + check */}
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{title}</Text>
+          {hasMeals && consumedCalories >= goalCalories }
         </View>
-        <Text className="text-base text-gray-500 mt-1">
+        {/* Progress */}
+        <View style={styles.progressBg}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+        </View>
+        <Text style={styles.kcalText}>
           {consumedCalories} / {goalCalories} kcal
         </Text>
       </View>
-
-      {/* Right side action */}
-      {hasMeals ? (
-        <Icon as={ChevronRight} className="w-5 h-5 text-gray-400" />
-      ) : (
-        <Pressable onPress={onAddPress} hitSlop={8} className="rounded-full p-2 bg-primary-500">
-          <Icon as={Plus} className="w-5 h-5 text-white" />
-        </Pressable>
-      )}
-    </HStack>
+      {Right}
+    </View>
   );
 
   if (hasMeals && onPress) {
-    return <Pressable onPress={onPress}>{content}</Pressable>;
+    return (
+      <Pressable onPress={onPress} style={{ flex: 1 }}>
+        {Content}
+      </Pressable>
+    );
   }
-
-  return content;
+  return Content;
 };
+
+const createStyles = (theme: ThemeInterface) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: theme.space('sm'),
+    } as ViewStyle,
+    icon: {
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      marginRight: theme.space('sm'),
+      resizeMode: 'contain',
+    } as ImageStyle,
+    emoji: {
+      fontSize: 20,
+      marginRight: theme.space('sm'),
+    } as TextStyle,
+    middle: {
+      flex: 1,
+    } as ViewStyle,
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: theme.space('xs'),
+    } as ViewStyle,
+    title: {
+      flex: 1,
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.color('primary'),
+    } as TextStyle,
+    progressBg: {
+      width: '100%',
+      height: BAR_HEIGHT,
+      backgroundColor: theme.color('overlayGrey'),
+      borderRadius: BAR_HEIGHT,
+      overflow: 'hidden',
+    } as ViewStyle,
+    progressFill: {
+      height: '100%',
+      backgroundColor: theme.color('successLighter'),
+      borderRadius: BAR_HEIGHT,
+    } as ViewStyle,
+    kcalText: {
+      marginTop: theme.space('xs'),
+      fontSize: 14,
+      color: theme.color('blueGrey'),
+    } as TextStyle,
+    addButton: {
+      backgroundColor: theme.color('successLighter'),
+      borderRadius: 999,
+      padding: theme.space('xs'),
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 5,
+    } as ViewStyle,
+    arrow: {
+      fontSize: 30,
+      color: theme.color('successLighter'),
+    } as TextStyle,
+  });
 
 export default MealSlotItem;

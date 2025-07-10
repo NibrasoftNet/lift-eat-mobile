@@ -38,7 +38,7 @@ class AnalyticsCoreService {
       );
 
       // Récupération des repas de l'utilisateur via MCP
-      const mealsResult = await sqliteMCPServer.getMealsListViaMCP(userId);
+      const mealsResult = await sqliteMCPServer.getMealsListViaMCP({ userId });
 
       // Récupération des plans de l'utilisateur via MCP
       const plansResult = await sqliteMCPServer.getPlansListViaMCP(userId);

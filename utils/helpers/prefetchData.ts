@@ -220,7 +220,7 @@ async function prefetchRecentMeals(queryClient: QueryClient): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: [DataType.MEALS_LIST, 'recent', userId],
     queryFn: async () => {
-      const result = await sqliteMCPServer.getMealsListViaMCP(userId);
+      const result = await sqliteMCPServer.getMealsListViaMCP({ userId });
       if (!result.success) {
         throw new Error(
           result.error || 'Échec de la récupération des repas récents',
