@@ -21,15 +21,15 @@ export const CalendarRegularTwotoneIcon = ({
     />
     <Path
       d="M3.09277 9.40421H20.9167"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
-    <Path d="M16.0438 2V5.29078" fill={none} stroke={color} strokeWidth="1.5" />
-    <Path d="M7.96564 2V5.29078" fill={none} stroke={color} strokeWidth="1.5" />
+    <Path d="M16.0438 2V5.29078" fill='none' stroke={color} strokeWidth="1.5" />
+    <Path d="M7.96564 2V5.29078" fill='none' stroke={color} strokeWidth="1.5" />
     <Path
       d="M16.2383 3.5791H7.77096C4.83427 3.5791 3 5.21504 3 8.22213V17.2718C3 20.3261 4.83427 21.9999 7.77096 21.9999H16.229C19.175 21.9999 21 20.3545 21 17.3474V8.22213C21.0092 5.21504 19.1842 3.5791 16.2383 3.5791Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -17,13 +17,13 @@ export const BagSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M17 9.68424V8.57224C17 5.94924 14.873 3.82324 12.25 3.82324C9.62698 3.82324 7.50098 5.94924 7.50098 8.57224V9.68424"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M13.849 21.2465H20.437L21.5 7.89453H3L4.063 21.2465H8.469"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

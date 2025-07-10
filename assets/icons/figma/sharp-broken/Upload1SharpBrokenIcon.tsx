@@ -17,19 +17,19 @@ export const Upload1SharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.25 3.23047V16.0085"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M16.88 10.9946H21.5V21.5186H3V10.9946H7.62"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.98047 5.77045L12.2505 2.48145L15.5305 5.77045"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -17,19 +17,19 @@ export const ArrowDown3SharpTwoToneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.2495 20L12.2495 4.00024"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.58946 14.3398C9.49921 14.3398 12.2495 16.9024 12.2495 19.9999"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M17.9096 14.3398C14.9998 14.3398 12.2495 16.9024 12.2495 19.9999"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

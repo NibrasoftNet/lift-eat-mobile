@@ -17,19 +17,19 @@ export const ArrowUp3SharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.2495 4L12.2495 19.9998"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.58946 9.66016C9.49921 9.66016 12.2495 7.09758 12.2495 4.00011"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M17.9096 9.66016C14.9998 9.66016 12.2495 7.09758 12.2495 4.00011"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

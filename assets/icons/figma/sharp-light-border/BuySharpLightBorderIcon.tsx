@@ -29,13 +29,13 @@ export const BuySharpLightBorderIcon = ({
     />
     <Path
       d="M14.625 10.9637H17.2967"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M5.87516 7.05288H21.5L20.2306 16.6875H6.74355L5.46652 3.99268H3"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

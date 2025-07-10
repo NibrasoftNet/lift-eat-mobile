@@ -17,13 +17,13 @@ export const MessageSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M18.0539 9.38574L12.2899 14.0697L6.5249 9.38574"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.688 21.5347H2.25V3.53467H22.25V21.5347H10.948"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

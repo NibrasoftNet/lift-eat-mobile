@@ -17,7 +17,7 @@ export const Home2SharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M9.70642 21.3887V16.3098H14.8281V21.3887H20.6937V8.88605L12.1508 2.88867L3.80664 8.88605V21.3887H9.70642Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

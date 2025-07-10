@@ -21,6 +21,7 @@ import CircularNutritionProgress from '../../../../../../components-new/ui/molec
 import GeneralInfoSection from '../../../../../../components-new/ui/molecules/info/GeneralInfoSection';
 import IngredientsList from '../../../../../../components-new/ui/organisms/meal/IngredientsList';
 import InstructionsSection from '../../../../../../components-new/ui/molecules/meal/InstructionsSection';
+import { IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
 
 /**
  * MealDetailsScreen
@@ -243,23 +244,32 @@ const MealDetailsScreen = () => {
 
       {/* Liste des ingrédients */}
       <IngredientsList
-        ingredients={ingredients.map((ing) => ({
-          id: ing.id?.toString() || '',
-          name: ing.ingredient?.name || '', // Utilisation de la propriété ingredient qui contient les détails
-          quantity: ing.quantity || 0,
-          unit: ing.ingredient?.unit || 'g',
-          imageUrl: ing.ingredient?.image
+        ingredients={ingredients.map((ing, index) => {
+          const imageUrl = ing.ingredient?.image
             ? getImageUrl(ing.ingredient.image)
-            : undefined, // Ajout de l'image de l'ingrédient
-        }))}
+            : undefined;
+          const unit = ing.ingredient?.unit || 'g';
+          return {
+            ...ing.ingredient,
+            uniqueId: `${ing.id}-${index}`,
+            id: ing.id?.toString() || '',
+            name: ing.ingredient?.name ?? t('common.ingredient'),
+            displayName: (ing.ingredient?.name ??
+              t('common.ingredient')) as string,
+            quantity: ing.quantity || 0,
+            unit,
+            displayUnit: unit as string,
+            imageUrl,
+            hasImage: !!imageUrl,
+          } as IngredientWithUniqueId;
+        })}
         showDeleteButtons={false}
         isDarkMode={isDarkMode}
       />
 
-      {/* Instructions de préparation (utilise le champ description) */}
+      {/* Instructions */}
       <InstructionsSection
-        instructions={meal?.description || ''}
-        title={t('meal.details.instructionsTitle')}
+        instructions={(meal as any)?.instructions || ''}
         isDarkMode={isDarkMode}
       />
     </ScrollView>

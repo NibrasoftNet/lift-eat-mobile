@@ -17,13 +17,13 @@ export const ArrowDownCurvedLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M12.2744 19.75V4.75"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.299 13.6992C18.299 13.6992 15.038 19.7492 12.276 19.7492C9.512 19.7492 6.25 13.6992 6.25 13.6992"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

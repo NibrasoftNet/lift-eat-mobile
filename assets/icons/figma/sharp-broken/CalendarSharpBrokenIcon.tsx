@@ -17,67 +17,67 @@ export const CalendarSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M16.3578 17.3413H16.3658"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M12.2528 17.3413H12.2618"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.13954 17.3413H8.14854"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M16.3578 13.7461H16.3658"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M12.2528 13.7461H12.2618"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.13954 13.7461H8.14854"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M4.00977 10.1338H17.8408"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M15.9897 3.28467V6.32867"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.51807 3.28467V6.32867"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M5.8638 4.74561H3.9248V21.7846H20.5748V4.74561H16.0658"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M13.0113 4.74561H8.52832"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -1,37 +1,11 @@
 import { GoalEnum } from '@/utils/enum/user-details.enum';
 import { DayEnum } from '@/utils/enum/general.enum';
-import {
-  CuisineTypeEnum,
-  MealTypeEnum,
-  MealUnitEnum,
-} from '@/utils/enum/meal.enum';
-import { ImageSourcePropType } from 'react-native';
 
-export interface Ingredients {
-  id: number;
-  name: string;
-  calories: number;
-  carbs: number;
-  fats: number;
-  protein: number;
-  unit: string;
-  quantity: number;
-}
 
-export interface Meal {
-  id: number;
-  name: string;
-  image: ImageSourcePropType | null;
-  type: MealTypeEnum;
-  calories: number;
-  carbs: number;
-  fats: number;
-  protein: number;
-  cuisineType: CuisineTypeEnum;
-  unit: MealUnitEnum;
-  quantity: number;
-  ingredients: Ingredients[];
-}
+import { MealOrmProps } from '@/db/schema';
+
+
+
 
 export interface DailyPlan {
   id: number;
@@ -41,7 +15,7 @@ export interface DailyPlan {
   carbs: number;
   fats: number;
   protein: number;
-  meals: Meal[];
+  meals: MealOrmProps[];
 }
 
 export interface NutritionPlan {
@@ -68,5 +42,5 @@ export interface DailyIntake {
   actualCarbs: number;
   actualFats: number;
   actualProtein: number;
-  meals: Meal[];
+  meals: MealOrmProps[];
 }

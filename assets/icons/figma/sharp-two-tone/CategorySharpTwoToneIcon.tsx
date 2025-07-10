@@ -20,19 +20,19 @@ export const CategorySharpTwoToneIcon = ({
       y="14.3936"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
-    <Rect x="2.85742" y="0.4" width="7" height="7" fill={none} stroke={color} />
+    <Rect x="2.85742" y="0.4" width="7" height="7" fill='none' stroke={color} />
     <Rect
       x="2.85742"
       y="3.39355"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
-    <Rect x="14.8818" y="0.4" width="7" height="7" fill={none} stroke={color} />
+    <Rect x="14.8818" y="0.4" width="7" height="7" fill='none' stroke={color} />
   </Svg>
 );
 

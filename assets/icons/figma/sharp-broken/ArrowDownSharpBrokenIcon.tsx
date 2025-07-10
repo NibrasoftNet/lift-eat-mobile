@@ -17,17 +17,17 @@ export const ArrowDownSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.2495 18.8996V10.4966"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.27 13.4497L12.25 19.4997L6.22998 13.4497"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
-    <Path d="M12.2495 6.667V4.5" fill={none} stroke={color} strokeWidth="1.5" />
+    <Path d="M12.2495 6.667V4.5" fill='none' stroke={color} strokeWidth="1.5" />
   </Svg>
 );
 

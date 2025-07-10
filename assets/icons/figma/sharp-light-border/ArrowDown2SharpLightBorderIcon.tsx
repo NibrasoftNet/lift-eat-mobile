@@ -17,7 +17,7 @@ export const ArrowDown2SharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M19.25 8.5L12.25 15.5L5.25 8.5"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

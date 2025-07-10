@@ -17,19 +17,19 @@ export const ArrowLeftSquareSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M8.90918 11.9604H16.3392"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M11.9292 8.2124L8.15918 11.9604L11.9292 15.7084"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.073 21.25H21.5V2.75H3V21.25H12.847"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

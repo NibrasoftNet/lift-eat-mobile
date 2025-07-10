@@ -17,13 +17,13 @@ export const ArrowLeft3RegularLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M11.3 12.2512L20.25 12.2512"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M11.2998 7.25024L3.3628 12.2512L11.2998 17.2522L11.2998 7.25024Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

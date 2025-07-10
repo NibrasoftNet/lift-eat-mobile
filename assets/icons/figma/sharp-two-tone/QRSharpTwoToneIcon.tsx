@@ -17,37 +17,37 @@ export const QRSharpTwoToneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M17.5977 17.437L17.5977 17.5342"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.90234 17.437L6.90234 17.5342"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M14.1943 10.1942H16.4145M20.9999 7.76367V10.1942H19.2985M20.9999 5.09006V3.38867H19.2985M16.6249 3.38867H14.1943V7.5084"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M16.5176 5.75427V7.97266H18.3467"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.9434 5.74391L18.9434 5.75391"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.90234 6.74262L6.90234 6.83984"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
@@ -56,7 +56,7 @@ export const QRSharpTwoToneIcon = ({
       y="0.4"
       width="6.80556"
       height="6.80556"
-      fill={none}
+      fill='none'
       stroke={color}
     />
     <Rect
@@ -64,7 +64,7 @@ export const QRSharpTwoToneIcon = ({
       y="0.4"
       width="6.80556"
       height="6.80556"
-      fill={none}
+      fill='none'
       stroke={color}
     />
     <Rect
@@ -72,7 +72,7 @@ export const QRSharpTwoToneIcon = ({
       y="0.4"
       width="6.80556"
       height="6.80556"
-      fill={none}
+      fill='none'
       stroke={color}
     />
   </Svg>

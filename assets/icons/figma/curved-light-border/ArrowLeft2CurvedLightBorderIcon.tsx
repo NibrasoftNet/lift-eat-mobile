@@ -17,7 +17,7 @@ export const ArrowLeft2CurvedLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M15.5 19C15.5 19 8.5 14.856 8.5 12C8.5 9.145 15.5 5 15.5 5"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

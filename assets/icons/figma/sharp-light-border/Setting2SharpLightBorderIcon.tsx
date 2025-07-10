@@ -17,11 +17,11 @@ export const Setting2SharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M22.25 12.1388L17.25 20.799H7.25L2.25 12.1388L7.25 3.47852L17.25 3.47852L22.25 12.1388Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
-    <Circle cx="12.2507" cy="12.139" r="2.8499" fill={none} stroke={color} />
+    <Circle cx="12.2507" cy="12.139" r="2.8499" fill='none' stroke={color} />
   </Svg>
 );
 

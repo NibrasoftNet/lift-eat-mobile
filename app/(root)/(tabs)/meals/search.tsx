@@ -25,6 +25,8 @@ import OpenFoodFactsService, {
 import OpenFoodSearchCard from '@/components-new/ui/organisms/meal/OpenFoodSearchCard';
 import Divider from '@/components-new/ui/atoms/layout/Divider';
 
+import { ThemeInterface } from '@/themeNew';
+
 // Build dropdown options from CountryTypeEnum
 const countryOptions = Object.values(CountryTypeEnum).map((value) => ({
   label: CountryLabelMap[value],
@@ -178,8 +180,6 @@ export default function MealSearchScreen() {
     </Box>
   );
 }
-
-import { ThemeInterface } from '@/themeNew';
 
 const createStyles = (theme: ThemeInterface) =>
   StyleSheet.create({

@@ -23,7 +23,6 @@ import LogoIcon from '../../../assets/icons/LogoIcon';
 import { useTheme } from '../../../themeNew';
 import Text from '../../../components-new/ui/atoms/base/Text';
 import Input from '../../../components-new/ui/atoms/inputs/Input';
-import Button from '../../../components-new/ui/atoms/inputs/Button';
 import Checkbox from '../../../components-new/ui/atoms/inputs/Checkbox';
 import Divider from '../../../components-new/ui/atoms/layout/Divider';
 import GoogleIcon from '../../../assets/icons/GoogleIcon';
@@ -31,11 +30,8 @@ import AppleIcon from '../../../assets/icons/AppleIcon';
 import FacebookIcon from '../../../assets/icons/FacebookIcon';
 
 // Import des icônes officielles de Figma
-import { MessageRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/MessageRegularBoldIcon';
-import { LockRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/LockRegularBoldIcon';
 import { ShowRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/ShowRegularBoldIcon';
 import { HideRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/HideRegularBoldIcon';
-import { LoginRegularBoldIcon } from '../../../assets/icons/figma/regular-bold/LoginRegularBoldIcon';
 import { LockRegularTwotoneIcon } from '../../../assets/icons/figma/regular-two-tone/LockRegularTwotoneIcon';
 import { MessageRegularTwotoneIcon } from '../../../assets/icons/figma/regular-two-tone/MessageRegularTwotoneIcon';
 // Import validation schema and interfaces

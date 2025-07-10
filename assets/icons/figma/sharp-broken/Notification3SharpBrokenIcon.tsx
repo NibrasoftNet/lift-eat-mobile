@@ -17,7 +17,7 @@ export const Notification3SharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M15.4804 18.6797V18.9097C15.4804 20.6927 14.0344 22.1387 12.2514 22.1387C10.4684 22.1387 9.02344 20.6927 9.02344 18.9097V18.6797"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

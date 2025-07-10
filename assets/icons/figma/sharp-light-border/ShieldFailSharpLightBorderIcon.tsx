@@ -17,19 +17,19 @@ export const ShieldFailSharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M14.1625 13.6239L10.3086 9.77002"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M10.3086 13.6239L14.1625 9.77002"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M12.2506 21.604C12.2506 21.604 20.1185 19.2217 20.1185 12.6543V3.604H4.38281V12.6543C4.38281 19.2217 12.2506 21.604 12.2506 21.604Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

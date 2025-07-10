@@ -29,13 +29,13 @@ export const BuyRegularLightBorderIcon = ({
     />
     <Path
       d="M2.75 3.24988L4.83 3.60988L5.793 15.0829C5.87 16.0199 6.653 16.7389 7.593 16.7359H18.502C19.399 16.7379 20.16 16.0779 20.287 15.1899L21.236 8.63188C21.342 7.89888 20.833 7.21888 20.101 7.11288C20.037 7.10388 5.164 7.09888 5.164 7.09888"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M14.125 10.7948H16.898"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

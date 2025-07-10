@@ -1,23 +1,17 @@
 import React from 'react';
 import { View, StyleSheet, FlatList, Alert } from 'react-native';
+import { IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
 import { useTheme } from '../../../../themeNew';
 import { ThemeInterface } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
 import IngredientListItem from '../../molecules/tracking/IngredientListItem';
 import { InfoCircleRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/InfoCircleRegularBoldIcon';
 
-interface Ingredient {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  imageUrl?: string; // URL de l'image de l'ingrédient
-  // Autres propriétés potentielles (calories, protéines, etc.)
-}
+
 
 interface IngredientsListProps {
   /** Liste des ingrédients */
-  ingredients: Ingredient[];
+  ingredients: IngredientWithUniqueId[];
   /** Mode d'affichage sombre */
   isDarkMode?: boolean;
   /** Fonction callback lorsqu'on clique sur un ingrédient */
@@ -87,12 +81,12 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
   };
 
   // Rendu d'un élément de la liste
-  const renderItem = ({ item }: { item: Ingredient }) => (
+  const renderItem = ({ item }: { item: IngredientWithUniqueId }) => (
     <IngredientListItem
-      id={item.id}
+      id={`${item.id}`}
       name={item.name}
       quantity={item.quantity}
-      unit={item.unit}
+      unit={item.displayUnit}
       imageUrl={item.imageUrl}
       isDarkMode={isDarkMode}
       onPress={handleIngredientPress}
@@ -114,7 +108,7 @@ const IngredientsList: React.FC<IngredientsListProps> = ({
         <FlatList
           data={ingredients}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}`}
           style={[styles.list, { backgroundColor }]}
           contentContainerStyle={[styles.listContent, { borderColor }]}
           scrollEnabled={false}

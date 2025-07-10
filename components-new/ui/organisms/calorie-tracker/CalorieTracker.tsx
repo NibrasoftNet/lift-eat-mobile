@@ -10,15 +10,9 @@ import MacronutrientDistributionBar from '../../molecules/calorie-tracker/Macron
 import CaloriesBurnedSection from '../../molecules/calorie-tracker/CaloriesBurnedSection';
 import FoodList from '../../molecules/tracking/FoodList';
 import CircularAddButton from '../../atoms/inputs/CircularAddButton';
+import { FoodItem } from '@/types/food-item.type';
 
-// Type pour les aliments
-interface FoodItem {
-  id: string;
-  name: string;
-  quantity: string;
-  calories: number;
-  emoji?: string;
-}
+
 
 // Props du composant
 interface CalorieTrackerProps {

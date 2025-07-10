@@ -14,7 +14,6 @@ import Text from '@/components-new/ui/atoms/base/Text';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
 
-
 export default function MyPlansScreenNew() {
   const router = useRouter();
   const theme = useAppTheme();
@@ -63,9 +62,7 @@ export default function MyPlansScreenNew() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.safeArea}
-    >
+    <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text variant="h3" style={styles.headerTitle}>
@@ -132,9 +129,7 @@ export default function MyPlansScreenNew() {
       </QueryStateHandler>
 
       {/* CTA */}
-      <View
-        style={styles.ctaContainer}
-      >
+      <View style={styles.ctaContainer}>
         <CreatePlanButton
           onPress={() => router.push('/plans/my-plans/create')}
         />
@@ -164,7 +159,6 @@ const getStyles = (theme: ThemeInterface) =>
     emptyContainer: {
       alignItems: 'center',
       marginTop: 32,
-      
     },
     emptyText: {
       opacity: 0.6,
@@ -177,8 +171,5 @@ const getStyles = (theme: ThemeInterface) =>
       backgroundColor: 'transparent',
       paddingHorizontal: theme.space('xl'),
       paddingBottom: theme.space('2xl'),
-      
     },
   });
-
-

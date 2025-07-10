@@ -37,7 +37,6 @@ import { addDummyData } from '@/db/addDummyData';
 import { DrizzleProvider } from '@/utils/providers/DrizzleProvider';
 import MCPProvider from '@/utils/providers/MCPProvider';
 import UserContextProvider from '@/utils/providers/UserContextProvider';
-import useSessionStore from '@/utils/store/sessionStore';
 import '@/i18n';
 import Box from '@/components-new/ui/atoms/base/Box';
 import Button from '@/components-new/ui/atoms/inputs/Button';
@@ -45,9 +44,7 @@ import Text from '@/components-new/ui/atoms/base/Text';
 import Icon from '@/components-new/ui/atoms/display/Icon';
 import { CloudAlert } from 'lucide-react-native';
 import { ThemeProvider as AppThemeProvider } from '@/utils/providers/ThemeProvider';
-import { tokenCache } from '@/cache';
 import { setQueryClient } from '@/utils/helpers/queryClient';
-import { prefetchEssentialData } from '@/utils/helpers/prefetchData';
 
 // Configurer Reanimated pour désactiver les avertissements du mode strict
 configureReanimated();

@@ -17,7 +17,7 @@ export const StarSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M10.13 16.804C8.402 14.471 5.905 12.749 3 12C7.537 10.83 11.08 7.287 12.25 2.75C13.42 7.287 16.963 10.83 21.5 12C16.963 13.17 13.42 16.713 12.25 21.25"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

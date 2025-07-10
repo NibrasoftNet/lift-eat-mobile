@@ -3,7 +3,7 @@
  * Ces interfaces définissent les structures utilisées par les services de drawer
  */
 
-import { MealOrmProps } from '@/db/schema';
+import { MealOrmProps, IngredientStandardOrmProps } from '@/db/schema';
 import { MealTypeEnum, CuisineTypeEnum } from '@/utils/enum/meal.enum';
 
 /**
@@ -76,38 +76,24 @@ export interface MealDrawerServiceInterface {
 }
 
 /**
- * Interface pour un ingru00e9dient avec un identifiant unique
- * Optimisu00e9e pour l'affichage dans les listes d'ingru00e9dients
+ * Interface pour un ingrédient avec un identifiant unique
+ * Optimisé pour l'affichage dans les listes d'ingrédients
  */
-export interface IngredientWithUniqueId {
-  id: number;
-  name: string;
+export interface IngredientWithUniqueId extends IngredientStandardOrmProps {
+  /** Identifiant unique pour l’UI (ex: prefix-id-pX-iY) */
   uniqueId: string;
-  image: any; // Buffer ou null
-  quantity: number;
-  unit: string | null;
-
-  // Propriu00e9tu00e9s pru00e9-calculu00e9es pour l'affichage
+  /** Nom formaté selon les préférences utilisateur */
   displayName: string;
+  /** Unité formatée (ex: “g”, “ml”) */
   displayUnit: string;
+  /** Flag dérivé pour savoir si une image binaire est présente */
   hasImage: boolean;
-
-  // Propriu00e9tu00e9s nutritionnelles
-  calories: number;
-  carbs: number;
-  fat: number;
-  protein: number;
-
-  // Dates
-  createdAt: Date | string;
-  updatedAt: Date | string;
-
-  // Autres propriu00e9tu00e9s hu00e9ritu00e9es
+  /** Index signature pour autoriser l’ajout de clés temporaires sans casser le typage */
   [key: string]: any;
 }
 
 /**
- * Paramu00e8tres pour la ru00e9cupu00e9ration des ingru00e9dients
+ * Paramètres pour la récupération des ingrédients
  */
 export interface GetIngredientsParams {
   searchTerm?: string;

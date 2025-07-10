@@ -15,10 +15,10 @@ export const ArrowDownSharpLightBorderIcon = ({
   ...props
 }: IconProps) => (
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
-    <Path d="M12.25 18.9002V4.5" fill={none} stroke={color} strokeWidth="1.5" />
+    <Path d="M12.25 18.9002V4.5" fill='none' stroke={color} strokeWidth="1.5" />
     <Path
       d="M18.2746 13.4502L12.2506 19.5002L6.22559 13.4502"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

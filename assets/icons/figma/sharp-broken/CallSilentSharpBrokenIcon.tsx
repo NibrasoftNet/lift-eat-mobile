@@ -21,7 +21,7 @@ export const CallSilentSharpBrokenIcon = ({
     />
     <Path
       d="M4.26611 22.0192L18.8801 6.43018"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

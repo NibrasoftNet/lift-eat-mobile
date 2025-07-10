@@ -1,5 +1,4 @@
 import MealsScreen from '@/components-new/screens/meals/MealsScreen';
-export default MealsScreen;
 
 // --- Legacy implementation (kept for reference) ---
 /**
@@ -32,9 +31,6 @@ import SegmentedTabButtons from '@/components-new/ui/molecules/navigation/Segmen
 import { FilterPanel } from '@/components-new/ui/molecules/filtering';
 import { ThemeInterface } from '@/themeNew';
 
-// Image de repas par défaut
-const DEFAULT_MEAL_IMAGE = require('@/assets/images/logo_no_bg.png');
-
 // Services et API
 import { useQuery } from '@tanstack/react-query';
 import { DataType } from '@/utils/helpers/queryInvalidation';
@@ -44,6 +40,10 @@ import { MealOrmProps } from '@/db/schema';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { useTranslation } from 'react-i18next';
+export default MealsScreen;
+
+// Image de repas par défaut
+const DEFAULT_MEAL_IMAGE = require('@/assets/images/logo_no_bg.png');
 
 // Types pour les données de repas
 type MealDisplay = {

@@ -17,13 +17,13 @@ export const ArrowRightCircleSharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.25 21.25C17.358 21.25 21.5 17.109 21.5 12C21.5 6.892 17.358 2.75 12.25 2.75C7.142 2.75 3 6.892 3 12C3 17.109 7.142 21.25 12.25 21.25Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M10.8076 15.4712L14.2936 12.0002L10.8076 8.52919"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -25,6 +25,8 @@ import Input from '@/components-new/ui/atoms/inputs/Input';
 import Button from '@/components-new/ui/atoms/inputs/Button';
 import { useTheme } from '@/themeNew';
 
+import { IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
+
 // SVG icons
 import { PlusRegularBoldIcon } from '@/assets/icons/figma/regular-bold/PlusRegularBoldIcon';
 import { ArrowDownRegularBoldIcon } from '@/assets/icons/figma/regular-bold/ArrowDownRegularBoldIcon';
@@ -573,13 +575,19 @@ export default function MealFormNew({
                   : `data:image/png;base64,${rawImg}`
                 : undefined;
 
+              const ingredientStd = ing.ingredientsStandard as any;
               return {
-                id: `${ing.ingredientStandardId}-${index}`,
-                name: ing.ingredientsStandard?.name ?? t('common.ingredient'),
+                ...ingredientStd,
+                uniqueId: `${ing.ingredientStandardId}-${index}`,
+                id: ingredientStd?.id ?? ing.ingredientStandardId,
+                name: ingredientStd?.name ?? t('common.ingredient'),
+                displayName: (ingredientStd?.name ?? t('common.ingredient')) as string,
                 quantity: ing.quantity,
-                unit: (ing as any).unit ?? ing.ingredientsStandard?.unit ?? 'g',
+                unit: ing.unit ?? ingredientStd?.unit ?? 'g',
+                displayUnit: (ing.unit ?? ingredientStd?.unit ?? 'g') as string,
                 imageUrl,
-              };
+                hasImage: !!imageUrl,
+              } as IngredientWithUniqueId;
             })}
             showDeleteButtons
             onIngredientDelete={(id: string) => {

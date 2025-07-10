@@ -6,10 +6,10 @@
 
 | Catégorie            | Terminé | En cours | À faire | Total | Progression |
 | -------------------- | ------- | -------- | ------- | ----- | ----------- |
-| Composants Atoms     | 14/14   | 0        | 0       | 14    | 100%        |
-| Composants Molecules | 41/41   | 0        | 0       | 41    | 100%        |
-| Composants Organisms | 9/18    | 9        | 0       | 18    | 50%         |
-| Écrans               | 12/31   | 3        | 16      | 31    | 39%         |
+| Composants Atoms     | 22/22   | 0        | 0       | 22    | 100%        |
+| Composants Molecules | 93/93   | 0        | 0       | 93    | 100%        |
+| Composants Organisms | 27/36   | 9        | 0       | 36    | 75%         |
+| Écrans               | 23/32   | 5        | 4       | 32    | 72%         |
 
 ---
 
@@ -31,15 +31,15 @@
 
 ## 2. Composants UI
 
-#### Atoms (14/14 - 100%)
+#### Atoms (22/22 – 100%)
 
 - `Avatar`, `AutoLayout`, `Badge`, `Box`, `Button`, `Divider`, `Grid`, `HomeIndicator`, `Icon`, `Input`, `AppLogo`, `MaleIcon`, `FemaleIcon`, `Tag`, `Text`, `Émojis fluents (26)`
 
-#### Molecules (41/41 - 100%)
+#### Molecules (93/93 – 100%)
 
 - `AgeSelector`, `BottomBarButtonAction`, `CalorieCircleProgress`, `CalorieSummary`, `CaloriesBurnedNet`, `CategoryMenu`, `Chips`, `CircularProgress`, `CuisineTypeFilter`, `CurrentWeightSelector`, `CustomizeCupSize`, `Dropdown`, `DrinkTypeSelector`, `FoodEmoji`, `FoodImagePicker`, `FoodList`, `GenderSelector`, `HeightSelector`, `HistoryEmpty`, `HistoryList`, `HorizontalTab`, `Input`, `InputForm`, `InputForm2`, `IngredientCard`, `MealCard`, `MealListItem`, `MealNutritionalValues`, `MealTypeFilter`, `MacronutrientDistribution`, `MacronutrientIndicators`, `MacronutrientProgress`, `NameInput`, `NutritionCard`, `PagingHorizontalTab`, `QuantitySelector`, `Radio`, `Search`, `SearchForm`, `TargetWeightSelector`, `TopBar`, `WaterIntake`
 
-#### Organisms (9/18 - 50%)
+#### Organisms (27/36 – 75%)
 
 - **Terminés**
   - `BottomNavigation` (03/06)
@@ -65,19 +65,19 @@
 
 ## 3. Écrans
 
-#### Terminés (12/31 - 39%)
+#### Terminés (23/32 – 72%)
 
 - **Onboarding (5/5)**: `Splash`, `Walkthrough 1-3`, `Étapes 1-5`
 - **Authentification (2/6)**: `Welcome`, `Login`
 - **Repas (5/7)**: `Meal Search`, `My Meals List`, `Create Meal v2`, `Meal Details`, `Edit Meal`
 
-#### En cours (3/31)
+#### En cours (5/32)
 
 - **Meal Scanner**: En cours de finalisation QA.
 - **Sleep Tracker**: En cours d'implémentation.
 - **Weight Tracker**: En cours d'implémentation.
 
-#### À faire (16/31)
+#### À faire (4/32)
 
 - **Authentification (4)**: `Register`, `Reset Password`, `Confirm-reset`, `New Password`
 - **Dashboard & Trackers (4)**: `Dashboard`, `Step-counter`, `Water-tracker`, `Analytics`
@@ -88,6 +88,12 @@
 
 ## 4. Mises à jour récentes
 
+- **10/07/2025**:
+  - **Flux Auth complet** : Ajout des écrans Register, Reset/New Password et Verification (OTP).
+  - **Module Plans** : Community Plans & My Plans (create, details, edit) avec nouveaux organisms PlanCardNew, PlanDetailHeader, PlanOptionsDrawer.
+  - **Analytics** : Écran Analytics + graphique placeholder.
+  - **Nouveaux Organisms** : FooterWithNavigation, Navbar, MenuBar, CameraView, Cancel/Delete buttons & drawers, ScanOverlay, ScanResultCard, etc.
+  - **Atoms / Molecules** : Extension du design system à 22 atoms et 93 molecules.
 - **19/06/2025**:
   - **Module Scanner** : Finalisation de l'intégration du design system et de l'internationalisation.
   - **Documentation** : Mise à jour complète de `integration-status-2025.md` et `scanner-module-checklist.md`.

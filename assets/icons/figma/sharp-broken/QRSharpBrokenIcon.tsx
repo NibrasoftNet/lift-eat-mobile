@@ -17,25 +17,25 @@ export const QRSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M6.90234 17.4139V17.5109"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M21.0003 20.8656H14.1943V14.0596H21.0003V17.7796"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M17.5977 17.4139V17.5109"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M3.5 20.8656V14.0596H10.306V20.8656L7.015 20.9106"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
@@ -45,25 +45,25 @@ export const QRSharpBrokenIcon = ({
     />
     <Path
       d="M16.5176 5.73096V7.94996H18.3466"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.9438 5.72107V5.73107"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M10.306 3.36621V10.1722H3.5V3.36621H6.632"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.90234 6.72005V6.81705"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

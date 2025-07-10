@@ -17,13 +17,13 @@ export const ArrowLeftCurvedTwoToneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M4.25 12.2744L19.25 12.2744"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M10.3003 18.299C10.3003 18.299 4.25029 15.038 4.25029 12.276C4.25029 9.512 10.3003 6.25 10.3003 6.25"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
