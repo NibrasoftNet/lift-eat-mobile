@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Image, Pressable, StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import Text from '@/components-new/ui/atoms/base/Text';
 import CircularAddButton from '@/components-new/ui/atoms/inputs/CircularAddButton';
-import ArrowRight2RegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
+import ArrowRightRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
 import TickSquareIcon from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import { useTheme, ThemeInterface } from '@/themeNew';
 
@@ -51,7 +51,7 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
   );
 
   const Right = hasMeals ? (
-    <ArrowRight2RegularLightBorderIcon width={24} height={24} color="#212121" />
+    <ArrowRightRegularLightBorderIcon width={24} height={24} color="#212121" />
   ) : (
     <CircularAddButton
       size={40}
