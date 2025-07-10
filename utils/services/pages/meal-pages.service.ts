@@ -8,6 +8,7 @@ import {
   MealWithIngredientAndStandardOrmProps,
 } from '@/db/schema';
 import { mealService } from '@/utils/services/core/meal-core.service';
+import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import type { QueryClient } from '@tanstack/react-query';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
@@ -27,7 +28,16 @@ class MealPagesService implements MealPagesServiceInterface {
     }>
   > {
     try {
-      const result = await mealService.getMealsList(filters);
+      const userId = getCurrentUserIdSync();
+      if (!userId) {
+        return {
+          success: false,
+          error: 'Utilisateur introuvable',
+          data: { meals: [], totalCount: 0 },
+        };
+      }
+      const params = { ...filters, userId } as any;
+      const result = await mealService.getMealsList(params);
 
       if (!result.success) {
         return {

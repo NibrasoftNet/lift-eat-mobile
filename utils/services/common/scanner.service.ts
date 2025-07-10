@@ -101,16 +101,17 @@ class ScannerService {
       // Convertir les produits en ExtendedProductResult
       const results: ExtendedProductResult[] = apiProducts.map((product) => {
         return {
+          code: product.code || '',
           name: product.product_name || '',
           image: product.image_url ? { uri: product.image_url } : null,
           calories: this.extractCalories(product),
           protein: this.extractNutrient(product, 'proteins_100g'),
           carbs: this.extractNutrient(product, 'carbohydrates_100g'),
+          sugars: this.extractNutrient(product, 'sugars_100g'),
           fats: this.extractNutrient(product, 'fat_100g'),
           brands: product.brands,
           categories: product.categories,
           nutriscore_grade: product.nutriscore_grade,
-          // Ajouter les propriétés supplémentaires nécessaires
           origins_tags: product.labels?.split(',') || [],
           categories_tags: product.categories?.split(',') || [],
           nutriments: product.nutriments,

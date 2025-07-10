@@ -52,7 +52,7 @@ const CaloriesBurnedSection: React.FC<CaloriesBurnedSectionProps> = ({
         <CircularAddButton
           size={40}
           color={buttonColor}
-          iconColor="#212121"
+          iconColor="#ffffff"
           onPress={onAddActivityPress}
           style={styles.addButton}
         />

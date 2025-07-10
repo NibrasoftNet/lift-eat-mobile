@@ -17,13 +17,13 @@ export const ArrowDown2CurvedBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M18.9997 8.5C18.9997 8.5 14.8557 15.5 11.9997 15.5C11.1717 15.5 10.2357 14.912 9.32373 14.076"
-      fill={none}
+      fill="none"
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M6.881 11.289C5.773 9.806 5 8.5 5 8.5"
-      fill={none}
+      fill="none"
       stroke={color}
       strokeWidth="1.5"
     />
