@@ -10,7 +10,8 @@ import { Text } from '../../../../../../components-new/ui/atoms/base';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../../../../themeNew';
+import { useTheme } from '@/themeNew';
+import { getImageUrl } from '@/utils/getImageUrl';
 
 // Services MCP
 import { mealPagesService } from '../../../../../../utils/services/pages/meal-pages.service';
@@ -144,8 +145,10 @@ const MealDetailsScreen = () => {
     router.push(`/(root)/(tabs)/meals/my-meals/edit/${mealId}`);
   };
 
-  // Fonction utilitaire pour traiter correctement les différents formats d'image
-  const getImageUrl = (image: any): string => {
+  /*
+   * Legacy inline getImageUrl block – replaced by shared util
+   * Keeping commented for reference, will be removed later
+   *
     if (!image) {
       return 'https://via.placeholder.com/400x250?text=No+Image';
     }
@@ -173,6 +176,7 @@ const MealDetailsScreen = () => {
     }
   };
 
+*/
   // Affichage pendant le chargement
   if (isLoading) {
     return (
@@ -214,7 +218,7 @@ const MealDetailsScreen = () => {
       <MealDetailHeader
         mealId={mealId}
         title={meal?.name ? meal.name : t('meal.details.noName')}
-        imageUrl={getImageUrl(meal?.image)}
+        imageUrl={getImageUrl(meal?.image) ?? ''}
         calories={meal?.calories || 0}
         isFavorite={!!isFavorite}
         favoriteLoading={toggleFavoriteMutation.isPending}
@@ -244,7 +248,7 @@ const MealDetailsScreen = () => {
 
       {/* Liste des ingrédients */}
       <IngredientsList
-        ingredients={ingredients.map((ing, index) => {
+        ingredients={ingredients.map((ing: any, index: number) => {
           const imageUrl = ing.ingredient?.image
             ? getImageUrl(ing.ingredient.image)
             : undefined;

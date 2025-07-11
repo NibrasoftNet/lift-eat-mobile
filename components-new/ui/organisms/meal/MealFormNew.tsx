@@ -58,6 +58,7 @@ import {
   MealDefaultValuesProps,
 } from '@/utils/validation/meal/meal.validation';
 import { useTranslation } from 'react-i18next';
+import { getImageUrl } from '@/utils/getImageUrl';
 
 // Selectors & other components
 import { MealTypeSelector } from '@/components-new/ui/molecules/selectors/MealTypeSelector';
@@ -104,14 +105,8 @@ export default function MealFormNew({
 
   // helper to normalize image string
   const normalizeImage = (img: string | null | undefined): string | null => {
-    if (!img) return null;
-    if (
-      img.startsWith('http') ||
-      img.startsWith('file') ||
-      img.startsWith('data:')
-    )
-      return img;
-    return `data:image/jpeg;base64,${img}`;
+    const url = getImageUrl(img);
+    return url ?? null;
   };
 
   const [mealImage, setMealImage] = useState<string | null>(
@@ -683,8 +678,8 @@ const createStyles = (theme: ThemeInterface) =>
       marginVertical: 16,
     },
     imagePlaceholder: {
-      width: 200,
-      height: 160,
+      width: 320,
+      height: 320,
       borderRadius: 20,
       backgroundColor: '#F3F4F6',
       justifyContent: 'center',

@@ -192,7 +192,7 @@ const createStyles = (theme: ThemeInterface) =>
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: theme.color('successLighter'),
-      borderRadius: 8,
+      borderRadius: 10,
       paddingVertical: theme.space('sm'),
       paddingHorizontal: theme.space('md'),
       minHeight: 48,

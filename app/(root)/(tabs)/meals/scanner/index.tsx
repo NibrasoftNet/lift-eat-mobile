@@ -101,7 +101,7 @@ const createStyles = (theme: any) =>
       backgroundColor: theme.colors.error,
       padding: 12,
       margin: 16,
-      borderRadius: 8,
+      borderRadius: 10,
     },
     errorText: { color: '#fff', textAlign: 'center' },
   });

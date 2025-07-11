@@ -104,7 +104,7 @@ const createStyles = (theme: ThemeInterface) =>
     },
     card: {
       backgroundColor: '#fff',
-      borderRadius: 12,
+      borderRadius: 10,
       padding: theme.space('md'),
       shadowColor: '#000',
       shadowOpacity: 0.05,

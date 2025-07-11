@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { SafeAreaView, RefreshControl, StyleSheet, View } from 'react-native';
+import { SafeAreaView, RefreshControl, StyleSheet, View, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +8,6 @@ import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import type { ThemeInterface } from '@/themeNew';
 import SearchPlanNew from '@/components-new/ui/organisms/plan/SearchPlanNew';
 import PlanCardNew from '@/components-new/ui/organisms/plan/PlanCardNew';
-import CreatePlanButton from '@/components-new/ui/organisms/plan/CreatePlanButton';
 import Text from '@/components-new/ui/atoms/base/Text';
 
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
@@ -130,9 +129,14 @@ export default function MyPlansScreenNew() {
 
       {/* CTA */}
       <View style={styles.ctaContainer}>
-        <CreatePlanButton
+        <Pressable
+          style={styles.ctaButton}
           onPress={() => router.push('/plans/my-plans/create')}
-        />
+        >
+          <Text variant="button" style={styles.ctaText}>
+            Créer un plan
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -171,5 +175,16 @@ const getStyles = (theme: ThemeInterface) =>
       backgroundColor: 'transparent',
       paddingHorizontal: theme.space('xl'),
       paddingBottom: theme.space('2xl'),
+    },
+    ctaButton: {
+      backgroundColor: theme.color('successLighter'),
+      borderRadius: 10,
+      alignItems: 'center',
+      paddingVertical: theme.space('lg'),
+    },
+    ctaText: {
+      color: '#ffffff',
+      fontWeight: '600',
+      fontSize: 16,
     },
   });
