@@ -240,22 +240,26 @@ export const addDummyData = async (db: ExpoSQLiteDatabase) => {
       .select({ count: sql`count(*)` })
       .from(ingredientsStandard)
       .get();
+    const existingUsers = await db
+      .select({ count: sql`count(*)` })
+      .from(users)
+      .get();
 
     // Convertir les résultats en nombres pour comparaison
     const mealsCount = existingMeals ? Number(existingMeals.count) : 0;
     const plansCount = existingPlans ? Number(existingPlans.count) : 0;
-    const ingredientsCount = existingIngredients
-      ? Number(existingIngredients.count)
-      : 0;
+    const ingredientsCount = existingIngredients ? Number(existingIngredients.count) : 0;
+    const usersCount = existingUsers ? Number(existingUsers.count) : 0;
 
     logger.info(LogCategory.DATABASE, 'État actuel des tables', {
       mealsCount,
       plansCount,
       ingredientsCount,
+      usersCount,
     });
 
-    // Si toutes les tables principales contiennent des données, on considère que la DB est initialisée
-    if (mealsCount > 0 && plansCount > 0 && ingredientsCount > 0) {
+    // Si des données essentielles existent déjà (utilisateurs et ingrédients), on considère que la DB est initialisée
+    if (usersCount > 0 && ingredientsCount > 0) {
       logger.info(LogCategory.DATABASE, 'Les données seed existent déjà');
       // Mettre à jour le flag pour la prochaine fois
       AsyncStorage.setItemSync('dbInitialized', 'true');

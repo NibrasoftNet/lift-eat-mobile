@@ -25,6 +25,8 @@ import Input from '@/components-new/ui/atoms/inputs/Input';
 import Button from '@/components-new/ui/atoms/inputs/Button';
 import { useTheme } from '@/themeNew';
 
+import { IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
+
 // SVG icons
 import { PlusRegularBoldIcon } from '@/assets/icons/figma/regular-bold/PlusRegularBoldIcon';
 import { ArrowDownRegularBoldIcon } from '@/assets/icons/figma/regular-bold/ArrowDownRegularBoldIcon';
@@ -56,6 +58,7 @@ import {
   MealDefaultValuesProps,
 } from '@/utils/validation/meal/meal.validation';
 import { useTranslation } from 'react-i18next';
+import { getImageUrl } from '@/utils/getImageUrl';
 
 // Selectors & other components
 import { MealTypeSelector } from '@/components-new/ui/molecules/selectors/MealTypeSelector';
@@ -102,14 +105,8 @@ export default function MealFormNew({
 
   // helper to normalize image string
   const normalizeImage = (img: string | null | undefined): string | null => {
-    if (!img) return null;
-    if (
-      img.startsWith('http') ||
-      img.startsWith('file') ||
-      img.startsWith('data:')
-    )
-      return img;
-    return `data:image/jpeg;base64,${img}`;
+    const url = getImageUrl(img);
+    return url ?? null;
   };
 
   const [mealImage, setMealImage] = useState<string | null>(
@@ -573,13 +570,19 @@ export default function MealFormNew({
                   : `data:image/png;base64,${rawImg}`
                 : undefined;
 
+              const ingredientStd = ing.ingredientsStandard as any;
               return {
-                id: `${ing.ingredientStandardId}-${index}`,
-                name: ing.ingredientsStandard?.name ?? t('common.ingredient'),
+                ...ingredientStd,
+                uniqueId: `${ing.ingredientStandardId}-${index}`,
+                id: ingredientStd?.id ?? ing.ingredientStandardId,
+                name: ingredientStd?.name ?? t('common.ingredient'),
+                displayName: (ingredientStd?.name ?? t('common.ingredient')) as string,
                 quantity: ing.quantity,
-                unit: (ing as any).unit ?? ing.ingredientsStandard?.unit ?? 'g',
+                unit: ing.unit ?? ingredientStd?.unit ?? 'g',
+                displayUnit: (ing.unit ?? ingredientStd?.unit ?? 'g') as string,
                 imageUrl,
-              };
+                hasImage: !!imageUrl,
+              } as IngredientWithUniqueId;
             })}
             showDeleteButtons
             onIngredientDelete={(id: string) => {
@@ -675,8 +678,8 @@ const createStyles = (theme: ThemeInterface) =>
       marginVertical: 16,
     },
     imagePlaceholder: {
-      width: 200,
-      height: 160,
+      width: 320,
+      height: 320,
       borderRadius: 20,
       backgroundColor: '#F3F4F6',
       justifyContent: 'center',

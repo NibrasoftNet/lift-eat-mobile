@@ -17,7 +17,7 @@ export const PaperFailRegularTwotoneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M14.7365 2.76196H7.97851C5.91951 2.76196 4.24951 4.43096 4.24951 6.49096V17.34C4.24951 19.516 6.01351 21.115 8.18951 21.115H16.0725C18.1325 21.115 19.8015 19.4 19.8015 17.34V8.03796L14.7365 2.76196Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
@@ -27,7 +27,7 @@ export const PaperFailRegularTwotoneIcon = ({
     />
     <Path
       d="M14.4736 2.75024V5.65924C14.4736 7.07924 15.6226 8.23124 17.0416 8.23424C18.3586 8.23724 19.7056 8.23824 19.7966 8.23224"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

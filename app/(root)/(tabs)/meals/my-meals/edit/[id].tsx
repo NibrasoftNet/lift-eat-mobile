@@ -109,7 +109,7 @@ export default function EditMealV2Screen() {
       >
         <Link href="/meals/my-meals" asChild>
           <View
-            style={{ padding: 12, backgroundColor: '#A4C73B', borderRadius: 8 }}
+            style={{ padding: 12, backgroundColor: '#A4C73B', borderRadius: 10 }}
           >
             <Text style={{ color: '#fff' }}>{t('meal.error.loading')}</Text>
           </View>

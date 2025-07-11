@@ -17,7 +17,7 @@ export const ArrowUp2RegularTwotoneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M5 15.5L12 8.5L19 15.5"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

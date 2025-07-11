@@ -163,10 +163,10 @@ const createStyles = (theme: ThemeInterface) => {
       height: 48,
     },
     imageContainer: {
-      width: 200,
-      height: 160,
+      width: 320,
+      height: 320,
       borderRadius: 20,
-      backgroundColor: '#ffffff',
+      backgroundColor: '#F7FBF1',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2,

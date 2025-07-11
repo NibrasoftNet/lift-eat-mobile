@@ -17,19 +17,19 @@ export const DeleteSharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M12.2495 12.854V17.507"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.26698 22.1038H6.20198L4.87598 8.25684H19.624L18.297 22.1038H12.221"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M8.06201 3.604H16.438"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

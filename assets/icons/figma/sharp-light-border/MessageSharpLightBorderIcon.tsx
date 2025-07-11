@@ -17,7 +17,7 @@ export const MessageSharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M18.0537 9.38574L12.2895 14.0697L6.52539 9.38574"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
@@ -26,7 +26,7 @@ export const MessageSharpLightBorderIcon = ({
       y="3.53467"
       width="20"
       height="18"
-      fill={none}
+      fill='none'
       stroke={color}
     />
   </Svg>

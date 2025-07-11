@@ -10,7 +10,8 @@ import { Text } from '../../../../../../components-new/ui/atoms/base';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../../../../themeNew';
+import { useTheme } from '@/themeNew';
+import { getImageUrl } from '@/utils/getImageUrl';
 
 // Services MCP
 import { mealPagesService } from '../../../../../../utils/services/pages/meal-pages.service';
@@ -21,6 +22,7 @@ import CircularNutritionProgress from '../../../../../../components-new/ui/molec
 import GeneralInfoSection from '../../../../../../components-new/ui/molecules/info/GeneralInfoSection';
 import IngredientsList from '../../../../../../components-new/ui/organisms/meal/IngredientsList';
 import InstructionsSection from '../../../../../../components-new/ui/molecules/meal/InstructionsSection';
+import { IngredientWithUniqueId } from '@/utils/interfaces/drawer.interface';
 
 /**
  * MealDetailsScreen
@@ -143,8 +145,10 @@ const MealDetailsScreen = () => {
     router.push(`/(root)/(tabs)/meals/my-meals/edit/${mealId}`);
   };
 
-  // Fonction utilitaire pour traiter correctement les différents formats d'image
-  const getImageUrl = (image: any): string => {
+  /*
+   * Legacy inline getImageUrl block – replaced by shared util
+   * Keeping commented for reference, will be removed later
+   *
     if (!image) {
       return 'https://via.placeholder.com/400x250?text=No+Image';
     }
@@ -172,6 +176,7 @@ const MealDetailsScreen = () => {
     }
   };
 
+*/
   // Affichage pendant le chargement
   if (isLoading) {
     return (
@@ -213,7 +218,7 @@ const MealDetailsScreen = () => {
       <MealDetailHeader
         mealId={mealId}
         title={meal?.name ? meal.name : t('meal.details.noName')}
-        imageUrl={getImageUrl(meal?.image)}
+        imageUrl={getImageUrl(meal?.image) ?? ''}
         calories={meal?.calories || 0}
         isFavorite={!!isFavorite}
         favoriteLoading={toggleFavoriteMutation.isPending}
@@ -243,23 +248,32 @@ const MealDetailsScreen = () => {
 
       {/* Liste des ingrédients */}
       <IngredientsList
-        ingredients={ingredients.map((ing) => ({
-          id: ing.id?.toString() || '',
-          name: ing.ingredient?.name || '', // Utilisation de la propriété ingredient qui contient les détails
-          quantity: ing.quantity || 0,
-          unit: ing.ingredient?.unit || 'g',
-          imageUrl: ing.ingredient?.image
+        ingredients={ingredients.map((ing: any, index: number) => {
+          const imageUrl = ing.ingredient?.image
             ? getImageUrl(ing.ingredient.image)
-            : undefined, // Ajout de l'image de l'ingrédient
-        }))}
+            : undefined;
+          const unit = ing.ingredient?.unit || 'g';
+          return {
+            ...ing.ingredient,
+            uniqueId: `${ing.id}-${index}`,
+            id: ing.id?.toString() || '',
+            name: ing.ingredient?.name ?? t('common.ingredient'),
+            displayName: (ing.ingredient?.name ??
+              t('common.ingredient')) as string,
+            quantity: ing.quantity || 0,
+            unit,
+            displayUnit: unit as string,
+            imageUrl,
+            hasImage: !!imageUrl,
+          } as IngredientWithUniqueId;
+        })}
         showDeleteButtons={false}
         isDarkMode={isDarkMode}
       />
 
-      {/* Instructions de préparation (utilise le champ description) */}
+      {/* Instructions */}
       <InstructionsSection
-        instructions={meal?.description || ''}
-        title={t('meal.details.instructionsTitle')}
+        instructions={(meal as any)?.instructions || ''}
         isDarkMode={isDarkMode}
       />
     </ScrollView>

@@ -16,7 +16,7 @@ import {
 } from '@/utils/interfaces/drawer.interface';
 
 import { IngredientPagesServiceInterface } from '@/utils/interfaces/pages-services.interface';
-import { Buffer } from 'buffer';
+import { getImageUrl } from '@/utils/getImageUrl';
 
 /**
  * Service pour les opérations liées aux pages d'ingrédients
@@ -325,6 +325,7 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
  * Convertit un Buffer d'image ou une chaîne en URL (data URI) pour l'UI React Native Image
  * @param image Buffer | string | undefined
  */
+/* Legacy local getImageUrl function replaced by shared util
 const getImageUrl = (image: any): string | undefined => {
   if (!image) return undefined;
 
@@ -399,6 +400,7 @@ const getImageUrl = (image: any): string | undefined => {
 
   return undefined;
 };
+*/
 
 // Exporter une instance singleton du service
 export const ingredientPagesService = new IngredientPagesService();

@@ -17,7 +17,7 @@ export const Star6SharpLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M12.25 2.75L14.0166 8.94017L20.2607 7.375L15.7832 12L20.2607 16.625L14.0166 15.0598L12.25 21.25L10.4834 15.0598L4.23927 16.625L8.71681 12L4.23927 7.375L10.4834 8.94017L12.25 2.75Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

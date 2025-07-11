@@ -8,7 +8,6 @@ import { useMutation } from '@tanstack/react-query';
 
 // Design system – atomic components
 import TitleAndDescription from '@/components-new/ui/molecules/auth/TitleAndDescription';
-import Text from '@/components-new/ui/atoms/base/Text';
 import Input from '@/components-new/ui/atoms/inputs/Input';
 import Button from '@/components-new/ui/atoms/inputs/Button';
 

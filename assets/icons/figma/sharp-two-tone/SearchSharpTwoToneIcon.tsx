@@ -17,11 +17,11 @@ export const SearchSharpTwoToneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M16.7373 16.7085L21.2908 21.2501"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
-    <Circle cx="11.2485" cy="10.7885" r="8.03854" fill={none} stroke={color} />
+    <Circle cx="11.2485" cy="10.7885" r="8.03854" fill='none' stroke={color} />
   </Svg>
 );
 

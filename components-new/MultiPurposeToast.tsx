@@ -39,7 +39,7 @@ const MultiPurposeToast: React.FC<MultiPurposeToastProps> = ({
           marginHorizontal: 16,
           paddingVertical: 12,
           paddingHorizontal: 16,
-          borderRadius: 8,
+          borderRadius: 10,
           backgroundColor,
           shadowColor: '#000',
           shadowOpacity: 0.12,

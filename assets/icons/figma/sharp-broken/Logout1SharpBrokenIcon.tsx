@@ -17,19 +17,19 @@ export const Logout1SharpBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none" {...props}>
     <Path
       d="M21.0187 12H8.24072"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M18.479 8.7251L21.769 12.0001L18.479 15.2761"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M13.255 16.625V21.25H2.73096V2.75H13.255V7.375"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

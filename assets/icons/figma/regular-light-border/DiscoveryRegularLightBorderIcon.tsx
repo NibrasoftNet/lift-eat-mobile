@@ -17,11 +17,11 @@ export const DiscoveryRegularLightBorderIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M8.27002 14.9519L9.8627 9.8627L14.9519 8.27002L13.3593 13.3593L8.27002 14.9519Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
-    <Circle cx="11.611" cy="11.611" r="9.61098" fill={none} stroke={color} />
+    <Circle cx="11.611" cy="11.611" r="9.61098" fill='none' stroke={color} />
   </Svg>
 );
 

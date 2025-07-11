@@ -17,13 +17,13 @@ export const PlusSharpTwoToneIcon = ({
   <Svg width={size} height={size} viewBox="0 0 25 25" fill="none" {...props}>
     <Path
       d="M12.2496 8.8623V16.1887M15.9173 12.5251H8.58398"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M21.5 21.7847L21.5 3.28467L3 3.28467L3 21.7847L21.5 21.7847Z"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -20,7 +20,7 @@ export const CategorySharpLightBorderIcon = ({
       y="14.3936"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
     <Rect
@@ -28,7 +28,7 @@ export const CategorySharpLightBorderIcon = ({
       y="14.3936"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
     <Rect
@@ -36,7 +36,7 @@ export const CategorySharpLightBorderIcon = ({
       y="3.39355"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
     <Rect
@@ -44,7 +44,7 @@ export const CategorySharpLightBorderIcon = ({
       y="2.60645"
       width="7"
       height="7"
-      fill={none}
+      fill='none'
       stroke={color}
     />
   </Svg>

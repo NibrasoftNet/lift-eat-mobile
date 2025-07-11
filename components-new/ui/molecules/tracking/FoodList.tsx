@@ -2,33 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../../../../themeNew';
 import { Text } from '../../atoms/base';
+import { FoodItem } from '@/types/food-item.type';
 
-interface FoodItem {
-  /**
-   * Identifiant unique de l'aliment
-   */
-  id: string;
 
-  /**
-   * Nom de l'aliment
-   */
-  name: string;
-
-  /**
-   * Quantité (avec unité)
-   */
-  quantity: string;
-
-  /**
-   * Calories
-   */
-  calories: number;
-
-  /**
-   * Emoji ou icône associée à l'aliment
-   */
-  emoji?: string;
-}
 
 interface FoodListProps {
   /**

@@ -23,24 +23,24 @@ const IMG_SNACKS = require('@/assets/emoji/Emoji=Green salad, Component=Fluent E
  */
 export default function PlanDetailsScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]); 
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.card}>
-      <CalorieTracker 
-        // static placeholders – will be replaced with real data later
-        consumedCalories={0}
-        goalCalories={2000}
-        walkingCalories={0}
-        activityCalories={0}
-        carbs={{ current: 0, goal: 0 }}
-        protein={{ current: 0, goal: 0 }}
-        fat={{ current: 0, goal: 0 }}
-        foodItems={[]}
-        // omit callbacks for now (UI only)
-      />
+        <CalorieTracker
+          // static placeholders – will be replaced with real data later
+          consumedCalories={0}
+          goalCalories={2000}
+          walkingCalories={0}
+          activityCalories={0}
+          carbs={{ current: 0, goal: 0 }}
+          protein={{ current: 0, goal: 0 }}
+          fat={{ current: 0, goal: 0 }}
+          foodItems={[]}
+          // omit callbacks for now (UI only)
+        />
       </View>
 
       {/* Espace */}
@@ -49,16 +49,43 @@ export default function PlanDetailsScreen() {
       {/* Liste des créneaux repas */}
       <MealSlotsList
         slots={[
-          { key: 'breakfast', title: 'Breakfast', consumed: 824, goal: 768, hasMeals: true, icon: IMG_BREAKFAST },
-          { key: 'lunch', title: 'Lunch', consumed: 810, goal: 768, hasMeals: true, icon: IMG_LUNCH },
-          { key: 'dinner', title: 'Dinner', consumed: 0, goal: 768, hasMeals: false, icon: IMG_DINNER },
-          { key: 'snacks', title: 'Snacks', consumed: 0, goal: 256, hasMeals: false, icon: IMG_SNACKS },
+          {
+            key: 'breakfast',
+            title: 'Breakfast',
+            consumed: 824,
+            goal: 768,
+            hasMeals: true,
+            icon: IMG_BREAKFAST,
+          },
+          {
+            key: 'lunch',
+            title: 'Lunch',
+            consumed: 810,
+            goal: 768,
+            hasMeals: true,
+            icon: IMG_LUNCH,
+          },
+          {
+            key: 'dinner',
+            title: 'Dinner',
+            consumed: 0,
+            goal: 768,
+            hasMeals: false,
+            icon: IMG_DINNER,
+          },
+          {
+            key: 'snacks',
+            title: 'Snacks',
+            consumed: 0,
+            goal: 256,
+            hasMeals: false,
+            icon: IMG_SNACKS,
+          },
         ]}
       />
-            {/* Espace */}
-            <View style={styles.spacer2} />
+      {/* Espace */}
+      <View style={styles.spacer2} />
     </ScrollView>
-
   );
 }
 
@@ -77,7 +104,7 @@ const createStyles = (theme: ThemeInterface) =>
     },
     card: {
       backgroundColor: '#fff',
-      borderRadius: 12,
+      borderRadius: 10,
       padding: theme.space('md'),
       shadowColor: '#000',
       shadowOpacity: 0.05,

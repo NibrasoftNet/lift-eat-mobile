@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { SafeAreaView, RefreshControl, StyleSheet, View } from 'react-native';
+import { SafeAreaView, RefreshControl, StyleSheet, View, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -8,12 +8,10 @@ import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import type { ThemeInterface } from '@/themeNew';
 import SearchPlanNew from '@/components-new/ui/organisms/plan/SearchPlanNew';
 import PlanCardNew from '@/components-new/ui/organisms/plan/PlanCardNew';
-import CreatePlanButton from '@/components-new/ui/organisms/plan/CreatePlanButton';
 import Text from '@/components-new/ui/atoms/base/Text';
 
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { QueryStateHandler } from '@/utils/providers/QueryWrapper';
-
 
 export default function MyPlansScreenNew() {
   const router = useRouter();
@@ -63,9 +61,7 @@ export default function MyPlansScreenNew() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.safeArea}
-    >
+    <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text variant="h3" style={styles.headerTitle}>
@@ -132,12 +128,15 @@ export default function MyPlansScreenNew() {
       </QueryStateHandler>
 
       {/* CTA */}
-      <View
-        style={styles.ctaContainer}
-      >
-        <CreatePlanButton
+      <View style={styles.ctaContainer}>
+        <Pressable
+          style={styles.ctaButton}
           onPress={() => router.push('/plans/my-plans/create')}
-        />
+        >
+          <Text variant="button" style={styles.ctaText}>
+            Créer un plan
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -164,7 +163,6 @@ const getStyles = (theme: ThemeInterface) =>
     emptyContainer: {
       alignItems: 'center',
       marginTop: 32,
-      
     },
     emptyText: {
       opacity: 0.6,
@@ -177,8 +175,16 @@ const getStyles = (theme: ThemeInterface) =>
       backgroundColor: 'transparent',
       paddingHorizontal: theme.space('xl'),
       paddingBottom: theme.space('2xl'),
-      
+    },
+    ctaButton: {
+      backgroundColor: theme.color('successLighter'),
+      borderRadius: 10,
+      alignItems: 'center',
+      paddingVertical: theme.space('lg'),
+    },
+    ctaText: {
+      color: '#ffffff',
+      fontWeight: '600',
+      fontSize: 16,
     },
   });
-
-

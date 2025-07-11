@@ -17,13 +17,13 @@ export const TimeSquareCurvedBrokenIcon = ({
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
     <Path
       d="M15.43 20.991C19.723 20.22 21.25 17.636 21.25 12C21.25 5.063 18.937 2.75 12 2.75C5.063 2.75 2.75 5.063 2.75 12C2.75 18.937 5.063 21.25 12 21.25"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />
     <Path
       d="M15.39 14.0178L11.999 11.9948V7.63379"
-      fill={none}
+      fill='none'
       stroke={color}
       strokeWidth="1.5"
     />

@@ -55,8 +55,6 @@ import { api } from '@/convex/_generated/api';
 // La référence exacte à la fonction est gérée à l'exécution
 
 // Icônes nécessaires
-import { MessageRegularBoldIcon } from '@/assets/icons/figma/regular-bold/MessageRegularBoldIcon';
-import { LockRegularBoldIcon } from '@/assets/icons/figma/regular-bold/LockRegularBoldIcon';
 import { ShowRegularBoldIcon } from '@/assets/icons/figma/regular-bold/ShowRegularBoldIcon';
 import { HideRegularBoldIcon } from '@/assets/icons/figma/regular-bold/HideRegularBoldIcon';
 import { ArrowLeftRegularBoldIcon } from '@/assets/icons/figma/regular-bold/ArrowLeftRegularBoldIcon';
