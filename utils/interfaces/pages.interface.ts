@@ -79,6 +79,10 @@ export interface MealFilters {
   page?: number;
   limit?: number;
   filter?: MealListFilter;
+
+  // Ajouts pour logique par date / plan
+  planId?: number;
+  date?: string; // YYYY-MM-DD
 }
 
 /**
@@ -179,7 +183,7 @@ export interface ProgressPagesServiceInterface {
    * Récupère la progression quotidienne pour une date
    * @param date Date de la progression
    */
-  getDailyProgress(date: string): Promise<
+  getDailyProgress(date: string, type?: MealTypeEnum): Promise<
     OperationResult<{
       dailyProgress: DailyProgressOrmProps;
       mealsWithProgress: any[];

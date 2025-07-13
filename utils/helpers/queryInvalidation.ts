@@ -28,7 +28,7 @@ const CACHE_KEY_PATTERNS: Record<DataType, string[]> = {
   [DataType.USER_PREFERENCES]: ['user-preferences', 'preferences'],
   [DataType.PLAN]: ['plan-', 'current-plan'],
   [DataType.PLANS_LIST]: ['plans', 'my-plans', 'plans-list'],
-  [DataType.DAILY_PLAN]: ['daily-plan-', 'day-plan-'],
+  [DataType.DAILY_PLAN]: ['dailyPlan', 'daily-plan-', 'day-plan-'],
   [DataType.MEAL]: ['meal-', 'meal:', 'meal', 'meal-details'],
   [DataType.MEALS_LIST]: ['meals', 'my-meals', 'meals-list', 'meal:mealsList'],
   [DataType.PROGRESS]: ['progress-', 'daily-progress-'],

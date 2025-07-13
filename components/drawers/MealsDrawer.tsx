@@ -305,12 +305,12 @@ function MealsDrawer({
 
     try {
       // Récupérer les repas avec filtres
-      const result = await sqliteMCPServer.getMealsListViaMCP(
+      const result = await sqliteMCPServer.getMealsListViaMCP({
         userId,
-        selectedCuisine,
-        selectedMealType,
-        searchMealName,
-      );
+        cuisine: selectedCuisine,
+        type: selectedMealType,
+        search: searchMealName,
+      });
 
       if (!result.success) {
         logger.error(
@@ -552,6 +552,10 @@ function MealsDrawer({
             </Toast>
           ),
         });
+
+        // Invalider le cache du plan et des données nutritionnelles quotidiennes
+        await invalidateCache(queryClient, DataType.PLAN, { id: planId });
+        await queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'dailyNutrition' });
 
         // Fermer le drawer et réinitialiser les sélections
         setSelectedMeals([]);

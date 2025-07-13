@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { DailyPlanOrmProps, MealOrmProps, PlanOrmProps } from '../../db/schema';
-import { DayEnum } from '../enum/general.enum';
 import { calculateTotalMacros } from '../helpers/nutrition.helper';
 
 // Interface définissant un jour de plan avec ses repas
@@ -17,19 +16,20 @@ export interface PlanWithDays extends PlanOrmProps {
 interface PlanStore {
   currentPlan: PlanWithDays | null;
   activeDayIndex: number;
-  selectedWeek: number;
+  // Nouvelle sélection par date (YYYY-MM-DD)
+  selectedDate: string;
   isEditing: boolean;
 
   setCurrentPlan: (plan: PlanWithDays | null) => void;
   setActiveDayIndex: (index: number) => void;
-  setSelectedWeek: (week: number) => void;
+  setSelectedDate: (date: string) => void;
   setIsEditing: (isEditing: boolean) => void;
 
   addMealToDailyPlan: (dayPlanId: number, meal: MealOrmProps) => void;
   removeMealFromDailyPlan: (dayPlanId: number, mealId: number) => void;
 
   getActiveDayPlan: () => DayPlanWithMeals | null;
-  getDayPlanByDay: (day: DayEnum, week: number) => DayPlanWithMeals | null;
+  getDayPlanByDate: (date: string) => DayPlanWithMeals | null;
   calculateDailyMacros: (dayPlanId: number) => {
     calories: number;
     carbs: number;
@@ -43,12 +43,13 @@ interface PlanStore {
 export const usePlanStore = create<PlanStore>((set, get) => ({
   currentPlan: null,
   activeDayIndex: 0,
-  selectedWeek: 1,
+  selectedDate: '',
+
   isEditing: false,
 
   setCurrentPlan: (plan) => set({ currentPlan: plan }),
   setActiveDayIndex: (index) => set({ activeDayIndex: index }),
-  setSelectedWeek: (week) => set({ selectedWeek: week }),
+  setSelectedDate: (date) => set({ selectedDate: date }),
   setIsEditing: (isEditing) => set({ isEditing }),
 
   addMealToDailyPlan: (dayPlanId, meal) => {
@@ -117,24 +118,15 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
   },
 
   getActiveDayPlan: () => {
-    const { currentPlan, activeDayIndex, selectedWeek } = get();
-    if (!currentPlan) return null;
-
-    const weekDayPlans = currentPlan.dailyPlans.filter(
-      (dp) => dp.week === selectedWeek,
-    );
-
-    return weekDayPlans[activeDayIndex] || null;
+    const { currentPlan, selectedDate } = get();
+    if (!currentPlan || !selectedDate) return null;
+    return currentPlan.dailyPlans.find((dp) => dp.date === selectedDate) || null;
   },
 
-  getDayPlanByDay: (day, week) => {
+  getDayPlanByDate: (date) => {
     const { currentPlan } = get();
     if (!currentPlan) return null;
-
-    return (
-      currentPlan.dailyPlans.find((dp) => dp.day === day && dp.week === week) ||
-      null
-    );
+    return currentPlan.dailyPlans.find((dp) => dp.date === date) || null;
   },
 
   calculateDailyMacros: (dayPlanId) => {
@@ -156,7 +148,7 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
     set({
       currentPlan: null,
       activeDayIndex: 0,
-      selectedWeek: 1,
+      selectedDate: '',
       isEditing: false,
     });
   },

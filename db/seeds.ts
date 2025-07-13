@@ -130,10 +130,61 @@ export const mealsSeed: Omit<
 export const planSeed: Omit<
   PlanOrmProps,
   'id' | 'createdAt' | 'updatedAt' | 'userId'
->[] = [];
+>[] = [
+  {
+    name: 'Demo Plan',
+    goal: GoalEnum.MAINTAIN,
+    unit: WeightUnitEnum.KG,
+    initialWeight: 70,
+    targetWeight: 70,
+    public: true,
+    current: true,
+    completed: false,
+    durationWeeks: 4,
+    startDate: new Date().toISOString().split('T')[0],
+    calories: 2000,
+    carbs: 250,
+    fat: 70,
+    protein: 150,
+    type: PlanGeneratedWithEnum.MANUAL,
+  },
+];
 
 // Daily plans pour le plan hebdomadaire
+// Génère 7 jours de DailyPlan à partir d'une date de début (aujourd'hui par défaut)
+function generateDailyPlanSeed(startDate: Date = new Date()): Omit<
+  DailyPlanOrmProps,
+  'id' | 'createdAt' | 'updatedAt' | 'planId'
+>[] {
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const dayEnums: DayEnum[] = [
+    DayEnum.MONDAY,
+    DayEnum.TUESDAY,
+    DayEnum.WEDNESDAY,
+    DayEnum.THURSDAY,
+    DayEnum.FRIDAY,
+    DayEnum.SATURDAY,
+    DayEnum.SUNDAY,
+  ];
+
+  return [...Array(7)].map((_, i) => {
+    const current = new Date(startDate.getTime() + i * ONE_DAY);
+    const isoDate = current.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    return {
+      date: isoDate,
+      calories: 0,
+      carbs: 0,
+      fat: 0,
+      protein: 0,
+      type: DailyPlanGeneratedWithEnum.MANUAL,
+      day: dayEnums[current.getDay() === 0 ? 6 : current.getDay() - 1], // JS getDay: 0=Sun
+    } as Omit<DailyPlanOrmProps,
+      'id' | 'createdAt' | 'updatedAt' | 'planId'>;
+  });
+}
+
 export const dailyPlanSeed: Omit<
   DailyPlanOrmProps,
   'id' | 'createdAt' | 'updatedAt' | 'planId'
->[] = [];
+>[] = generateDailyPlanSeed();

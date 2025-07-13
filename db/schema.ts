@@ -185,13 +185,14 @@ export const meals = sqliteTable('meals', {
 });
 
 // Daily Plans table (independent plans)
+// Ajout du champ `date` (YYYY-MM-DD) pour piloter la sélection directe par date.
 // NOTE: Les valeurs nutritionnelles représentent le total journalier du plan, pas une valeur à 100g
 // La normalisation à 100g n'est pas pertinente pour des plans journaliers complets
 export const dailyPlan = sqliteTable('daily_plan', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   id: integer('id').primaryKey({ autoIncrement: true }),
-  week: integer('week').notNull().default(1),
+  date: text('date').notNull(),
   // Valeurs nutritionnelles totales pour la journée (pas standardisées)
   calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
@@ -265,6 +266,7 @@ export const plan = sqliteTable('plan', {
   current: integer({ mode: 'boolean' }).notNull().default(false),
   completed: integer({ mode: 'boolean' }).notNull().default(false),
   durationWeeks: integer('duration_weeks').notNull().default(1),
+  startDate: text('start_date').notNull(),
   calories: real('calories').notNull().default(1),
   carbs: real('carbs').notNull().default(1),
   fat: real('fat').notNull().default(1),

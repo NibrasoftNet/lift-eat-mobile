@@ -19,8 +19,7 @@ import { useToast } from '../ui/toast';
 import { Box } from '../ui/box';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
-import { useQueryClient } from '@tanstack/react-query';
-import { progressPagesService } from '@/utils/services/pages/progress-pages.service';
+import { useMarkMealAsConsumed } from '@/utils/hooks';
 
 // Extension du type MealWithProgress pour inclure dailyPlanMealId
 interface MealWithProgressExtended extends MealWithProgress {
@@ -120,7 +119,7 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
 }) => {
   const toast = useToast();
   const { setMealsWithProgress } = useProgressStore();
-  const queryClient = useQueryClient();
+  const { mutateAsync: markMeal } = useMarkMealAsConsumed();
 
   // Initialize empty lists
   const initialLeftList: MealList = {
@@ -314,12 +313,12 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         },
       );
 
-      const result = await progressPagesService.markMealAsConsumed(
-        dailyProgress.id,
-        selectedItem.id,
-        Number(dailyPlanMealId), // Conversion explicite en number pour éviter l'erreur TypeScript
-        toConsumed,
-      );
+      const result = await markMeal({
+        dailyProgressId: dailyProgress.id,
+        mealId: selectedItem.id,
+        dailyPlanMealId: Number(dailyPlanMealId),
+        consumed: toConsumed,
+      });
 
       if (!result.success) {
         logger.error(
@@ -329,11 +328,7 @@ const MealsClickSelection: React.FC<MealsClickSelectionProps> = ({
         throw new Error(result.error || 'Erreur lors du marquage du repas');
       }
 
-      // Invalider le cache après la mise à jour
-      progressPagesService.invalidateProgressionCache(
-        queryClient,
-        dailyProgress.id,
-      );
+      
 
       // Mettre à jour les listes localement
       if (toConsumed) {

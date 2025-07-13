@@ -411,6 +411,58 @@ class PlanPagesService implements PlanPagesServiceInterface {
   }
 
   /**
+   * Retire un repas d'un plan journalier
+   * @param dailyPlanId ID du plan journalier
+   * @param mealId ID du repas à retirer
+   */
+  async removeMealFromDailyPlan(
+    dailyPlanId: number,
+    mealId: number,
+  ): Promise<OperationResult> {
+    try {
+      logger.info(
+        LogCategory.UI,
+        `Suppression du repas ${mealId} du plan journalier ${dailyPlanId}`,
+      );
+
+      const result = await planService.removeMealFromDailyPlan(
+        dailyPlanId,
+        mealId,
+      );
+
+      if (!result.success) {
+        return {
+          success: false,
+          error:
+            result.error || `Échec de la suppression du repas pour ce plan`,
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Repas supprimé du plan journalier avec succès',
+      };
+    } catch (error) {
+      logger.error(
+        LogCategory.UI,
+        `Erreur lors de la suppression du repas ${mealId} du plan journalier ${dailyPlanId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          dailyPlanId,
+          mealId,
+        },
+      );
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Une erreur est survenue lors de la suppression du repas du plan journalier",
+      };
+    }
+  }
+
+  /**
    * Récupère les données formatées pour une carte de repas dans un plan journalier
    * Cette méthode orchestre les données nécessaires pour le composant PlanMealCard
    *
@@ -916,6 +968,28 @@ class PlanPagesService implements PlanPagesServiceInterface {
         success: false,
         error:
           error instanceof Error ? error.message : 'Une erreur est survenue',
+      };
+    }
+  }
+
+  /**
+   * Récupère les valeurs nutritionnelles actuelles par date (nouveau modèle date-based)
+   */
+  async getDailyPlanNutritionByDate(planId: number, date: string): Promise<
+    OperationResult<{
+      macros: MacroNutrientsBase;
+    }>
+  > {
+    try {
+      const result = await planService.getDailyPlanNutritionByDate(planId, date);
+      if (result.success && result.data) {
+        return { success: true, data: result.data };
+      }
+      return { success: false, error: result.error || 'Échec de la récupération des macros' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

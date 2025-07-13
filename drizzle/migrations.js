@@ -7,15 +7,20 @@ import m0002 from './0002_tense_vivisector.sql';
 import m0003 from './0003_salty_mordo.sql';
 import m0004 from './0004_skinny_hiroim.sql';
 import m0005 from './0005_nappy_kid_colt.sql';
+import m0006 from './0006_demonic_hellcat.sql';
+import m0007 from './0007_brave_daredevil.sql';
 
-export default {
-  journal,
-  migrations: {
-    m0000,
-    m0001,
-    m0002,
-    m0003,
-    m0004,
-    m0005,
-  },
-};
+  export default {
+    journal,
+    migrations: {
+      m0000,
+m0001,
+m0002,
+m0003,
+m0004,
+m0005,
+m0006,
+m0007
+    }
+  }
+  

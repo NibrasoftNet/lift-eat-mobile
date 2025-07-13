@@ -1,0 +1,1 @@
+ALTER TABLE `plan` ADD `start_date` text NOT NULL;

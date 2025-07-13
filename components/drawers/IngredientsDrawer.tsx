@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { usePaginatedList } from '@/utils/hooks/usePaginatedList';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
 import { DataType } from '@/utils/helpers/queryInvalidation';
@@ -107,29 +107,15 @@ const IngredientsDrawer = React.memo(
       [debouncedSearchTerm, userId],
     );
 
-    // Configuration ULTRA-optimisée de l'infinite query
-    const query = useInfiniteQuery({
-      queryKey: [DataType.INGREDIENT, debouncedSearchTerm, userId],
-      queryFn: fetchIngredients,
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
-      staleTime: 15 * 60 * 1000, // Conserver les données valides plus longtemps
-      gcTime: 15 * 60 * 1000, // Conserver en cache plus longtemps
-      // Optimisations agressives:
-      retry: 0, // Ne pas ré-essayer (réduit les appels réseau)
-      refetchOnMount: false, // Ne pas refetch au montage
-      refetchOnWindowFocus: false, // Ne pas refetch sur focus
-      refetchOnReconnect: false, // Ne pas refetch sur reconnexion
-      enabled: !!userId && showIngredientsDrawer,
-      // CRUCIAL: Retarder le chargement initial pour éviter les plantages UI sur ouverture
-      placeholderData: {
-        pages: [{ data: [], nextPage: null }],
-        pageParams: [1],
-      },
-    });
+    // Utilisation du hook générique partagé pour la pagination
+    const query = usePaginatedList<IngredientWithUniqueId>(
+      [DataType.INGREDIENT, debouncedSearchTerm, userId],
+      fetchIngredients,
+      !!userId && showIngredientsDrawer,
+    );
 
     // Destructurer et utiliser directement les propriétés de query
-    const { data, isLoading, isPending } = query;
+    const { data, isLoading, isPending, hasNextPage, isFetchingNextPage, isRefetching, refetch, fetchNextPage } = query;
 
     // Mémoriser les ingrédients et appliquer la limite MAX_ITEMS
     const ingredients = useMemo(() => {

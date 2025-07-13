@@ -149,6 +149,7 @@ const FoodImagePicker: React.FC<FoodImagePickerProps> = ({
         <Image
           source={resolveStaticImage(selectedImage.value)}
           style={styles.selectedImage}
+          resizeMode="cover"
         />
       );
     }
@@ -252,11 +253,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   imageContainer: {
-    width: 198,
-    height: 158,
+    width: 320,
+    height: 320,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   placeholder: {
@@ -271,7 +272,7 @@ const styles = StyleSheet.create({
   selectedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    borderRadius: 20,
   },
   iconContainer: {
     width: '100%',

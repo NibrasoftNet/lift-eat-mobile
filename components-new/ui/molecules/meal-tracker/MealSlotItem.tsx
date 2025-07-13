@@ -3,9 +3,12 @@ import { View, Image, Pressable, StyleSheet, ViewStyle, TextStyle, ImageStyle } 
 import Text from '@/components-new/ui/atoms/base/Text';
 import CircularAddButton from '@/components-new/ui/atoms/inputs/CircularAddButton';
 import ArrowRightRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
+import DeleteRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/DeleteRegularLightBorderIcon';
 import TickSquareIcon from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import { useTheme, ThemeInterface } from '@/themeNew';
 
+
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 interface MealSlotItemProps {
   /** Nom du créneau (Breakfast, Lunch, …) */
@@ -20,6 +23,12 @@ interface MealSlotItemProps {
   onPress?: () => void;
   /** Handler quand l'utilisateur veut ajouter un repas (si !hasMeals) */
   onAddPress?: () => void;
+  /** Handler pour supprimer le premier repas (simplifié) */
+  onRemovePress?: () => void;
+  /** Type du créneau (BREAKFAST, LUNCH…) */
+  slot?: MealTypeEnum;
+  /** Chargement en cours ? */
+  isLoading?: boolean;
   /** Emoji ou source image pour l'icône */
   iconSource?: any;
 }
@@ -37,10 +46,23 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
   hasMeals,
   onPress,
   onAddPress,
+  onRemovePress,
   iconSource,
+  isLoading = false,
+  slot,
+  ...restProps
 }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.skeleton]}>
+        <View style={styles.skeletonIcon} />
+        <View style={styles.skeletonText} />
+      </View>
+    );
+  }
 
   const progress = goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
 
@@ -51,7 +73,14 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
   );
 
   const Right = hasMeals ? (
-    <ArrowRightRegularLightBorderIcon width={24} height={24} color="#212121" />
+    <View style={styles.rightBtns}>
+      {onRemovePress && (
+        <Pressable onPress={onRemovePress} style={styles.deleteBtn} hitSlop={6}>
+          <DeleteRegularLightBorderIcon width={20} height={20} color={theme.color('error')} />
+        </Pressable>
+      )}
+      <ArrowRightRegularLightBorderIcon width={24} height={24} color="#212121" />
+    </View>
   ) : (
     <CircularAddButton
       size={40}
@@ -100,6 +129,13 @@ const createStyles = (theme: ThemeInterface) =>
       alignItems: 'center',
       paddingVertical: theme.space('sm'),
     } as ViewStyle,
+    skeletonIcon: {
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      marginRight: theme.space('sm'),
+      borderRadius: ICON_SIZE / 2,
+      backgroundColor: theme.color('overlayGrey'),
+    } as ViewStyle,
     icon: {
       width: ICON_SIZE,
       height: ICON_SIZE,
@@ -141,6 +177,12 @@ const createStyles = (theme: ThemeInterface) =>
       fontSize: 14,
       color: theme.color('blueGrey'),
     } as TextStyle,
+    skeletonText: {
+      flex: 1,
+      height: 16,
+      borderRadius: 4,
+      backgroundColor: theme.color('overlayGrey'),
+    } as ViewStyle,
     addButton: {
       backgroundColor: theme.color('successLighter'),
       borderRadius: 999,
@@ -152,6 +194,16 @@ const createStyles = (theme: ThemeInterface) =>
       shadowOpacity: 0.1,
       shadowRadius: 3,
       elevation: 5,
+    } as ViewStyle,
+    skeleton: {
+      opacity: 0.5,
+    } as ViewStyle,
+    rightBtns: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    } as ViewStyle,
+    deleteBtn: {
+      marginRight: theme.space('xs'),
     } as ViewStyle,
     arrow: {
       fontSize: 30,
