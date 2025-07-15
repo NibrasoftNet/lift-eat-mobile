@@ -1,21 +1,31 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { ScrollView, View, StyleSheet, Pressable, ViewStyle, TextStyle } from 'react-native';
+import {
+  ScrollView,
+  RefreshControl,
+  View,
+  StyleSheet,
+  Pressable,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { useTheme, ThemeInterface } from '@/themeNew';
 import { useLocalSearchParams, router } from 'expo-router';
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
 import { useMealsBySlot } from '@/utils/hooks/queries/useMealsBySlot';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components-new/ui/toast';
 
 import MealSlotItem from '@/components-new/ui/molecules/meal-tracker/MealSlotItem';
 import Text from '@/components-new/ui/atoms/base/Text';
 
 import { useRemoveMealFromDailyPlan } from '@/utils/hooks/mutations/useRemoveMealFromDailyPlan';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
+import { useAddMealToDailyPlan } from '@/utils/hooks/mutations/useAddMealToDailyPlan';
 import MealListDrawer from '@/components-new/ui/organisms/meal/MealListDrawer';
 import { usePlanDetails } from '@/utils/hooks/queries/usePlanDetails';
 import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
-import { logger } from '@/utils/services/common/logging.service';
-import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Page Liste des repas pour un créneau (breakfast, lunch, dinner, snack)
@@ -26,8 +36,21 @@ export default function SlotMealsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const toast = useToast();
-  const { id: planIdParam, slot: slotParam, date, openAdd } = useLocalSearchParams<{ id: string; slot: string; date: string; openAdd?: string }>();
+  const {
+    id: planIdParam,
+    slot: slotParam,
+    date,
+    openAdd,
+  } = useLocalSearchParams<{
+    id: string;
+    slot: string;
+    date: string;
+    openAdd?: string;
+  }>();
   const [showDrawer, setShowDrawer] = useState(openAdd === '1');
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
 
   const planId = Number(planIdParam);
   const slot = slotParam as MealTypeEnum;
@@ -39,12 +62,54 @@ export default function SlotMealsScreen() {
     refetch,
   } = useMealsBySlot({ planId, date, slot });
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['mealsBySlot', planId, date, slot] }),
+        queryClient.invalidateQueries({ queryKey: ['dailyNutrition', planId, date] }),
+        queryClient.invalidateQueries({ queryKey: ['plan', planId] }),
+      ]);
+      await refetch();
+    } catch (error) {
+      logger.error(LogCategory.UI, 'Pull-to-refresh error', error as any);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [queryClient, planId, date, slot, refetch]);
+
   // Fetch plan details to get dailyPlanId
   const { data: planDetailsData } = usePlanDetails(planId);
-  const dailyPlanId = planDetailsData?.dailyPlans?.find((dp: any) => dp.date === date)?.id;
+  const dailyPlanId = planDetailsData?.dailyPlans?.find(
+    (dp: any) => dp.date === date,
+  )?.id;
 
   // --- REMOVE MEAL MUTATION ---
   const removeMealMutation = useRemoveMealFromDailyPlan();
+  const addMealMutation = useAddMealToDailyPlan();
+
+  const handleAddMealToPlan = useCallback(
+    async (
+      dailyPlanIdParam: number,
+      mealId: number,
+      quantity: number = 100,
+      mealType?: MealTypeEnum,
+    ) => {
+      if (!planId || !date) {
+        return { success: false, error: 'Plan or date missing' };
+      }
+      logger.info(LogCategory.UI, 'SlotMealsScreen: handleAddMealToPlan called', { dailyPlanId: dailyPlanIdParam, mealId, quantity, slot });
+      return addMealMutation.mutateAsync({
+        planId,
+        date,
+        dailyPlanId: dailyPlanIdParam,
+        mealId,
+        quantity,
+        slot,
+      });
+    },
+    [addMealMutation, planId, date, slot],
+  );
 
   const handleRemoveMeal = useCallback(
     (mealId: number) => {
@@ -62,7 +127,9 @@ export default function SlotMealsScreen() {
             toast.show({
               placement: 'top',
               render: ({ id }) => (
-                <Text key={id} style={{ color: '#fff', padding: 8 }}>Repas supprimé</Text>
+                <Text key={id} style={{ color: '#fff', padding: 8 }}>
+                  Repas supprimé
+                </Text>
               ),
             });
             refetch();
@@ -71,7 +138,9 @@ export default function SlotMealsScreen() {
             toast.show({
               placement: 'top',
               render: ({ id }) => (
-                <Text key={id} style={{ color: '#fff', padding: 8 }}>Suppression impossible</Text>
+                <Text key={id} style={{ color: '#fff', padding: 8 }}>
+                  Suppression impossible
+                </Text>
               ),
             });
           },
@@ -85,7 +154,11 @@ export default function SlotMealsScreen() {
   const goBack = () => router.back();
 
   // --- TOTAL KCAL ---
-  const totalCalories = mealsData?.meals?.reduce((sum: number, m: any) => sum + (m.calories || 0), 0) || 0;
+  const totalCalories =
+    mealsData?.meals?.reduce(
+      (sum: number, m: any) => sum + (m.calories || 0),
+      0,
+    ) || 0;
 
   const title = slot.charAt(0).toUpperCase() + slot.slice(1).toLowerCase();
 
@@ -108,7 +181,10 @@ export default function SlotMealsScreen() {
       </View>
 
       {/* Meals list */}
-      <ScrollView style={styles.list}>
+      <ScrollView
+        style={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {mealsData?.meals?.map((meal: any) => (
           <MealSlotItem
             key={meal.id}
@@ -117,27 +193,26 @@ export default function SlotMealsScreen() {
             goalCalories={0}
             hasMeals={true}
             slot={slot}
-            onPress={() => {/* TODO: details */}}
+            onPress={() => {
+              /* TODO: details */
+            }}
             onRemovePress={() => handleRemoveMeal(meal.id)}
           />
         ))}
       </ScrollView>
 
       {/* Add button */}
-      <Pressable
-        style={styles.addBtn}
-        onPress={() => setShowDrawer(true)}
-      >
-        <Text style={styles.addTxt}>+  Add</Text>
+      <Pressable style={styles.addBtn} onPress={() => setShowDrawer(true)}>
+        <Text style={styles.addTxt}>+ Add</Text>
       </Pressable>
 
       {/* Drawer d'ajout de repas */}
       <MealListDrawer
-        showMealsDrawer={showDrawer}
-        setShowMealsDrawer={setShowDrawer}
+        showDrawer={showDrawer}
+        setShowDrawer={setShowDrawer}
         dailyPlanId={dailyPlanId ?? 0}
         planId={planId}
-        onAddMealToPlan={planPagesService.addMealToDailyPlan}
+        onAddMealToPlan={handleAddMealToPlan}
         onMealsAdded={async () => {
           await refetch();
         }}

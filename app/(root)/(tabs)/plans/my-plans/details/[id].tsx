@@ -46,10 +46,9 @@ export default function PlanDetailsScreen() {
   const setCurrentPlan = usePlanStore((s) => s.setCurrentPlan);
 
   // ---- DATA FETCHING ----
-  const {
-    data: planDetails,
-    isSuccess: isPlanLoaded,
-  } = usePlanDetails(Number(id));
+  const { data: planDetails, isSuccess: isPlanLoaded } = usePlanDetails(
+    Number(id),
+  );
 
   // When plan loaded, hydrate store & ensure selectedDate fits the plan
   useEffect(() => {
@@ -62,7 +61,9 @@ export default function PlanDetailsScreen() {
       setCurrentPlan(mergedPlan);
 
       // If no date selected OR date not in current plan, default to first day of plan
-      const dateInPlan = mergedPlan.dailyPlans?.some((dp: any) => dp.date === selectedDate);
+      const dateInPlan = mergedPlan.dailyPlans?.some(
+        (dp: any) => dp.date === selectedDate,
+      );
       if (!selectedDate || !dateInPlan) {
         if (mergedPlan.dailyPlans?.length) {
           setSelectedDate(mergedPlan.dailyPlans[0].date);
@@ -83,15 +84,60 @@ export default function PlanDetailsScreen() {
   // Fetch global nutrition goals for the plan
   const { data: goalsData } = usePlanNutritionGoals({ planId: Number(id) });
 
-  const makeMealsHook = (slot: MealTypeEnum) =>
-    selectedDate
-      ? useMealsBySlot({ planId: Number(id), date: selectedDate, slot })
-      : { data: undefined, isLoading: false };
+  // ---- DEBUG LOG FOR CALORIE TRACKER ----
+  useEffect(() => {
+    logger.debug(
+      LogCategory.NUTRITION,
+      '[PlanDetailsScreen] CalorieTracker values',
+      {
+        selectedDate,
+        consumedCalories:
+          (nutritionData as any)?.data?.macros?.calories ?? 0,
+        goalCalories:
+          (goalsData as any)?.data?.macros?.calories ??
+          (planDetails?.plan?.calories ?? dailyPlan?.calories ?? 0),
+        carbs: {
+          current: (nutritionData as any)?.data?.macros?.carbs ?? 0,
+          goal:
+            (goalsData as any)?.data?.macros?.carbs ??
+            (planDetails?.plan?.carbs ?? dailyPlan?.carbs ?? 0),
+        },
+        protein: {
+          current: (nutritionData as any)?.data?.macros?.protein ?? 0,
+          goal:
+            (goalsData as any)?.data?.macros?.protein ??
+            (planDetails?.plan?.protein ?? dailyPlan?.protein ?? 0),
+        },
+        fat: {
+          current: (nutritionData as any)?.data?.macros?.fat ?? 0,
+          goal:
+            (goalsData as any)?.data?.macros?.fat ?? (planDetails?.plan?.fat ?? dailyPlan?.fat ?? 0),
+        },
+      },
+    );
+  }, [selectedDate, nutritionData, goalsData, dailyPlan]);
 
-  const { data: breakfastData, isLoading: loadingBreakfast } = makeMealsHook(MealTypeEnum.BREAKFAST);
-  const { data: lunchData, isLoading: loadingLunch } = makeMealsHook(MealTypeEnum.LUNCH);
-  const { data: dinnerData, isLoading: loadingDinner } = makeMealsHook(MealTypeEnum.DINNER);
-  const { data: snacksData, isLoading: loadingSnacks } = makeMealsHook(MealTypeEnum.SNACK);
+  // Always call hooks unconditionally to respect the Rules of Hooks.
+  const { data: breakfastData, isLoading: loadingBreakfast } = useMealsBySlot({
+    planId: Number(id),
+    date: selectedDate || '',
+    slot: MealTypeEnum.BREAKFAST,
+  });
+  const { data: lunchData, isLoading: loadingLunch } = useMealsBySlot({
+    planId: Number(id),
+    date: selectedDate || '',
+    slot: MealTypeEnum.LUNCH,
+  });
+  const { data: dinnerData, isLoading: loadingDinner } = useMealsBySlot({
+    planId: Number(id),
+    date: selectedDate || '',
+    slot: MealTypeEnum.DINNER,
+  });
+  const { data: snacksData, isLoading: loadingSnacks } = useMealsBySlot({
+    planId: Number(id),
+    date: selectedDate || '',
+    slot: MealTypeEnum.SNACK,
+  });
 
   // --- MUTATION REMOVE MEAL ---
   const toast = useToast();
@@ -161,7 +207,7 @@ export default function PlanDetailsScreen() {
         },
       );
     },
-    [dailyPlanId, breakfastData, lunchData, dinnerData, snacksData, selectedDate],
+    [dailyPlanId, selectedDate],
   );
 
   const slotEnumMap: Record<string, MealTypeEnum> = {
@@ -190,7 +236,11 @@ export default function PlanDetailsScreen() {
       const slot = slotEnumMap[key];
       if (!slot) return;
       if (!selectedDate) {
-        logger.warn(LogCategory.UI, 'Attempted navigation without selectedDate', { key });
+        logger.warn(
+          LogCategory.UI,
+          'Attempted navigation without selectedDate',
+          { key },
+        );
         return;
       }
       logger.info(LogCategory.UI, 'Navigate to slot page', {
@@ -239,20 +289,18 @@ export default function PlanDetailsScreen() {
   };
 
   // ---- CALENDAR MARKERS & RANGE ----
-  const markedDates = planDetails?.dailyPlans?.reduce(
-    (acc: any, dp: any) => {
-      acc[dp.date] = {
-        marked: true,
-        selected: dp.date === selectedDate,
-      };
-      return acc;
-    },
-    {} as any,
-  );
+  const markedDates = planDetails?.dailyPlans?.reduce((acc: any, dp: any) => {
+    acc[dp.date] = {
+      marked: true,
+      selected: dp.date === selectedDate,
+    };
+    return acc;
+  }, {} as any);
 
   // Compute calendar bounds (start & end of current plan)
   const planStartDate = planDetails?.dailyPlans?.[0]?.date;
-  const planEndDate = planDetails?.dailyPlans?.[planDetails?.dailyPlans?.length - 1]?.date;
+  const planEndDate =
+    planDetails?.dailyPlans?.[planDetails?.dailyPlans?.length - 1]?.date;
 
   const handleDayPress = useCallback((day: any) => {
     setSelectedDate(day.dateString);
@@ -263,8 +311,8 @@ export default function PlanDetailsScreen() {
       {planDetails && (
         <View style={styles.calendarWrapper}>
           <NutrioCalendar
-             minDate={planStartDate}
-             maxDate={planEndDate}
+            minDate={planStartDate}
+            maxDate={planEndDate}
             initialDate={selectedDate}
             markedDates={markedDates}
             onDayPress={handleDayPress}
@@ -276,36 +324,71 @@ export default function PlanDetailsScreen() {
         <CalorieTracker
           date={selectedDate ? new Date(selectedDate) : new Date()}
           consumedCalories={(nutritionData as any)?.data?.macros?.calories || 0}
-          goalCalories={(goalsData as any)?.data?.macros?.calories || 0}
+          goalCalories={
+            (goalsData as any)?.data?.macros?.calories ??
+            (planDetails?.plan?.calories ?? dailyPlan?.calories ?? 0)
+          }
           walkingCalories={0}
           activityCalories={0}
           carbs={{
             current: (nutritionData as any)?.data?.macros?.carbs || 0,
-            goal: (goalsData as any)?.data?.macros?.carbs || 0,
+            goal:
+              (goalsData as any)?.data?.macros?.carbs ??
+              (planDetails?.plan?.carbs ?? dailyPlan?.carbs ?? 0),
           }}
           protein={{
             current: (nutritionData as any)?.data?.macros?.protein || 0,
-            goal: (goalsData as any)?.data?.macros?.protein || 0,
+            goal:
+              (goalsData as any)?.data?.macros?.protein ??
+              (planDetails?.plan?.protein ?? dailyPlan?.protein ?? 0),
           }}
           fat={{
             current: (nutritionData as any)?.data?.macros?.fat || 0,
-            goal: (goalsData as any)?.data?.macros?.fat || 0,
+            goal:
+              (goalsData as any)?.data?.macros?.fat ??
+              (planDetails?.plan?.fat ?? dailyPlan?.fat ?? 0),
           }}
           foodItems={[]}
         />
       </View>
-
-      <View style={styles.spacer} />
 
       <MealSlotsList
         onSlotPress={handleSlotPress}
         onAdd={handleAddMeal}
         onRemove={handleRemoveMeal}
         slots={[
-          slotToProps('breakfast', 'Breakfast', breakfastData, IMG_BREAKFAST, MealTypeEnum.BREAKFAST, loadingBreakfast),
-          slotToProps('lunch', 'Lunch', lunchData, IMG_LUNCH, MealTypeEnum.LUNCH, loadingLunch),
-          slotToProps('dinner', 'Dinner', dinnerData, IMG_DINNER, MealTypeEnum.DINNER, loadingDinner),
-          slotToProps('snacks', 'Snacks', snacksData, IMG_SNACKS, MealTypeEnum.SNACK, loadingSnacks),
+          slotToProps(
+            'breakfast',
+            'Breakfast',
+            breakfastData,
+            IMG_BREAKFAST,
+            MealTypeEnum.BREAKFAST,
+            loadingBreakfast,
+          ),
+          slotToProps(
+            'lunch',
+            'Lunch',
+            lunchData,
+            IMG_LUNCH,
+            MealTypeEnum.LUNCH,
+            loadingLunch,
+          ),
+          slotToProps(
+            'dinner',
+            'Dinner',
+            dinnerData,
+            IMG_DINNER,
+            MealTypeEnum.DINNER,
+            loadingDinner,
+          ),
+          slotToProps(
+            'snacks',
+            'Snacks',
+            snacksData,
+            IMG_SNACKS,
+            MealTypeEnum.SNACK,
+            loadingSnacks,
+          ),
         ]}
       />
 

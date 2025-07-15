@@ -45,7 +45,7 @@ export async function handleGetMealsList(
   db: any,
   params: GetMealsListParams,
 ): Promise<GetMealsListResult> {
-  const { userId, type, search, limit = 20, filter, cuisine } = params;
+  const { userId, type, search, limit = 20, filter, cuisine, planId, date } = params;
 
   try {
     if (!db) throw new Error('Database not initialized');
@@ -60,9 +60,29 @@ export async function handleGetMealsList(
     // Nous utilisons updatedAt pour l'ordre décroissant. Si updatedAt n'est pas défini
     // (cas peu probable car la colonne possède une valeur par défaut), Drizzle renverra NULL
     // et les repas ne seront pas pris en compte comme récents, ce qui est acceptable.
-    let query: any = db.select().from(meals).orderBy(desc(meals.updatedAt));
+    let query: any;
+
+    // Si planId et date sont spécifiés, nous devons joindre les tables daily_plan et daily_plan_meals
+    // pour ne récupérer que les repas liés au plan et à la date donnés.
+    if (planId && date) {
+      query = db
+        .select()
+        .from(meals)
+        .innerJoin(dailyPlanMeals, eq(dailyPlanMeals.mealId, meals.id))
+        .innerJoin(dailyPlan, eq(dailyPlan.id, dailyPlanMeals.dailyPlanId))
+        .orderBy(desc(meals.updatedAt));
+    } else {
+      // Comportement précédent : requête directe sur la table meals
+      query = db.select().from(meals).orderBy(desc(meals.updatedAt));
+    }
 
     const conditions: SQL[] = [];
+    
+    // Ajout des conditions de plan/date si fournies
+    if (planId && date) {
+      conditions.push(eq(dailyPlan.planId, planId));
+      conditions.push(eq(dailyPlan.date, date));
+    }
 
     if (filter === 'favorites') {
       conditions.push(eq(meals.isFavorite, true));
@@ -75,8 +95,14 @@ export async function handleGetMealsList(
       // si tous les repas sont liés à un utilisateur.
     }
 
+    // Filtre par type de repas
     if (type) {
-      conditions.push(eq(meals.type, type));
+      if (planId && date) {
+        // Lorsque nous sommes dans le contexte d'un plan/date, on se base sur la colonne mealType de la table de liaison
+        conditions.push(eq(dailyPlanMeals.mealType, type));
+      } else {
+        conditions.push(eq(meals.type, type));
+      }
     }
 
     if (cuisine) {
@@ -524,7 +550,7 @@ export async function handleAddMealToDailyPlan(
   db: any,
   params: AddMealToDailyPlanParams,
 ): Promise<AddMealToDailyPlanResult> {
-  const { dailyPlanId, mealId, quantity } = params;
+  const { dailyPlanId, mealId, quantity, mealType } = params;
 
   try {
     if (!db) throw new Error('Database not initialized');
@@ -585,6 +611,7 @@ export async function handleAddMealToDailyPlan(
           dailyPlanId,
           mealId,
           quantity,
+          mealType: mealType ?? meal.type,
           calories: adjustedCalories,
           carbs: adjustedCarbs,
           fat: adjustedFat,

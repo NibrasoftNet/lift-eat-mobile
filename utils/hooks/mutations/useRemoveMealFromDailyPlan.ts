@@ -31,6 +31,10 @@ export function useRemoveMealFromDailyPlan() {
       });
 
       await queryClient.invalidateQueries({
+        queryKey: queryKeys.nutritionGoals(planId),
+      });
+
+      await queryClient.invalidateQueries({
         queryKey: queryKeys.dailyNutrition(planId, date),
       });
 

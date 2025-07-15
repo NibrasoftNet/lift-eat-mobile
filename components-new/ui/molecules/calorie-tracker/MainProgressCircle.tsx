@@ -58,7 +58,7 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
           </Text>
         </View>
         <Text style={[styles.amountText, { color: textDarkColor }]}>
-          {consumedCalories}
+          {consumedCalories}/{goalCalories}
         </Text>
         <Text style={[styles.unitText, { color: textGrayColor }]}>kcal</Text>
       </View>

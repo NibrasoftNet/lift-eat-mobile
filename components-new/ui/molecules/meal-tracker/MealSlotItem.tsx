@@ -1,13 +1,19 @@
 import React, { useMemo } from 'react';
-import { View, Image, Pressable, StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import {
+  View,
+  Image,
+  Pressable,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
+} from 'react-native';
 import Text from '@/components-new/ui/atoms/base/Text';
 import CircularAddButton from '@/components-new/ui/atoms/inputs/CircularAddButton';
 import ArrowRightRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
 import DeleteRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/DeleteRegularLightBorderIcon';
 import TickSquareIcon from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import { useTheme, ThemeInterface } from '@/themeNew';
-
-
 import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 interface MealSlotItemProps {
@@ -35,9 +41,6 @@ interface MealSlotItemProps {
 
 const ICON_SIZE = 48;
 const BAR_HEIGHT = 4;
-const BADGE_SIZE = 20;
-const ADD_SIZE = 28;
-
 
 const MealSlotItem: React.FC<MealSlotItemProps> = ({
   title,
@@ -64,7 +67,8 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
     );
   }
 
-  const progress = goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
+  const progress =
+    goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
 
   const Left = iconSource ? (
     <Image source={iconSource} style={styles.icon} />
@@ -76,10 +80,20 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
     <View style={styles.rightBtns}>
       {onRemovePress && (
         <Pressable onPress={onRemovePress} style={styles.deleteBtn} hitSlop={6}>
-          <DeleteRegularLightBorderIcon width={20} height={20} color={theme.color('error')} />
+          <DeleteRegularLightBorderIcon
+            width={20}
+            height={20}
+            color={theme.color('error')}
+          />
         </Pressable>
       )}
-      <ArrowRightRegularLightBorderIcon width={24} height={24} color="#212121" />
+      <Pressable onPress={onPress}>
+        <ArrowRightRegularLightBorderIcon
+          width={24}
+          height={24}
+          color="#212121"
+        />
+      </Pressable>
     </View>
   ) : (
     <CircularAddButton
@@ -98,11 +112,19 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
         {/* Title + check */}
         <View style={styles.titleRow}>
           <Text style={styles.title}>{title}</Text>
-          {hasMeals && consumedCalories >= goalCalories }
+          {hasMeals && consumedCalories >= goalCalories && (
+            <TickSquareIcon
+              width={16}
+              height={16}
+              color={theme.color('success')}
+            />
+          )}
         </View>
         {/* Progress */}
         <View style={styles.progressBg}>
-          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+          <View
+            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+          />
         </View>
         <Text style={styles.kcalText}>
           {consumedCalories} / {goalCalories} kcal

@@ -20,7 +20,7 @@ export const queryKeys = {
     ['dailyNutrition', planId, date] as const,
 
   // Repas d'un slot (B, L, S, D) pour une date
-  
+
   // Objectifs nutritionnels globaux du plan
   nutritionGoals: (planId: number | string) => ['nutritionGoals', planId] as const,
 

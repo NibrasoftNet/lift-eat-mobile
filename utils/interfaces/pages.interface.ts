@@ -74,7 +74,10 @@ export interface AuthPagesServiceInterface {
  */
 export interface MealFilters {
   search?: string;
+  /** Alias vers `type` pour rétrocompatibilité */
   mealType?: MealTypeEnum;
+  /** Nouveau champ aligné sur MCP */
+  type?: MealTypeEnum;
   cuisine?: CuisineTypeEnum;
   page?: number;
   limit?: number;
