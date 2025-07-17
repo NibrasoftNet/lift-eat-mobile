@@ -14,9 +14,9 @@
 - [ ] Implémenter `useUpdatePlan` (React Query mutation) dans `utils/hooks/mutations/useUpdatePlan.ts` enveloppant `planPagesService.updatePlan`.
 - [ ] Ajouter invalidation de cache (`planPagesService.invalidatePlanCache`).
 
-## 3. Construction du formulaire UI (formulaire unique)
+## 3. Construction du formulaire UI (formulaire unique) – **Phase 1 : UI Only (terminée)**
 > Pour l’écran d’édition, on fusionne les **deux** formulaires utilisés lors de la création (ex : informations générales + objectifs nutritionnels) en **un seul** composant. Toutes les données devront être chargées, affichées et validées dans ce formulaire unique.
-- [ ] Créer un composant **`PlanEditForm`** dans `components-new/ui/organisms/plan/PlanEditForm.tsx`.
+- [x] Créer un composant **`PlanEditForm`** dans `components-new/ui/organisms/plan/PlanEditForm.tsx`.
   - [ ] Utiliser les nouveaux composants :`Input`, `Textarea`, `Select`, `DatePicker`, `Button` depuis `components-new/ui/atoms` ou `molecules`.
   - [ ] Disposer les champs (regroupés logiquement : détails généraux, objectifs/calories, dates, etc.)
   - [ ] Afficher messages d’erreur de validation sous chaque champ.
@@ -24,7 +24,7 @@
 - [ ] Ajouter un bouton « Supprimer le plan » si la fonctionnalité existe.
 
 ## 4. Écran et navigation Expo Router
-- [ ] Créer le fichier d’écran `app/(root)/(tabs)/plans/my-plans/edit/[id]-new.tsx` ou remplacer l’ancien.
+- [x] Créer le fichier d’écran `app/(root)/(tabs)/plans/my-plans/edit/[id]-new.tsx` ou remplacer l’ancien.
   - [ ] Récupérer `id` via `useLocalSearchParams`.
   - [ ] Charger les données initiales via `usePlanDetails` et hydrater le formulaire.
   - [ ] Sur submit, appeler `useUpdatePlan` puis rediriger (toast + router.back()).

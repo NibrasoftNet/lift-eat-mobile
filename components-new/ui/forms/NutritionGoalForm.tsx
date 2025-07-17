@@ -10,6 +10,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { nutritionPagesService } from '@/utils/services/pages/nutrition-pages.service';
+import { planPagesService } from '@/utils/services/pages/plan-pages.service';
 import { invalidateCache, DataType } from '@/utils/helpers/queryInvalidation';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
@@ -64,13 +65,17 @@ const SegmentToggle = <T extends string>({
   );
 };
 
+interface NutritionGoalFormProps {
+  defaultValues: NutritionGoalDefaultValueProps;
+  operation: 'create' | 'update';
+  planId?: number;
+}
+
 export default function NutritionGoalForm({
   defaultValues,
   operation,
-}: {
-  defaultValues: NutritionGoalDefaultValueProps;
-  operation: 'create' | 'update';
-}) {
+  planId,
+}: NutritionGoalFormProps) {
   const { t } = useTranslation();
   const theme = useAppTheme();
   const styles = getStyles(theme);
@@ -101,7 +106,16 @@ export default function NutritionGoalForm({
         throw new Error(formResult.message || 'Form validation failed');
       }
 
-      // Call API to create plan
+      if (operation === 'update') {
+        if (!planId) throw new Error('Plan ID required for update');
+        const result = await planPagesService.updatePlan(planId, formResult.data);
+        if (!result.success) {
+          logger.error(LogCategory.DATABASE, `Failed to update plan: ${result.error}`);
+          throw new Error(result.error || 'Failed to update plan');
+        }
+        return planId;
+      }
+      // Creation flow
       const result = await nutritionPagesService.createPlan(formResult.data, userId);
       if (!result.success || !result.data?.planId) {
         logger.error(LogCategory.DATABASE, `Failed to create plan: ${result.error}`);
@@ -119,7 +133,7 @@ export default function NutritionGoalForm({
             id={`toast-${id}`}
             color={ToastTypeEnum.SUCCESS}
             title={t('toast.savedTitle')}
-            description={t('toast.nutritionGoalSavedMsg')}
+            description={operation === 'update' ? t('toast.planUpdatedMsg', 'Plan updated successfully') : t('toast.nutritionGoalSavedMsg')}
           />
         ),
       });

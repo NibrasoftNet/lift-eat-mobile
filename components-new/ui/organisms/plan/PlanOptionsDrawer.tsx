@@ -76,7 +76,7 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
             style={styles.closeBtn as ViewStyle}
             onPress={onClose}
           >
-            <Icon as={CircleX} size="xl" color={theme.color('primary')} />
+            <Icon as={CircleX} size="xl" color={theme.color('successLighter')} />
           </TouchableOpacity>
 
           {/* Title */}

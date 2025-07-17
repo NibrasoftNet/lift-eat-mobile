@@ -39,9 +39,11 @@ import { LogCategory } from '@/utils/enum/logging.enum';
 
 interface Props {
   defaultValues: CalculateCaloriesIntakeDefaultValueProps;
+  /** Optional callback invoked after successful submission instead of default navigation */
+  onContinue?: () => void;
 }
 
-const CalculateCaloriesIntakeFormNew: React.FC<Props> = ({ defaultValues }) => {
+const CalculateCaloriesIntakeFormNew: React.FC<Props> = ({ defaultValues, onContinue }) => {
   const theme = useAppTheme();
   const styles = getStyles(theme);
   const queryClient = useQueryClient();
@@ -90,7 +92,11 @@ const CalculateCaloriesIntakeFormNew: React.FC<Props> = ({ defaultValues }) => {
       if (!updateResult.success) throw new Error(updateResult.error || 'Failed to save data');
 
       await queryClient.invalidateQueries({ queryKey: ['user-details', userId] });
-      router.push('/(root)/(tabs)/plans/my-plans/create/target');
+      if (onContinue) {
+        onContinue();
+      } else {
+        router.push('/(root)/(tabs)/plans/my-plans/create/target');
+      }
 
       toast.show({
         placement: 'top',

@@ -20,6 +20,7 @@ export default function NewPlanLayout() {
         name="target/index"
         options={{ animation: 'fade_from_bottom', animationDuration: 600 }}
       />
+
       <Stack.Screen
         name="target/edit/[id]"
         options={{ animation: 'fade_from_bottom', animationDuration: 600 }}

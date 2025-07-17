@@ -119,19 +119,19 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
 
   getActiveDayPlan: () => {
     const { currentPlan, selectedDate } = get();
-    if (!currentPlan || !selectedDate) return null;
+    if (!currentPlan || !Array.isArray(currentPlan.dailyPlans)) return null;
     return currentPlan.dailyPlans.find((dp) => dp.date === selectedDate) || null;
   },
 
   getDayPlanByDate: (date) => {
     const { currentPlan } = get();
-    if (!currentPlan) return null;
+    if (!currentPlan || !Array.isArray(currentPlan.dailyPlans)) return null;
     return currentPlan.dailyPlans.find((dp) => dp.date === date) || null;
   },
 
   calculateDailyMacros: (dayPlanId) => {
     const { currentPlan } = get();
-    if (!currentPlan) return { calories: 0, carbs: 0, fat: 0, protein: 0 };
+    if (!currentPlan || !Array.isArray(currentPlan.dailyPlans)) return { calories: 0, carbs: 0, fat: 0, protein: 0 };
 
     const dayPlan = currentPlan.dailyPlans.find((dp) => dp.id === dayPlanId);
     if (!dayPlan) return { calories: 0, carbs: 0, fat: 0, protein: 0 };
