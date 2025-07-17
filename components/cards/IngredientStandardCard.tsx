@@ -1,4 +1,6 @@
 import React, { useEffect, memo, useMemo } from 'react';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Box } from '../ui/box';
 import { Text } from '../ui/text';
@@ -38,6 +40,15 @@ const DEFAULT_INGREDIENT_IMAGE = require('@/assets/images/logo_no_bg.png');
 // Solution optimisée, pas de lecture/écriture de valeurs Reanimated pendant le rendu
 const IngredientStandardCard = memo(
   ({ item, index }: { item: IngredientWithStableId; index: number }) => {
+    // Résolution de l'image avec mémoïsation et logging
+    const resolvedImage = useMemo(() => {
+      const src = resolveStaticImage(item.image as unknown as string, DEFAULT_INGREDIENT_IMAGE);
+      logger.debug(LogCategory.UI, 'IngredientStandardCard image resolved', {
+        ingredientId: item.id,
+        hasImage: !!item.image,
+      });
+      return src;
+    }, [item.image, item.id, item.name]);
     const router = useRouter();
 
     // Zustand store hooks avec sélecteur pour éviter les re-rendus inutiles
@@ -102,7 +113,7 @@ const IngredientStandardCard = memo(
                   {item.image ? (
                     <AvatarImage
                       className="border-2 border-tertiary-500 w-16 h-16 shadow-md"
-                      source={resolveStaticImage(item.image as unknown as string, DEFAULT_INGREDIENT_IMAGE)}
+                      source={resolvedImage}
                     />
                   ) : (
                     <Icon as={HandPlatter} size="lg" className="stroke-white" />

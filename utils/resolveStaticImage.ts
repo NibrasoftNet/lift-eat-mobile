@@ -1,5 +1,7 @@
 import { ImageSourcePropType } from 'react-native';
 import { ingredientImages } from '../db/ingredientImages';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 
 /**
  * Convertit un chemin (string) stocké en base locale ou distant en source compatible React Native.
@@ -11,28 +13,47 @@ export function resolveStaticImage(
   uri?: string | null,
   fallback?: ImageSourcePropType,
 ): ImageSourcePropType {
-  if (!uri) return fallback ?? ({} as ImageSourcePropType);
+  // Log entrée
+  logger.debug(LogCategory.UI, 'resolveStaticImage invoked', { hasImage: !!uri });
+
+  let resolved: ImageSourcePropType | undefined;
+
+  if (!uri) {
+    resolved = fallback ?? ({} as ImageSourcePropType);
+    logger.debug(LogCategory.UI, 'resolveStaticImage – empty URI, using fallback', { resolvedType: getResolvedType(resolved) });
+    return resolved;
+  }
 
   // URL distante ou data URI ➜ retourner tel quel
-  // URI already includes a protocol (http/https) or is a full data URI ➜ return directly
   if (/^(https?:|data:)/.test(uri)) {
-    return { uri } as ImageSourcePropType;
+    resolved = { uri } as ImageSourcePropType;
+    logger.debug(LogCategory.UI, 'resolveStaticImage – remote or data URI', { hasImage: true });
+    return resolved;
   }
 
+  // Mapping statique via ingredientImages
   if (ingredientImages && ingredientImages[uri as keyof typeof ingredientImages]) {
-    return ingredientImages[uri as keyof typeof ingredientImages] as ImageSourcePropType;
+    resolved = ingredientImages[uri as keyof typeof ingredientImages] as ImageSourcePropType;
+    logger.debug(LogCategory.UI, 'resolveStaticImage – matched static asset', { hasImage: true });
+    return resolved;
   }
 
-  // Detect raw base64 strings (commonly stored without the `data:` prefix)
-  // Heuristic: very long string with no protocol/colon and valid base64 characters
+  // Détection chaîne base64 brute
   if (/^[A-Za-z0-9+/]+={0,2}$/.test(uri) && uri.length > 100) {
-    return { uri: `data:image/jpeg;base64,${uri}` } as ImageSourcePropType;
+    resolved = { uri: `data:image/jpeg;base64,${uri}` } as ImageSourcePropType;
+    logger.debug(LogCategory.UI, 'resolveStaticImage – raw base64 string detected', { hasImage: true });
+    return resolved;
   }
 
-  // Aucun mapping trouvé – on renvoie soit l'URI brute (peut provenir du FileSystem),
-  // soit le placeholder.
-  return (
-    (/^(file:|content:)/.test(uri) ? { uri } : fallback) ??
-    ({} as ImageSourcePropType)
-  );
+  // Fallbacks: file/content URI ou placeholder
+  resolved = (/^(file:|content:)/.test(uri) ? { uri } : fallback) ?? ({} as ImageSourcePropType);
+  logger.debug(LogCategory.UI, 'resolveStaticImage – fallback resolution', { hasImage: !!uri });
+  return resolved;
+}
+
+// Helper interne pour un logging plus lisible
+function getResolvedType(source: ImageSourcePropType): string {
+  if (typeof source === 'number') return 'static-module';
+  if (typeof source === 'object' && source && 'uri' in source) return 'uri';
+  return 'unknown';
 }

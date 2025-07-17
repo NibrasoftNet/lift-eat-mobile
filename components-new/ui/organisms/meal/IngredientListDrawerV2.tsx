@@ -25,6 +25,8 @@ import { getCurrentUserIdSync } from '@/utils/helpers/userContext';
 import IngredientDetailsRow from './IngredientDetailsRow';
 import { IngredientDetailsData } from './IngredientDetails';
 import { resolveStaticImage } from '@/utils/resolveStaticImage';
+import { logger } from '@/utils/services/common/logging.service';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { CloseSquareRegularBoldIcon } from '@/assets/icons/figma/regular-bold/CloseSquareRegularBoldIcon';
 import { SearchRegularBoldIcon } from '@/assets/icons/figma/regular-bold/SearchRegularBoldIcon';
 
@@ -129,10 +131,13 @@ const IngredientListDrawerV2: React.FC<IngredientListDrawerProps> = ({
           <View style={styles.leftSection}>
             <View style={styles.imageContainer}>
               {ing.image ? (
-                <Image
-                  source={typeof ing.image === 'string' ? resolveStaticImage(ing.image) : { uri: `data:image/png;base64,${ing.image}` }}
-                  style={styles.ingredientImage}
-                />
+                (() => {
+                  const src = typeof ing.image === 'string'
+                    ? resolveStaticImage(ing.image)
+                    : { uri: `data:image/png;base64,${ing.image}` };
+                  logger.debug(LogCategory.UI, 'IngredientRow image resolved', { ingredientId: ing.id, hasImage: !!ing.image });
+                  return <Image source={src} style={styles.ingredientImage} />;
+                })()
               ) : (
                 <View style={styles.fallbackContainer}>
                   <Text style={styles.fallbackText}>{ing.name.slice(0, 2).toUpperCase()}</Text>
