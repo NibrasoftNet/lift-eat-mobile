@@ -12,7 +12,12 @@ export enum MealListFilter {
 // Interface pour getMealsListViaMCP
 export interface GetMealsListParams {
   userId: number;
+  /** Type de repas (Breakfast, Lunch, etc.) */
   type?: MealTypeEnum;
+  /** Identifiant du plan associé (pour filtrage dans PlanDetails) */
+  planId?: number;
+  /** Date ISO (YYYY-MM-DD) du dailyPlan concerné */
+  date?: string;
   cuisine?: CuisineTypeEnum;
   search?: string;
   limit?: number;

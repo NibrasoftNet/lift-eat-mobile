@@ -14,12 +14,19 @@ export function resolveStaticImage(
   if (!uri) return fallback ?? ({} as ImageSourcePropType);
 
   // URL distante ou data URI ➜ retourner tel quel
+  // URI already includes a protocol (http/https) or is a full data URI ➜ return directly
   if (/^(https?:|data:)/.test(uri)) {
     return { uri } as ImageSourcePropType;
   }
 
   if (ingredientImages && ingredientImages[uri as keyof typeof ingredientImages]) {
     return ingredientImages[uri as keyof typeof ingredientImages] as ImageSourcePropType;
+  }
+
+  // Detect raw base64 strings (commonly stored without the `data:` prefix)
+  // Heuristic: very long string with no protocol/colon and valid base64 characters
+  if (/^[A-Za-z0-9+/]+={0,2}$/.test(uri) && uri.length > 100) {
+    return { uri: `data:image/jpeg;base64,${uri}` } as ImageSourcePropType;
   }
 
   // Aucun mapping trouvé – on renvoie soit l'URI brute (peut provenir du FileSystem),

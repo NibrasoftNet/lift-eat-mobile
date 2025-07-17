@@ -9,8 +9,8 @@ import { MealOrmProps } from '@/db/schema';
 
 export interface DailyPlan {
   id: number;
+  date: string; // YYYY-MM-DD
   day: DayEnum;
-  week: number;
   calories: number;
   carbs: number;
   fats: number;
@@ -36,7 +36,6 @@ export interface NutritionPlan {
 
 export interface DailyIntake {
   id: number;
-  week: number;
   date: string;
   actualCalories: number;
   actualCarbs: number;

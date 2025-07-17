@@ -52,7 +52,7 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
       {/* Section gauche - Calories consommées */}
       <View style={styles.sideContainer}>
         <View style={styles.labelRow}>
-          <GreenSaladEmoji size={12} />
+          <GreenSaladEmoji size={35} />
           <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>
             Eaten
           </Text>
@@ -105,7 +105,7 @@ const MainProgressCircle: React.FC<MainProgressCircleProps> = ({
       {/* Section droite - Calories restantes */}
       <View style={styles.sideContainer}>
         <View style={styles.labelRow}>
-          <FireEmoji size={12} />
+          <FireEmoji size={35} />
           <Text style={[styles.label, { color: textGrayColor, marginLeft: 4 }]}>
             Burned
           </Text>
@@ -139,17 +139,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: 'Urbanist',
-    fontSize: 12,
-    fontWeight: '400',
-    lineHeight: 19.2, // 1.6 * 12
+    fontSize: 16,
+    fontWeight: '500',
+    lineHeight: 24, // 1.6 * 12
     letterSpacing: 0.2, // 1.66666% * 12
     textAlign: 'center',
   },
   amountText: {
     fontFamily: 'Urbanist',
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '700',
-    lineHeight: 44.8, // 1.4 * 32
+    lineHeight: 35, // 1.4 * 24
     textAlign: 'center',
   },
   unitText: {
@@ -179,9 +179,9 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     fontFamily: 'Urbanist',
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: '700',
-    lineHeight: 56, // 1.4 * 40
+    lineHeight: 44.8, // 1.4 * 32
     textAlign: 'center',
   },
   percentageSymbol: {

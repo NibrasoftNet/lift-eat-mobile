@@ -44,6 +44,7 @@ import {
   PlanGeneratedWithEnum,
   DailyPlanGeneratedWithEnum,
   DayUnitArray,
+  DayEnum,
 } from '@/utils/enum/general.enum';
 import {
   GenderEnum,
@@ -237,6 +238,7 @@ export async function handleCreatePlan(
       protein: proteinGrams, // Grammes calculés
       fat: fatGrams, // Grammes calculés
       type: anyData.type || PlanGeneratedWithEnum.MANUAL, // Le type de génération du plan
+      startDate: anyData.startDate || new Date().toISOString().split('T')[0],
     };
 
     // Ajouter les propriétés spécifiques si elles existent dans les données fournies
@@ -328,7 +330,7 @@ export async function handleCreateDailyPlans(
 
     // Vérifier que le plan existe
     const existingPlan = await db
-      .select({ id: plan.id })
+      .select({ id: plan.id, startDate: plan.startDate })
       .from(plan)
       .where(eq(plan.id, planId));
 
@@ -339,23 +341,36 @@ export async function handleCreateDailyPlans(
     // Utiliser une transaction si fournie, sinon continuer sans transaction
     const dbContext = transaction || db;
 
-    // Générer les plans journaliers pour chaque jour de la semaine et pour chaque semaine
+    // Générer un dailyPlan par date pour toute la durée
     const dailyPlansToInsert: {
       planId: number;
       day: string;
-      week: number;
+      date: string;
       generatedWith: string;
     }[] = [];
 
-    for (let week = 1; week <= durationWeeks; week++) {
-      for (const day of DayUnitArray) {
-        dailyPlansToInsert.push({
-          planId,
-          day,
-          week,
-          generatedWith: DailyPlanGeneratedWithEnum.COMPANY,
-        });
-      }
+    const baseDate = new Date(existingPlan[0].startDate);
+    const totalDays = durationWeeks * DayUnitArray.length;
+
+    function addDays(d: Date, n: number) {
+      const copy = new Date(d);
+      copy.setDate(copy.getDate() + n);
+      return copy;
+    }
+
+    for (let i = 0; i < totalDays; i++) {
+      const current = addDays(baseDate, i);
+      const dateIso = current.toISOString().split('T')[0];
+            // getDay() renvoie 0 (dimanche) à 6 (samedi). On mappe manuellement :
+      const mappedDay =
+        current.getDay() === 0 ? DayEnum.SUNDAY : DayUnitArray[current.getDay() - 1];
+
+      dailyPlansToInsert.push({
+        planId,
+        day: mappedDay,
+        date: dateIso,
+        generatedWith: DailyPlanGeneratedWithEnum.COMPANY,
+      });
     }
 
     // Insérer tous les plans journaliers
@@ -853,8 +868,8 @@ export async function handleAddDailyPlan(
       .insert(dailyPlan)
       .values({
         planId,
-        day: dailyPlanData.day,
-        week: dailyPlanData.week || 1,
+        date: dailyPlanData.date,
+        day: dailyPlanData.day ?? DayUnitArray[new Date(dailyPlanData.date).getDay()],
         calories: dailyPlanData.calories,
         carbs: dailyPlanData.carbs,
         protein: dailyPlanData.protein,

@@ -21,6 +21,36 @@ export interface MealDrawerServiceInterface {
 }
 
 class MealDrawerUIService implements MealDrawerServiceInterface {
+  // --- Drawer helper constants ---
+  readonly PAGE_SIZE = 10;
+  readonly MAX_ITEMS = 100;
+  readonly DEBOUNCE_DELAY = 300;
+
+  /**
+   * Debounce helper relying on generic drawerUIService
+   */
+  debounceSearchTerm(
+    searchTerm: string,
+    callback: (term: string) => void,
+    delay: number = this.DEBOUNCE_DELAY,
+  ) {
+    drawerUIService.debounceSearchTerm(searchTerm, callback, delay);
+  }
+
+  /**
+   * Generate a stable uniqueId for FlashList keyExtractor
+   */
+  generateUniqueId(item: { id: number }, pageParam: number, index: number) {
+    return drawerUIService.generateUniqueId('meal', item.id, pageParam, index);
+  }
+
+  /**
+   * Item type helper for FlashList optimisation
+   */
+  getItemType() {
+    return 'meal';
+  }
+
   getMealTypeName(type: MealTypeEnum): string {
     const names: Record<MealTypeEnum, string> = {
       [MealTypeEnum.BREAKFAST]: 'Petit-déjeuner',

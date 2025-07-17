@@ -737,6 +737,92 @@ export const planService = {
   },
 
   /**
+   * Récupère les valeurs nutritionnelles d'un plan journalier à partir du couple (planId, date)
+   * @param planId ID du plan nutritionnel
+   * @param date Date au format YYYY-MM-DD
+   * @returns Macros totales pour cette journée
+   */
+  async getDailyPlanNutritionByDate(
+    planId: number,
+    date: string,
+  ): Promise<{
+    success: boolean;
+    data?: { macros: MacroNutrientsBase };
+    error?: string;
+  }> {
+    try {
+      // Vérifier l'authentification
+      const userId = getCurrentUserIdSync();
+      if (!userId) {
+        return { success: false, error: 'Utilisateur non authentifié' };
+      }
+
+      logger.info(
+        LogCategory.NUTRITION,
+        `Récupération des macros pour le plan ${planId} à la date ${date}`,
+      );
+
+      // 1. Obtenir les plans journaliers du plan
+      const planDetails = await this.getPlanDetails(planId);
+      if (!planDetails.success || !planDetails.dailyPlans) {
+        return {
+          success: false,
+          error:
+            planDetails.error || `Impossible de récupérer les plans journaliers`,
+        };
+      }
+
+      // 2. Trouver le plan journalier correspondant à la date
+      const dailyPlan = planDetails.dailyPlans.find(
+        (dp: any) => dp.date === date,
+      );
+      if (!dailyPlan) {
+        return {
+          success: false,
+          error: `Aucun plan journalier trouvé pour la date ${date}`,
+        };
+      }
+
+      const dailyPlanId = dailyPlan.id;
+      if (!dailyPlanId) {
+        return {
+          success: false,
+          error: `ID du plan journalier introuvable pour la date ${date}`,
+        };
+      }
+
+      // 3. Calculer les macros via nutritionCoreService
+      const nutritionResult = await nutritionCoreService.calculateDailyPlanNutrition(
+        dailyPlanId,
+        userId,
+        NutritionDisplayMode.AS_IS,
+      );
+
+      if (!nutritionResult.success) {
+        return { success: false, error: nutritionResult.error };
+      }
+
+      const macros: MacroNutrientsBase = {
+        calories: nutritionResult.calories,
+        carbs: nutritionResult.carbs,
+        fat: nutritionResult.fat,
+        protein: nutritionResult.protein,
+        unit: 'g',
+      };
+
+      return { success: true, data: { macros } };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(
+        LogCategory.NUTRITION,
+        'Erreur dans getDailyPlanNutritionByDate',
+        { error: message, planId, date },
+      );
+      return { success: false, error: message };
+    }
+  },
+
+  /**
    * Méthode calculateDailyPlanNutrition supprimée le 13 mai 2025
    *
    * Cette méthode permettait de calculer les valeurs nutritionnelles d'un plan journalier.

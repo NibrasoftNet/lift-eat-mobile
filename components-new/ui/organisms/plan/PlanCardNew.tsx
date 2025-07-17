@@ -223,7 +223,7 @@ const PlanCardNew: React.FC<PlanCardNewProps> = ({ plan }) => {
         disableEdit={false}
         disableDelete={false}
         onDetail={() => router.push(`/plans/my-plans/details/${plan.id}`)}
-        onEdit={() => router.push(`/plans/my-plans/edit/${plan.id}`)}
+        onEdit={() => router.push({ pathname: '/plans/my-plans/edit/[id]', params: { id: plan.id } })}
         onDelete={handleDelete}
         disableSetCurrent={plan.current}
         onSetCurrent={handleSetCurrent}

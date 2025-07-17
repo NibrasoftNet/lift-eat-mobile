@@ -1,11 +1,20 @@
 import React, { useMemo } from 'react';
-import { View, Image, Pressable, StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import {
+  View,
+  Image,
+  Pressable,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
+} from 'react-native';
 import Text from '@/components-new/ui/atoms/base/Text';
 import CircularAddButton from '@/components-new/ui/atoms/inputs/CircularAddButton';
 import ArrowRightRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/ArrowLeft2RegularLightBorderIcon';
+import DeleteRegularLightBorderIcon from '@/assets/icons/figma/regular-light-border/DeleteRegularLightBorderIcon';
 import TickSquareIcon from '@/assets/icons/figma/regular-bold/TickSquareRegularBoldIcon';
 import { useTheme, ThemeInterface } from '@/themeNew';
-
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 interface MealSlotItemProps {
   /** Nom du créneau (Breakfast, Lunch, …) */
@@ -20,15 +29,18 @@ interface MealSlotItemProps {
   onPress?: () => void;
   /** Handler quand l'utilisateur veut ajouter un repas (si !hasMeals) */
   onAddPress?: () => void;
+  /** Handler pour supprimer le premier repas (simplifié) */
+  onRemovePress?: () => void;
+  /** Type du créneau (BREAKFAST, LUNCH…) */
+  slot?: MealTypeEnum;
+  /** Chargement en cours ? */
+  isLoading?: boolean;
   /** Emoji ou source image pour l'icône */
   iconSource?: any;
 }
 
 const ICON_SIZE = 48;
 const BAR_HEIGHT = 4;
-const BADGE_SIZE = 20;
-const ADD_SIZE = 28;
-
 
 const MealSlotItem: React.FC<MealSlotItemProps> = ({
   title,
@@ -37,12 +49,26 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
   hasMeals,
   onPress,
   onAddPress,
+  onRemovePress,
   iconSource,
+  isLoading = false,
+  slot,
+  ...restProps
 }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const progress = goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.skeleton]}>
+        <View style={styles.skeletonIcon} />
+        <View style={styles.skeletonText} />
+      </View>
+    );
+  }
+
+  const progress =
+    goalCalories > 0 ? Math.min(consumedCalories / goalCalories, 1) : 0;
 
   const Left = iconSource ? (
     <Image source={iconSource} style={styles.icon} />
@@ -50,16 +76,17 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
     <Text style={styles.emoji}>🥗</Text>
   );
 
-  const Right = hasMeals ? (
-    <ArrowRightRegularLightBorderIcon width={24} height={24} color="#212121" />
-  ) : (
-    <CircularAddButton
-      size={40}
-      color={theme.color('successLighter')}
-      iconColor="#ffffff"
-      onPress={onAddPress}
-      style={styles.addButton}
-    />
+  // Always show the add (“+”) button.
+  const Right = (
+    <View style={styles.rightBtns}>
+      <CircularAddButton
+        size={40}
+        color={theme.color('successLighter')}
+        iconColor="#ffffff"
+        onPress={onAddPress}
+        style={styles.addButton}
+      />
+    </View>
   );
 
   const Content = (
@@ -69,15 +96,21 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
         {/* Title + check */}
         <View style={styles.titleRow}>
           <Text style={styles.title}>{title}</Text>
-          {hasMeals && consumedCalories >= goalCalories }
+          {hasMeals && consumedCalories >= goalCalories && (
+            <TickSquareIcon
+              width={16}
+              height={16}
+              color={theme.color('success')}
+            />
+          )}
         </View>
         {/* Progress */}
         <View style={styles.progressBg}>
-          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+          <View
+            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+          />
         </View>
-        <Text style={styles.kcalText}>
-          {consumedCalories} / {goalCalories} kcal
-        </Text>
+
       </View>
       {Right}
     </View>
@@ -99,6 +132,13 @@ const createStyles = (theme: ThemeInterface) =>
       flexDirection: 'row',
       alignItems: 'center',
       paddingVertical: theme.space('sm'),
+    } as ViewStyle,
+    skeletonIcon: {
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      marginRight: theme.space('sm'),
+      borderRadius: ICON_SIZE / 2,
+      backgroundColor: theme.color('overlayGrey'),
     } as ViewStyle,
     icon: {
       width: ICON_SIZE,
@@ -136,11 +176,13 @@ const createStyles = (theme: ThemeInterface) =>
       backgroundColor: theme.color('successLighter'),
       borderRadius: BAR_HEIGHT,
     } as ViewStyle,
-    kcalText: {
-      marginTop: theme.space('xs'),
-      fontSize: 14,
-      color: theme.color('blueGrey'),
-    } as TextStyle,
+
+    skeletonText: {
+      flex: 1,
+      height: 16,
+      borderRadius: 4,
+      backgroundColor: theme.color('overlayGrey'),
+    } as ViewStyle,
     addButton: {
       backgroundColor: theme.color('successLighter'),
       borderRadius: 999,
@@ -152,6 +194,16 @@ const createStyles = (theme: ThemeInterface) =>
       shadowOpacity: 0.1,
       shadowRadius: 3,
       elevation: 5,
+    } as ViewStyle,
+    skeleton: {
+      opacity: 0.5,
+    } as ViewStyle,
+    rightBtns: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    } as ViewStyle,
+    deleteBtn: {
+      marginRight: theme.space('xs'),
     } as ViewStyle,
     arrow: {
       fontSize: 30,

@@ -11,6 +11,9 @@ import { useAppTheme } from '@/utils/providers/ThemeProvider';
 import { Text } from '../../atoms/base';
 import { MealOrmProps } from '@/db/schema';
 import { ArrowRightRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/ArrowRightRegularBoldIcon';
+import { logger } from '@/utils/services/common/logging.service';
+import { Buffer } from 'buffer';
+import { LogCategory } from '@/utils/enum/logging.enum';
 import { DeleteRegularBoldIcon } from '../../../../assets/icons/figma/regular-bold/DeleteRegularBoldIcon';
 
 // Image de repas par défaut
@@ -30,22 +33,65 @@ interface MealCardProps {
  * Carte d'affichage d'un repas, conformément au design Figma
  */
 const MealCard: React.FC<MealCardProps> = ({ meal, onPress, onDelete }) => {
+  // Debug log to inspect meal data each render (truncate image for readability)
+  const debugMeal = (() => {
+    try {
+      const clone: any = JSON.parse(JSON.stringify(meal));
+      const shorten = (img?: string) =>
+        typeof img === 'string' && img.length > 30 ? `<base64 len:${img.length}>` : img;
+      if (clone?.image) clone.image = shorten(clone.image);
+      if (clone?.meals?.image) clone.meals.image = shorten(clone.meals.image);
+      return clone;
+    } catch {
+      return { ...(meal as any), image: '<<omitted>>' };
+    }
+  })();
+  logger.debug(LogCategory.UI, '[MealCard] render', { meal: debugMeal });
   const theme = useAppTheme();
   const swipeableRef = useRef<Swipeable>(null);
 
-  // Extraction des données du repas
-  const { id, name, description, calories, image, quantity, unit } = meal;
+  // Some queries wrap meal data under a "meals" property (join). Flatten if necessary
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const coreMeal: any = (meal && (meal as any).meals) ? (meal as any).meals : meal;
+
+  // Extract
+  const {
+    id,
+    name,
+    description,
+    calories: baseCalories,
+    image,
+    quantity,
+    unit,
+  } = coreMeal as MealOrmProps;
+
+  // Fallback to calories from daily_plan_meals if not present
+  const calories = baseCalories ?? (meal as any)?.daily_plan_meals?.calories ?? 0;
 
   // Approche simple pour l'image du repas, comme dans l'ancien composant
-  let imageSource = DEFAULT_MEAL_IMAGE;
+  let imageSource: any = DEFAULT_MEAL_IMAGE;
 
   // Si l'image existe, l'utiliser directement comme URI
   if (image) {
-    try {
-      imageSource = { uri: `${image}` };
-    } catch (error) {
-      console.error("Erreur lors du traitement de l'image:", error);
-      imageSource = DEFAULT_MEAL_IMAGE;
+    const img: any = image as any;
+    // If image is already a string/URL or base64, use directly
+    if (typeof img === 'string') {
+      const isUri = img.startsWith('http') || img.startsWith('file:') || img.startsWith('data:');
+      imageSource = { uri: isUri ? img : `data:image/jpeg;base64,${img}` };
+    } else if (typeof image === 'object' && image !== null) {
+      // Detect array/Uint8Array -> convert to base64 (best-effort)
+      try {
+        // React Native Buffer polyfill may exist
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const base64 = Buffer.from(image).toString('base64');
+        imageSource = { uri: `data:image/jpeg;base64,${base64}` };
+      } catch (e) {
+        logger.warn(LogCategory.UI, '[MealCard] Unable to convert image buffer', {
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
     }
   }
 
@@ -67,7 +113,9 @@ const MealCard: React.FC<MealCardProps> = ({ meal, onPress, onDelete }) => {
   };
 
   // Calculer la taille de portion et calories pour l'affichage
-  const portion = quantity ? `${quantity}${unit}` : 'Portion standard';
+  const finalQuantity = (meal as any)?.daily_plan_meals?.quantity ?? quantity;
+  const finalUnit = (meal as any)?.daily_plan_meals?.unit ?? unit;
+  const portion = finalQuantity ? `${finalQuantity}${finalUnit}` : 'Portion standard';
   const caloriesText = calories ? `${calories} kcal` : 'N/A';
 
   // Rendu du bouton de suppression (visible lors du swipe)

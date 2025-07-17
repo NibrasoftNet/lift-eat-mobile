@@ -74,9 +74,19 @@ interface CalorieTrackerProps {
   onAddActivityPress?: () => void;
 
   /**
+   * Callback lorsque l'utilisateur appuie sur l'icône calendrier dans l'en-tête
+   */
+  onCalendarPress?: () => void;
+
+  /**
    * Callback pour la navigation entre les jours
    */
   onDateChange?: (date: Date) => void;
+  /**
+   * Bornes de la plage de dates du plan pour désactiver les flèches
+   */
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 /**
@@ -98,7 +108,10 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   onFoodItemPress,
   onAddFoodPress,
   onAddActivityPress,
+  onCalendarPress,
   onDateChange,
+  minDate,
+  maxDate,
 }) => {
   const theme = useTheme();
 
@@ -153,7 +166,10 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
             <DateNavigationHeader
               date={date}
               onDateChange={onDateChange}
+              onCalendarPress={onCalendarPress}
               isDarkMode={isDarkMode}
+              minDate={minDate}
+              maxDate={maxDate}
             />
           </View>
 
@@ -212,11 +228,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    gap: 16,
+    padding: 2,
+    gap: 10,
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 6,
     position: 'relative',
   },
   addButton: {

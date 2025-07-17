@@ -3,12 +3,16 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import MealSlotItem from './MealSlotItem';
 import { useTheme, ThemeInterface } from '@/themeNew';
 
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
+
 export interface MealSlotData {
   key: string;
   title: string;
   consumed: number;
   goal: number;
   hasMeals: boolean;
+  slot: MealTypeEnum;
+  isLoading?: boolean;
   icon?: any;
 }
 
@@ -16,9 +20,10 @@ interface MealSlotsListProps {
   slots: MealSlotData[];
   onSlotPress?: (key: string) => void;
   onAdd?: (key: string) => void;
+  onRemove?: (key: string) => void;
 }
 
-const MealSlotsList: React.FC<MealSlotsListProps> = ({ slots, onSlotPress, onAdd }) => {
+const MealSlotsList: React.FC<MealSlotsListProps> = ({ slots, onSlotPress, onAdd, onRemove }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -31,8 +36,11 @@ const MealSlotsList: React.FC<MealSlotsListProps> = ({ slots, onSlotPress, onAdd
             consumedCalories={s.consumed}
             goalCalories={s.goal}
             hasMeals={s.hasMeals}
+            slot={s.slot}
+            isLoading={s.isLoading}
             onPress={onSlotPress ? () => onSlotPress(s.key) : undefined}
             onAddPress={onAdd ? () => onAdd(s.key) : undefined}
+            onRemovePress={onRemove ? () => onRemove(s.key) : undefined}
             iconSource={s.icon}
           />
           {idx < slots.length - 1 && <View style={styles.divider} />}

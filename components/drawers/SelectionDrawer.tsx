@@ -102,11 +102,10 @@ function SelectionDrawer<T extends SelectionItem>({
     if (!userId) {
       logger.warn(
         LogCategory.AUTH,
-        'User not authenticated when accessing SelectionDrawer',
+        'No user in session when SelectionDrawer opened (ignored)',
       );
-      setShowDrawer(false);
     }
-  }, [userId, setShowDrawer]);
+  }, [userId]);
 
   // Utiliser le service pour le debounce du terme de recherche
   useEffect(() => {

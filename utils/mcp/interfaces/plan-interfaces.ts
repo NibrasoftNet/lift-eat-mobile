@@ -4,7 +4,7 @@ import { MealTypeEnum } from '@/utils/enum/meal.enum';
 
 // Interfaces pour createPlanViaMCP
 export interface CreatePlanParams {
-  data: NutritionGoalSchemaFormData;
+  data: NutritionGoalSchemaFormData & { startDate?: string };
   userId: number;
 }
 
@@ -86,8 +86,8 @@ export interface GetPlansListResult {
 export interface AddDailyPlanParams {
   planId: number;
   dailyPlanData: {
-    day: string;
-    week?: number;
+    date: string; // YYYY-MM-DD
+    day?: string;
     calories?: number;
     carbs?: number;
     protein?: number;

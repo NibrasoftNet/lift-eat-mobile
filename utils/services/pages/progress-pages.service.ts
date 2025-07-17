@@ -11,12 +11,12 @@ import { DailyProgressOrmProps } from '@/db/schema';
 import sqliteMCPServer from '@/utils/mcp/sqlite-server';
 import { logger } from '@/utils/services/common/logging.service';
 import { LogCategory } from '@/utils/enum/logging.enum';
+import { MealTypeEnum } from '@/utils/enum/meal.enum';
 import {
   getCurrentUserIdSync,
   getCurrentUserId,
 } from '@/utils/helpers/userContext';
-import { QueryClient } from '@tanstack/react-query';
-// Importer le service core pour la délégation
+import { QueryClient } from '@tanstack/react-query';// Importer le service core pour la délégation
 import { progressService } from '@/utils/services/core/progress-core.service';
 
 /**
@@ -209,7 +209,7 @@ class ProgressPagesService implements ProgressPagesServiceInterface {
    * @param date Date au format YYYY-MM-DD
    * @returns Résultat de l'opération avec la progression quotidienne et les repas associés
    */
-  async getDailyProgress(date: string): Promise<
+  async getDailyProgress(date: string, type?: MealTypeEnum): Promise<
     OperationResult<{
       dailyProgress: DailyProgressOrmProps;
       mealsWithProgress: any[];
@@ -241,10 +241,10 @@ class ProgressPagesService implements ProgressPagesServiceInterface {
       );
 
       // Appel au service MCP pour récupérer la progression quotidienne
-      const result = await sqliteMCPServer.getDailyProgressByDateViaMCP(
-        userId,
-        date,
-      );
+      const anyServer = sqliteMCPServer as any;
+      const result = anyServer.getDailyProgressByDateViaMCP
+        ? await anyServer.getDailyProgressByDateViaMCP(userId, date, type)
+        : await anyServer.getDailyProgressByDateViaMCP(userId, date);
 
       if (!result) {
         logger.error(

@@ -63,7 +63,7 @@ import { getImageUrl } from '@/utils/getImageUrl';
 // Selectors & other components
 import { MealTypeSelector } from '@/components-new/ui/molecules/selectors/MealTypeSelector';
 import { CuisineSelector } from '@/components-new/ui/molecules/selectors/CuisineSelector';
-import IngredientListDrawer from '@/components-new/ui/organisms/meal/IngredientListDrawer';
+import IngredientListDrawer from '@/components-new/ui/organisms/meal/IngredientListDrawerV2';
 import IngredientsList from '@/components-new/ui/organisms/meal/IngredientsList';
 import CircularNutritionProgress from '@/components-new/ui/molecules/tracking/CircularNutritionProgress';
 
