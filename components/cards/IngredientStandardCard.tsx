@@ -42,13 +42,15 @@ const IngredientStandardCard = memo(
   ({ item, index }: { item: IngredientWithStableId; index: number }) => {
     // Résolution de l'image avec mémoïsation et logging
     const resolvedImage = useMemo(() => {
-      const src = resolveStaticImage(item.image as unknown as string, DEFAULT_INGREDIENT_IMAGE);
+      const rawImage: any = (item as any).imageUrl ?? item.image;
+
+      const src = resolveStaticImage(rawImage as unknown as string, DEFAULT_INGREDIENT_IMAGE);
       logger.debug(LogCategory.UI, 'IngredientStandardCard image resolved', {
         ingredientId: item.id,
-        hasImage: !!item.image,
+        hasImage: !!rawImage,
       });
       return src;
-    }, [item.image, item.id, item.name]);
+    }, [(item as any).imageUrl, item.image, item.id, item.name]);
     const router = useRouter();
 
     // Zustand store hooks avec sélecteur pour éviter les re-rendus inutiles

@@ -130,19 +130,21 @@ const IngredientListDrawerV2: React.FC<IngredientListDrawerProps> = ({
         >
           <View style={styles.leftSection}>
             <View style={styles.imageContainer}>
-              {ing.image ? (
-                (() => {
-                  const src = typeof ing.image === 'string'
-                    ? resolveStaticImage(ing.image)
-                    : { uri: `data:image/png;base64,${ing.image}` };
-                  logger.debug(LogCategory.UI, 'IngredientRow image resolved', { ingredientId: ing.id, hasImage: !!ing.image });
+              {(() => {
+                const displayImage: any = (ing as any).imageUrl ?? ing.image;
+                if (displayImage) {
+                  const src = typeof displayImage === 'string'
+                    ? resolveStaticImage(displayImage)
+                    : { uri: `data:image/png;base64,${displayImage}` };
+                  logger.debug(LogCategory.UI, 'IngredientRow image resolved', { ingredientId: ing.id, hasImage: !!displayImage });
                   return <Image source={src} style={styles.ingredientImage} />;
-                })()
-              ) : (
-                <View style={styles.fallbackContainer}>
-                  <Text style={styles.fallbackText}>{ing.name.slice(0, 2).toUpperCase()}</Text>
-                </View>
-              )}
+                }
+                return (
+                  <View style={styles.fallbackContainer}>
+                    <Text style={styles.fallbackText}>{ing.name.slice(0, 2).toUpperCase()}</Text>
+                  </View>
+                );
+              })()}
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.ingredientName}>{ing.name}</Text>
