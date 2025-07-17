@@ -136,11 +136,11 @@ const PlanOptionsDrawer: React.FC<PlanOptionsDrawerProps> = ({
                 <Icon
                   as={Star}
                   size="md"
-                  color={disableSetCurrent ? theme.color('blueGrey') : theme.color('green')}
+                  color={disableSetCurrent ? theme.color('success') : theme.color('successLighter')}
                 />
               </View>
               <Text
-                style={[styles.optionLabel as TextStyle, { color: theme.color('green') }]}
+                style={[styles.optionLabel as TextStyle, { color: theme.color('successLighter') }]}
               >
                 Set current
               </Text>
@@ -236,7 +236,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       textAlign: 'center',
     },
     disabled: {
-      opacity: 0.4,
+      opacity: 0.2,
     },
   });
 

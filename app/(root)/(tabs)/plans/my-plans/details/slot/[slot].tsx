@@ -15,7 +15,8 @@ import { useMealsBySlot } from '@/utils/hooks/queries/useMealsBySlot';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components-new/ui/toast';
 
-import MealSlotItem from '@/components-new/ui/molecules/meal-tracker/MealSlotItem';
+import MealCard from '@/components-new/ui/molecules/food-selection/MealCard';
+import HeroHeader from '@/components-new/ui/molecules/header/HeroHeader';
 import Text from '@/components-new/ui/atoms/base/Text';
 
 import { useRemoveMealFromDailyPlan } from '@/utils/hooks/mutations/useRemoveMealFromDailyPlan';
@@ -150,8 +151,15 @@ export default function SlotMealsScreen() {
     [mealsData, planId, date, slot],
   );
 
-  // --- NAVIGATION BACK ---
+  // --- NAVIGATION ---
   const goBack = () => router.back();
+  const goToDetails = () => {
+    if (planIdParam) {
+      router.push(`/plans/my-plans/details/${planIdParam}?date=${date ?? ''}`);
+    } else {
+      router.back();
+    }
+  };
 
   // --- TOTAL KCAL ---
   const totalCalories =
@@ -165,14 +173,13 @@ export default function SlotMealsScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={goBack} hitSlop={8} style={styles.backBtn}>
-          {/* Arrow Left icon placeholder */}
-          <Text style={styles.backTxt}>{'<'}</Text>
-        </Pressable>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <View style={{ width: 32 }} />
-      </View>
+      <HeroHeader
+        title={title}
+        showBack
+        showClose
+        onBack={goBack}
+        onClose={goToDetails}
+      />
 
       {/* Total bar */}
       <View style={styles.totalBar}>
@@ -185,18 +192,14 @@ export default function SlotMealsScreen() {
         style={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {mealsData?.meals?.map((meal: any) => (
-          <MealSlotItem
-            key={meal.id}
-            title={meal.name}
-            consumedCalories={meal.calories}
-            goalCalories={0}
-            hasMeals={true}
-            slot={slot}
+        {mealsData?.meals?.map((meal: any, idx: number) => (
+          <MealCard
+            key={`${meal.id}-${idx}`}
+            meal={meal}
+            onDelete={() => handleRemoveMeal(meal.id)}
             onPress={() => {
-              /* TODO: details */
+              /* TODO: meal details */
             }}
-            onRemovePress={() => handleRemoveMeal(meal.id)}
           />
         ))}
       </ScrollView>
@@ -225,9 +228,10 @@ const createStyles = (theme: ThemeInterface) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#F7F7F7',
+      backgroundColor: '#F7FBF1',
     } as ViewStyle,
     header: {
+      backgroundColor: theme.color('background'),
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -248,7 +252,7 @@ const createStyles = (theme: ThemeInterface) =>
       fontWeight: '700',
     } as TextStyle,
     totalBar: {
-      backgroundColor: '#fff',
+      backgroundColor: '#F7FBF1',
       marginHorizontal: theme.space('md'),
       borderRadius: 8,
       paddingHorizontal: theme.space('md'),
@@ -258,17 +262,19 @@ const createStyles = (theme: ThemeInterface) =>
       alignItems: 'center',
     } as ViewStyle,
     totalLabel: {
-      fontWeight: '600',
-      fontSize: 16,
+      fontWeight: '700',
+      fontSize: 22,
+      color: theme.color('successLighter'),
     } as TextStyle,
     totalValue: {
-      fontWeight: '600',
-      fontSize: 16,
+      fontWeight: '700',
+      fontSize: 22,
+      color: theme.color('successLighter'),
     } as TextStyle,
     list: {
       flex: 1,
       paddingHorizontal: theme.space('md'),
-      marginTop: theme.space('sm'),
+      marginTop: 0,
     } as ViewStyle,
     addBtn: {
       margin: theme.space('md'),
@@ -280,6 +286,7 @@ const createStyles = (theme: ThemeInterface) =>
       paddingVertical: theme.space('md'),
     } as ViewStyle,
     addTxt: {
+      textTransform: 'uppercase',
       color: '#fff',
       fontSize: 18,
       fontWeight: '700',

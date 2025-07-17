@@ -10,12 +10,18 @@ interface DateNavigationHeaderProps {
   onDateChange?: (date: Date) => void;
   onCalendarPress?: () => void;
   isDarkMode?: boolean;
+  /** Date minimale autorisée dans le plan */
+  minDate?: Date;
+  /** Date maximale autorisée dans le plan */
+  maxDate?: Date;
 }
 
 const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
   date,
   onDateChange,
   onCalendarPress,
+  minDate,
+  maxDate,
   isDarkMode = false,
 }) => {
   const theme = useTheme();
@@ -38,6 +44,10 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
   const backIconColor = isDarkMode ? '#FFFFFF' : '#212121';
   const forwardIconColor = isDarkMode ? '#9E9E9E' : '#9E9E9E';
 
+  // Disable arrows if outside bounds
+  const disablePrev = !!minDate && date <= minDate;
+  const disableNext = !!maxDate && date >= maxDate;
+
   // Fonctions pour naviguer entre les dates
   const goToPreviousDay = () => {
     if (onDateChange) {
@@ -57,7 +67,7 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={goToPreviousDay} style={styles.arrowButton}>
+      <TouchableOpacity disabled={disablePrev} onPress={goToPreviousDay} style={[styles.arrowButton, disablePrev && { opacity: 0.3 }]}>
         <ArrowLeft3CurvedBoldIcon
           width={24}
           height={24}
@@ -89,7 +99,7 @@ const DateNavigationHeader: React.FC<DateNavigationHeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={goToNextDay} style={styles.arrowButton}>
+      <TouchableOpacity disabled={disableNext} onPress={goToNextDay} style={[styles.arrowButton, disableNext && { opacity: 0.3 }]}>
         <ArrowRight3CurvedBoldIcon
           width={24}
           height={24}

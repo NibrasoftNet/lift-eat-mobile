@@ -85,9 +85,9 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontFamily: 'Urbanist',
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '700',
-    lineHeight: 44.8, // 1.4 * 32
+    lineHeight: 33.6, // 1.4 * 24
     textAlign: 'center',
     width: '100%',
   },

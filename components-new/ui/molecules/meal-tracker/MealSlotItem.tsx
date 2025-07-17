@@ -76,33 +76,17 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
     <Text style={styles.emoji}>🥗</Text>
   );
 
-  const Right = hasMeals ? (
+  // Always show the add (“+”) button.
+  const Right = (
     <View style={styles.rightBtns}>
-      {onRemovePress && (
-        <Pressable onPress={onRemovePress} style={styles.deleteBtn} hitSlop={6}>
-          <DeleteRegularLightBorderIcon
-            width={20}
-            height={20}
-            color={theme.color('error')}
-          />
-        </Pressable>
-      )}
-      <Pressable onPress={onPress}>
-        <ArrowRightRegularLightBorderIcon
-          width={24}
-          height={24}
-          color="#212121"
-        />
-      </Pressable>
+      <CircularAddButton
+        size={40}
+        color={theme.color('successLighter')}
+        iconColor="#ffffff"
+        onPress={onAddPress}
+        style={styles.addButton}
+      />
     </View>
-  ) : (
-    <CircularAddButton
-      size={40}
-      color={theme.color('successLighter')}
-      iconColor="#ffffff"
-      onPress={onAddPress}
-      style={styles.addButton}
-    />
   );
 
   const Content = (
@@ -126,9 +110,7 @@ const MealSlotItem: React.FC<MealSlotItemProps> = ({
             style={[styles.progressFill, { width: `${progress * 100}%` }]}
           />
         </View>
-        <Text style={styles.kcalText}>
-          {consumedCalories} / {goalCalories} kcal
-        </Text>
+
       </View>
       {Right}
     </View>
@@ -194,11 +176,7 @@ const createStyles = (theme: ThemeInterface) =>
       backgroundColor: theme.color('successLighter'),
       borderRadius: BAR_HEIGHT,
     } as ViewStyle,
-    kcalText: {
-      marginTop: theme.space('xs'),
-      fontSize: 14,
-      color: theme.color('blueGrey'),
-    } as TextStyle,
+
     skeletonText: {
       flex: 1,
       height: 16,
