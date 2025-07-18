@@ -171,6 +171,17 @@ class IngredientPagesService implements IngredientPagesServiceInterface {
         imageUrl: getImageUrl(ing.image as any),
       }));
 
+      // Log du pipeline image pour chaque ingrédient (id, hasImage, len)
+      try {
+        ingredientsWithImages.forEach((ing) => {
+          logger.debug(LogCategory.DATABASE, '[IMG] ingredient-pages', {
+            id: ing.id,
+            hasImage: !!ing.imageUrl,
+            len: ing.imageUrl ? ing.imageUrl.length : 0,
+          });
+        });
+      } catch {/* ignore logging errors */}
+
       // Il y a une page suivante si nous avons pu récupérer un nombre d'éléments égal à pageSize
       const hasNextPage = pageSlice.length === pageSize;
       const nextPage = hasNextPage ? pageParam + 1 : null;

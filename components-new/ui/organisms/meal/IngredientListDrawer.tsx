@@ -464,22 +464,23 @@ const IngredientListDrawer: React.FC<IngredientListDrawerProps> = ({
                     {/* Left section: image + texts */}
                     <View style={styles.leftSection}>
                       <View style={styles.imageContainer}>
-                        {item.image ? (
-                          <Image
-                            source={
-                              typeof item.image === 'string'
-                                ? resolveStaticImage(item.image)
-                                : { uri: `data:image/png;base64,${item.image}` }
-                            }
-                            style={styles.ingredientImage}
-                          />
-                        ) : (
-                          <View style={styles.fallbackContainer}>
-                            <Text style={styles.fallbackText}>
-                              {item.name.slice(0, 2).toUpperCase()}
-                            </Text>
-                          </View>
-                        )}
+                        {(() => {
+                          const displayImg: any = (item as any).imageUrl ?? item.image;
+                          if (displayImg) {
+                            const src =
+                              typeof displayImg === 'string'
+                                ? resolveStaticImage(displayImg as string)
+                                : { uri: `data:image/png;base64,${displayImg}` };
+                            return <Image source={src} style={styles.ingredientImage} />;
+                          }
+                          return (
+                            <View style={styles.fallbackContainer}>
+                              <Text style={styles.fallbackText}>
+                                {item.name.slice(0, 2).toUpperCase()}
+                              </Text>
+                            </View>
+                          );
+                        })()}
                       </View>
                       <View style={styles.textContainer}>
                         <Text style={styles.ingredientName}>{item.name}</Text>

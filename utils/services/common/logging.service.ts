@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { LogLevel, LogCategory } from '@/utils/enum/logging.enum';
 
 /**
@@ -24,7 +25,30 @@ class Logger {
   private isDebugMode: boolean;
 
   private constructor() {
-    this.isDebugMode = __DEV__;
+    // Activate debug logs in development (__DEV__) or when the Expo extra flag
+    // "logDebug" is set to true in app.json / app.config.(ts|js).
+    // Example:
+    //   {
+    //     "expo": {
+    //       "extra": {
+    //         "logDebug": true
+    //       }
+    //     }
+    //   }
+    // Fallback also supports the legacy manifest field and env variable EXPO_PUBLIC_LOG_DEBUG.
+    const extra: any =
+      // SDK 50+ (expoConfig)
+      (Constants as any).expoConfig?.extra ??
+      // Older SDKs (manifest)
+      (Constants as any).manifest?.extra ?? {};
+
+    const envFlag = (process.env.EXPO_PUBLIC_LOG_DEBUG ?? '').toString().toLowerCase();
+
+    this.isDebugMode =
+      __DEV__ ||
+      extra?.logDebug === true ||
+      extra?.logDebug === 'true' ||
+      envFlag === 'true';
   }
 
   public static getInstance(): Logger {

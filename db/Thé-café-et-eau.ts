@@ -24,7 +24,7 @@ const TheEtCafeEtEau: MealEntry[] = [
     carbs: 0.76,
     fat: 0.0,
     protein: 0.14,
-    image: '../assets/images/seed/Thé-café-et-eau/Café_Noir.jpg',
+    image: '../assets/images/seed/the_cafe_et_eau/cafe_noir.jpg',
   },
   {
     name: 'Café, Poudre Soluble',
@@ -34,7 +34,7 @@ const TheEtCafeEtEau: MealEntry[] = [
     carbs: 0.34,
     fat: 0.0,
     protein: 0.1,
-    image: '../assets/images/seed/Thé-café-et-eau/Café__Poudre_Soluble.jpg',
+    image: '../assets/images/seed/the_cafe_et_eau/cafe_poudre_soluble.jpg',
   },
   {
     name: 'Eau Minérale, Faiblement Minéralisée',
@@ -45,7 +45,7 @@ const TheEtCafeEtEau: MealEntry[] = [
     fat: 0.0,
     protein: 0.0,
     image:
-      '../assets/images/seed/Thé-café-et-eau/Eau_Minérale__Faiblement_Minéralisée.jpg',
+      '../assets/images/seed/the_cafe_et_eau/eau_minerale_faiblement_mineralisee.jpg',
   },
   {
     name: 'Thé',
@@ -55,7 +55,7 @@ const TheEtCafeEtEau: MealEntry[] = [
     carbs: 0.3,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Thé-café-et-eau/Thé.jpg',
+    image: '../assets/images/seed/the_cafe_et_eau/the.jpg',
   },
 ];
 

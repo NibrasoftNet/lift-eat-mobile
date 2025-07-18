@@ -24,7 +24,7 @@ const volailles: MealEntry[] = [
     carbs: 0.73,
     fat: 4.83,
     protein: 16.92,
-    image: '../assets/images/seed/Volailles/Foie_de_Volaille_Cru.jpg',
+    image: '../assets/images/seed/volailles/foie_de_volaille_cru.jpg',
   },
 
   {
@@ -35,7 +35,7 @@ const volailles: MealEntry[] = [
     carbs: 0.45,
     fat: 1.34,
     protein: 23.5,
-    image: '../assets/images/seed/Volailles/Blanc_de_Poulet_Cru(sans_peau).jpg',
+    image: '../assets/images/seed/volailles/blanc_de_poulet_cru_sans_peau.jpg',
   },
 
   {
@@ -47,7 +47,7 @@ const volailles: MealEntry[] = [
     fat: 5.09,
     protein: 19.06,
     image:
-      '../assets/images/seed/Volailles/Cuisse_de_Poulet_Crue(sans_peau).jpg',
+      '../assets/images/seed/volailles/cuisse_de_poulet_crue_sans_peau.jpg',
   },
 
   {
@@ -58,7 +58,7 @@ const volailles: MealEntry[] = [
     carbs: 4.21,
     fat: 1.66,
     protein: 17.07,
-    image: '../assets/images/seed/Volailles/Blanc_de_Dinde_Cru(sans_peau).jpg',
+    image: '../assets/images/seed/volailles/blanc_de_dinde_cru_sans_peau.jpg',
   },
 
   {
@@ -70,7 +70,7 @@ const volailles: MealEntry[] = [
     fat: 6.72,
     protein: 19.54,
     image:
-      '../assets/images/seed/Volailles/Cuisse_de_Dinde_Crue(sans_peau).jpg',
+      '../assets/images/seed/volailles/cuisse_de_dinde_crue_sans_peau.jpg',
   },
 
   {
@@ -81,7 +81,7 @@ const volailles: MealEntry[] = [
     carbs: 1.5,
     fat: 6.34,
     protein: 16.98,
-    image: '../assets/images/seed/Volailles/Jambon_de_Dinde.jpg',
+    image: '../assets/images/seed/volailles/jambon_de_dinde.jpg',
   },
 ];
 

@@ -24,7 +24,7 @@ const potatoEntries: MealEntry[] = [
     carbs: 17.61,
     fat: 0.05,
     protein: 1.57,
-    image: '../assets/images/seed/pomme-de-terre/Patate_Douce__Crue.jpg',
+    image: '../assets/images/seed/pomme_de_terre/patate_douce_crue.jpg',
   },
 
   {
@@ -35,7 +35,7 @@ const potatoEntries: MealEntry[] = [
     carbs: 37.17,
     fat: 15.93,
     protein: 3.54,
-    image: '../assets/images/seed/pomme-de-terre/Pom_Deterre__Frite.jpg',
+    image: '../assets/images/seed/pomme_de_terre/pom_deterre_frite.jpg',
   },
 
   {
@@ -46,7 +46,7 @@ const potatoEntries: MealEntry[] = [
     carbs: 17.47,
     fat: 0.09,
     protein: 2.02,
-    image: '../assets/images/seed/pomme-de-terre/Pomme_De_Terre__Crue.jpg',
+    image: '../assets/images/seed/pomme_de_terre/pomme_de_terre_crue.jpg',
   },
 
   {
@@ -58,7 +58,7 @@ const potatoEntries: MealEntry[] = [
     fat: 34.6,
     protein: 7.0,
     image:
-      '../assets/images/seed/pomme-de-terre/Pomme_De_Terre__Chips__Salée.jpg',
+      '../assets/images/seed/pomme_de_terre/pomme_de_terre_chips_salee.jpg',
   },
 ];
 

@@ -24,7 +24,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 91.27,
     fat: 0.05,
     protein: 0.26,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Amidon_de_Maïs.jpg',
+    image: '../assets/images/seed/cereales_et_pates/amidon_de_mais.jpg',
   },
 
   {
@@ -35,7 +35,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 76.6,
     fat: 6.3,
     protein: 12.1,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Biscotte_Toast.jpg',
+    image: '../assets/images/seed/cereales_et_pates/biscotte_toast.jpg',
   },
 
   {
@@ -46,7 +46,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 76.6,
     fat: 6.3,
     protein: 12.1,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Toast_Sans_Sel.jpg',
+    image: '../assets/images/seed/cereales_et_pates/toast_sans_sel.jpg',
   },
 
   {
@@ -57,7 +57,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 65.68,
     fat: 1.54,
     protein: 12.61,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Blé_en_Graines.jpg',
+    image: '../assets/images/seed/cereales_et_pates/ble_en_graines.jpg',
   },
 
   {
@@ -68,7 +68,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 45.8,
     fat: 21.0,
     protein: 8.2,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Brioche.jpg',
+    image: '../assets/images/seed/cereales_et_pates/brioche.jpg',
   },
 
   {
@@ -79,7 +79,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 73.98,
     fat: 1.5,
     protein: 13.44,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Couscous_Sec.jpg',
+    image: '../assets/images/seed/cereales_et_pates/couscous_sec.jpg',
   },
 
   {
@@ -90,7 +90,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 74.7,
     fat: 1.2,
     protein: 11.0,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Farine_Blanche.jpg',
+    image: '../assets/images/seed/cereales_et_pates/farine_blanche.jpg',
   },
 
   {
@@ -101,7 +101,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 76.0,
     fat: 4.0,
     protein: 12.0,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Farine Orge.jpg',
+    image: '../assets/images/seed/cereales_et_pates/farine_orge.jpg',
   },
 
   {
@@ -112,7 +112,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 74.26,
     fat: 4.74,
     protein: 9.42,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Maïs_Graines_Séche.jpg',
+    image: '../assets/images/seed/cereales_et_pates/mais_graines_seche.jpg',
   },
 
   {
@@ -123,7 +123,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 77.72,
     fat: 1.16,
     protein: 9.91,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Orge_Perlé_Cru.jpg',
+    image: '../assets/images/seed/cereales_et_pates/orge_perle_cru.jpg',
   },
 
   {
@@ -134,7 +134,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 44.05,
     fat: 24.43,
     protein: 8.41,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_au_Chocolat.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_au_chocolat.jpg',
   },
 
   {
@@ -145,7 +145,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 50.0,
     fat: 3.85,
     protein: 7.69,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_de_Mie(Beba).jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_de_mie_beba.jpg',
   },
 
   {
@@ -156,7 +156,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 51.9,
     fat: 3.0,
     protein: 8.8,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Baguette.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_baguette.jpg',
   },
 
   {
@@ -167,7 +167,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 46.4,
     fat: 3.8,
     protein: 10.0,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Complet.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_complet.jpg',
   },
 
   {
@@ -178,7 +178,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 49.31,
     fat: 7.85,
     protein: 8.36,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Mbassess.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_mbassess.jpg',
   },
 
   {
@@ -189,7 +189,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 44.26,
     fat: 5.68,
     protein: 7.1,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Mlaoui.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_mlaoui.jpg',
   },
 
   {
@@ -200,7 +200,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 46.06,
     fat: 2.4,
     protein: 7.94,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Orge.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_orge.jpg',
   },
 
   {
@@ -211,7 +211,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 44.53,
     fat: 3.16,
     protein: 8.01,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Tabouna.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_tabouna.jpg',
   },
 
   {
@@ -222,7 +222,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 44.16,
     fat: 5.63,
     protein: 8.15,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pain_Tajine.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pain_tajine.jpg',
   },
 
   {
@@ -233,7 +233,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 74.69,
     fat: 1.58,
     protein: 12.78,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pâtes_Alimentaire_Cru.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pates_alimentaire_cru.jpg',
   },
 
   {
@@ -244,7 +244,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 45.1,
     fat: 38.1,
     protein: 7.3,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Pâte_Feuilletée_Cru.jpg',
+    image: '../assets/images/seed/cereales_et_pates/pate_feuilletee_cru.jpg',
   },
 
   {
@@ -255,7 +255,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 79.34,
     fat: 0.58,
     protein: 6.61,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Riz_Cru.jpg',
+    image: '../assets/images/seed/cereales_et_pates/riz_cru.jpg',
   },
 
   {
@@ -266,7 +266,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 72.83,
     fat: 1.05,
     protein: 12.68,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Farine_de_Semoule.jpg',
+    image: '../assets/images/seed/cereales_et_pates/farine_de_semoule.jpg',
   },
 
   {
@@ -277,7 +277,7 @@ const cerealesEtPates: MealEntry[] = [
     carbs: 66.03,
     fat: 3.3,
     protein: 11.3,
-    image: '../assets/images/seed/Céréales-et-Pâtes/Dro3.jpg',
+    image: '../assets/images/seed/cereales_et_pates/dro3.jpg',
   },
 ];
 

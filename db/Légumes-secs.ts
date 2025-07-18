@@ -24,7 +24,7 @@ const legumesSecs: MealEntry[] = [
     carbs: 56.0,
     fat: 5.3,
     protein: 26.2,
-    image: '../assets/images/seed/Légumes-secs/Fenugrec__Graines_Entières.jpg',
+    image: '../assets/images/seed/legumes_secs/fenugrec_graines_entieres.jpg',
   },
 
   {
@@ -35,7 +35,7 @@ const legumesSecs: MealEntry[] = [
     carbs: 58.29,
     fat: 1.53,
     protein: 26.12,
-    image: '../assets/images/seed/Légumes-secs/Fève_Sèche__Crue.jpg',
+    image: '../assets/images/seed/legumes_secs/feve_seche_crue.jpg',
   },
 
   {
@@ -46,7 +46,7 @@ const legumesSecs: MealEntry[] = [
     carbs: 60.01,
     fat: 0.83,
     protein: 23.58,
-    image: '../assets/images/seed/Légumes-secs/Haricot_Blanc_Sec.jpg',
+    image: '../assets/images/seed/legumes_secs/haricot_blanc_sec.jpg',
   },
 
   {
@@ -57,7 +57,7 @@ const legumesSecs: MealEntry[] = [
     carbs: 57.09,
     fat: 0.96,
     protein: 28.0,
-    image: '../assets/images/seed/Légumes-secs/Lentille__Sèche.jpg',
+    image: '../assets/images/seed/legumes_secs/lentille_seche.jpg',
   },
 
   {
@@ -68,7 +68,7 @@ const legumesSecs: MealEntry[] = [
     carbs: 60.65,
     fat: 6.04,
     protein: 19.3,
-    image: '../assets/images/seed/Légumes-secs/Pois_Chiche_Sec.jpg',
+    image: '../assets/images/seed/legumes_secs/pois_chiche_sec.jpg',
   },
 ];
 

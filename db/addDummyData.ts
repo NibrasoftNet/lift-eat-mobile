@@ -41,43 +41,73 @@ function isBase64Image(str: string): boolean {
 }
 
 // Function to load a static asset OR absolute/remote URI and return Base64
+// Robust to Android release builds where assets may be packaged in the APK
+// and direct readAsStringAsync can fail with ERR_UNEXPECTED.
 async function getImageBuffer(
   assetOrUri: number | string,
-): Promise<any | null> {
+): Promise<string | null> {
+  const startTime = performance.now();
+  let asset: Asset;
   try {
-    const startTime = performance.now();
-    let asset: Asset;
-
+    // 1. Resolve the asset reference (module id or URI)
     if (typeof assetOrUri === 'number') {
       asset = Asset.fromModule(assetOrUri);
     } else {
-      // Accept absolute / remote URI or relative path previously resolved by metro
       asset = Asset.fromURI(assetOrUri);
     }
 
-    await asset.downloadAsync(); // Ensure it's downloaded
+    // 2. Ensure we have a local file path on the device
+    await asset.downloadAsync();
 
     if (!asset.localUri) {
-      logger.error(LogCategory.DATABASE, `Échec de chargement de l'asset`, {
+      logger.error(LogCategory.DATABASE, `Aucun localUri pour l'asset`, {
         assetOrUri,
+        hash: asset.hash,
+        type: asset.type,
       });
-      return '';
+      return null;
     }
 
-    const base64Data = await FileSystem.readAsStringAsync(asset.localUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-
-    const duration = performance.now() - startTime;
-    // logger.debug(LogCategory.PERFORMANCE, `Asset chargé en ${duration.toFixed(2)}ms`, { assetOrUri });
-    return base64Data;
+    // 3. Try a direct read. This peut échouer sur certains APK release (ERR_UNEXPECTED)
+    try {
+      const data = await FileSystem.readAsStringAsync(asset.localUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      logger.debug(LogCategory.PERFORMANCE, `Asset chargé`, {
+        assetOrUri,
+        duration: (performance.now() - startTime).toFixed(2) + 'ms',
+      });
+      return data;
+    } catch (readErr: any) {
+      // 4. Fallback : copier vers un fichier temporaire lisible puis relire
+      const tempPath = `${FileSystem.cacheDirectory}tmp_${asset.hash}.${asset.type || 'img'}`;
+      try {
+        await FileSystem.copyAsync({ from: asset.localUri, to: tempPath });
+        const data = await FileSystem.readAsStringAsync(tempPath, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        // Nettoyer le fichier temporaire de façon idempotente
+        await FileSystem.deleteAsync(tempPath, { idempotent: true });
+        logger.debug(LogCategory.PERFORMANCE, `Asset chargé via fallback`, {
+          assetOrUri,
+          duration: (performance.now() - startTime).toFixed(2) + 'ms',
+        });
+        return data;
+      } catch (fallbackErr) {
+        logger.error(LogCategory.DATABASE, `Fallback lecture asset échoué`, {
+          assetOrUri,
+          readErr,
+          fallbackErr,
+        });
+        return null;
+      }
+    }
   } catch (error) {
-    logger.error(
-      LogCategory.DATABASE,
-      `Erreur générale de chargement d'asset`,
-      { assetOrUri, error },
-    );
-    return '';
+    logger.error(LogCategory.DATABASE, `Erreur générale de chargement d'asset`, {
+      assetOrUri,
+      error,
+    });
+    return null;
   }
 }
 
@@ -130,9 +160,18 @@ async function prepareIngredientStandardWithImages() {
         if (typeof ingStandard.image === 'number') {
           buffer = await getImageBuffer(ingStandard.image);
         } else if (typeof ingStandard.image === 'string' && ingStandard.image) {
-          const assetId = ingredientImages[ingStandard.image as string];
-          if (assetId) {
-            buffer = await getImageBuffer(assetId);
+          const assetEntry = ingredientImages[ingStandard.image as string];
+          if (assetEntry) {
+            if (typeof assetEntry === 'number') {
+              buffer = await getImageBuffer(assetEntry);
+            } else if (
+              typeof assetEntry === 'object' &&
+              assetEntry !== null &&
+              'uri' in assetEntry &&
+              typeof (assetEntry as any).uri === 'string'
+            ) {
+              buffer = await getImageBuffer((assetEntry as any).uri as string);
+            }
           } else {
             // Absolute or remote URI
             buffer = await getImageBuffer(ingStandard.image);
@@ -140,6 +179,11 @@ async function prepareIngredientStandardWithImages() {
         }
 
         if (buffer) {
+          logger.debug(LogCategory.DATABASE, 'Image ingrédient encodée', {
+            name: ingStandard.name,
+            source: ingStandard.image,
+            size: buffer.length,
+          });
           return {
             ...ingStandard,
             image: `data:image/jpeg;base64,${buffer}` as unknown as Buffer,
@@ -184,6 +228,11 @@ async function prepareMealsWithImages() {
         }
 
         if (buffer) {
+          logger.debug(LogCategory.DATABASE, 'Image repas encodée', {
+            name: meal.name,
+            type: meal.type,
+            size: buffer.length,
+          });
           return {
             ...meal,
             image: `data:image/jpeg;base64,${buffer}` as unknown as Buffer,

@@ -194,9 +194,9 @@ export default function SlotMealsScreen() {
       >
         {mealsData?.meals?.map((meal: any, idx: number) => (
           <MealCard
-            key={`${meal.id}-${idx}`}
+            key={`${(meal as any).meals?.id ?? meal.id}-${idx}`}
             meal={meal}
-            onDelete={() => handleRemoveMeal(meal.id)}
+            onDelete={handleRemoveMeal}
             onPress={() => {
               /* TODO: meal details */
             }}

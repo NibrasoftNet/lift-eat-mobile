@@ -102,25 +102,25 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
         {/* Partie gauche avec image et nom */}
         <View style={styles.leftSection}>
           <View style={styles.imageContainer}>
-            {ingredientsStandard?.image ? (
-              <Image
-                source={
-                  Buffer.isBuffer(ingredientsStandard.image)
-                    ? {
-                        uri: `data:image/jpeg;base64,${Buffer.from(
-                          ingredientsStandard.image
-                        ).toString('base64')}`,
-                      }
-                    : resolveStaticImage(ingredientsStandard.image as string)
-                }
-                style={styles.ingredientImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.fallbackContainer}>
-                <HandPlatter width={32} height={32} color="#FFFFFF" />
-              </View>
-            )}
+            {(() => {
+              const displayImg: any = (ingredientsStandard as any)?.imageUrl ?? ingredientsStandard?.image;
+              if (displayImg) {
+                const src =
+                  typeof displayImg === 'string'
+                    ? resolveStaticImage(displayImg as string)
+                    : {
+                        uri: `data:image/jpeg;base64,${Buffer.from(displayImg).toString('base64')}`,
+                      };
+                return (
+                  <Image source={src} style={styles.ingredientImage} resizeMode="cover" />
+                );
+              }
+              return (
+                <View style={styles.fallbackContainer}>
+                  <HandPlatter width={32} height={32} color="#FFFFFF" />
+                </View>
+              );
+            })()}
           </View>
           <View style={styles.textContainer}>
             <Text style={styles.nameText}>
