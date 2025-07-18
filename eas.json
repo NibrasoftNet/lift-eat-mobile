@@ -24,6 +24,7 @@
       "autoIncrement": true
     },
     "local": {
+      "extends": "preview",
       "android": {
         "buildType": "apk",
         "distribution": "internal",
@@ -31,10 +32,17 @@
         "withoutCredentials": true,
         "releaseChannel": "default"
       },
-      "extends": "preview",
       "env": {
         "EXPO_PUBLIC_DEBUG_MODE": "false",
         "EXPO_PUBLIC_API_URL": "https://example.com/api"
+      }
+    },
+    "debug": {
+      "android": {
+        "buildType": "apk",
+        "distribution": "internal",
+        "gradleCommand": ":app:assembleDebug",
+        "withoutCredentials": true
       }
     }
   },

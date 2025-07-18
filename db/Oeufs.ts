@@ -17,14 +17,7 @@ interface MealEntry {
 
 const Oeufs: MealEntry[] = [
   {
-    name: "Jaune d'Œuf Cru",
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    calories: 322,
-    carbs: 3.59,
-    fat: 26.54,
-    protein: 15.86,
-    image: "../assets/images/seed/Oeufs/Jaune_d'Œuf_Cru.jpg",
+    name: "Jaune d'uf_cru_unit_mealunitenum_grammes_quantity_100_calories_322_carbs_3_59_fat_26_54_protein_15_86_image./assets/images/seed/oeufs/jaune_d'Œuf_Cru.jpg",
   },
   {
     name: 'Œuf Frais',
@@ -34,7 +27,7 @@ const Oeufs: MealEntry[] = [
     carbs: 0.86,
     fat: 9.94,
     protein: 12.58,
-    image: '../assets/images/seed/Oeufs/Œuf_Frais.jpg',
+    image: '../assets/images/seed/oeufs/uf_frais.jpg',
   },
 ];
 

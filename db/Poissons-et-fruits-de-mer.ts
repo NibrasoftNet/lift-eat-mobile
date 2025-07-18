@@ -17,15 +17,7 @@ interface MealEntry {
 
 const PoissonsFruitsDeMer: MealEntry[] = [
   {
-    name: "Anchois à l'Huile",
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    calories: 210,
-    carbs: 0,
-    fat: 9.71,
-    protein: 28.89,
-    image:
-      "../assets/images/seed/Poissons-et-fruits-de-mer/Anchois_à_l'Huile.jpg",
+    name: "Anchois à l'huile_unit_mealunitenum_grammes_quantity_100_calories_210_carbs_0_fat_9_71_protein_28_89_image./assets/images/seed/poissons_et_fruits_de_mer/anchois_a_l'Huile.jpg",
   },
   {
     name: 'Anchois Frais',
@@ -35,7 +27,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 4.84,
     protein: 20.35,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Anchois_Frais.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/anchois_frais.jpg',
   },
   {
     name: 'Poissans Bleu',
@@ -45,7 +37,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 9.19,
     protein: 19.33,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Poissons_Bleu.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/poissons_bleu.jpg',
   },
   {
     name: 'Calamar Cru',
@@ -55,7 +47,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 3.08,
     fat: 1.38,
     protein: 15.58,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Calamar_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/calamar_cru.jpg',
   },
   {
     name: 'Calamar Sec',
@@ -65,7 +57,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 11.11,
     fat: 5.25,
     protein: 59.24,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Calamar_Sec.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/calamar_sec.jpg',
   },
   {
     name: 'Clam Praire ou Palourde Cru',
@@ -76,7 +68,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     fat: 0.97,
     protein: 12.77,
     image:
-      '../assets/images/seed/Poissons-et-fruits-de-mer/Clam_Praire_ou_Palourde_Cru.jpg',
+      '../assets/images/seed/poissons_et_fruits_de_mer/clam_praire_ou_palourde_cru.jpg',
   },
   {
     name: 'Crevette Crue',
@@ -86,7 +78,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0.91,
     fat: 1.73,
     protein: 20.31,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Crevette_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/crevette_crue.jpg',
   },
   {
     name: 'Hareng Cru',
@@ -96,7 +88,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 9.04,
     protein: 17.96,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Hareng_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/hareng_cru.jpg',
   },
   {
     name: 'Loup Cru',
@@ -106,7 +98,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 2.33,
     protein: 17.73,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Loup_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/loup_cru.jpg',
   },
   {
     name: 'Poissons Blanc',
@@ -116,7 +108,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 2.04,
     protein: 18.6,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Poissons_Blanc.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/poissons_blanc.jpg',
   },
   {
     name: 'Maquereau Cru',
@@ -126,7 +118,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 13.89,
     protein: 18.6,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Maquereau_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/maquereau_cru.jpg',
   },
   {
     name: 'Merlu Cru',
@@ -136,7 +128,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 1.31,
     protein: 18.31,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Merlu_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/merlu_cru.jpg',
   },
   {
     name: 'Moule Crue',
@@ -146,7 +138,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 3.69,
     fat: 2.24,
     protein: 11.9,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Moule_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/moule_crue.jpg',
   },
   {
     name: 'Mulet Cru',
@@ -156,7 +148,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 3.79,
     protein: 19.35,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Mulet_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/mulet_cru.jpg',
   },
   {
     name: 'Poulpe Cru',
@@ -166,7 +158,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 2.2,
     fat: 1.04,
     protein: 14.91,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Poulpe_Cru.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/poulpe_cru.jpg',
   },
   {
     name: 'Poulpe Sèche',
@@ -176,7 +168,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 8.37,
     fat: 3.95,
     protein: 56.69,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Poulpe_Sèche.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/poulpe_seche.jpg',
   },
   {
     name: 'Rascasse Crue',
@@ -186,7 +178,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 1.57,
     protein: 18.75,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Rascasse_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/rascasse_crue.jpg',
   },
   {
     name: 'Sardine Conserve',
@@ -197,7 +189,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     fat: 11.45,
     protein: 24.62,
     image:
-      '../assets/images/seed/Poissons-et-fruits-de-mer/Sardine_Conserve.jpg',
+      '../assets/images/seed/poissons_et_fruits_de_mer/sardine_conserve.jpg',
   },
   {
     name: 'Sardine Crue',
@@ -207,7 +199,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 9.0,
     protein: 20.4,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Sardine_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/sardine_crue.jpg',
   },
   {
     name: 'Seiche Crue',
@@ -217,7 +209,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0.82,
     fat: 0.7,
     protein: 16.24,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Seiche_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/seiche_crue.jpg',
   },
   {
     name: 'Sole Crue',
@@ -227,7 +219,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 1.19,
     protein: 18.84,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Sole_Crue.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/sole_crue.jpg',
   },
   {
     name: 'Thon Conserve',
@@ -237,7 +229,7 @@ const PoissonsFruitsDeMer: MealEntry[] = [
     carbs: 0,
     fat: 8.08,
     protein: 26.53,
-    image: '../assets/images/seed/Poissons-et-fruits-de-mer/Thon_Conserve.jpg',
+    image: '../assets/images/seed/poissons_et_fruits_de_mer/thon_conserve.jpg',
   },
 ];
 

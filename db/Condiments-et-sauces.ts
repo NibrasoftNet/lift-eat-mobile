@@ -23,7 +23,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 33.06,
     fat: 0.5,
     protein: 6.36,
-    image: '../assets/images/seed/Condiments-et-sauces/Ail_Frais.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/ail_frais.jpg',
   },
   {
     name: 'Anis',
@@ -33,7 +33,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 30.88,
     fat: 15.9,
     protein: 17.6,
-    image: '../assets/images/seed/Condiments-et-sauces/ANIS.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/anis.jpg',
   },
   {
     name: 'Cannelle, Sèche',
@@ -43,7 +43,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 79.8,
     fat: 2.2,
     protein: 4.5,
-    image: '../assets/images/seed/Condiments-et-sauces/Cannelle__Sèche.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/cannelle_seche.jpg',
   },
   {
     name: 'Câpre',
@@ -53,7 +53,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 4.89,
     fat: 0.86,
     protein: 2.36,
-    image: '../assets/images/seed/Condiments-et-sauces/Câpre.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/capre.jpg',
   },
   {
     name: 'Carvi',
@@ -63,7 +63,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 30.65,
     fat: 14.59,
     protein: 19.77,
-    image: '../assets/images/seed/Condiments-et-sauces/Carvi.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/carvi.jpg',
   },
   {
     name: 'Coriandre',
@@ -73,7 +73,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 22.15,
     fat: 17.77,
     protein: 12.37,
-    image: '../assets/images/seed/Condiments-et-sauces/Coriandre.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/coriandre.jpg',
   },
   {
     name: 'Cornichon au Vinaigre',
@@ -84,7 +84,7 @@ const CondimentsEtSauces: MealEntry[] = [
     fat: 0.1,
     protein: 0.7,
     image:
-      '../assets/images/seed/Condiments-et-sauces/Cornichon_au_Vinaigre.jpg',
+      '../assets/images/seed/condiments_et_sauces/cornichon_au_vinaigre.jpg',
   },
   {
     name: 'Cumin, en Poudre',
@@ -94,7 +94,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 40.0,
     fat: 23.2,
     protein: 19.0,
-    image: '../assets/images/seed/Condiments-et-sauces/Cumin__en_Poudre.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/cumin_en_poudre.jpg',
   },
   {
     name: 'Curcuma, en Poudre',
@@ -104,7 +104,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 58.44,
     fat: 9.88,
     protein: 7.83,
-    image: '../assets/images/seed/Condiments-et-sauces/Curcuma__en_Poudre.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/curcuma_en_poudre.jpg',
   },
   {
     name: 'Curry, en Poudre',
@@ -114,7 +114,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 37.52,
     fat: 13.81,
     protein: 12.66,
-    image: '../assets/images/seed/Condiments-et-sauces/curry_vainilla.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/curry_vainilla.jpg',
   },
   {
     name: 'Gingembre, Moulu',
@@ -124,7 +124,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 64.24,
     fat: 5.95,
     protein: 9.12,
-    image: '../assets/images/seed/Condiments-et-sauces/Gingembre__Moulu.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/gingembre_moulu.jpg',
   },
   {
     name: 'Gingembre, Racine',
@@ -134,7 +134,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 17.77,
     fat: 0.75,
     protein: 1.82,
-    image: '../assets/images/seed/Condiments-et-sauces/Gingembre__Racine.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/gingembre_racine.jpg',
   },
   {
     name: 'Levure de Bière, Sèche',
@@ -145,7 +145,7 @@ const CondimentsEtSauces: MealEntry[] = [
     fat: 0.0,
     protein: 49.35,
     image:
-      '../assets/images/seed/Condiments-et-sauces/Levure_de_Bière__Sèche.jpg',
+      '../assets/images/seed/condiments_et_sauces/levure_de_biere_seche.jpg',
   },
   {
     name: 'Mayonnaise',
@@ -155,7 +155,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 3.9,
     fat: 78.2,
     protein: 1.1,
-    image: '../assets/images/seed/Condiments-et-sauces/Mayonnaise.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/mayonnaise.jpg',
   },
   {
     name: 'Menthe, Fraîche',
@@ -165,7 +165,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 8.41,
     fat: 0.73,
     protein: 3.29,
-    image: '../assets/images/seed/Condiments-et-sauces/Menthe__Fraîche.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/menthe_fraiche.jpg',
   },
   {
     name: 'Menthe, Sèche',
@@ -175,7 +175,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 51.0,
     fat: 2.8,
     protein: 25.2,
-    image: '../assets/images/seed/Condiments-et-sauces/Menthe__Sèche.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/menthe_seche.jpg',
   },
   {
     name: 'Moutarde',
@@ -185,7 +185,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 10.5,
     fat: 6.3,
     protein: 5.5,
-    image: '../assets/images/seed/Condiments-et-sauces/Moutarde.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/moutarde.jpg',
   },
   {
     name: 'Noix de Muscade',
@@ -195,7 +195,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 43.71,
     fat: 36.31,
     protein: 5.84,
-    image: '../assets/images/seed/Condiments-et-sauces/Noix_de_Muscade.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/noix_de_muscade.jpg',
   },
   {
     name: 'Piment Rouge, Moulu',
@@ -205,7 +205,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 28.63,
     fat: 17.27,
     protein: 12.01,
-    image: '../assets/images/seed/Condiments-et-sauces/Piment_Rouge__Moulu.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/piment_rouge_moulu.jpg',
   },
   {
     name: 'Poivre Noir, Moulu',
@@ -215,7 +215,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 45.47,
     fat: 3.26,
     protein: 10.95,
-    image: '../assets/images/seed/Condiments-et-sauces/Poivre_Noir__Moulu.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/poivre_noir_moulu.jpg',
   },
   {
     name: 'Vinaigre',
@@ -225,7 +225,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 5.9,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Condiments-et-sauces/Vinaigre.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/vinaigre.jpg',
   },
   {
     name: 'Thym',
@@ -235,7 +235,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 43.17,
     fat: 7.43,
     protein: 9.11,
-    image: '../assets/images/seed/Condiments-et-sauces/Thym.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/thym.jpg',
   },
   {
     name: 'Tomate, Ketchup',
@@ -245,7 +245,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 27.29,
     fat: 0.36,
     protein: 1.52,
-    image: '../assets/images/seed/Condiments-et-sauces/Tomate__Ketchup.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/tomate_ketchup.jpg',
   },
   {
     name: 'Sel, Fin',
@@ -255,7 +255,7 @@ const CondimentsEtSauces: MealEntry[] = [
     carbs: 0.0,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Condiments-et-sauces/Sel__Fin.jpg',
+    image: '../assets/images/seed/condiments_et_sauces/sel_fin.jpg',
   },
 ];
 

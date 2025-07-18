@@ -24,7 +24,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 8.73,
     fat: 21.23,
     protein: 16.41,
-    image: '../assets/images/seed/Lait-et-dérivés/Fromage_Fondu.jpg',
+    image: '../assets/images/seed/lait_et_derives/fromage_fondu.jpg',
   },
   {
     name: 'Fromage Pâte Dure',
@@ -34,7 +34,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 3.38,
     fat: 27.45,
     protein: 28.43,
-    image: '../assets/images/seed/Lait-et-dérivés/Fromage_Pâte_Dure.jpg',
+    image: '../assets/images/seed/lait_et_derives/fromage_pate_dure.jpg',
   },
   {
     name: 'Lait au Chocolat',
@@ -44,7 +44,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 10.34,
     fat: 3.39,
     protein: 3.17,
-    image: '../assets/images/seed/Lait-et-dérivés/Lait_au_Chocolat.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_au_chocolat.jpg',
   },
   {
     name: 'Lait Concentré Sucré',
@@ -54,7 +54,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 54.4,
     fat: 8.7,
     protein: 7.91,
-    image: '../assets/images/seed/Lait-et-dérivés/Lait_Concentré_Sucré.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_concentre_sucre.jpg',
   },
   {
     name: 'Lait de Chèvre',
@@ -64,7 +64,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.45,
     fat: 4.14,
     protein: 3.56,
-    image: '../assets/images/seed/Lait-et-dérivés/Lait_de_Chèvre.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_de_chevre.jpg',
   },
   {
     name: 'Lait Demi-Écrémé',
@@ -74,7 +74,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.7,
     fat: 1.7,
     protein: 3.4,
-    image: '../assets/images/seed/Lait-et-dérivés/Lait_Demi-Écrémé.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_demi_ecreme.jpg',
   },
   {
     name: 'Lait Écrémé',
@@ -84,7 +84,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.85,
     fat: 0.18,
     protein: 3.41,
-    image: '../assets/images/seed/Lait-et-dérivés/Lait_Écrémé.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_ecreme.jpg',
   },
   {
     name: 'Lait Entier UHT',
@@ -94,7 +94,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.65,
     fat: 3.66,
     protein: 3.28,
-    image: '../assets/images/seed/Lait-et-dérivés/LAIT_ENTIER_UHT.jpg',
+    image: '../assets/images/seed/lait_et_derives/lait_entier_uht.jpg',
   },
   {
     name: 'Leben',
@@ -104,7 +104,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.85,
     fat: 0.17,
     protein: 3.26,
-    image: '../assets/images/seed/Lait-et-dérivés/Leben.jpg',
+    image: '../assets/images/seed/lait_et_derives/leben.jpg',
   },
   {
     name: 'Rayeb',
@@ -114,7 +114,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 4.65,
     fat: 3.66,
     protein: 3.28,
-    image: '../assets/images/seed/Lait-et-dérivés/Rayeb.jpg',
+    image: '../assets/images/seed/lait_et_derives/rayeb.jpg',
   },
   {
     name: 'Ricotta',
@@ -124,7 +124,7 @@ const LaitEtDerives: MealEntry[] = [
     carbs: 8.06,
     fat: 0.0,
     protein: 16.13,
-    image: '../assets/images/seed/Lait-et-dérivés/Ricotta.jpg',
+    image: '../assets/images/seed/lait_et_derives/ricotta.jpg',
   },
   {
     name: 'Yaourt au Lait Demi-Écrémé, Aromatisé',
@@ -135,7 +135,7 @@ const LaitEtDerives: MealEntry[] = [
     fat: 1.25,
     protein: 4.93,
     image:
-      '../assets/images/seed/Lait-et-dérivés/Yaourt_au_Lait_Demi-Écrémé__Aromatisé.jpg',
+      '../assets/images/seed/lait_et_derives/yaourt_au_lait_demi_ecreme_aromatise.jpg',
   },
   {
     name: 'Yaourt au Lait Demi-Écrémé, Nature',
@@ -146,7 +146,7 @@ const LaitEtDerives: MealEntry[] = [
     fat: 1.76,
     protein: 5.88,
     image:
-      '../assets/images/seed/Lait-et-dérivés/Yaourt_au_Lait_Demi-Écrémé__Nature.jpg',
+      '../assets/images/seed/lait_et_derives/yaourt_au_lait_demi_ecreme_nature.jpg',
   },
   {
     name: 'Yaourt au Lait Entier, Aromatisé',
@@ -157,7 +157,7 @@ const LaitEtDerives: MealEntry[] = [
     fat: 3.18,
     protein: 4.84,
     image:
-      '../assets/images/seed/Lait-et-dérivés/Yaourt_au_Lait_Entier__Aromatisé.jpg',
+      '../assets/images/seed/lait_et_derives/yaourt_au_lait_entier_aromatise.jpg',
   },
   {
     name: 'Yaourt au Lait Entier, aux Fruits',
@@ -168,7 +168,7 @@ const LaitEtDerives: MealEntry[] = [
     fat: 2.7,
     protein: 3.5,
     image:
-      '../assets/images/seed/Lait-et-dérivés/Yaourt_au_Lait_Entier__aux_Fruits.jpg',
+      '../assets/images/seed/lait_et_derives/yaourt_au_lait_entier_aux_fruits.jpg',
   },
   {
     name: 'Yaourt au Lait Entier, Chocolaté',
@@ -179,7 +179,7 @@ const LaitEtDerives: MealEntry[] = [
     fat: 3.18,
     protein: 4.84,
     image:
-      '../assets/images/seed/Lait-et-dérivés/Yaourt_au_Lait_Entier__Chocolaté.jpg',
+      '../assets/images/seed/lait_et_derives/yaourt_au_lait_entier_chocolate.jpg',
   },
 ];
 

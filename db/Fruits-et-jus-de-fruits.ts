@@ -24,7 +24,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 11.12,
     fat: 0.39,
     protein: 1.4,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Abricot.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/abricot.jpg',
   },
 
   {
@@ -35,7 +35,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 54.82,
     fat: 0.46,
     protein: 3.65,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Abricot_Sec.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/abricot_sec.jpg',
   },
 
   {
@@ -46,7 +46,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 12.63,
     fat: 0.12,
     protein: 0.54,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Ananas_Frais.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/ananas_frais.jpg',
   },
 
   {
@@ -57,7 +57,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 8.53,
     fat: 14.66,
     protein: 2.0,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Avocat_Frais.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/avocat_frais.jpg',
   },
 
   {
@@ -68,7 +68,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 22.84,
     fat: 0.33,
     protein: 1.09,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Banane.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/banane.jpg',
   },
 
   {
@@ -79,7 +79,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 65.77,
     fat: 0.45,
     protein: 1.97,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Datte.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/datte.jpg',
   },
 
   {
@@ -90,7 +90,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 5.5,
     fat: 0.3,
     protein: 1.1,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Citron.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/citron.jpg',
   },
 
   {
@@ -102,7 +102,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     fat: 0.19,
     protein: 0.63,
     image:
-      '../assets/images/seed/Fruits-et-jus-de-fruits/Clémentine_Mondarine.jpg',
+      '../assets/images/seed/fruits_et_jus_de_fruits/clementine_mondarine.jpg',
   },
 
   {
@@ -113,7 +113,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 15.3,
     fat: 0.1,
     protein: 0.4,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Coing.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/coing.jpg',
   },
 
   {
@@ -125,7 +125,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     fat: 0.51,
     protein: 0.73,
     image:
-      '../assets/images/seed/Fruits-et-jus-de-fruits/Figue_de_Barbarie.jpg',
+      '../assets/images/seed/fruits_et_jus_de_fruits/figue_de_barbarie.jpg',
   },
 
   {
@@ -136,7 +136,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 56.86,
     fat: 0.93,
     protein: 3.3,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Figue_Séche.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/figue_seche.jpg',
   },
 
   {
@@ -147,7 +147,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 11.2,
     fat: 0.7,
     protein: 1.9,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Cerise.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/cerise.jpg',
   },
 
   {
@@ -158,7 +158,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 8.16,
     fat: 0.19,
     protein: 0.84,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Melon.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/melon.jpg',
   },
 
   {
@@ -169,7 +169,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 7.68,
     fat: 0.3,
     protein: 0.67,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Fraise.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/fraise.jpg',
   },
 
   {
@@ -180,7 +180,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 17.17,
     fat: 0.3,
     protein: 0.95,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Grenade.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/grenade.jpg',
   },
 
   {
@@ -191,7 +191,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 6.63,
     fat: 0.0,
     protein: 0.38,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Jus_de_Citron.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/jus_de_citron.jpg',
   },
 
   {
@@ -202,7 +202,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 10.4,
     fat: 0.2,
     protein: 0.7,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Jus_D_Orange.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/jus_d_orange.jpg',
   },
 
   {
@@ -213,7 +213,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 14.66,
     fat: 0.52,
     protein: 1.14,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Kiwi.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/kiwi.jpg',
   },
 
   {
@@ -224,7 +224,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 17.0,
     fat: 0.27,
     protein: 0.51,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Mangue.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/mangue.jpg',
   },
 
   {
@@ -235,7 +235,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 19.18,
     fat: 0.3,
     protein: 0.75,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Figue.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/figue.jpg',
   },
 
   {
@@ -246,7 +246,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 9.61,
     fat: 0.49,
     protein: 1.39,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Mûre_Noire.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/mure_noire.jpg',
   },
 
   {
@@ -257,7 +257,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 11.78,
     fat: 0.46,
     protein: 0.94,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Nectarine.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/nectarine.jpg',
   },
 
   {
@@ -268,7 +268,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 12.14,
     fat: 0.2,
     protein: 0.43,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Nèfle.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/nefle.jpg',
   },
 
   {
@@ -279,7 +279,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 9.82,
     fat: 33.49,
     protein: 3.33,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Noix_de_Coco.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/noix_de_coco.jpg',
   },
 
   {
@@ -290,7 +290,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 9.36,
     fat: 26.34,
     protein: 1.63,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Olive_Noir.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/olive_noir.jpg',
   },
 
   {
@@ -301,7 +301,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 0.0,
     fat: 11.0,
     protein: 0.9,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Olive_Verte.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/olive_verte.jpg',
   },
 
   {
@@ -312,7 +312,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 11.54,
     fat: 0.21,
     protein: 0.7,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Orange_Douce.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/orange_douce.jpg',
   },
 
   {
@@ -323,7 +323,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 8.41,
     fat: 0.1,
     protein: 0.69,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Pamplemousse.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/pamplemousse.jpg',
   },
 
   {
@@ -334,7 +334,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 7.55,
     fat: 0.15,
     protein: 0.61,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Pasteque.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/pasteque.jpg',
   },
 
   {
@@ -345,7 +345,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 9.54,
     fat: 0.25,
     protein: 0.91,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Pêche.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/peche.jpg',
   },
 
   {
@@ -356,7 +356,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 15.46,
     fat: 0.12,
     protein: 0.38,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Poire.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/poire.jpg',
   },
 
   {
@@ -367,7 +367,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 12.3,
     fat: 0.0,
     protein: 0.3,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Pomme.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/pomme.jpg',
   },
 
   {
@@ -378,7 +378,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 11.42,
     fat: 0.28,
     protein: 0.7,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Prune.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/prune.jpg',
   },
 
   {
@@ -389,7 +389,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 17.39,
     fat: 0.72,
     protein: 0.72,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Raisin.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/raisin.jpg',
   },
 
   {
@@ -400,7 +400,7 @@ const fruitsEtJusDeFruits: MealEntry[] = [
     carbs: 1.9,
     fat: 0.1,
     protein: 0.6,
-    image: '../assets/images/seed/Fruits-et-jus-de-fruits/Rhubarbe.jpg',
+    image: '../assets/images/seed/fruits_et_jus_de_fruits/rhubarbe.jpg',
   },
 ];
 

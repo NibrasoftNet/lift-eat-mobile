@@ -24,18 +24,10 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.06,
     fat: 81.11,
     protein: 0.85,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Beurre.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/beurre.jpg',
   },
   {
-    name: "Graisse d'Agneau Crue",
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    calories: 665,
-    carbs: 0.0,
-    fat: 70.61,
-    protein: 6.65,
-    image:
-      "../assets/images/seed/Huiles-et-corps-gras/Graisse_d'Agneau_Crue.jpg",
+    name: "Graisse d'agneau_crue_unit_mealunitenum_grammes_quantity_100_calories_665_carbs_0_0_fat_70_61_protein_6_65_image./assets/images/seed/huiles_et_corps_gras/graisse_d'Agneau_Crue.jpg",
   },
   {
     name: 'Huile de Colza',
@@ -45,7 +37,7 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.0,
     fat: 100.0,
     protein: 0.0,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Huile_de_Colza.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/huile_de_colza.jpg',
   },
   {
     name: 'Huile de Mais',
@@ -55,7 +47,7 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.0,
     fat: 100.0,
     protein: 0.0,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Huile_de_Mais.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/huile_de_mais.jpg',
   },
   {
     name: 'Huile de Soja',
@@ -65,7 +57,7 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.0,
     fat: 100.0,
     protein: 0.0,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Huile_de_Soja.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/huile_de_soja.jpg',
   },
   {
     name: 'Huile de Tournesol',
@@ -75,17 +67,10 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.0,
     fat: 100.0,
     protein: 0.0,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Huile_de_Tournesol.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/huile_de_tournesol.jpg',
   },
   {
-    name: "Huile d'Olive",
-    unit: MealUnitEnum.GRAMMES,
-    quantity: 100,
-    calories: 900,
-    carbs: 0.0,
-    fat: 100.0,
-    protein: 0.0,
-    image: "../assets/images/seed/Huiles-et-corps-gras/Huile_d'Olive.jpg",
+    name: "Huile d'olive_unit_mealunitenum_grammes_quantity_100_calories_900_carbs_0_0_fat_100_0_protein_0_0_image./assets/images/seed/huiles_et_corps_gras/huile_d'Olive.jpg",
   },
   {
     name: 'Margarine',
@@ -95,7 +80,7 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 0.9,
     fat: 80.3,
     protein: 0.8,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Margarine.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/margarine.jpg',
   },
   {
     name: 'Smen',
@@ -105,7 +90,7 @@ const HuilesEtCorpsGras: MealEntry[] = [
     carbs: 1.5,
     fat: 77.3,
     protein: 0.85,
-    image: '../assets/images/seed/Huiles-et-corps-gras/Smen.jpg',
+    image: '../assets/images/seed/huiles_et_corps_gras/smen.jpg',
   },
 ];
 

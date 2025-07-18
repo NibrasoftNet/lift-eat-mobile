@@ -145,9 +145,8 @@ interface IngredientStore {
 
 // Transforme un IngredientStandardOrmProps en IngredientWithStandardProps
 const mapToIngredientWithStandard = (
-  ingredient: IngredientStandardOrmProps,
+  ingredient: IngredientStandardOrmProps & { imageUrl?: string; displayUnit?: string },
 ): IngredientWithStandardProps => {
-  // Créer l'objet avec la bonne structure avant de calculer les macros
   const ingredientWithStandard: IngredientWithStandardProps = {
     quantity: ingredient.quantity || 1,
     calories: ingredient.calories || 0,
@@ -156,8 +155,9 @@ const mapToIngredientWithStandard = (
     protein: ingredient.protein || 0,
     ingredientStandardId: ingredient.id,
     ingredientsStandard: ingredient,
+    imageUrl: (ingredient as any).imageUrl,
+    displayUnit: (ingredient as any).displayUnit ?? ingredient.unit,
   };
-
   return ingredientWithStandard;
 };
 

@@ -25,7 +25,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.15,
     protein: 3.27,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Artichaut__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/artichaut_cru.jpg',
   },
 
   {
@@ -37,7 +37,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.19,
     protein: 1.01,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Aubergine__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/aubergine_crue.jpg',
   },
 
   {
@@ -48,7 +48,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 3.74,
     fat: 0.2,
     protein: 1.8,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Bette__Crue.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/bette_crue.jpg',
   },
 
   {
@@ -60,7 +60,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.17,
     protein: 1.61,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Betterave Rouge, Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/betterave_rouge_crue.jpg',
   },
 
   {
@@ -71,7 +71,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 5.33,
     fat: 0.11,
     protein: 0.76,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Cardon__Cru.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/cardon_cru.jpg',
   },
 
   {
@@ -83,7 +83,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.24,
     protein: 0.93,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Carotte__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/carotte_crue.jpg',
   },
 
   {
@@ -95,7 +95,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.1,
     protein: 0.9,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Céleri_Branche__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/celeri_branche_cru.jpg',
   },
 
   {
@@ -107,7 +107,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.17,
     protein: 0.69,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Céleri-Rave__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/celeri_rave_cru.jpg',
   },
 
   {
@@ -119,7 +119,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.34,
     protein: 3.11,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Champignon__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/champignon_cru.jpg',
   },
 
   {
@@ -131,7 +131,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.12,
     protein: 1.44,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Chou_Vert__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/chou_vert_cru.jpg',
   },
 
   {
@@ -143,7 +143,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.1,
     protein: 1.98,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Chou-Fleur__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/chou_fleur_cru.jpg',
   },
 
   {
@@ -155,7 +155,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.16,
     protein: 0.59,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Concombre__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/concombre_cru.jpg',
   },
 
   {
@@ -167,7 +167,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 1.67,
     protein: 31.0,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Corète_Chorchorus_Olinopus(Mloukhia).jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/corete_chorchorus_olinopus_mloukhia.jpg',
   },
 
   {
@@ -179,7 +179,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.1,
     protein: 1.0,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Courge__Pulpe__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/courge_pulpe_crue.jpg',
   },
 
   {
@@ -191,7 +191,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.18,
     protein: 1.21,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Courgette__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/courgette_crue.jpg',
   },
 
   {
@@ -203,7 +203,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.1,
     protein: 0.9,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Endive__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/endive_crue.jpg',
   },
 
   {
@@ -215,7 +215,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.39,
     protein: 2.86,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Epinard__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/epinard_cru.jpg',
   },
 
   {
@@ -227,7 +227,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.2,
     protein: 1.24,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Fenouil__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/fenouil_cru.jpg',
   },
 
   {
@@ -239,7 +239,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.3,
     protein: 2.43,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Fenouil__Feuille__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/fenouil_feuille_cru.jpg',
   },
 
   {
@@ -251,7 +251,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.6,
     protein: 5.6,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Fève_Fraîche__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/feve_fraiche_crue.jpg',
   },
 
   {
@@ -262,7 +262,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 7.03,
     fat: 0.1,
     protein: 2.0,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Gombo__Cru.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/gombo_cru.jpg',
   },
 
   {
@@ -274,7 +274,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.0,
     protein: 1.18,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Haricot_Vert__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/haricot_vert_cru.jpg',
   },
 
   {
@@ -286,7 +286,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.11,
     protein: 0.81,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Laitue__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/laitue_crue.jpg',
   },
 
   {
@@ -297,7 +297,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 6.43,
     fat: 0.1,
     protein: 0.9,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Navet__Cru.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/navet_cru.jpg',
   },
 
   {
@@ -308,7 +308,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 10.11,
     fat: 0.08,
     protein: 0.92,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Oignon__Cru.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/oignon_cru.jpg',
   },
 
   {
@@ -320,7 +320,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.79,
     protein: 2.97,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Persil__Frais.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/persil_frais.jpg',
   },
 
   {
@@ -332,7 +332,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.4,
     protein: 5.42,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Petit_Pois__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/petit_pois_cru.jpg',
   },
 
   {
@@ -344,7 +344,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.3,
     protein: 1.5,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Poireau__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/poireau_cru.jpg',
   },
 
   {
@@ -356,7 +356,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.17,
     protein: 0.86,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Poivron_Vert__Cru.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/poivron_vert_cru.jpg',
   },
 
   {
@@ -367,7 +367,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     carbs: 3.4,
     fat: 0.1,
     protein: 0.68,
-    image: '../assets/images/seed/Légumes-frais-et-transformés/Radis__Cru.jpg',
+    image: '../assets/images/seed/legumes_frais_et_transformes/radis_cru.jpg',
   },
 
   {
@@ -379,7 +379,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.47,
     protein: 4.32,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Concentree.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/tomate_concentree.jpg',
   },
 
   {
@@ -391,7 +391,7 @@ const legumesFraisEtTransformes: MealEntry[] = [
     fat: 0.2,
     protein: 0.88,
     image:
-      '../assets/images/seed/Légumes-frais-et-transformés/Tomate__Crue.jpg',
+      '../assets/images/seed/legumes_frais_et_transformes/tomate_crue.jpg',
   },
 ];
 

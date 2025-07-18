@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTheme } from '../../../../themeNew';
+import { resolveStaticImage } from '@/utils/resolveStaticImage';
 import { Text } from '../../atoms/base';
 import CircularNutritionProgress from '../../molecules/tracking/CircularNutritionProgress';
 import QuantitySelector from '../../molecules/tracking/QuantitySelector';
@@ -72,14 +73,14 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = ({
 
       {/* Image */}
       {(() => {
-        const raw = (ingredient as any).image ?? ingredient.imageUrl;
-        if (raw) {
-          const uri =
-            raw.startsWith('http') || raw.startsWith('data')
-              ? raw
-              : `data:image/png;base64,${raw}`;
+        const displayImg: any = (ingredient as any).imageUrl ?? ingredient.image;
+        if (displayImg) {
+          const src =
+            typeof displayImg === 'string'
+              ? resolveStaticImage(displayImg as string)
+              : { uri: `data:image/png;base64,${displayImg}` };
           return (
-            <Image source={{ uri }} resizeMode="contain" style={styles.image} />
+            <Image source={src} resizeMode="contain" style={styles.image} />
           );
         }
         return (

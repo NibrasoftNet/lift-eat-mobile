@@ -2,6 +2,32 @@
 
 > Objectif : permettre la mise à jour périodique des données (ingrédients standards, repas, plans, etc.) tout en conservant un mode hors-ligne complet.
 
+## 0. Pré-requis & Setup
+
+- [ ] **Installer les dépendances (partiellement fait)**
+  - ✅ `convex` / `convex/react`
+  - ✅ `drizzle-orm` / `drizzle-kit`
+  - ✅ `@tanstack/react-query`
+  - ☐ `expo-sqlite-orm`
+  - ☐ `uuid`
+  - ☐ `npm install -g convex` (CLI)
+
+- [ ] **Initialiser Convex (partiellement fait)**  
+  - ✅ Nouveau projet Convex créé (`convex/` + `_generated/`)  
+  - ☐ `convex.json` absent → lancer `npx convex init` à la racine  
+  - ✅ `.env.local` présent
+
+- [ ] **Variables d'environnement Expo / EAS**  
+  - ☐ `EXPO_PUBLIC_CONVEX_URL` (à vérifier dans `.env.local`)  
+  - ☐ `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`  
+  - [ ] `EXPO_PUBLIC_CLERK_JWT_TEMPLATE` (optionnel pour JWT personnalisé)
+
+- [ ] **Scripts NPM utiles**  
+  - [ ] `sync:dev` → `convex dev`  
+  - [ ] `sync:codegen` → `convex codegen && drizzle-kit generate`
+
+---
+
 ## Backend : Convex
 
 - [ ] **Ajout du champ `updatedAt`** à toutes les tables concernées dans `convex/schema.ts` (ISO string).
@@ -26,6 +52,7 @@
 - [ ] **Gérer les conflits** (timestamp le plus récent par défaut).
 
 ### Pages / UI
+- ✅ `utils/services/pages/user-pages.service.ts` implémenté (CRUD utilisateur, orchestration UI)
 - [ ] **Hook `useSync()`** avec React Query (`useMutation`).
 - [ ] **Déclenchement automatique** au démarrage si `Date.now() - lastSyncedAt > SYNC_INTERVAL`.
 - [ ] **Bouton “Rafraîchir”** sur les écrans principaux.
@@ -38,7 +65,10 @@
   - [ ] Retourner `BackgroundFetch.Result.*` selon le succès.
 
 ### Drizzle ORM
-- [ ] **Ajouter `updatedAt` + `id` (uuid)** dans les schémas SQLite.
+- [ ] **Aligner les schémas SQLite**
+  - ✅ Champs `updatedAt` déjà présents
+  - ☐ Passer les `id` autoIncrement → UUID stables (string)
+  - ☐ Vérifier cohérence avec schéma Convex
 - [ ] **Créer helper `upsert()`** générique pour Drizzle.
 - [ ] **Écrire migration** correspondante (`drizzle-kit`).
 

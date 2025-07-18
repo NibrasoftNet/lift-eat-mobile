@@ -24,7 +24,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 95.0,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Bonbons.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/bonbons.jpg',
   },
   {
     name: 'Chamia',
@@ -34,7 +34,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 42.73,
     fat: 33.3,
     protein: 11.6,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Chamia.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/chamia.jpg',
   },
   {
     name: 'Chocolat à Tartiner avec Noisette',
@@ -45,7 +45,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 29.73,
     protein: 5.41,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_à_Tartiner_avec_Noisette.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/chocolat_a_tartiner_avec_noisette.jpg',
   },
   {
     name: 'Chocolat au Lait',
@@ -56,7 +56,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 29.66,
     protein: 7.65,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_au_Lait.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/chocolat_au_lait.jpg',
   },
   {
     name: 'Chocolat Instantané Sucré, en Poudre',
@@ -67,7 +67,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 3.1,
     protein: 3.3,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Chocolat_Instantané_Sucré__en_Poudre.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/chocolat_instantane_sucre_en_poudre.jpg',
   },
   {
     name: 'Confiture, Tout Type',
@@ -78,7 +78,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 0.07,
     protein: 0.37,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Confiture__Tout_Type.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/confiture_tout_type.jpg',
   },
   {
     name: 'Glace',
@@ -88,7 +88,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 25.57,
     fat: 6.9,
     protein: 4.6,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Glace.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/glace.jpg',
   },
   {
     name: 'Miel',
@@ -98,7 +98,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 75.7,
     fat: 0.0,
     protein: 0.3,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Miel.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/miel.jpg',
   },
   {
     name: 'Pâte de Fruits',
@@ -108,7 +108,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 56.0,
     fat: 0.0,
     protein: 1.0,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Pâte_de_Fruits.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/pate_de_fruits.jpg',
   },
   {
     name: 'Sirop, Grenadine',
@@ -119,7 +119,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 0.0,
     protein: 0.0,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Sirop__Grenadine.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/sirop_grenadine.jpg',
   },
   {
     name: 'Soda',
@@ -129,7 +129,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 10.85,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/Soda.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/soda.jpg',
   },
   {
     name: 'Sorbet au Citron',
@@ -140,7 +140,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     fat: 0.0,
     protein: 0.5,
     image:
-      '../assets/images/seed/Sucre-et-produits-sucrés/Sorbet_au_Citron.jpg',
+      '../assets/images/seed/sucre_et_produits_sucres/sorbet_au_citron.jpg',
   },
   {
     name: 'Sucre',
@@ -150,7 +150,7 @@ const SucreEtProduitsSucres: MealEntry[] = [
     carbs: 99.98,
     fat: 0.0,
     protein: 0.0,
-    image: '../assets/images/seed/Sucre-et-produits-sucrés/sucre.jpg',
+    image: '../assets/images/seed/sucre_et_produits_sucres/sucre.jpg',
   },
 ];
 

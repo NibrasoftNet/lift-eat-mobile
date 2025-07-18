@@ -25,7 +25,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 52.83,
     protein: 22.09,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Grillée.jpg',
+      '../assets/images/seed/graines_oleagineuses/amande_seche_grillee.jpg',
   },
 
   {
@@ -37,7 +37,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 50.64,
     protein: 21.26,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Amande_Sèche_Naturelle.jpg',
+      '../assets/images/seed/graines_oleagineuses/amande_seche_naturelle.jpg',
   },
 
   {
@@ -49,7 +49,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 49.66,
     protein: 23.68,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Salée.jpg',
+      '../assets/images/seed/graines_oleagineuses/cacahuete_grillee_salee.jpg',
   },
 
   {
@@ -61,7 +61,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 49.66,
     protein: 23.68,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Cacahuète_Grillée_Sans_Sel.jpg',
+      '../assets/images/seed/graines_oleagineuses/cacahuete_grillee_sans_sel.jpg',
   },
 
   {
@@ -73,7 +73,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 51.45,
     protein: 17.3,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Mélange_de_Fruits_Secs_Grillés.jpg',
+      '../assets/images/seed/graines_oleagineuses/melange_de_fruits_secs_grilles.jpg',
   },
 
   {
@@ -84,7 +84,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 5.36,
     fat: 60.75,
     protein: 14.95,
-    image: '../assets/images/seed/Graines-oléagineuses/Noisette_Naturelle.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/noisette_naturelle.jpg',
   },
 
   {
@@ -95,7 +95,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 13.71,
     fat: 65.21,
     protein: 15.23,
-    image: '../assets/images/seed/Graines-oléagineuses/Noix_Naturelle.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/noix_naturelle.jpg',
   },
 
   {
@@ -107,7 +107,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 46.35,
     protein: 15.31,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Salée.jpg',
+      '../assets/images/seed/graines_oleagineuses/noix_de_cajou_grillee_salee.jpg',
   },
 
   {
@@ -119,7 +119,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 46.35,
     protein: 15.31,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Noix_de_Cajou_Grillée_Non_Salée.jpg',
+      '../assets/images/seed/graines_oleagineuses/noix_de_cajou_grillee_non_salee.jpg',
   },
 
   {
@@ -130,7 +130,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 12.93,
     fat: 64.53,
     protein: 6.88,
-    image: '../assets/images/seed/Graines-oléagineuses/Noix_de_Coco_Sèche.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/noix_de_coco_seche.jpg',
   },
 
   {
@@ -141,7 +141,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 54.38,
     fat: 18.1,
     protein: 7.4,
-    image: '../assets/images/seed/Graines-oléagineuses/Pâte_d_Amande.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/pate_d_amande.jpg',
   },
 
   {
@@ -152,7 +152,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 10.36,
     fat: 49.7,
     protein: 25.07,
-    image: '../assets/images/seed/Graines-oléagineuses/Pâte_d_Arachide.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/pate_d_arachide.jpg',
   },
 
   {
@@ -164,7 +164,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 45.97,
     protein: 21.35,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Salée.jpg',
+      '../assets/images/seed/graines_oleagineuses/pistache_grillee_salee.jpg',
   },
 
   {
@@ -176,7 +176,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 45.97,
     protein: 21.35,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Pistache_Grillée_Sans_Sel.jpg',
+      '../assets/images/seed/graines_oleagineuses/pistache_grillee_sans_sel.jpg',
   },
 
   {
@@ -187,7 +187,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 40.0,
     fat: 0.3,
     protein: 2.5,
-    image: '../assets/images/seed/Graines-oléagineuses/Pruneau_Sec.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/pruneau_sec.jpg',
   },
 
   {
@@ -198,7 +198,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 79.2,
     fat: 0.4,
     protein: 3.3,
-    image: '../assets/images/seed/Graines-oléagineuses/Raisin_Sec.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/raisin_sec.jpg',
   },
 
   {
@@ -209,7 +209,7 @@ const grainesOleagineuses: MealEntry[] = [
     carbs: 13.76,
     fat: 49.67,
     protein: 17.73,
-    image: '../assets/images/seed/Graines-oléagineuses/Sésame_Graine.jpg',
+    image: '../assets/images/seed/graines_oleagineuses/sesame_graine.jpg',
   },
 
   {
@@ -221,7 +221,7 @@ const grainesOleagineuses: MealEntry[] = [
     fat: 49.8,
     protein: 19.33,
     image:
-      '../assets/images/seed/Graines-oléagineuses/Tournesol_Graine_Salée.jpg',
+      '../assets/images/seed/graines_oleagineuses/tournesol_graine_salee.jpg',
   },
 ];
 
